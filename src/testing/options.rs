@@ -4,6 +4,8 @@ use crate::options::{
 use colored::Colorize;
 use log::{debug, warn};
 use std::env::var;
+use std::path::PathBuf;
+use crate::testing::CONTENT_SAMPLES_DIR;
 
 pub struct TestOptionsFactory;
 
@@ -37,6 +39,9 @@ fn inject_from_env_var(options: SharedOptions) -> SharedOptions {
     }
     if options.source.is_none() {
         options.source = get_env_var("SOURCE");
+    }
+    if options.content_directory.is_none() {
+        options.content_directory = Some(PathBuf::from(CONTENT_SAMPLES_DIR));
     }
     options
 }
