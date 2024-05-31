@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Download a freely available sample
+# https://archive.org/details/tennyson-discography_
+URL="https://archive.org/download/tennyson-discography_/Tennyson%20-%20With%20You%20-%20Lay-by.zip"
+ZIP="/tmp/sample.zip"
+OUT="samples/content/Tennyson - With You (2014) [Digital] {16-44.1 Bandcamp} (FLAC)"
+curl --location --create-dirs --output "$ZIP" "$URL"
+unzip "$ZIP" -d "$OUT"
+rm "$ZIP"
