@@ -1,5 +1,6 @@
+use red_oxide::fs::DirectoryReader;
 use red_oxide::logging::{Debug, Logger};
-use red_oxide::options::{SharedOptions, SpectrogramOptions, TranscodeOptions};
+use red_oxide::options::{SharedOptions, TranscodeOptions};
 use red_oxide::source::*;
 use red_oxide::testing::*;
 
@@ -7,19 +8,18 @@ use red_oxide::testing::*;
 async fn source_provider() -> Result<(), SourceError> {
     // Arrange
     Logger::init_new(Debug);
-    let shared_options = create_shared_options(SharedOptions {
+    let shared_options = TestOptionsFactory::shared(SharedOptions {
         verbosity: Some(Debug),
         ..SharedOptions::default()
     });
-    let transcode_options = create_transcode_options(TranscodeOptions {
+    let transcode_options = TestOptionsFactory::transcode(TranscodeOptions {
         allow_existing: Some(true),
         ..TranscodeOptions::default()
     });
-    let host = create_host(
-        shared_options.clone(),
-        SpectrogramOptions::default(),
-        transcode_options,
-    );
+    let host = TestHostBuilder::new()
+        .with_shared(shared_options.clone())
+        .with_transcode(transcode_options)
+        .build();
     let provider = host.services.get_required_mut::<SourceProvider>();
 
     // Act
@@ -30,7 +30,11 @@ async fn source_provider() -> Result<(), SourceError> {
         .await?;
 
     // Assert
-    let file_count = source_file_count(&source);
+    let file_count = DirectoryReader::new()
+        .with_extension("flac")
+        .read(&source.directory)
+        .expect("Should be able to read source dir")
+        .len();
     assert!(file_count > 0);
     Ok(())
 }

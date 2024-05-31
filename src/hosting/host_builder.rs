@@ -68,7 +68,7 @@ impl HostBuilder {
         this
     }
 
-    pub fn build(self) -> Result<Host, ValidationError> {
+    pub fn build(&self) -> Result<Host, ValidationError> {
         let services = self.services.build_provider()?;
         Ok(Host::new(services))
     }

@@ -1,11 +1,18 @@
+use std::path::PathBuf;
+
+use red_oxide::fs::DirectoryReader;
 use red_oxide::imdl::imdl_command::ImdlCommand;
 use red_oxide::imdl::ImdlError;
-use red_oxide::testing::get_sample_torrent_file;
+use red_oxide::testing::TORRENTS_SAMPLES_DIR;
 
 #[tokio::test]
 async fn show() -> Result<(), ImdlError> {
     // Arrange
-    let path = get_sample_torrent_file().expect("Path should be valid");
+    let paths = DirectoryReader::new()
+        .with_extension("torrent")
+        .read(&PathBuf::from(TORRENTS_SAMPLES_DIR))
+        .expect("Directory should exist");
+    let path = paths.first().expect("Should be at least one sample");
 
     // Act
     let summary = ImdlCommand::show(&path).await?;
