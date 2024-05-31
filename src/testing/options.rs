@@ -1,11 +1,11 @@
 use crate::options::{
     Options, OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions,
 };
+use crate::testing::CONTENT_SAMPLES_DIR;
 use colored::Colorize;
 use log::{debug, warn};
 use std::env::var;
 use std::path::PathBuf;
-use crate::testing::CONTENT_SAMPLES_DIR;
 
 pub struct TestOptionsFactory;
 
