@@ -9,7 +9,7 @@ use crate::fs::Collector;
 use crate::jobs::{JobError, JobRunner};
 use crate::logging::Colors;
 use crate::naming::{DirectoryName, SourceName};
-use crate::options::{SharedOptions, TranscodeOptions};
+use crate::options::SharedOptions;
 use crate::source::*;
 use crate::transcode::{AdditionalJobFactory, TranscodeJobFactory};
 
@@ -19,7 +19,6 @@ const OUTPUT_SUB_DIR: &str = "transcodes";
 #[injectable]
 pub struct SourceTranscoder {
     shared_options: Ref<SharedOptions>,
-    transcode_options: Ref<TranscodeOptions>,
     targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
     additional_job_factory: Ref<AdditionalJobFactory>,

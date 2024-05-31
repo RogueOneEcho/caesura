@@ -1,17 +1,14 @@
 use std::path::Path;
 
-use di::{injectable, Ref};
+use di::injectable;
 
 use crate::fs::FlacFile;
 use crate::jobs::Job;
-use crate::options::SpectrogramOptions;
 use crate::spectrogram::*;
 
 /// A factory for creating [`SpectrogramJob`] from multiple flac files.
 #[injectable]
-pub struct SpectrogramJobFactory {
-    options: Ref<SpectrogramOptions>,
-}
+pub struct SpectrogramJobFactory;
 
 impl SpectrogramJobFactory {
     /// Create a [`SpectrogramJob`] for each [`FlacFile`] in the [`Vec<FlacFile>`].

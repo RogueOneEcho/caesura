@@ -7,7 +7,6 @@ use crate::formats::TargetFormatProvider;
 use crate::fs::{Collector, FlacFile};
 use crate::imdl::imdl_command::ImdlCommand;
 use crate::imdl::ImdlError::IOFailure;
-use crate::options::TranscodeOptions;
 use crate::source::SourceError::*;
 use crate::source::*;
 use crate::verify::SourceRule::*;
@@ -16,7 +15,6 @@ use crate::verify::*;
 /// Check if a [Source] is suitable for transcoding.
 #[injectable]
 pub struct SourceVerifier {
-    options: Ref<TranscodeOptions>,
     api: RefMut<Api>,
     targets: Ref<TargetFormatProvider>,
 }

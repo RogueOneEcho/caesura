@@ -91,7 +91,6 @@ integer_division = "warn"
 separated_literal_suffix = "allow"
 unseparated_literal_suffix = "warn"
 # TODO COULD re-consider the following allows:
-dead_code = "allow"
 clone_on_ref_ptr = "allow"
 unused_self = "allow"
 wildcard_imports = "allow"

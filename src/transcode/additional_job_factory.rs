@@ -3,7 +3,7 @@ use std::path::Path;
 use di::{injectable, Ref};
 
 use crate::formats::target_format::TargetFormat;
-use crate::fs::{AdditionalFile, FlacFile};
+use crate::fs::AdditionalFile;
 use crate::jobs::Job;
 use crate::options::TranscodeOptions;
 use crate::transcode::AdditionalJob;
@@ -62,10 +62,4 @@ impl AdditionalJobFactory {
             extension,
         })
     }
-}
-
-fn get_output_path(flac: &FlacFile, format: TargetFormat, output_dir: &Path) -> String {
-    let extension = format.get_file_extension();
-    let filename = flac.file_name.clone() + "." + extension.as_str();
-    output_dir.join(filename).to_string_lossy().into_owned()
 }

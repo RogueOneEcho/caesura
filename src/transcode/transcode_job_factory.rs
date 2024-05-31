@@ -1,21 +1,18 @@
 use std::path::Path;
 
 use audiotags::Id3v2Tag;
-use di::{injectable, Ref};
+use di::injectable;
 
 use crate::formats::target_format::TargetFormat;
 use crate::fs::FlacFile;
 use crate::jobs::JobError::SourceFailure;
 use crate::jobs::{Job, JobError};
-use crate::options::TranscodeOptions;
 use crate::source::SourceError::{AudioTagFailure, StreamInfoFailure};
 use crate::transcode::transcode_job::TranscodeJob;
 use crate::transcode::*;
 
 #[injectable]
-pub struct TranscodeJobFactory {
-    options: Ref<TranscodeOptions>,
-}
+pub struct TranscodeJobFactory;
 
 impl TranscodeJobFactory {
     /// Create a [`TranscodeJob`] for each [`FlacFile`] in the [`Vec<FlacFile>`].
