@@ -1,9 +1,9 @@
-use std::env::var;
-use colored::Colorize;
-use log::{debug, warn};
 use crate::options::{
     Options, OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions,
 };
+use colored::Colorize;
+use log::{debug, warn};
+use std::env::var;
 
 pub struct TestOptionsFactory;
 
