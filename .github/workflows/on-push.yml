@@ -17,6 +17,7 @@ jobs:
       run: ./samples/download-sample
     - run: sudo apt-get update
     - run: sudo apt-get install flac lame sox imagemagick --yes
+    - run: cargo install imdl
     - run: cargo build
     - run: cargo test --no-fail-fast
       env:

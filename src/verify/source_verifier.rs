@@ -29,9 +29,9 @@ impl SourceVerifier {
         let flac_errors = self.flac_checks(source)?;
         debug_errors(&flac_errors, source, "FLAC file checks");
         let hash_check = if self.options.skip_hash_check.expect("Options should be set") {
+            debug!("{} hash check due to settings", "Skipped".bold());
             Vec::new()
         } else {
-            debug!("{} hash check due to settings", "Skipped".bold().yellow());
             let hash_check = self.hash_check(source).await?;
             debug_errors(&hash_check, source, "Hash check");
             hash_check
@@ -97,6 +97,7 @@ impl SourceVerifier {
         };
         let is_verified = match ImdlCommand::verify(&buffer, &source.directory).await {
             Ok(is_verified) => is_verified,
+            // TODO SHOULD return custom error message - io not found is confusing on failure.
             Err(error) => return Err(ImdlFailure(IOFailure(error))),
         };
         if is_verified {
