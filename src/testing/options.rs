@@ -1,8 +1,10 @@
-use crate::options::{Options, OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions};
+use crate::options::{
+    Options, OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions,
+};
 
 pub struct TestOptionsFactory;
 
-impl TestOptionsFactory {    
+impl TestOptionsFactory {
     #[must_use]
     pub fn shared(mut options: SharedOptions) -> SharedOptions {
         let provider = OptionsProvider::new();

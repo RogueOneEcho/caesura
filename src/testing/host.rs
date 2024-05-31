@@ -1,4 +1,4 @@
-use di::{Ref, singleton_as_self};
+use di::{singleton_as_self, Ref};
 
 use crate::hosting::{Host, HostBuilder};
 use crate::options::{SharedOptions, SpectrogramOptions, TranscodeOptions};
