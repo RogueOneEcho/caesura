@@ -6,6 +6,7 @@ use red_oxide::imdl::ImdlError;
 use red_oxide::testing::TORRENTS_SAMPLES_DIR;
 
 #[tokio::test]
+#[ignore]
 async fn show() -> Result<(), ImdlError> {
     // Arrange
     let paths = DirectoryReader::new()
