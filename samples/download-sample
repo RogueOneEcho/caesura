@@ -1,10 +1,21 @@
 #!/bin/bash
-
+set -euo pipefail
 # Download a freely available sample
 # https://archive.org/details/tennyson-discography_
 URL="https://archive.org/download/tennyson-discography_/Tennyson%20-%20With%20You%20-%20Lay-by.zip"
 ZIP="/tmp/sample.zip"
-OUT="samples/content/Tennyson - With You (2014) [Digital] {16-44.1 Bandcamp} (FLAC)"
+OUT="samples/content/Tennyson - With You (2014) [Digital] "'{'"16-44.1 Bandcamp"'}'" (FLAC)"
+EXPECTED="c599d74d09ce6c13b6f04a5bb050e62f1354215360757b97b7608978d2bba2cb  $ZIP"
 curl --location --create-dirs --output "$ZIP" "$URL"
+ACTUAL=$(sha256sum $ZIP)
+echo "Expected: $EXPECTED"
+echo "Actual:   $ACTUAL"
+if [[ "$EXPECTED" == "$ACTUAL" ]]
+then
+    echo "PASS"
+else
+  echo "FAIL"
+  exit 1
+fi
 unzip "$ZIP" -d "$OUT"
 rm "$ZIP"
