@@ -45,7 +45,7 @@ built = "^0.7"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
-restriction = { level = "warn", priority = -2 }
+#restriction = { level = "warn", priority = -2 }
 
 module_inception = "allow"
 just_underscores_and_digits = "allow"
@@ -93,7 +93,7 @@ unseparated_literal_suffix = "warn"
 # TODO COULD re-consider the following allows:
 dead_code = "allow"
 clone_on_ref_ptr = "allow"
-unused_self = "allow"#
+unused_self = "allow"
 wildcard_imports = "allow"
 missing_errors_doc = "allow"
 # TODO SHOULD investigate solution to await_holding_lock

@@ -15,7 +15,7 @@ async fn show() -> Result<(), ImdlError> {
     let path = paths.first().expect("Should be at least one sample");
 
     // Act
-    let summary = ImdlCommand::show(&path).await?;
+    let summary = ImdlCommand::show(path).await?;
 
     // Assert
     assert!(!summary.files.is_empty());
