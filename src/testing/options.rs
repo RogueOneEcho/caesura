@@ -1,3 +1,6 @@
+use std::env::var;
+use colored::Colorize;
+use log::{debug, warn};
 use crate::options::{
     Options, OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions,
 };
@@ -9,7 +12,7 @@ impl TestOptionsFactory {
     pub fn shared(mut options: SharedOptions) -> SharedOptions {
         let provider = OptionsProvider::new();
         options.merge(&provider.get_shared_options());
-        options
+        inject_from_env_var(options)
     }
 
     #[must_use]
@@ -26,3 +29,22 @@ impl TestOptionsFactory {
         options
     }
 }
+
+fn inject_from_env_var(options: SharedOptions) -> SharedOptions {
+    let mut options = options;
+    if options.api_key.is_none() {
+        options.api_key = get_env_var("API_KEY");
+    }
+    options
+}
+
+fn get_env_var(key: &str) -> Option<String> {
+    if let Ok(value) = var(key) {
+        debug!("{} {key} from environment variable", "Assigning".bold());
+        Some(value)
+    } else {
+        warn!("Environment variable {} is not set", key.bold().yellow());
+        None
+    }
+}
+
