@@ -19,3 +19,5 @@ jobs:
     - run: sudo apt-get install flac lame sox imagemagick --yes
     - run: cargo build
     - run: cargo test
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
