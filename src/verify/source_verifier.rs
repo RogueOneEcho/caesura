@@ -27,7 +27,7 @@ impl SourceVerifier {
         let flac_errors = self.flac_checks(source)?;
         debug_errors(&flac_errors, source, "FLAC file checks");
         let hash_check = self.hash_check(source).await?;
-        debug_errors(&flac_errors, source, "Hash check");
+        debug_errors(&hash_check, source, "Hash check");
         let is_verified = api_errors.is_empty() && flac_errors.is_empty() && hash_check.is_empty();
         if is_verified {
             info!("{} {}", "Verified".bold(), source);
