@@ -22,3 +22,9 @@ jobs:
       env:
         API_KEY: ${{ secrets.API_KEY }}
         SOURCE: ${{ secrets.SOURCE }}
+    - run: cargo check --quiet --all-targets --message-format short
+      continue-on-error: true
+    - run: cargo clippy --quiet --all-targets --message-format short
+      continue-on-error: true
+    - run: cargo fmt --quiet --check
+      continue-on-error: true
