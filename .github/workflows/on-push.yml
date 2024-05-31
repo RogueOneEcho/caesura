@@ -21,3 +21,4 @@ jobs:
     - run: cargo test
       env:
         API_KEY: ${{ secrets.API_KEY }}
+        SOURCE: ${{ secrets.SOURCE }}

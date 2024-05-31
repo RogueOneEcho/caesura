@@ -35,6 +35,9 @@ fn inject_from_env_var(options: SharedOptions) -> SharedOptions {
     if options.api_key.is_none() {
         options.api_key = get_env_var("API_KEY");
     }
+    if options.source.is_none() {
+        options.source = get_env_var("SOURCE");
+    }
     options
 }
 
@@ -47,4 +50,3 @@ fn get_env_var(key: &str) -> Option<String> {
         None
     }
 }
-
