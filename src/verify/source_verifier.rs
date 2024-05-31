@@ -7,6 +7,7 @@ use crate::formats::TargetFormatProvider;
 use crate::fs::{Collector, FlacFile};
 use crate::imdl::imdl_command::ImdlCommand;
 use crate::imdl::ImdlError::IOFailure;
+use crate::options::TranscodeOptions;
 use crate::source::SourceError::*;
 use crate::source::*;
 use crate::verify::SourceRule::*;
@@ -15,6 +16,7 @@ use crate::verify::*;
 /// Check if a [Source] is suitable for transcoding.
 #[injectable]
 pub struct SourceVerifier {
+    options: Ref<TranscodeOptions>,
     api: RefMut<Api>,
     targets: Ref<TargetFormatProvider>,
 }
@@ -26,8 +28,14 @@ impl SourceVerifier {
         debug_errors(&api_errors, source, "API checks");
         let flac_errors = self.flac_checks(source)?;
         debug_errors(&flac_errors, source, "FLAC file checks");
-        let hash_check = self.hash_check(source).await?;
-        debug_errors(&hash_check, source, "Hash check");
+        let hash_check = if self.options.skip_hash_check.expect("Options should be set") {
+            Vec::new()
+        } else {
+            debug!("{} hash check due to settings", "Skipped".bold().yellow());
+            let hash_check = self.hash_check(source).await?;
+            debug_errors(&hash_check, source, "Hash check");
+            hash_check
+        };
         let is_verified = api_errors.is_empty() && flac_errors.is_empty() && hash_check.is_empty();
         if is_verified {
             info!("{} {}", "Verified".bold(), source);

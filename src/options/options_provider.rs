@@ -54,6 +54,9 @@ impl OptionsProvider {
             if options.allow_existing == Some(false) {
                 options.allow_existing = None;
             }
+            if options.skip_hash_check == Some(false) {
+                options.skip_hash_check = None;
+            }
             if options.hard_link == Some(false) {
                 options.hard_link = None;
             }

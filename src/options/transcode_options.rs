@@ -19,6 +19,10 @@ pub struct TranscodeOptions {
     #[arg(long, default_value = None, action = ArgAction::SetTrue)]
     pub allow_existing: Option<bool>,
 
+    /// Should the torrent hash check of existing files be skipped?
+    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
+    pub skip_hash_check: Option<bool>,
+
     /// Use hard links when copying files
     #[arg(long, default_value = None, action = ArgAction::SetTrue)]
     pub hard_link: Option<bool>,
@@ -50,6 +54,9 @@ impl Options for TranscodeOptions {
         if self.allow_existing.is_none() {
             self.allow_existing = alternative.allow_existing;
         }
+        if self.skip_hash_check.is_none() {
+            self.skip_hash_check = alternative.skip_hash_check;
+        }
         if self.hard_link.is_none() {
             self.hard_link = alternative.hard_link;
         }
@@ -68,6 +75,9 @@ impl Options for TranscodeOptions {
         }
         if self.allow_existing.is_none() {
             self.allow_existing = Some(false);
+        }
+        if self.skip_hash_check.is_none() {
+            self.skip_hash_check = Some(false);
         }
         if self.hard_link.is_none() {
             self.hard_link = Some(false);

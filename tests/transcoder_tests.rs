@@ -18,6 +18,7 @@ async fn source_transcoder() -> Result<(), JobError> {
     });
     let transcode_options = TestOptionsFactory::transcode(TranscodeOptions {
         allow_existing: Some(true),
+        skip_hash_check: Some(true),
         ..TranscodeOptions::default()
     });
     let output_dir = shared_options
