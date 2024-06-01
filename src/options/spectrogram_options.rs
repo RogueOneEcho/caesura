@@ -4,7 +4,7 @@ use crate::options::{IsEmpty, OptionRule, Options, OptionsProvider};
 use crate::spectrogram::Size;
 use clap::Args;
 use di::{injectable, Ref};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 /// Options for the [`SpectrogramGenerator`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]

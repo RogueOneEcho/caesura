@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use clap::{ArgAction, Args};
 use di::{injectable, Ref};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::formats::TargetFormat;
 use crate::options::{IsEmpty, NotSet, OptionRule, Options, OptionsProvider};

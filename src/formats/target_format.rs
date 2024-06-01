@@ -1,6 +1,6 @@
 use crate::formats::ExistingFormat;
 use clap::ValueEnum;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 /// Format to transcode to.
 #[derive(Clone, Copy, Debug, Deserialize, Hash, PartialEq, Serialize, ValueEnum)]

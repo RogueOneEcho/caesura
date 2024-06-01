@@ -1,7 +1,7 @@
 use clap::ValueEnum;
 use colored::{ColoredString, Colorize};
 use log::{Level, LevelFilter};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::logging::*;
 

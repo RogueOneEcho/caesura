@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use clap::Args;
 use di::{injectable, Ref};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::logging::{Info, Verbosity};
 use crate::options::{
