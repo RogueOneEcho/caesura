@@ -35,7 +35,7 @@ impl SourceProvider {
                 )
             }
         } else {
-            AppError::explained("get source", format!("Unknown input type: {input}"))
+            AppError::explained("get source", format!("Unknown source: {input}"))
         }
     }
 

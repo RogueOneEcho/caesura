@@ -1,7 +1,4 @@
-use std::backtrace::BacktraceStatus;
-use colored::Colorize;
 use di::ServiceProvider;
-use log::{error, trace};
 
 use crate::errors::AppError;
 use crate::logging::*;
@@ -33,12 +30,12 @@ impl Host {
     /// 1. Configure logging
     /// 2. Determine the command to execute
     /// 3. Execute the command
-    pub async fn execute(&self) -> bool {
+    pub async fn execute(&self) -> Result<bool, AppError> {
         let logger = self.services.get_required::<Logger>();
         Logger::init(logger);
         let options = self.services.get_required::<SharedOptions>();
         if !options.validate() {
-            return false;
+            return Ok(false);
         }
         let source_provider = self.services.get_required_mut::<source::SourceProvider>();
         let source_input = options.source.clone().unwrap_or_default();
@@ -46,30 +43,11 @@ impl Host {
             .write()
             .expect("Source provider should be writeable")
             .get_by_string(&source_input)
-            .await;
-        let source = match source {
-            Ok(source) => source,
-            Err(error) => {
-                error!("{} to retrieve the source: {}", "Failed".bold(), error);
-                return false;
-            }
-        };
-        let result = match Arguments::get_command_or_exit() {
+            .await?;
+        match Arguments::get_command_or_exit() {
             Spectrogram { .. } => self.execute_spectrogram(&source).await,
             Transcode { .. } => self.execute_transcode(&source).await,
             Verify { .. } => self.execute_verify(&source).await,
-        };
-        match result {
-            Ok(code) => code,
-            Err(error) => {
-                for line in format!("{error}").split('\n') {
-                    error!("{line}");
-                }
-                if matches!(error.backtrace.status(), BacktraceStatus::Captured) {
-                    trace!("Backtrace:\n{}", error.backtrace);                    
-                }
-                false
-            }
         }
     }
 

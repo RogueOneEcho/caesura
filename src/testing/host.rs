@@ -1,4 +1,4 @@
-use di::{singleton_as_self, Ref};
+use di::{Ref, singleton_as_self};
 
 use crate::hosting::{Host, HostBuilder};
 use crate::options::{SharedOptions, SpectrogramOptions, TranscodeOptions};
@@ -40,6 +40,6 @@ impl TestHostBuilder {
 
     #[must_use]
     pub fn build(&self) -> Host {
-        self.builder.build().expect("Builder should be valid")
+        self.builder.build()
     }
 }

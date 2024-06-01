@@ -1,6 +1,9 @@
+use std::process::exit;
 use std::sync::Arc;
 
-use di::{singleton_as_self, Injectable, Mut, RefMut, ServiceCollection, ValidationError};
+use colored::Colorize;
+use di::{Injectable, Mut, RefMut, ServiceCollection, singleton_as_self};
+use log::error;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
 
@@ -9,7 +12,7 @@ use crate::errors::AppError;
 use crate::formats::TargetFormatProvider;
 use crate::hosting::Host;
 use crate::jobs::{DebugSubscriber, JobRunner, ProgressBarSubscriber, Publisher};
-use crate::logging::Logger;
+use crate::logging::{Logger, Trace};
 use crate::options::{OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions};
 use crate::source::SourceProvider;
 use crate::spectrogram::{SpectrogramGenerator, SpectrogramJobFactory};
@@ -69,8 +72,15 @@ impl HostBuilder {
         this
     }
 
-    pub fn build(&self) -> Result<Host, ValidationError> {
-        let services = self.services.build_provider()?;
-        Ok(Host::new(services))
+    pub fn build(&self) -> Host {
+        match self.services.build_provider() {
+            Ok(services) => Host::new(services),
+            Err(error) => {
+                Logger::init_new(Trace);
+                error!("{} to build the application:", "Failed".red().bold());
+                error!("{error}");
+                exit(1)
+            }
+        }
     }
 }

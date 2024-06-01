@@ -1,13 +1,14 @@
-use std::backtrace::Backtrace;
+use std::backtrace::{Backtrace, BacktraceStatus};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::io::Error as IOError;
 
 use colored::Colorize;
+use log::{error, trace};
 use reqwest::StatusCode;
 use tokio::task::JoinError;
 
-use crate::errors::app_error::Reason::{External, Explained, Unexpected};
+use crate::errors::app_error::Reason::{Explained, External, Unexpected};
 use crate::errors::CommandError;
 
 pub struct AppError {
@@ -30,7 +31,7 @@ impl AppError {
             backtrace: Backtrace::force_capture(),
         }
     }
-    
+
     pub fn explained<T>(action: &str, explanation: String) -> Result<T, AppError> {
         Err(Self {
             action: action.to_owned(),
@@ -38,8 +39,12 @@ impl AppError {
             backtrace: Backtrace::force_capture(),
         })
     }
-    
-    fn external<T>(action: &str, domain: &str, error: Box<dyn Error + Send + Sync>) -> Result<T, AppError> {
+
+    fn external<T>(
+        action: &str,
+        domain: &str,
+        error: Box<dyn Error + Send + Sync>,
+    ) -> Result<T, AppError> {
         Err(Self {
             action: action.to_owned(),
             reason: External(domain.to_owned(), error),
@@ -47,7 +52,12 @@ impl AppError {
         })
     }
 
-    pub fn unexpected<T>(action: &str, explanation: &str, expected: String, actual: String) -> Result<T, AppError> {
+    pub fn unexpected<T>(
+        action: &str,
+        explanation: &str,
+        expected: String,
+        actual: String,
+    ) -> Result<T, AppError> {
         Err(Self {
             action: action.to_owned(),
             reason: Unexpected(explanation.to_owned(), expected, actual),
@@ -78,10 +88,7 @@ impl AppError {
 
     pub fn response<T>(status_code: StatusCode, action: &str) -> Result<T, AppError> {
         let status = status_code.canonical_reason().unwrap_or("unknown");
-        Self::explained(
-            action,
-            format!("Received a {status} response"),
-        )
+        Self::explained(action, format!("Received a {status} response"))
     }
 
     pub fn tag<T>(error: audiotags::Error, action: &str) -> Result<T, AppError> {
@@ -95,6 +102,35 @@ impl AppError {
     pub fn deserialization<T>(error: serde_json::Error, action: &str) -> Result<T, AppError> {
         Self::external(action, "deserialization", Box::new(error))
     }
+
+    pub fn lines(&self) -> Vec<String> {
+        match &self.reason {
+            Explained(explanation) => vec![
+                format!("{} to {}", "Failed".bold().red(), self.action),
+                format!("{explanation}"),
+            ],
+            External(domain, error) => vec![
+                format!("{} to {}", "Failed".bold().red(), self.action),
+                format!("A {domain} error occured"),
+                format!("{error}"),
+            ],
+            Unexpected(explanation, expected, actual) => vec![
+                format!("{} to {}", "Failed".bold().red(), self.action),
+                format!("{explanation}"),
+                format!("Expected: {expected}"),
+                format!("Actual: {actual}"),
+            ],
+        }
+    }
+
+    pub fn log(&self) {
+        for line in self.lines() {
+            error!("{line}");
+        }
+        if matches!(self.backtrace.status(), BacktraceStatus::Captured) {
+            trace!("Backtrace:\n{}", self.backtrace);
+        }
+    }
 }
 
 impl Debug for AppError {
@@ -105,26 +141,7 @@ impl Debug for AppError {
 
 impl Display for AppError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        match &self.reason {
-            Explained(reason) => write!(
-                formatter,
-                "{} to {}\n{reason}",
-                "Failed".bold().red(),
-                self.action
-            ),
-            External(domain, error) => write!(
-                formatter,
-                "{} to {}\nA {domain} error occured\n{error}",
-                "Failed".bold().red(),
-                self.action
-            ),
-            Unexpected(explanation, expected, actual) => write!(
-                formatter,
-                "{} to {}\n{explanation}\nExpected: {expected}. Actual: {actual}",
-                "Failed".bold().red(),
-                self.action
-            ),
-        }
+        write!(formatter, "{}", self.lines().join("\n"))
     }
 }
 
