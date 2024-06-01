@@ -9,7 +9,7 @@ use crate::formats::{TargetFormat, TargetFormatProvider};
 use crate::fs::Collector;
 use crate::jobs::JobRunner;
 use crate::logging::Colors;
-use crate::naming::{DirectoryName, SourceName};
+use crate::naming::{TargetName, SourceName};
 use crate::options::SharedOptions;
 use crate::source::*;
 use crate::transcode::{AdditionalJobFactory, TranscodeJobFactory};
@@ -63,7 +63,7 @@ impl SourceTranscoder {
             source
         );
         for target in targets {
-            let dir_name = DirectoryName::get(source, target);
+            let dir_name = TargetName::get(source, target);
             let output_dir = output_dir.join(dir_name);
             let jobs = self
                 .transcode_job_factory
@@ -88,7 +88,7 @@ impl SourceTranscoder {
             files.len().to_string().gray()
         );
         for target in targets {
-            let dir_name = DirectoryName::get(source, target);
+            let dir_name = TargetName::get(source, target);
             let output_dir = output_dir.join(dir_name);
             let jobs = self
                 .additional_job_factory

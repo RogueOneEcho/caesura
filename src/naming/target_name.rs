@@ -3,9 +3,9 @@ use crate::formats::TargetFormat::*;
 use crate::naming::{SourceName, FORBIDDEN_CHARACTERS};
 use crate::source::Source;
 
-pub struct DirectoryName;
+pub struct TargetName;
 
-impl DirectoryName {
+impl TargetName {
     #[must_use]
     pub fn get(source: &Source, target: &TargetFormat) -> String {
         let prefix = SourceName::get(source);
