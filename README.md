@@ -2,13 +2,83 @@
 
 CLI to help uploading to REDacted, inspired by REDBetter.
 
-## Installing
+## Features
 
-1. Install [intermodal](https://github.com/casey/intermodal#installation) and add it to your PATH
-2. Install lame, sox & flac and add them to your PATH
-3. download the latest release from [here](https://github.com/DevYukine/red_oxide/releases)
+All gazelle based indexers/trackers are supported
+- RED
+- **[[new](https://github.com/DevYukine/red_oxide/issues/7)]** OPS.
+
+Tested on Linux, theoretically working on Windows.
+
+Fully configurable, if there's something hard coded that you think should be configurable then open issue on GitHub.
+
+### Source Verification
+
+Each source is verified to ensure it's:
+- A lossless FLAC
+- Not a scene or lossy release
+- Files match the torrent hash
+- Audio tags for artist, album, title and track number are set
+- **[[fixed](https://github.com/DevYukine/red_oxide/issues/18)]** Vinyl track numbering
+- Sample rate and channels are supported
+
+### Spectrogram Generation
+
+- Full and zoomed spectrograms generated for review
+
+### Transcoding
+
+- **[fixed]** Multi-threaded transcoding with optional CPU limit
+- FLAC and FLAC 24 bit sources are supported
+- FLAC, MP3 320 (CBR) and MP3 V0 (VBR) target formats
+- Existing formats are skipped
+- **[[fixed](https://github.com/DevYukine/red_oxide/issues/21)]** Nested sub directories are fully supported (i.e. CD1, and CD2 etc)
+- **[[fixed](https://github.com/DevYukine/red_oxide/issues/22)]** Automatic naming following established conventions, with decoding of HTML entities.
+- **[[fixed](https://github.com/DevYukine/red_oxide/issues/24)]** Shorter file names.
+- Automatic torrent file creation
+- **[new]** Images in the root directory are included and all other files ignored.
+- **[new]** Images larger than 750 KB are (optionally) compressed and reduced to less than 1920 px. 
+
+*The logic being that folder and cover images are included but to minimize file size, but for artwork and anything additional the original source can be downloaded*
+
+### Upload
+
+*Work in progress*
+
+## Getting started
+
+### Linux
+
+1. [Install Rust](https://www.rust-lang.org/tools/install)
+
+2. [Install Intermodal](https://github.com/casey/intermodal#installation)
+
+```bash
+cargo install imdl
+```
+
+3. Install FLAC, LAME, SOX and ImageMagick
+
+```bash
+sudo apt install flac lame sox imagemagick --yes
+```
+
+4. Install red_oxide
+```bash
+cargo install red_oxide
+```
+
+### Windows
+
+*To be confirmed*
+
+### Docker
+
+*To be confirmed*
 
 ## Usage
+
+
 
 ### CLI
 
@@ -96,24 +166,6 @@ HOME is determined by these environment variables on Linux in this order:
 
 ```
 
-### Notes for people using sox under windows
-
-if you use the binaries from [here](https://sourceforge.net/projects/sox/files/sox/), and you want utf-8 support for paths (this is needed for Japanese/Chinese/Korean names in paths for example) you have to download the files from [here](https://raw.githubusercontent.com/DevYukine/red_oxide/master/.github/dependency-fixes/sox_windows_fix.zip) and follow the steps below
-
-1. Extract the files from the zip
-2. Run the PreferExternalManifest.reg file and let it overwrite the registry entry
-3. Copy the sox.exe.manifest file to the folder where sox.exe is located
-4. Enjoy sox working with utf-8 paths :)
-
-## Built With
-
-- [Rust](https://www.rust-lang.org/) - The language used
-- [clap](https://github.com/clap-rs/clap) - CLI Framework
-- [tokio](https://tokio.rs/) - Async runtime
-- [reqwest](https://github.com/seanmonstar/reqwest) - HTTP client
-- [serde](https://serde.rs/) - Serialization/Deserialization
-- [intermodal](https://github.com/casey/intermodal) - Used for Torrent Hash checking & creation
-- [audiotags](https://docs.rs/audiotags/latest/audiotags/) - Reading/Writing Audio Metadata
 
 ## Contributing
 
@@ -128,7 +180,8 @@ repository](https://github.com/DevYukine/red_oxide/tags).
 
 ## Authors
 
-- **[DevYukine](https://github.com/DevYukine)** - *Initial Work*
+- **[DevYukine](https://github.com/DevYukine)** - *Initial work*
+- **[RogueOneEcho](https://github.com/RogueOneEcho)** - *Refactor, fixes and additional features*
 
 See also the list of
 [contributors](https://github.com/DevYukine/red_oxide/contributors)
@@ -136,4 +189,4 @@ who participated in this project.
 
 ## License
 
-This project is licensed under the [MIT](LICENSE) See the [LICENSE.md](LICENSE) file for details
+This project is licensed under the [MIT](LICENSE) See the [LICENSE.md](LICENSE) file for details.
