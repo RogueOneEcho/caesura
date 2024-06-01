@@ -1,9 +1,9 @@
-use red_oxide::errors::AppError;
-use red_oxide::fs::DirectoryReader;
-use red_oxide::logging::{Debug, Logger};
-use red_oxide::options::{SharedOptions, TranscodeOptions};
-use red_oxide::source::*;
-use red_oxide::testing::*;
+use rogue_oxide::errors::AppError;
+use rogue_oxide::fs::DirectoryReader;
+use rogue_oxide::logging::{Debug, Logger};
+use rogue_oxide::options::{SharedOptions, TranscodeOptions};
+use rogue_oxide::source::*;
+use rogue_oxide::testing::*;
 
 #[tokio::test]
 async fn source_provider() -> Result<(), AppError> {

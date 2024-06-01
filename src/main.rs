@@ -1,6 +1,5 @@
 use std::process::ExitCode;
-
-use red_oxide::hosting::HostBuilder;
+use rogue_oxide::hosting::HostBuilder;
 
 #[tokio::main]
 async fn main() -> ExitCode {

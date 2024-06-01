@@ -1,5 +1,5 @@
-use red_oxide::naming::{Shortener, SourceName};
-use red_oxide::source::Metadata;
+use rogue_oxide::naming::{Shortener, SourceName};
+use rogue_oxide::source::Metadata;
 
 #[test]
 fn get_shortened() {

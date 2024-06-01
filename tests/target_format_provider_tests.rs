@@ -1,6 +1,6 @@
 use di::Ref;
-use red_oxide::formats::{ExistingFormat, SourceFormat, TargetFormat, TargetFormatProvider};
-use red_oxide::options::TranscodeOptions;
+use rogue_oxide::formats::{ExistingFormat, SourceFormat, TargetFormat, TargetFormatProvider};
+use rogue_oxide::options::TranscodeOptions;
 use std::collections::HashSet;
 
 #[test]

@@ -9,35 +9,24 @@ license = "AGPL-3.0-only"
 exclude = [".github", ".editorconfig", ".idea", "samples/"]
 
 [dependencies]
+audiotags = "^0.5"
+bytes = "^1.5"
 clap = { version = "^4.3", features = ["derive"] }
-console = "^0.15"
+claxon = "^0.4"
+colored = "2.1.0"
+html-escape = "^0.2"
 indicatif = "^0.17"
+log = { version = "^0.4", features = ["std"] }
+more-di = { version = "3.1.0", features = ["async", "builder"] }
+num_cpus = "^1.15"
+regex = "^1"
 reqwest = { version = "0.12.4", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
 serde = { version = "^1", features = ["derive"] }
 serde_json = "^1"
 serde_repr = "^0.1"
 serde_derive = "^1"
-thiserror = "^1"
 tokio = { version = "^1", features = ["full"] }
-regex = "^1"
-audiotags = "^0.5"
-log = { version = "^0.4", features = ["std"] }
-num_cpus = "^1.15"
 tower = { version = "^0.4", features = ["util", "limit"] }
-strum = "^0.26"
-strum_macros = "^0.26"
-derivative = "^2.2"
-claxon = "^0.4"
-async-recursion = "^1.0"
-lazy_static = "^1.4"
-dialoguer = "^0.11"
-html-escape = "^0.2"
-const_format = "^0.2"
-futures-core = "^0.3"
-bytes = "^1.5"
-futures = "^0.3"
-more-di = { version = "3.1.0", features = ["async", "builder"] }
-colored = "2.1.0"
 
 [build-dependencies]
 built = "^0.7"

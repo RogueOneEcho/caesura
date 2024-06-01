@@ -1,13 +1,13 @@
-use red_oxide::errors::AppError;
+use rogue_oxide::errors::AppError;
 use std::path::PathBuf;
 
-use red_oxide::fs::DirectoryReader;
+use rogue_oxide::fs::DirectoryReader;
 
-use red_oxide::logging::{Debug, Logger};
-use red_oxide::options::SharedOptions;
-use red_oxide::source::SourceProvider;
-use red_oxide::spectrogram::*;
-use red_oxide::testing::*;
+use rogue_oxide::logging::{Debug, Logger};
+use rogue_oxide::options::SharedOptions;
+use rogue_oxide::source::SourceProvider;
+use rogue_oxide::spectrogram::*;
+use rogue_oxide::testing::*;
 
 #[tokio::test]
 async fn spectrogram_generator() -> Result<(), AppError> {

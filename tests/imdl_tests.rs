@@ -1,9 +1,9 @@
-use red_oxide::errors::AppError;
+use rogue_oxide::errors::AppError;
 use std::path::PathBuf;
 
-use red_oxide::fs::DirectoryReader;
-use red_oxide::imdl::imdl_command::ImdlCommand;
-use red_oxide::testing::TORRENTS_SAMPLES_DIR;
+use rogue_oxide::fs::DirectoryReader;
+use rogue_oxide::imdl::imdl_command::ImdlCommand;
+use rogue_oxide::testing::TORRENTS_SAMPLES_DIR;
 
 #[tokio::test]
 #[ignore]

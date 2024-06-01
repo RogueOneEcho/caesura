@@ -1,4 +1,4 @@
-use red_oxide::source::*;
+use rogue_oxide::source::*;
 
 const BASE_URL: &str = "https://example.com";
 

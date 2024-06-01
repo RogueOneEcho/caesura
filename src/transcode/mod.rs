@@ -9,7 +9,6 @@ pub use transcoder::*;
 pub mod additional_job;
 pub mod additional_job_factory;
 mod command_factory;
-pub mod error;
 mod streaminfo_helpers;
 pub mod transcode_job;
 pub mod transcode_job_factory;
