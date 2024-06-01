@@ -166,27 +166,26 @@ HOME is determined by these environment variables on Linux in this order:
 
 ```
 
+## Releases and Changes
 
-## Contributing
+All release versions follow the [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) specification.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code
-of conduct, and the process for submitting pull requests to us.
+All commit messages follow the [Conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
-## Versioning
+Releases and a full changelog are available via [GitHub Releases](https://github.com/RogueOneEcho/rogue_oxide/releases).
 
-We use [Semantic Versioning](http://semver.org/) for versioning. For the versions
-available, see the [tags on this
-repository](https://github.com/DevYukine/red_oxide/tags).
+## History
 
-## Authors
+[**DevYukine**](https://github.com/DevYukine) completed the **initial work** and released it as [**red_oxide**](https://github.com/DevYukine/red_oxide) under an [MIT license](LICENSE.HISTORIC.md).
 
-- **[DevYukine](https://github.com/DevYukine)** - *Initial work*
-- **[RogueOneEcho](https://github.com/RogueOneEcho)** - *Refactor, fixes and additional features*
+[**RogueOneEcho**](https://github.com/RogueOneEcho) then forked the project to complete a major refactor, **fix some issues**, add **new features** and improve logging and error handling. The fork is released as [**rogue_oxide**](https://github.com/RogueOneEcho/rogue_oxide) under an [AGPL license](LICENSE.md).
+
+*The main difference between the former MIT license and the present AGPL license is that if you intend to distribute a modified version of the code - even to run it on a server - you must also provide the modified source code under an AGPL license.*
+
+*This is often known as copyleft. The intent is to ensure that anyone taking advantage of this open source work are also contributing back to the open source community.*
+
+The code base has now adopted [object oriented patterns](https://refactoring.guru/design-patterns/catalog) with SOLID principles.
 
 See also the list of
 [contributors](https://github.com/DevYukine/red_oxide/contributors)
 who participated in this project.
-
-## License
-
-This project is licensed under the [MIT](LICENSE) See the [LICENSE.md](LICENSE) file for details.
