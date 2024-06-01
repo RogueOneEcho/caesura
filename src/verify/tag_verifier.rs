@@ -7,7 +7,7 @@ use log::warn;
 pub struct TagVerifier;
 
 impl TagVerifier {
-    pub fn execute(flac: &FlacFile, media: &String) -> Result<Vec<SourceRule>, AppError> {
+    pub fn execute(flac: &FlacFile, media: &str) -> Result<Vec<SourceRule>, AppError> {
         let tags = flac.get_tags()?;
         let mut errors: Vec<SourceRule> = Vec::new();
         if tags.artist().is_none() {

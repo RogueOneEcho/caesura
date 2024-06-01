@@ -52,6 +52,7 @@ impl AppError {
         })
     }
 
+
     pub fn unexpected<T>(
         action: &str,
         explanation: &str,
@@ -135,7 +136,7 @@ impl AppError {
 
 impl Debug for AppError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(formatter, "{self:?}")
+        write!(formatter, "{}", self.lines().join("\n"))
     }
 }
 

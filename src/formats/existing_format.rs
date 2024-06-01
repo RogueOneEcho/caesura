@@ -12,6 +12,7 @@ pub enum ExistingFormat {
 }
 
 impl ExistingFormat {
+    #[allow(clippy::wildcard_enum_match_arm)]
     pub fn to_source(&self) -> Result<SourceFormat, AppError> {
         match self {
             ExistingFormat::Flac24 => Ok(SourceFormat::Flac24),
@@ -22,6 +23,7 @@ impl ExistingFormat {
 }
 
 impl Torrent {
+    #[allow(clippy::wildcard_enum_match_arm)]
     pub fn get_format(&self) -> Result<ExistingFormat, AppError> {
         match self.format.as_str() {
             "FLAC" => match self.encoding.as_str() {

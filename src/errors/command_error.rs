@@ -11,7 +11,13 @@ pub struct CommandError {
 
 impl Debug for CommandError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(formatter, "{self:?}")
+        if !self.stderr.is_empty() {
+            write!(formatter, "{}", self.stderr)
+        } else if !self.stdout.is_empty() {
+            write!(formatter, "{}", self.stdout)
+        } else {
+            write!(formatter, "unexplained failure")
+        }
     }
 }
 
