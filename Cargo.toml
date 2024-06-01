@@ -6,8 +6,7 @@ authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
 description = "An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. "
 repository = "https://github.com/RogueOneEcho/rogue_oxide"
 license = "AGPL-3.0-only"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+exclude = [".github", ".editorconfig", ".idea", "samples/"]
 
 [dependencies]
 clap = { version = "^4.3", features = ["derive"] }
