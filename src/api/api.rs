@@ -6,8 +6,8 @@ use serde::de::DeserializeOwned;
 use tower::limit::RateLimit;
 use tower::ServiceExt;
 
-use crate::api::{ApiResponse, TorrentGroupResponse, TorrentResponse};
 use crate::api::ApiFactory;
+use crate::api::{ApiResponse, TorrentGroupResponse, TorrentResponse};
 use crate::errors::AppError;
 
 /// API client

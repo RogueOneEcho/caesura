@@ -1,8 +1,8 @@
-use log::warn;
 use crate::errors::AppError;
 use crate::fs::FlacFile;
 use crate::verify::SourceRule;
 use crate::verify::SourceRule::{NoAlbumTag, NoArtistTag, NoTitleTag, NoTrackNumberTag};
+use log::warn;
 
 pub struct TagVerifier;
 

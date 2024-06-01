@@ -1,12 +1,12 @@
 use std::path::Path;
 
+use crate::errors::AppError;
 use audiotags::Id3v2Tag;
 use di::injectable;
-use crate::errors::AppError;
 
 use crate::formats::target_format::TargetFormat;
 use crate::fs::FlacFile;
-use crate::jobs::{Job};
+use crate::jobs::Job;
 use crate::transcode::transcode_job::TranscodeJob;
 use crate::transcode::*;
 

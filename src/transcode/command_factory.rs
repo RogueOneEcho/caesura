@@ -2,10 +2,10 @@ use claxon::metadata::StreamInfo;
 use tokio::process::Command;
 
 use crate::dependencies::{FLAC, LAME, SOX};
+use crate::errors::AppError;
 use crate::formats::target_format::TargetFormat;
 use crate::formats::target_format::TargetFormat::*;
 use crate::fs::FlacFile;
-use crate::errors::AppError;
 use crate::transcode::{get_resample_rate_or_err, is_resample_required};
 
 pub struct CommandFactory {

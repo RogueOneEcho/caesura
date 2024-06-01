@@ -28,9 +28,12 @@ pub struct AdditionalJob {
 impl AdditionalJob {
     #[allow(clippy::integer_division)]
     pub async fn execute(self) -> Result<(), AppError> {
-        let file = File::open(&self.source_path).await
+        let file = File::open(&self.source_path)
+            .await
             .or_else(|e| AppError::io(e, "open file"))?;
-        let metadata = file.metadata().await
+        let metadata = file
+            .metadata()
+            .await
             .or_else(|e| AppError::io(e, "read metadata"))?;
         let size = metadata.size();
         let is_large = size > MAX_FILE_SIZE;
@@ -43,7 +46,8 @@ impl AdditionalJob {
                 self.source_path
             );
         }
-        create_dir_all(&self.output_dir).await
+        create_dir_all(&self.output_dir)
+            .await
             .or_else(|e| AppError::io(e, "create directories"))?;
 
         let verb = if is_large && is_image && self.compress_images {
@@ -54,11 +58,13 @@ impl AdditionalJob {
             .await?;
             "Compressed"
         } else if self.hard_link {
-            hard_link(&self.source_path, &self.output_path).await
+            hard_link(&self.source_path, &self.output_path)
+                .await
                 .or_else(|e| AppError::io(e, "hard link file"))?;
             "Hard Linked"
         } else {
-            copy(&self.source_path, &self.output_path).await
+            copy(&self.source_path, &self.output_path)
+                .await
                 .or_else(|e| AppError::io(e, "copy file"))?;
             "Copied"
         };

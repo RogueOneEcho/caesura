@@ -32,7 +32,9 @@ impl Display for SourceRule {
             NoTitleTag(path) => format!("No title tag: {path}"),
             NoTrackNumberTag(path) => format!("No track number tag: {path}"),
             UnknownSampleRate(rate) => format!("Unknown sample rate: {rate}"),
-            TooManyChannels(channels) => format!("Unable to transcode more than two channels: {channels}"),
+            TooManyChannels(channels) => {
+                format!("Unable to transcode more than two channels: {channels}")
+            }
         };
         message.fmt(formatter)
     }

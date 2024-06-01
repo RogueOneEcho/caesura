@@ -2,7 +2,7 @@ use std::process::exit;
 use std::sync::Arc;
 
 use colored::Colorize;
-use di::{Injectable, Mut, RefMut, ServiceCollection, singleton_as_self};
+use di::{singleton_as_self, Injectable, Mut, RefMut, ServiceCollection};
 use log::error;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;

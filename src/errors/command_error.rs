@@ -18,7 +18,7 @@ impl Debug for CommandError {
 impl Display for CommandError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         if !self.stderr.is_empty() {
-            write!(formatter, "{}", self.stderr)    
+            write!(formatter, "{}", self.stderr)
         } else if !self.stdout.is_empty() {
             write!(formatter, "{}", self.stdout)
         } else {
@@ -28,4 +28,3 @@ impl Display for CommandError {
 }
 
 impl Error for CommandError {}
-

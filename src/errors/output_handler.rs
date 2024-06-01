@@ -1,7 +1,7 @@
+use crate::errors::command_error::CommandError;
+use crate::errors::AppError;
 use std::os::unix::process::ExitStatusExt;
 use std::process::Output;
-use crate::errors::AppError;
-use crate::errors::command_error::CommandError;
 
 pub struct OutputHandler {}
 

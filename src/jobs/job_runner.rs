@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
+use crate::errors::AppError;
 use di::{injectable, Ref, RefMut};
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
-use crate::errors::AppError;
 
 use crate::jobs::*;
 

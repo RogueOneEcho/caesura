@@ -1,5 +1,5 @@
-use claxon::metadata::StreamInfo;
 use crate::errors::AppError;
+use claxon::metadata::StreamInfo;
 
 #[must_use]
 pub fn is_resample_required(info: &StreamInfo) -> bool {
@@ -18,6 +18,7 @@ pub fn get_resample_rate(info: &StreamInfo) -> Option<u32> {
 }
 
 pub fn get_resample_rate_or_err(info: &StreamInfo) -> Result<u32, AppError> {
-    get_resample_rate(info)
-        .ok_or_else(|| AppError::else_explained("get sample rate", "invalid sample rate".to_owned()))
+    get_resample_rate(info).ok_or_else(|| {
+        AppError::else_explained("get sample rate", "invalid sample rate".to_owned())
+    })
 }

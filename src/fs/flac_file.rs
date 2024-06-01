@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
+use crate::errors::AppError;
 use audiotags::{AudioTag, Tag};
 use claxon::metadata::StreamInfo;
 use claxon::FlacReader;
-use crate::errors::AppError;
 
 /// A representation of a FLAC file.
 pub struct FlacFile {
@@ -53,8 +53,7 @@ impl FlacFile {
     }
 
     pub fn get_stream_info(&self) -> Result<StreamInfo, AppError> {
-        let reader = FlacReader::open(&self.path)
-            .or_else(|e| AppError::claxon(e, "read FLAC"))?;
+        let reader = FlacReader::open(&self.path).or_else(|e| AppError::claxon(e, "read FLAC"))?;
         Ok(reader.streaminfo())
     }
 }

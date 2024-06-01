@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use red_oxide::errors::AppError;
+use std::path::PathBuf;
 
 use red_oxide::fs::DirectoryReader;
 

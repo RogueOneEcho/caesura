@@ -2,8 +2,8 @@ use di::ServiceProvider;
 
 use crate::errors::AppError;
 use crate::logging::*;
-use crate::options::{Arguments, Options, SharedOptions, SpectrogramOptions, TranscodeOptions};
 use crate::options::SubCommand::*;
+use crate::options::{Arguments, Options, SharedOptions, SpectrogramOptions, TranscodeOptions};
 use crate::source;
 use crate::source::Source;
 use crate::spectrogram::SpectrogramGenerator;
