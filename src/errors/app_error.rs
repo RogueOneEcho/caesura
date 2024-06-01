@@ -24,7 +24,8 @@ enum Reason {
 }
 
 impl AppError {
-    #[must_use] pub fn else_explained(action: &str, explanation: String) -> AppError {
+    #[must_use]
+    pub fn else_explained(action: &str, explanation: String) -> AppError {
         Self {
             action: action.to_owned(),
             reason: Explained(explanation),
@@ -51,7 +52,6 @@ impl AppError {
             backtrace: Backtrace::force_capture(),
         })
     }
-
 
     pub fn unexpected<T>(
         action: &str,
