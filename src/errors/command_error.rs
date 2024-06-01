@@ -11,7 +11,7 @@ pub struct CommandError {
 
 impl Debug for CommandError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(formatter, "{:?}", self)
+        write!(formatter, "{self:?}")
     }
 }
 

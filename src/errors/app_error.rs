@@ -24,7 +24,7 @@ enum Reason {
 }
 
 impl AppError {
-    pub fn else_explained(action: &str, explanation: String) -> AppError {
+    #[must_use] pub fn else_explained(action: &str, explanation: String) -> AppError {
         Self {
             action: action.to_owned(),
             reason: Explained(explanation),
@@ -135,7 +135,7 @@ impl AppError {
 
 impl Debug for AppError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(formatter, "{:?}", self)
+        write!(formatter, "{self:?}")
     }
 }
 

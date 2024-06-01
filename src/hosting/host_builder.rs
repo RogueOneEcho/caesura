@@ -72,7 +72,7 @@ impl HostBuilder {
         this
     }
 
-    pub fn build(&self) -> Host {
+    #[must_use] pub fn build(&self) -> Host {
         match self.services.build_provider() {
             Ok(services) => Host::new(services),
             Err(error) => {

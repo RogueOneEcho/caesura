@@ -81,10 +81,10 @@ impl SourceVerifier {
         let mut errors: Vec<SourceRule> = Vec::new();
         for flac in flacs {
             for error in TagVerifier::execute(&flac, &source.metadata.media)? {
-                errors.push(error)
+                errors.push(error);
             }
             for error in StreamVerifier::execute(&flac)? {
-                errors.push(error)
+                errors.push(error);
             }
         }
         Ok(errors)
