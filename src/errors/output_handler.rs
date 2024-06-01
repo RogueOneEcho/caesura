@@ -6,7 +6,7 @@ use crate::errors::command_error::CommandError;
 pub struct OutputHandler {}
 
 impl OutputHandler {
-    pub fn execute(output: Output, action: &str, kind: &str) -> Result<Output, AppError> {
+    pub fn execute(output: Output, action: &str, domain: &str) -> Result<Output, AppError> {
         if output.status.success() {
             Ok(output)
         } else {
@@ -17,7 +17,7 @@ impl OutputHandler {
                 exit_signal: output.status.signal(),
                 exit_stopped_signal: output.status.stopped_signal(),
             };
-            AppError::command(error, action, kind)
+            AppError::command(error, action, domain)
         }
     }
 }

@@ -4,10 +4,10 @@ use di::{injectable, Ref, RefMut};
 use html_escape::decode_html_entities;
 
 use crate::api::Api;
+use crate::errors::AppError;
 use crate::formats::ExistingFormatProvider;
 use crate::imdl::imdl_command::ImdlCommand;
 use crate::options::SharedOptions;
-use crate::source::SourceError::*;
 use crate::source::*;
 
 /// Retrieve [Source] from the [Api] via a [provider design pattern](https://en.wikipedia.org/wiki/Provider_model)
@@ -18,44 +18,43 @@ pub struct SourceProvider {
 }
 
 impl SourceProvider {
-    pub async fn get_by_string(&mut self, input: &String) -> Result<Source, SourceError> {
+    pub async fn get_by_string(&mut self, input: &String) -> Result<Source, AppError> {
         if is_id_number(input) {
             let id = input.parse::<i64>().expect("ID should be a number");
-            self.get_by_torrent_id(id).await
+            self.get_by_id(id).await
         } else if is_url(input) {
             self.get_by_url(input).await
         } else if is_torrent_file(input) {
             let path = PathBuf::from(input);
             if path.exists() {
-                self.get_by_torrent_file(&path).await
+                self.get_by_file(&path).await
             } else {
-                Err(FileDoesNotExist(path.to_string_lossy().to_string()))
+                AppError::explained(
+                    "get source from torrent file",
+                    "File does not exist".to_owned(),
+                )
             }
         } else {
-            Err(InvalidInput(input.clone()))
+            AppError::explained("get source", format!("Unknown input type: {input}"))
         }
     }
 
-    async fn get_by_torrent_id(&mut self, id: i64) -> Result<Source, SourceError> {
+    async fn get_by_id(&mut self, id: i64) -> Result<Source, AppError> {
+        let action = "get source by id";
         let mut api = self.api.write().expect("API should be available to read");
-        let response = match api.get_torrent(id).await {
-            Ok(response) => response,
-            Err(error) => return Err(ApiFailure(error)),
-        };
+        let response = api.get_torrent(id).await?;
         let torrent = response.torrent;
         let group = response.group;
-        let response = match api.get_torrent_group(group.id).await {
-            Ok(response) => response,
-            Err(error) => return Err(ApiFailure(error)),
-        };
+        let response = api.get_torrent_group(group.id).await?;
         if group.id != response.group.id {
-            return Err(GroupMisMatch(group.id, response.group.id));
+            AppError::explained(
+                action,
+                "group of torrent did not match torrent group".to_owned(),
+            )?;
         }
         let group_torrents = response.torrents;
-        let format = torrent.get_format().expect("Format should be valid");
-        let format = format.to_source().ok_or(NotLossless(format))?;
-        let existing =
-            ExistingFormatProvider::get(&torrent, &group_torrents).expect("Format should be valid");
+        let format = torrent.get_format()?.to_source()?;
+        let existing = ExistingFormatProvider::get(&torrent, &group_torrents)?;
         let directory = self
             .options
             .content_directory
@@ -73,35 +72,39 @@ impl SourceProvider {
         })
     }
 
-    async fn get_by_url(&mut self, url: &str) -> Result<Source, SourceError> {
+    async fn get_by_url(&mut self, url: &str) -> Result<Source, AppError> {
         let base = &self
             .options
             .indexer_url
             .clone()
             .expect("Options should be set");
-        let torrent_id = get_torrent_id_from_url(url, base).ok_or(TorrentIdNotFound)?;
-        self.get_by_torrent_id(torrent_id).await
+        let torrent_id = get_torrent_id_from_url(url, base)?;
+        self.get_by_id(torrent_id).await
     }
 
-    async fn get_by_torrent_file(&mut self, path: &Path) -> Result<Source, SourceError> {
-        let summary = match ImdlCommand::show(path).await {
-            Ok(summary) => summary,
-            Err(error) => return Err(ImdlFailure(error)),
-        };
+    async fn get_by_file(&mut self, path: &Path) -> Result<Source, AppError> {
+        let action = "get source by file";
+        let summary = ImdlCommand::show(path).await?;
         let tracker_id = self
             .options
             .indexer
             .clone()
             .expect("Options should be set")
             .to_uppercase();
-        if summary.source != Some(tracker_id.clone()) {
-            Err(SourceDoesNotMatch(
-                tracker_id,
-                summary.source.expect("Options should be set"),
-            ))
+        if summary.source == Some(tracker_id.clone()) {
+            let url = summary.comment.unwrap_or_default();
+            if is_url(url.as_str()) {
+                self.get_by_url(&url).await
+            } else {
+                AppError::explained(action, "comment is not a url".to_owned())
+            }
         } else {
-            let url = summary.comment.ok_or(TorrentIdNotFound)?;
-            self.get_by_url(&url).await
+            AppError::unexpected(
+                action,
+                "incorrect source",
+                tracker_id,
+                summary.source.unwrap_or_default(),
+            )
         }
     }
 }

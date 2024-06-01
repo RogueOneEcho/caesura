@@ -6,9 +6,8 @@ use serde::de::DeserializeOwned;
 use tower::limit::RateLimit;
 use tower::ServiceExt;
 
-use crate::api::ApiError::*;
-use crate::api::{ApiError, ApiFactory};
 use crate::api::{ApiResponse, TorrentGroupResponse, TorrentResponse};
+use crate::api::ApiFactory;
 use crate::errors::AppError;
 
 /// API client
@@ -33,9 +32,10 @@ impl Api {
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
     pub async fn get_torrent(&mut self, id: i64) -> Result<TorrentResponse, AppError> {
+        let action = "get torrent";
         let url = format!("{}/ajax.php?action=torrent&id={}", self.api_url, id);
-        let response = self.get(&url, "get torrent").await?;
-        self.deserialize(response, url, TorrentNotFound).await
+        let response = self.get(&url, action).await?;
+        self.deserialize(response, action).await
     }
 
     /// Get a torrent group by id
@@ -46,9 +46,10 @@ impl Api {
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
     pub async fn get_torrent_group(&mut self, id: i64) -> Result<TorrentGroupResponse, AppError> {
+        let action = "get torrent group";
         let url = format!("{}/ajax.php?action=torrentgroup&id={}", self.api_url, id);
-        let response = self.get(&url, "get torrent group").await?;
-        self.deserialize(response, url, GroupNotFound).await
+        let response = self.get(&url, action).await?;
+        self.deserialize(response, action).await
     }
 
     /// Get the content of the .torrent file as a buffer
@@ -58,7 +59,6 @@ impl Api {
     pub async fn get_torrent_file_as_buffer(&mut self, id: i64) -> Result<Vec<u8>, AppError> {
         let url = format!("{}/ajax.php?action=download&id={}", self.api_url, id);
         let response = self.get(&url, "get torrent file").await?;
-        // TODO MUST check response code
         let bytes = response
             .bytes()
             .await
@@ -75,30 +75,31 @@ impl Api {
         if status_code.is_success() {
             Ok(response)
         } else {
-            AppError::response(e, action)
-        }       
+            AppError::response(status_code, action)
+        }
     }
 
     async fn wait_for_client(&mut self) -> &Client {
-        self.client.ready().await.expect("client should be available").get_ref()
+        self.client
+            .ready()
+            .await
+            .expect("client should be available")
+            .get_ref()
     }
 
     async fn deserialize<TResponse: DeserializeOwned>(
         &self,
         response: Response,
-        url: String,
-        non_success_error: AppError,
+        action: &str,
     ) -> Result<TResponse, AppError> {
-        let response = match response.json::<ApiResponse<TResponse>>().await {
-            Ok(response) => response,
-            Err(error) => return Err(DeserializationFailure(url, error)),
-        };
+        let response = response
+            .json::<ApiResponse<TResponse>>()
+            .await
+            .or_else(|e| AppError::request(e, action))?;
         if response.status != "success" {
-            return Err(non_success_error);
-        }
-        match response.response {
-            Some(response) => Ok(response),
-            None => Err(EmptyResponse),
+            AppError::explained(action, "API returned a non-success response".to_owned())
+        } else {
+            Ok(response.response.expect("response should be set"))
         }
     }
 }

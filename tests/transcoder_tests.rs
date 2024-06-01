@@ -1,6 +1,7 @@
+use red_oxide::errors::AppError;
 use red_oxide::formats::TargetFormatProvider;
 use red_oxide::fs::DirectoryReader;
-use red_oxide::jobs::AppError;
+
 use red_oxide::logging::{Debug, Logger};
 use red_oxide::options::{SharedOptions, TranscodeOptions};
 use red_oxide::source::SourceProvider;

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use audiotags::{AudioTag, Error, Tag};
+use audiotags::{AudioTag, Tag};
 use claxon::metadata::StreamInfo;
 use claxon::FlacReader;
 use crate::errors::AppError;

@@ -1,4 +1,3 @@
-use std::io::ErrorKind;
 use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 use std::process::Output;
@@ -90,6 +89,7 @@ async fn compress_image(source_path: &String, output_path: &String) -> Result<Ou
         .arg(format!("{QUALITY}%"))
         .arg(output_path)
         .output()
-        .await;
+        .await
+        .or_else(|e| AppError::io(e, "compressing image"))?;
     OutputHandler::execute(output, "compressing image", "convert")
 }

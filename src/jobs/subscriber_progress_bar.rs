@@ -4,6 +4,7 @@ use colored::Colorize;
 use di::{injectable, Ref, RefMut};
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use tokio::task::JoinSet;
+use crate::errors::AppError;
 
 /// A [Subscriber] that updates a progress bar in the console
 pub struct ProgressBarSubscriber {

@@ -4,9 +4,10 @@ use colored::Colorize;
 use di::{injectable, Ref};
 use log::*;
 
+use crate::errors::AppError;
 use crate::formats::{TargetFormat, TargetFormatProvider};
 use crate::fs::Collector;
-use crate::jobs::{AppError, JobRunner};
+use crate::jobs::JobRunner;
 use crate::logging::Colors;
 use crate::naming::{DirectoryName, SourceName};
 use crate::options::SharedOptions;

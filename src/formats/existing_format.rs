@@ -1,6 +1,6 @@
 use crate::api::Torrent;
-use crate::formats::FormatError::*;
-use crate::formats::{FormatError, SourceFormat};
+use crate::errors::AppError;
+use crate::formats::SourceFormat;
 
 /// Format of an existing release.
 #[derive(Debug, Hash, PartialEq, Eq)]
@@ -12,31 +12,35 @@ pub enum ExistingFormat {
 }
 
 impl ExistingFormat {
-    #[must_use]
-    pub fn to_source(&self) -> Option<SourceFormat> {
+    pub fn to_source(&self) -> Result<SourceFormat, AppError> {
         match self {
-            ExistingFormat::Flac24 => Some(SourceFormat::Flac24),
-            ExistingFormat::Flac => Some(SourceFormat::Flac),
-            ExistingFormat::_320 => None,
-            ExistingFormat::V0 => None,
+            ExistingFormat::Flac24 => Ok(SourceFormat::Flac24),
+            ExistingFormat::Flac => Ok(SourceFormat::Flac),
+            _ => AppError::explained("get source format", "Format is not FLAC".to_owned()),
         }
     }
 }
 
 impl Torrent {
-    pub fn get_format(&self) -> Result<ExistingFormat, FormatError> {
+    pub fn get_format(&self) -> Result<ExistingFormat, AppError> {
         match self.format.as_str() {
             "FLAC" => match self.encoding.as_str() {
                 "Lossless" => Ok(ExistingFormat::Flac),
                 "24bit Lossless" => Ok(ExistingFormat::Flac24),
-                _ => Err(UnknownEncoding(self.encoding.clone())),
+                _ => AppError::explained(
+                    "get format",
+                    format!("unknown encoding: {}", self.encoding),
+                ),
             },
             "MP3" => match self.encoding.as_str() {
                 "320" => Ok(ExistingFormat::_320),
                 "V0 (VBR)" => Ok(ExistingFormat::V0),
-                _ => Err(UnknownEncoding(self.encoding.clone())),
+                _ => AppError::explained(
+                    "get format",
+                    format!("unknown encoding: {}", self.encoding),
+                ),
             },
-            _ => Err(UnknownFormat(self.format.clone())),
+            _ => AppError::explained("get format", format!("unknown format: {}", self.format)),
         }
     }
 }

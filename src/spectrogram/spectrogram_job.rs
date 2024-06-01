@@ -5,7 +5,6 @@ use tokio::process::Command;
 
 use crate::dependencies::SOX;
 use crate::errors::{AppError, OutputHandler};
-use crate::jobs::AppError::*;
 use crate::spectrogram::*;
 
 /// A command to generate a spectrogram image of a FLAC file using sox.

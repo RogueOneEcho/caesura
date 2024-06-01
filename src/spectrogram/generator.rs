@@ -2,8 +2,9 @@ use colored::Colorize;
 use di::{injectable, Ref};
 use log::{debug, info};
 
+use crate::errors::AppError;
 use crate::fs::*;
-use crate::jobs::{AppError, JobRunner};
+use crate::jobs::JobRunner;
 use crate::logging::Colors;
 use crate::naming::SourceName;
 use crate::options::SharedOptions;

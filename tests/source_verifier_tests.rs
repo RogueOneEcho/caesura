@@ -1,3 +1,4 @@
+use red_oxide::errors::AppError;
 use red_oxide::logging::{Debug, Logger};
 use red_oxide::options::{SharedOptions, TranscodeOptions};
 use red_oxide::source::*;
@@ -5,7 +6,7 @@ use red_oxide::testing::*;
 use red_oxide::verify::SourceVerifier;
 
 #[tokio::test]
-async fn source_verifier() -> Result<(), SourceError> {
+async fn source_verifier() -> Result<(), AppError> {
     // Arrange
     Logger::init_new(Debug);
     let shared_options = TestOptionsFactory::shared(SharedOptions {

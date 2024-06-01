@@ -1,14 +1,12 @@
+use std::fs::create_dir_all;
 use std::process::Stdio;
 
-use crate::errors::AppError;
-use crate::jobs::AppError::{IOFailure, SourceFailure, TranscodeFailure};
 use audiotags::{AudioTagWrite, Id3v2Tag};
 use colored::Colorize;
 use log::*;
 use tokio::io::AsyncWriteExt;
 
-use crate::logging::Colors;
-use crate::source::SourceError::AudioTagFailure;
+use crate::errors::{AppError, OutputHandler};
 use crate::transcode::CommandFactory;
 
 pub struct TranscodeJob {
@@ -21,9 +19,9 @@ pub struct TranscodeJob {
 
 impl TranscodeJob {
     pub async fn execute(self) -> Result<(), AppError> {
-        if let Err(error) = std::fs::create_dir_all(&self.output_dir) {
-            return Err(IOFailure(error));
-        }
+        let action = "transcode";
+        create_dir_all(&self.output_dir).or_else(|e| AppError::io(e, action))?;
+
         let mut buffer = vec![];
         for factory in self.commands {
             let command = format!(
@@ -52,23 +50,13 @@ impl TranscodeJob {
                 .wait_with_output()
                 .await
                 .expect("Child should produce an output");
-            if output.status.success() {
-                buffer = output.stdout;
-            } else {
-                error!("{} to execute {}", "Failed".red(), command.gray());
-                debug!("{} {:?}", "Exit code:".bold(), output.status.code());
-                let out = String::from_utf8(output.stdout).unwrap_or_default();
-                debug!("{}\n{}", "Out:".bold(), out);
-                let err = String::from_utf8(output.stderr).unwrap_or_default();
-                debug!("{}\n{}", "Err:".bold(), err);
-                return Err(TranscodeFailure);
-            }
+            let output = OutputHandler::execute(output, action, "transcode")?;
+            buffer = output.stdout;
         }
         if let Some(tags) = self.tags {
             let mut tags = tags;
-            if let Err(error) = tags.write_to_path(self.output_path.as_str()) {
-                return Err(SourceFailure(AudioTagFailure(error)));
-            }
+            tags.write_to_path(self.output_path.as_str())
+                .or_else(|e| AppError::tag(e, "write tags to file"))?;
         }
         Ok(())
     }

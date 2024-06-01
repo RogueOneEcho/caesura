@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
 use crate::api::Torrent;
-use crate::formats::{ExistingFormat, FormatError};
+use crate::errors::AppError;
+use crate::formats::ExistingFormat;
 
 pub struct ExistingFormatProvider;
 
@@ -9,7 +10,7 @@ impl ExistingFormatProvider {
     pub fn get(
         source_torrent: &Torrent,
         group_torrents: &[Torrent],
-    ) -> Result<HashSet<ExistingFormat>, FormatError> {
+    ) -> Result<HashSet<ExistingFormat>, AppError> {
         group_torrents
             .iter()
             .filter(|&other_torrent| is_alternative_format(source_torrent, other_torrent))

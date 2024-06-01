@@ -9,7 +9,6 @@ use crate::fs::Collector;
 use crate::imdl::imdl_command::ImdlCommand;
 use crate::options::TranscodeOptions;
 use crate::source::*;
-use crate::source::SourceError::*;
 use crate::verify::*;
 use crate::verify::SourceRule::*;
 use crate::verify::tag_verifier::TagVerifier;
@@ -93,10 +92,7 @@ impl SourceVerifier {
 
     async fn hash_check(&mut self, source: &Source) -> Result<Vec<SourceRule>, AppError> {
         let mut api = self.api.write().expect("API should be available");
-        let buffer = match api.get_torrent_file_as_buffer(source.torrent.id).await {
-            Ok(buffer) => buffer,
-            Err(error) => return Err(ApiFailure(error)),
-        };
+        let buffer = api.get_torrent_file_as_buffer(source.torrent.id).await?;
         ImdlCommand::verify(&buffer, &source.directory).await
     }
 }

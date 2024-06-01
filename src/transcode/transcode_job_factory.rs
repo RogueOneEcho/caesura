@@ -2,12 +2,11 @@ use std::path::Path;
 
 use audiotags::Id3v2Tag;
 use di::injectable;
+use crate::errors::AppError;
 
 use crate::formats::target_format::TargetFormat;
 use crate::fs::FlacFile;
-use crate::jobs::AppError::SourceFailure;
-use crate::jobs::{Job, AppError};
-use crate::source::SourceError::{AudioTagFailure, StreamInfoFailure};
+use crate::jobs::{Job};
 use crate::transcode::transcode_job::TranscodeJob;
 use crate::transcode::*;
 
@@ -37,13 +36,7 @@ impl TranscodeJobFactory {
         format: TargetFormat,
         output_dir: &Path,
     ) -> Result<Job, AppError> {
-        let info = match flac.get_stream_info() {
-            Ok(info) => info,
-            Err(error) => return Err(SourceFailure(StreamInfoFailure(error))),
-        };
-        if let Err(error) = validate(info) {
-            return Err(SourceFailure(error));
-        };
+        let info = flac.get_stream_info()?;
         let id = format!("Transcode {format:<7?}{index:>3}");
         let output_dir = output_dir.join(&flac.sub_dir);
         let output_path = get_output_path(flac, format, &output_dir);
@@ -57,10 +50,7 @@ impl TranscodeJobFactory {
         };
         let output_dir = output_dir.to_string_lossy().into_owned();
         let tags = if matches!(format, TargetFormat::_320) || matches!(format, TargetFormat::V0) {
-            let tags = match flac.get_tags() {
-                Ok(tags) => tags,
-                Err(error) => return Err(SourceFailure(AudioTagFailure(error))),
-            };
+            let tags = flac.get_tags()?;
             Some(Id3v2Tag::from(tags))
         } else {
             None

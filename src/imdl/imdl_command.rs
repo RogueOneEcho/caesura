@@ -1,15 +1,12 @@
-use std::os::unix::prelude::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::{ExitStatus, Stdio};
 
-use crate::imdl::ImdlError;
-use crate::imdl::ImdlError::*;
 use bytes::Buf;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
-use crate::errors::{AppError, CommandError, OutputHandler};
 
-use crate::imdl::torrent_summary::TorrentSummary;
+use crate::errors::{AppError, OutputHandler};
+use crate::imdl::TorrentSummary;
 use crate::verify::SourceRule;
 use crate::verify::SourceRule::IncorrectHash;
 
@@ -58,16 +55,15 @@ impl ImdlCommand {
             .arg(path)
             .output()
             .await
-            .or_else(|e| AppError::io(e, action))?;        
+            .or_else(|e| AppError::io(e, action))?;
         let output = OutputHandler::execute(output, action, "IMDL")?;
         let reader = output.stdout.reader();
-        serde_json::from_reader(reader)
-            .or_else(|e| AppError::deserialization(e, action))
+        serde_json::from_reader(reader).or_else(|e| AppError::deserialization(e, action))
     }
 
     /// Verify files match the torrent metadata.
     pub async fn verify(buffer: &[u8], directory: &PathBuf) -> Result<Vec<SourceRule>, AppError> {
-        let action = "verify torrent";        
+        let action = "verify torrent";
         let mut child = Command::new(BINARY_PATH)
             .arg("torrent")
             .arg("verify")
@@ -80,10 +76,14 @@ impl ImdlCommand {
             .spawn()
             .or_else(|e| AppError::io(e, action))?;
         let mut stdin = child.stdin.take().expect("stdin should be available");
-        stdin.write_all(buffer).await
+        stdin
+            .write_all(buffer)
+            .await
             .or_else(|e| AppError::io(e, action))?;
         drop(stdin);
-        let output = child.wait_with_output().await
+        let output = child
+            .wait_with_output()
+            .await
             .or_else(|e| AppError::io(e, action))?;
         if output.status.success() {
             Ok(Vec::new())

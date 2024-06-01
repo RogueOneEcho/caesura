@@ -1,13 +1,13 @@
 use std::path::PathBuf;
+use red_oxide::errors::AppError;
 
 use red_oxide::fs::DirectoryReader;
 use red_oxide::imdl::imdl_command::ImdlCommand;
-use red_oxide::imdl::ImdlError;
 use red_oxide::testing::TORRENTS_SAMPLES_DIR;
 
 #[tokio::test]
 #[ignore]
-async fn show() -> Result<(), ImdlError> {
+async fn show() -> Result<(), AppError> {
     // Arrange
     let paths = DirectoryReader::new()
         .with_extension("torrent")
