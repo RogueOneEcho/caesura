@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::process::{ExitStatus, Stdio};
+use std::process::{Output, Stdio};
 
 use bytes::Buf;
 use tokio::io::AsyncWriteExt;
@@ -16,26 +16,28 @@ pub struct ImdlCommand;
 impl ImdlCommand {
     /// Create a torrent
     pub async fn create(
-        content_path: &Path,
-        torrent_path: &Path,
+        content_dir: &Path,
+        output_path: &Path,
         announce_url: String,
-    ) -> Result<ExitStatus, std::io::Error> {
-        let mut child = Command::new(IMDL)
+        source: String,
+    ) -> Result<Output, AppError> {
+        let action = "create torrent";
+        let output = Command::new(IMDL)
             .arg("torrent")
             .arg("create")
-            .arg(content_path.to_string_lossy().to_string())
-            .arg("-P")
-            .arg("-a")
+            .arg(content_dir.to_string_lossy().to_string())
+            .arg("--private")
+            .arg("--announce")
             .arg(announce_url)
-            .arg("-s")
-            .arg("RED")
-            .arg("-o")
-            .arg(torrent_path.to_string_lossy().to_string())
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()?;
-        child.wait().await
+            .arg("--source")
+            .arg(source)
+            .arg("--output")
+            .arg(output_path.to_string_lossy().to_string())
+            .arg("--force")
+            .output()
+            .await
+            .or_else(|e| AppError::io(e, action))?;
+        OutputHandler::execute(output, action, "IMDL")
     }
 
     /// Get a summary of the torrent file.
