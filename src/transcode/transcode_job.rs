@@ -1,7 +1,7 @@
 use std::process::Stdio;
 
-use crate::jobs::JobError;
-use crate::jobs::JobError::{IOFailure, SourceFailure, TranscodeFailure};
+use crate::errors::AppError;
+use crate::jobs::AppError::{IOFailure, SourceFailure, TranscodeFailure};
 use audiotags::{AudioTagWrite, Id3v2Tag};
 use colored::Colorize;
 use log::*;
@@ -20,7 +20,7 @@ pub struct TranscodeJob {
 }
 
 impl TranscodeJob {
-    pub async fn execute(self) -> Result<(), JobError> {
+    pub async fn execute(self) -> Result<(), AppError> {
         if let Err(error) = std::fs::create_dir_all(&self.output_dir) {
             return Err(IOFailure(error));
         }

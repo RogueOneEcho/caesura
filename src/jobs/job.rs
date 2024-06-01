@@ -1,4 +1,4 @@
-use crate::jobs::JobError;
+use crate::errors::AppError;
 use crate::spectrogram::SpectrogramJob;
 use crate::transcode::{AdditionalJob, TranscodeJob};
 
@@ -36,7 +36,7 @@ impl Job {
     }
 
     /// Execute the wrapped command.
-    pub async fn execute(self) -> Result<(), JobError> {
+    pub async fn execute(self) -> Result<(), AppError> {
         match self {
             Job::Additional(job) => job.execute().await,
             Job::Spectrogram(job) => job.execute().await,

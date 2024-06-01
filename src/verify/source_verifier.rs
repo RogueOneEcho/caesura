@@ -3,15 +3,16 @@ use di::{injectable, Ref, RefMut};
 use log::*;
 
 use crate::api::Api;
+use crate::errors::AppError;
 use crate::formats::TargetFormatProvider;
-use crate::fs::{Collector, FlacFile};
+use crate::fs::Collector;
 use crate::imdl::imdl_command::ImdlCommand;
-use crate::imdl::ImdlError::IOFailure;
 use crate::options::TranscodeOptions;
-use crate::source::SourceError::*;
 use crate::source::*;
-use crate::verify::SourceRule::*;
+use crate::source::SourceError::*;
 use crate::verify::*;
+use crate::verify::SourceRule::*;
+use crate::verify::tag_verifier::TagVerifier;
 
 /// Check if a [Source] is suitable for transcoding.
 #[injectable]
@@ -22,7 +23,7 @@ pub struct SourceVerifier {
 }
 
 impl SourceVerifier {
-    pub async fn execute(&mut self, source: &Source) -> Result<bool, SourceError> {
+    pub async fn execute(&mut self, source: &Source) -> Result<bool, AppError> {
         info!("{} {}", "Verifying".bold(), source);
         let api_errors = self.api_checks(source);
         debug_errors(&api_errors, source, "API checks");
@@ -66,7 +67,7 @@ impl SourceVerifier {
         errors
     }
 
-    fn flac_checks(&self, source: &Source) -> Result<Vec<SourceRule>, SourceError> {
+    fn flac_checks(&self, source: &Source) -> Result<Vec<SourceRule>, AppError> {
         if !source.directory.exists() || !source.directory.is_dir() {
             return Ok(vec![SourceDirectoryNotFound(
                 source.directory.to_string_lossy().to_string(),
@@ -80,71 +81,24 @@ impl SourceVerifier {
         }
         let mut errors: Vec<SourceRule> = Vec::new();
         for flac in flacs {
-            let mut tags = match validate_vinyl_tags(&flac, &source.metadata.media) {
-                Ok(tags) => tags,
-                Err(error) => return Err(AudioTagFailure(error)),
-            };
-            errors.append(&mut tags);
+            for error in TagVerifier::execute(&flac, &source.metadata.media)? {
+                errors.push(error)
+            }
+            for error in StreamVerifier::execute(&flac)? {
+                errors.push(error)
+            }
         }
         Ok(errors)
     }
 
-    async fn hash_check(&mut self, source: &Source) -> Result<Vec<SourceRule>, SourceError> {
+    async fn hash_check(&mut self, source: &Source) -> Result<Vec<SourceRule>, AppError> {
         let mut api = self.api.write().expect("API should be available");
         let buffer = match api.get_torrent_file_as_buffer(source.torrent.id).await {
             Ok(buffer) => buffer,
             Err(error) => return Err(ApiFailure(error)),
         };
-        let is_verified = match ImdlCommand::verify(&buffer, &source.directory).await {
-            Ok(is_verified) => is_verified,
-            // TODO SHOULD return custom error message - io not found is confusing on failure.
-            Err(error) => return Err(ImdlFailure(IOFailure(error))),
-        };
-        if is_verified {
-            Ok(vec![])
-        } else {
-            Ok(vec![IncorrectHash])
-        }
+        ImdlCommand::verify(&buffer, &source.directory).await
     }
-}
-fn validate_vinyl_tags(
-    flac: &FlacFile,
-    media: &String,
-) -> Result<Vec<SourceRule>, audiotags::Error> {
-    // TODO MUST confirm vinyl media comparison works
-    if media != "Vinyl" {
-        validate_tags_internal(flac)
-    } else {
-        let errors = validate_tags_internal(flac)?;
-        let count_before = errors.len();
-        let errors: Vec<SourceRule> = errors
-            .into_iter()
-            // TODO MUST confirm NoTrackNumberTag error filter works
-            .filter(|error| !matches!(*error, NoTrackNumberTag(_)))
-            .collect();
-        if count_before != errors.len() {
-            warn!("Unable to verify if the track number is valid. Vinyl releases can have non-standard track numbers (e.g. A1, A2, etc).");
-        }
-        Ok(errors)
-    }
-}
-
-fn validate_tags_internal(flac: &FlacFile) -> Result<Vec<SourceRule>, audiotags::Error> {
-    let tags = flac.get_tags()?;
-    let mut errors: Vec<SourceRule> = Vec::new();
-    if tags.artist().is_none() {
-        errors.push(NoArtistTag(flac.file_name.clone()));
-    }
-    if tags.album().is_none() {
-        errors.push(NoAlbumTag(flac.file_name.clone()));
-    }
-    if tags.title().is_none() {
-        errors.push(NoTitleTag(flac.file_name.clone()));
-    }
-    if tags.track_number().is_none() {
-        errors.push(NoTrackNumberTag(flac.file_name.clone()));
-    }
-    Ok(errors)
 }
 
 fn debug_errors(errors: &Vec<SourceRule>, source: &Source, title: &str) {

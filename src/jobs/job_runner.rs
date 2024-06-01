@@ -3,8 +3,8 @@ use std::sync::Arc;
 use di::{injectable, Ref, RefMut};
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
+use crate::errors::AppError;
 
-use crate::jobs::JobError::JoinFailure;
 use crate::jobs::*;
 
 /// Execute a [Job] in parallel across a restricted number of threads.
@@ -16,7 +16,7 @@ use crate::jobs::*;
 /// of a [Job] changes.
 pub struct JobRunner {
     pub semaphore: Arc<Semaphore>,
-    pub set: RefMut<JoinSet<Result<(), JobError>>>,
+    pub set: RefMut<JoinSet<Result<(), AppError>>>,
     pub publisher: Ref<Publisher>,
 }
 
@@ -25,7 +25,7 @@ impl JobRunner {
     /// Create a new [`JobRunner`].
     pub fn new(
         semaphore: Arc<Semaphore>,
-        set: RefMut<JoinSet<Result<(), JobError>>>,
+        set: RefMut<JoinSet<Result<(), AppError>>>,
         publisher: Ref<Publisher>,
     ) -> Self {
         Self {
@@ -57,14 +57,11 @@ impl JobRunner {
         }
     }
 
-    pub async fn execute(&self) -> Result<(), JobError> {
+    pub async fn execute(&self) -> Result<(), AppError> {
         self.publisher.start("");
         let mut set = self.set.write().expect("join set to be writeable");
         while let Some(result) = set.join_next().await {
-            match result {
-                Ok(result) => result,
-                Err(error) => Err(JoinFailure(error)),
-            }?;
+            result.or_else(|e| AppError::task(e, "executing task"))??;
         }
         self.publisher.finish("");
         Ok(())

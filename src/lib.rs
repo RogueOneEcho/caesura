@@ -1,6 +1,7 @@
 pub mod api;
 pub mod cli;
 pub mod dependencies;
+pub mod errors;
 pub mod formats;
 pub mod fs;
 pub mod hosting;

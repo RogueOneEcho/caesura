@@ -5,8 +5,8 @@ use di::injectable;
 
 use crate::formats::target_format::TargetFormat;
 use crate::fs::FlacFile;
-use crate::jobs::JobError::SourceFailure;
-use crate::jobs::{Job, JobError};
+use crate::jobs::AppError::SourceFailure;
+use crate::jobs::{Job, AppError};
 use crate::source::SourceError::{AudioTagFailure, StreamInfoFailure};
 use crate::transcode::transcode_job::TranscodeJob;
 use crate::transcode::*;
@@ -21,7 +21,7 @@ impl TranscodeJobFactory {
         flacs: &[FlacFile],
         format: TargetFormat,
         output_dir: &Path,
-    ) -> Result<Vec<Job>, JobError> {
+    ) -> Result<Vec<Job>, AppError> {
         let mut jobs = Vec::new();
         for (index, flac) in flacs.iter().enumerate() {
             jobs.push(self.create_single(index, flac, format, output_dir)?);
@@ -36,7 +36,7 @@ impl TranscodeJobFactory {
         flac: &FlacFile,
         format: TargetFormat,
         output_dir: &Path,
-    ) -> Result<Job, JobError> {
+    ) -> Result<Job, AppError> {
         let info = match flac.get_stream_info() {
             Ok(info) => info,
             Err(error) => return Err(SourceFailure(StreamInfoFailure(error))),

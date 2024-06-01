@@ -5,9 +5,9 @@ use crate::dependencies::{FLAC, LAME, SOX};
 use crate::formats::target_format::TargetFormat;
 use crate::formats::target_format::TargetFormat::*;
 use crate::fs::FlacFile;
-use crate::jobs::JobError;
-use crate::jobs::JobError::SourceFailure;
-use crate::transcode::{get_resample_rate, is_resample_required};
+use crate::errors::AppError;
+use crate::jobs::AppError::SourceFailure;
+use crate::transcode::{get_resample_rate_or_err, is_resample_required};
 
 pub struct CommandFactory {
     pub program: String,
@@ -25,11 +25,8 @@ impl CommandFactory {
         flac: &FlacFile,
         info: &StreamInfo,
         output_path: String,
-    ) -> Result<CommandFactory, JobError> {
-        let resample_rate = match get_resample_rate(info) {
-            Ok(resample_rate) => resample_rate,
-            Err(error) => return Err(SourceFailure(error)),
-        };
+    ) -> Result<CommandFactory, AppError> {
+        let resample_rate = get_resample_rate_or_err(info).ok_or(AppError::new("resample flac", "FLAC"))?;
         let command = CommandFactory {
             program: SOX.to_owned(),
             args: vec![
@@ -48,9 +45,9 @@ impl CommandFactory {
         Ok(command)
     }
 
-    pub fn new_decode(flac: &FlacFile, info: &StreamInfo) -> Result<CommandFactory, JobError> {
+    pub fn new_decode(flac: &FlacFile, info: &StreamInfo) -> Result<CommandFactory, AppError> {
         let command = if is_resample_required(info) {
-            let resample_rate = match get_resample_rate(info) {
+            let resample_rate = match get_resample_rate_or_err(info) {
                 Ok(resample_rate) => resample_rate,
                 Err(error) => return Err(SourceFailure(error)),
             };

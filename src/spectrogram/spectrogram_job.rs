@@ -1,10 +1,11 @@
+use std::fs::create_dir_all;
 use std::process::Output;
 
 use tokio::process::Command;
 
 use crate::dependencies::SOX;
-use crate::jobs::JobError;
-use crate::jobs::JobError::*;
+use crate::errors::{AppError, OutputHandler};
+use crate::jobs::AppError::*;
 use crate::spectrogram::*;
 
 /// A command to generate a spectrogram image of a FLAC file using sox.
@@ -23,32 +24,17 @@ pub struct SpectrogramJob {
 
 impl SpectrogramJob {
     /// Execute the command to generate the spectrogram.
-    pub async fn execute(self) -> Result<(), JobError> {
-        if let Err(error) = std::fs::create_dir_all(&self.output_dir) {
-            return Err(IOFailure(error));
-        }
-        let output = match self.size {
+    pub async fn execute(self) -> Result<(), AppError> {
+        create_dir_all(&self.output_dir)
+            .or_else(|e| AppError::io(e, "creating spectrogram directories"))?;
+        match self.size {
             Size::Full => self.execute_full().await,
             Size::Zoom => self.execute_zoom().await,
-        };
-        let output = match output {
-            Ok(output) => output,
-            Err(error) => return Err(IOFailure(error)),
-        };
-        if !output.status.success() {
-            return Err(SpectrogramFailure {
-                output_path: self.output_path.clone(),
-                exit_status: output.status,
-                stderr: String::from_utf8(output.stderr)
-                    .expect("Should be able to decipher stderr"),
-                stdout: String::from_utf8(output.stdout)
-                    .expect("Should be able to decipher stdout"),
-            });
-        }
+        }?;
         Ok(())
     }
 
-    async fn execute_zoom(&self) -> Result<Output, std::io::Error> {
+    async fn execute_zoom(&self) -> Result<Output, AppError> {
         let output = Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
@@ -73,11 +59,13 @@ impl SpectrogramJob {
             .arg("red_oxide")
             .arg("-o")
             .arg(&self.output_path)
-            .output();
-        output.await
+            .output()
+            .await
+            .or_else(|e| AppError::io(e, "generate spectrogram"))?;
+        OutputHandler::execute(output, "generatespectrogram", "IMDL")
     }
 
-    async fn execute_full(&self) -> Result<Output, std::io::Error> {
+    async fn execute_full(&self) -> Result<Output, AppError> {
         let output = Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
@@ -98,7 +86,9 @@ impl SpectrogramJob {
             .arg("red_oxide")
             .arg("-o")
             .arg(&self.output_path)
-            .output();
-        output.await
+            .output()
+            .await
+            .or_else(|e| AppError::io(e, "generating spectrogram"))?;
+        OutputHandler::execute(output, "generating spectrogram", "IMDL")
     }
 }

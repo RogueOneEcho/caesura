@@ -8,11 +8,13 @@ pub enum SourceRule {
     NoTranscodeFormats,
     SourceDirectoryNotFound(String),
     NoFlacFiles(String),
-    IncorrectHash,
+    IncorrectHash(String),
     NoArtistTag(String),
     NoAlbumTag(String),
     NoTitleTag(String),
     NoTrackNumberTag(String),
+    UnknownSampleRate(u32),
+    TooManyChannels(u32),
 }
 
 impl Display for SourceRule {
@@ -24,11 +26,13 @@ impl Display for SourceRule {
             NoTranscodeFormats => "All allowed formats have been transcoded to already".to_owned(),
             SourceDirectoryNotFound(_) => "Source directory not found: {0}".to_owned(),
             NoFlacFiles(path) => format!("No Flac files found in source directory: {path}"),
-            IncorrectHash => "Files do not match hash".to_owned(),
+            IncorrectHash(details) => format!("Files do not match hash:\n{details}"),
             NoArtistTag(path) => format!("No artist tag: {path}"),
             NoAlbumTag(path) => format!("No album tag: {path}"),
             NoTitleTag(path) => format!("No title tag: {path}"),
             NoTrackNumberTag(path) => format!("No track number tag: {path}"),
+            UnknownSampleRate(rate) => format!("Unknown sample rate: {rate}"),
+            TooManyChannels(channels) => format!("Unable to transcode more than two channels: {channels}"),
         };
         message.fmt(formatter)
     }

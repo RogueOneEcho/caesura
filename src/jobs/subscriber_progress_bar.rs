@@ -8,7 +8,7 @@ use tokio::task::JoinSet;
 /// A [Subscriber] that updates a progress bar in the console
 pub struct ProgressBarSubscriber {
     /// The set of jobs to track
-    set: RefMut<JoinSet<Result<(), JobError>>>,
+    set: RefMut<JoinSet<Result<(), AppError>>>,
 
     /// The progress bar
     bar: ProgressBar,
@@ -17,7 +17,7 @@ pub struct ProgressBarSubscriber {
 #[injectable]
 impl ProgressBarSubscriber {
     /// Create a new [`ProgressBarSubscriber`]
-    pub fn new(logger: Ref<Logger>, set: RefMut<JoinSet<Result<(), JobError>>>) -> Self {
+    pub fn new(logger: Ref<Logger>, set: RefMut<JoinSet<Result<(), AppError>>>) -> Self {
         let bar = create_progress_bar(logger);
         Self { set, bar }
     }

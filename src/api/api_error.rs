@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
+use reqwest::{Error, Response};
 
 use crate::api::ApiError::*;
 

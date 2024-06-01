@@ -5,9 +5,10 @@ use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
 
 use crate::api::{Api, ApiFactory};
+use crate::errors::AppError;
 use crate::formats::TargetFormatProvider;
 use crate::hosting::Host;
-use crate::jobs::{DebugSubscriber, JobError, JobRunner, ProgressBarSubscriber, Publisher};
+use crate::jobs::{DebugSubscriber, JobRunner, ProgressBarSubscriber, Publisher};
 use crate::logging::Logger;
 use crate::options::{OptionsProvider, SharedOptions, SpectrogramOptions, TranscodeOptions};
 use crate::source::SourceProvider;
@@ -60,7 +61,7 @@ impl HostBuilder {
                 Arc::new(Semaphore::new(cpu_limit))
             }))
             .add(singleton_as_self().from(|_| {
-                let set: JoinSet<Result<(), JobError>> = JoinSet::new();
+                let set: JoinSet<Result<(), AppError>> = JoinSet::new();
                 RefMut::new(Mut::new(set))
             }))
             // Add verify services

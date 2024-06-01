@@ -3,7 +3,7 @@ use di::{injectable, Ref};
 use log::{debug, info};
 
 use crate::fs::*;
-use crate::jobs::{JobError, JobRunner};
+use crate::jobs::{AppError, JobRunner};
 use crate::logging::Colors;
 use crate::naming::SourceName;
 use crate::options::SharedOptions;
@@ -22,7 +22,7 @@ pub struct SpectrogramGenerator {
 
 impl SpectrogramGenerator {
     /// Generate spectrogram images from flac files.
-    pub async fn execute(&self, source: &Source) -> Result<bool, JobError> {
+    pub async fn execute(&self, source: &Source) -> Result<bool, AppError> {
         info!("{} spectrograms for {}", "Creating".bold(), source);
         let collection = Collector::get_flacs(&source.directory);
         let dir_name = SourceName::get_escaped(source);

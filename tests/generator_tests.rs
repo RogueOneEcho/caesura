@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use red_oxide::fs::DirectoryReader;
-use red_oxide::jobs::JobError;
+use red_oxide::jobs::AppError;
 use red_oxide::logging::{Debug, Logger};
 use red_oxide::options::SharedOptions;
 use red_oxide::source::SourceProvider;
@@ -9,7 +9,7 @@ use red_oxide::spectrogram::*;
 use red_oxide::testing::*;
 
 #[tokio::test]
-async fn spectrogram_generator() -> Result<(), JobError> {
+async fn spectrogram_generator() -> Result<(), AppError> {
     // Arrange
     Logger::init_new(Debug);
     let shared_options = TestOptionsFactory::shared(SharedOptions {

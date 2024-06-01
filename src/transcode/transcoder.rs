@@ -6,7 +6,7 @@ use log::*;
 
 use crate::formats::{TargetFormat, TargetFormatProvider};
 use crate::fs::Collector;
-use crate::jobs::{JobError, JobRunner};
+use crate::jobs::{AppError, JobRunner};
 use crate::logging::Colors;
 use crate::naming::{DirectoryName, SourceName};
 use crate::options::SharedOptions;
@@ -26,7 +26,7 @@ pub struct SourceTranscoder {
 }
 
 impl SourceTranscoder {
-    pub async fn execute(&self, source: &Source) -> Result<bool, JobError> {
+    pub async fn execute(&self, source: &Source) -> Result<bool, AppError> {
         let targets = self.targets.get(source.format, &source.existing);
         let dir_name = SourceName::get_escaped(source);
         let output_dir = &self
@@ -52,7 +52,7 @@ impl SourceTranscoder {
         source: &Source,
         targets: &Vec<TargetFormat>,
         output_dir: &Path,
-    ) -> Result<(), JobError> {
+    ) -> Result<(), AppError> {
         let flacs = Collector::get_flacs(&source.directory);
         info!(
             "{} to {:?} for {} FLACs in {}",
@@ -79,7 +79,7 @@ impl SourceTranscoder {
         source: &Source,
         targets: &Vec<TargetFormat>,
         output_dir: &Path,
-    ) -> Result<(), JobError> {
+    ) -> Result<(), AppError> {
         let files = Collector::get_additional(&source.directory);
         info!(
             "{} {} additional files",

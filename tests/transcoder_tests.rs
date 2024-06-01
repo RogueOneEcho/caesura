@@ -1,6 +1,6 @@
 use red_oxide::formats::TargetFormatProvider;
 use red_oxide::fs::DirectoryReader;
-use red_oxide::jobs::JobError;
+use red_oxide::jobs::AppError;
 use red_oxide::logging::{Debug, Logger};
 use red_oxide::options::{SharedOptions, TranscodeOptions};
 use red_oxide::source::SourceProvider;
@@ -8,7 +8,7 @@ use red_oxide::testing::*;
 use red_oxide::transcode::SourceTranscoder;
 
 #[tokio::test]
-async fn source_transcoder() -> Result<(), JobError> {
+async fn source_transcoder() -> Result<(), AppError> {
     // Arrange
     Logger::init_new(Debug);
     let shared_options = TestOptionsFactory::shared(SharedOptions {

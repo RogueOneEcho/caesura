@@ -1,3 +1,4 @@
+use std::os::unix::prelude::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::{ExitStatus, Stdio};
 
@@ -6,8 +7,11 @@ use crate::imdl::ImdlError::*;
 use bytes::Buf;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
+use crate::errors::{AppError, CommandError, OutputHandler};
 
 use crate::imdl::torrent_summary::TorrentSummary;
+use crate::verify::SourceRule;
+use crate::verify::SourceRule::IncorrectHash;
 
 /// Path to the imdl binary
 #[cfg(target_os = "windows")]
@@ -37,38 +41,33 @@ impl ImdlCommand {
             .arg("RED")
             .arg("-o")
             .arg(torrent_path.to_string_lossy().to_string())
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .spawn()?;
         child.wait().await
     }
 
     /// Get a summary of the torrent file.
-    pub async fn show(path: &Path) -> Result<TorrentSummary, ImdlError> {
-        let result = Command::new(BINARY_PATH)
+    pub async fn show(path: &Path) -> Result<TorrentSummary, AppError> {
+        let action = "read torrent";
+        let output = Command::new(BINARY_PATH)
             .arg("torrent")
             .arg("show")
             .arg("--json")
             .arg(path)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::null())
             .output()
-            .await;
-        let output = match result {
-            Ok(output) => output,
-            Err(error) => return Err(IOFailure(error)),
-        };
+            .await
+            .or_else(|e| AppError::io(e, action))?;        
+        let output = OutputHandler::execute(output, action, "IMDL")?;
         let reader = output.stdout.reader();
-        match serde_json::from_reader(reader) {
-            Ok(summary) => Ok(summary),
-            Err(error) => Err(DeserializationFailure(error)),
-        }
+        serde_json::from_reader(reader)
+            .or_else(|e| AppError::deserialization(e, action))
     }
 
     /// Verify files match the torrent metadata.
-    pub async fn verify(buffer: &[u8], directory: &PathBuf) -> Result<bool, std::io::Error> {
+    pub async fn verify(buffer: &[u8], directory: &PathBuf) -> Result<Vec<SourceRule>, AppError> {
+        let action = "verify torrent";        
         let mut child = Command::new(BINARY_PATH)
             .arg("torrent")
             .arg("verify")
@@ -76,14 +75,21 @@ impl ImdlCommand {
             .arg(directory)
             .arg("-")
             .stdin(Stdio::piped())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()?;
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .or_else(|e| AppError::io(e, action))?;
         let mut stdin = child.stdin.take().expect("stdin should be available");
-        stdin.write_all(buffer).await?;
+        stdin.write_all(buffer).await
+            .or_else(|e| AppError::io(e, action))?;
         drop(stdin);
-        let output = child.wait_with_output().await?;
-        // TODO SHOULD retrieve explanation of invalid files from stderr
-        Ok(output.status.success())
+        let output = child.wait_with_output().await
+            .or_else(|e| AppError::io(e, action))?;
+        if output.status.success() {
+            Ok(Vec::new())
+        } else {
+            let details = String::from_utf8(output.stderr).unwrap_or_default();
+            Ok(vec![IncorrectHash(details)])
+        }
     }
 }
