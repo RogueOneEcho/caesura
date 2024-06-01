@@ -13,7 +13,7 @@ use crate::errors::CommandError;
 pub struct AppError {
     action: String,
     reason: Reason,
-    pub backtrace: Option<Backtrace>,
+    pub backtrace: Backtrace,
 }
 
 enum Reason {
@@ -23,11 +23,19 @@ enum Reason {
 }
 
 impl AppError {
+    pub fn else_explained(action: &str, explanation: String) -> AppError {
+        Self {
+            action: action.to_owned(),
+            reason: Explained(explanation),
+            backtrace: Backtrace::force_capture(),
+        }
+    }
+    
     pub fn explained<T>(action: &str, explanation: String) -> Result<T, AppError> {
         Err(Self {
             action: action.to_owned(),
             reason: Explained(explanation),
-            backtrace: Some(Backtrace::force_capture()),
+            backtrace: Backtrace::force_capture(),
         })
     }
     
@@ -35,7 +43,7 @@ impl AppError {
         Err(Self {
             action: action.to_owned(),
             reason: External(domain.to_owned(), error),
-            backtrace: Some(Backtrace::force_capture()),
+            backtrace: Backtrace::force_capture(),
         })
     }
 
@@ -43,7 +51,7 @@ impl AppError {
         Err(Self {
             action: action.to_owned(),
             reason: Unexpected(explanation.to_owned(), expected, actual),
-            backtrace: Some(Backtrace::force_capture()),
+            backtrace: Backtrace::force_capture(),
         })
     }
 

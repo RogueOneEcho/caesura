@@ -19,5 +19,5 @@ pub fn get_resample_rate(info: &StreamInfo) -> Option<u32> {
 
 pub fn get_resample_rate_or_err(info: &StreamInfo) -> Result<u32, AppError> {
     get_resample_rate(info)
-        .ok_or(AppError::explained("get sample rate", "invalid sample rate".to_owned())?)
+        .ok_or_else(|| AppError::else_explained("get sample rate", "invalid sample rate".to_owned()))
 }

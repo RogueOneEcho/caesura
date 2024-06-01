@@ -1,6 +1,7 @@
+use std::backtrace::BacktraceStatus;
 use colored::Colorize;
 use di::ServiceProvider;
-use log::error;
+use log::{error, trace};
 
 use crate::errors::AppError;
 use crate::logging::*;
@@ -64,8 +65,8 @@ impl Host {
                 for line in format!("{error}").split('\n') {
                     error!("{line}");
                 }
-                if let Some(backtrace) = error.backtrace {
-                    println!("{backtrace}");
+                if matches!(error.backtrace.status(), BacktraceStatus::Captured) {
+                    trace!("Backtrace:\n{}", error.backtrace);                    
                 }
                 false
             }
