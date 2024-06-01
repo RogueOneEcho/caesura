@@ -1,3 +1,3 @@
-pub use paths::*;
+pub use binaries::*;
 
-pub mod paths;
+pub mod binaries;

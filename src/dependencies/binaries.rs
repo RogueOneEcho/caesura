@@ -30,3 +30,11 @@ pub const CONVERT: &str = "convert.exe";
 /// Path to the imagemagick convert binary.
 #[cfg(not(target_os = "windows"))]
 pub const CONVERT: &str = "convert";
+
+/// Path to the imdl binary.
+#[cfg(target_os = "windows")]
+pub const IMDL: &str = "imdl.exe";
+
+/// Path to the imdl binary.
+#[cfg(not(target_os = "windows"))]
+pub const IMDL: &str = "imdl";

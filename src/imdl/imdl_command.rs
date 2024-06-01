@@ -4,19 +4,12 @@ use std::process::{ExitStatus, Stdio};
 use bytes::Buf;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
+use crate::dependencies::IMDL;
 
 use crate::errors::{AppError, OutputHandler};
 use crate::imdl::TorrentSummary;
 use crate::verify::SourceRule;
 use crate::verify::SourceRule::IncorrectHash;
-
-/// Path to the imdl binary
-#[cfg(target_os = "windows")]
-const BINARY_PATH: &str = "imdl.exe";
-
-/// Path to the imdl binary.
-#[cfg(not(target_os = "windows"))]
-const BINARY_PATH: &str = "imdl";
 
 pub struct ImdlCommand;
 
@@ -27,7 +20,7 @@ impl ImdlCommand {
         torrent_path: &Path,
         announce_url: String,
     ) -> Result<ExitStatus, std::io::Error> {
-        let mut child = Command::new(BINARY_PATH)
+        let mut child = Command::new(IMDL)
             .arg("torrent")
             .arg("create")
             .arg(content_path.to_string_lossy().to_string())
@@ -48,7 +41,7 @@ impl ImdlCommand {
     /// Get a summary of the torrent file.
     pub async fn show(path: &Path) -> Result<TorrentSummary, AppError> {
         let action = "read torrent";
-        let output = Command::new(BINARY_PATH)
+        let output = Command::new(IMDL)
             .arg("torrent")
             .arg("show")
             .arg("--json")
@@ -64,7 +57,7 @@ impl ImdlCommand {
     /// Verify files match the torrent metadata.
     pub async fn verify(buffer: &[u8], directory: &PathBuf) -> Result<Vec<SourceRule>, AppError> {
         let action = "verify torrent";
-        let mut child = Command::new(BINARY_PATH)
+        let mut child = Command::new(IMDL)
             .arg("torrent")
             .arg("verify")
             .arg("--content")
