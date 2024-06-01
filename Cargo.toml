@@ -10,15 +10,15 @@ exclude = [".github", ".editorconfig", ".idea", "samples/"]
 
 [dependencies]
 audiotags = "^0.5"
-bytes = "^1.5"
-clap = { version = "^4.3", features = ["derive"] }
+bytes = "^1.6"
+clap = { version = "^4.5", features = ["derive"] }
 claxon = "^0.4"
 colored = "2.1.0"
 html-escape = "^0.2"
 indicatif = "^0.17"
 log = { version = "^0.4", features = ["std"] }
 more-di = { version = "3.1.0", features = ["async", "builder"] }
-num_cpus = "^1.15"
+num_cpus = "^1.16"
 regex = "^1"
 reqwest = { version = "0.12.4", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
 serde_json = "^1"
