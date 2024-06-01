@@ -1,6 +1,6 @@
-# red_oxide
+## About
 
-CLI to help uploading to REDacted, inspired by REDBetter.
+An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. 
 
 ## Features
 
@@ -8,7 +8,7 @@ All gazelle based indexers/trackers are supported
 - RED
 - **[[new](https://github.com/DevYukine/red_oxide/issues/7)]** OPS.
 
-Tested on Linux, theoretically working on Windows.
+Tested on Linux, theoretically works on Windows.
 
 Fully configurable, if there's something hard coded that you think should be configurable then open issue on GitHub.
 
@@ -47,7 +47,9 @@ Each source is verified to ensure it's:
 
 ## Getting started
 
-### Linux
+### Install
+
+#### Linux
 
 1. [Install Rust](https://www.rust-lang.org/tools/install)
 
@@ -68,21 +70,21 @@ sudo apt install flac lame sox imagemagick --yes
 cargo install red_oxide
 ```
 
-### Windows
+#### Windows
 
 *To be confirmed*
 
-### Docker
+#### Docker
 
 *To be confirmed*
 
-## Usage
+### CLI Commands
 
+#### Verify source `rogue_oxide verify`
 
+#### Generate spectrograms `rogue_oxide spectrogram`
 
-### CLI
-
-#### Transcode subcommand (red_oxide transcode)
+#### Transcode FLACs `rogue_oxide transcode`
 
 You have to specify api-key, torrent-directory, content-directory, transcode-directory & spectrogram-directory either via the config file or via the CLI
 
