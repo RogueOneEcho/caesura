@@ -1,4 +1,4 @@
-use std::fs::{create_dir, create_dir_all};
+use std::fs::create_dir_all;
 use std::path::Path;
 
 use colored::Colorize;
@@ -135,7 +135,7 @@ impl SourceTranscoder {
                 .clone()
                 .expect("option should be set");
             ImdlCommand::create(&content_dir, &output_path, announce_url, indexer).await?;
-            debug!("{} torrent {:?}", "Created".bold(), output_path)
+            debug!("{} torrent {:?}", "Created".bold(), output_path);
         }
         info!("{} torrents {}", "Created".bold(), source);
         Ok(())
