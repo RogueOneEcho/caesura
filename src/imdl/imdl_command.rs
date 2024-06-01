@@ -1,10 +1,10 @@
 use std::path::{Path, PathBuf};
 use std::process::{Output, Stdio};
 
+use crate::dependencies::IMDL;
 use bytes::Buf;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
-use crate::dependencies::IMDL;
 
 use crate::errors::{AppError, OutputHandler};
 use crate::imdl::TorrentSummary;
