@@ -1,12 +1,11 @@
-use std::fmt::Display;
-
 use colored::Colorize;
 use di::ServiceProvider;
 use log::error;
 
+use crate::errors::AppError;
 use crate::logging::*;
-use crate::options::SubCommand::*;
 use crate::options::{Arguments, Options, SharedOptions, SpectrogramOptions, TranscodeOptions};
+use crate::options::SubCommand::*;
 use crate::source;
 use crate::source::Source;
 use crate::spectrogram::SpectrogramGenerator;
@@ -54,58 +53,52 @@ impl Host {
                 return false;
             }
         };
-        match Arguments::get_command_or_exit() {
+        let result = match Arguments::get_command_or_exit() {
             Spectrogram { .. } => self.execute_spectrogram(&source).await,
             Transcode { .. } => self.execute_transcode(&source).await,
             Verify { .. } => self.execute_verify(&source).await,
+        };
+        match result {
+            Ok(code) => code,
+            Err(error) => {
+                for line in format!("{error}").split('\n') {
+                    error!("{line}");
+                }
+                if let Some(backtrace) = error.backtrace {
+                    println!("{backtrace}");
+                }
+                false
+            }
         }
     }
 
-    async fn execute_spectrogram(&self, source: &Source) -> bool {
+    async fn execute_spectrogram(&self, source: &Source) -> Result<bool, AppError> {
         let options = self.services.get_required::<SpectrogramOptions>();
         if !options.validate() {
-            return false;
+            return Ok(false);
         }
         let service = self.services.get_required::<SpectrogramGenerator>();
-        match service.execute(source).await {
-            Ok(exit_status) => exit_status,
-            Err(error) => display_error(Box::new(error)),
-        }
+        service.execute(source).await
     }
 
-    async fn execute_transcode(&self, source: &Source) -> bool {
+    async fn execute_transcode(&self, source: &Source) -> Result<bool, AppError> {
         let options = self.services.get_required::<TranscodeOptions>();
         if !options.validate() {
-            return false;
+            return Ok(false);
         }
         let service = self.services.get_required::<SourceTranscoder>();
-        match service.execute(source).await {
-            Ok(exit_status) => exit_status,
-            Err(error) => display_error(Box::new(error)),
-        }
+        service.execute(source).await
     }
 
-    async fn execute_verify(&self, source: &Source) -> bool {
+    async fn execute_verify(&self, source: &Source) -> Result<bool, AppError> {
         let options = self.services.get_required::<TranscodeOptions>();
         if !options.validate() {
-            return false;
+            return Ok(false);
         }
         let service = self.services.get_required_mut::<SourceVerifier>();
         let mut service = service
             .write()
             .expect("SourceVerifier should be available to write");
-        match service.execute(source).await {
-            Ok(exit_status) => exit_status,
-            Err(error) => display_error(Box::new(error)),
-        }
+        service.execute(source).await
     }
-}
-
-fn display_error(error: Box<dyn Display>) -> bool {
-    error!(
-        "{} error occured while executing the command",
-        "Unexpected".bold()
-    );
-    error!("{}", error);
-    false
 }

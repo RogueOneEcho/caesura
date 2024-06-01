@@ -13,12 +13,12 @@ use crate::errors::CommandError;
 pub struct AppError {
     action: String,
     reason: Reason,
-    backtrace: Option<Backtrace>,
+    pub backtrace: Option<Backtrace>,
 }
 
 enum Reason {
     Explained(String),
-    External(String, Box<dyn Error>),
+    External(String, Box<dyn Error + Send + Sync>),
     Unexpected(String, String, String),
 }
 
@@ -31,7 +31,7 @@ impl AppError {
         })
     }
     
-    fn external<T>(action: &str, domain: &str, error: Box<dyn Error>) -> Result<T, AppError> {
+    fn external<T>(action: &str, domain: &str, error: Box<dyn Error + Send + Sync>) -> Result<T, AppError> {
         Err(Self {
             action: action.to_owned(),
             reason: External(domain.to_owned(), error),
