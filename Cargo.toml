@@ -1,11 +1,11 @@
 [package]
-name = "red_oxide"
-version = "0.8.2"
+name = "rogue_oxide"
 edition = "2021"
 build = "build.rs"
-authors = ["DevYukine devyukine@gmx.de"]
-description = "A simple helper while uploading music to redacted.ch"
-homepage = "https://github.com/DevYukine/red_oxide"
+authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
+description = "An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. "
+repository = "https://github.com/RogueOneEcho/rogue_oxide"
+license = "AGPL-3.0-only"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -895,42 +895,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08ad765b21a08b1a8e5cdce052719188a23772bcbefb3c439f0baaf62c56ceac"
 
 [[package]]
-name = "red_oxide"
-version = "0.8.2"
-dependencies = [
- "async-recursion",
- "audiotags",
- "built",
- "bytes",
- "clap",
- "claxon",
- "colored",
- "console",
- "const_format",
- "derivative",
- "dialoguer",
- "futures",
- "futures-core",
- "html-escape",
- "indicatif",
- "lazy_static",
- "log",
- "more-di",
- "num_cpus",
- "regex",
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_repr",
- "strum",
- "strum_macros",
- "thiserror",
- "tokio",
- "tower",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1025,6 +989,42 @@ dependencies = [
  "spin",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rogue_oxide"
+version = "0.0.0"
+dependencies = [
+ "async-recursion",
+ "audiotags",
+ "built",
+ "bytes",
+ "clap",
+ "claxon",
+ "colored",
+ "console",
+ "const_format",
+ "derivative",
+ "dialoguer",
+ "futures",
+ "futures-core",
+ "html-escape",
+ "indicatif",
+ "lazy_static",
+ "log",
+ "more-di",
+ "num_cpus",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_repr",
+ "strum",
+ "strum_macros",
+ "thiserror",
+ "tokio",
+ "tower",
 ]
 
 [[package]]
