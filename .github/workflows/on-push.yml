@@ -38,7 +38,7 @@ jobs:
       run: ${{ secrets.RELEASE_SCRIPT }}
     - run: echo "${{ steps.release.outputs.version}}"
     - run: cat "release-notes.md"
-    - name: Create Release
+    - name: gh release create
       if: ${{ steps.release.outputs.version != '' && ! contains(steps.release.outputs.version, '-') }}
       env:
         GH_TOKEN: ${{ github.token }}
@@ -48,7 +48,7 @@ jobs:
         --title "v${{ steps.release.outputs.version }}"
         --notes-file release-notes.md
         --target ${{ github.ref_name }}
-    - name: Create Pre-Release
+    - name: gh release create --prerelease
       if: ${{ steps.release.outputs.version != '' && contains(steps.release.outputs.version, '-') }}
       env:
         GH_TOKEN: ${{ github.token }}
@@ -63,11 +63,17 @@ jobs:
       if: ${{ steps.release.outputs.version != ''}}
     - run: cargo set-version ${{ steps.release.outputs.version }}
       if: ${{ steps.release.outputs.version != ''}}
-    - run: >
+    - name: gh release upload
+      run: >
         gh release upload
         "v${{ steps.release.outputs.version }}"
         "targets/release/caesura"
         --clobber
         --repo "${{ github.repository }}"
+      env:
+        GH_TOKEN: ${{ github.token }}
       if: ${{ steps.release.outputs.version != ''}}
-
+    - run: cargo publish --allow-dirty
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      if: ${{ steps.release.outputs.version != ''}}
