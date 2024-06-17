@@ -18,9 +18,19 @@ jobs:
        key: cache-samples
     - if: steps.cache-samples.outputs.cache-hit != 'true'
       run: ./samples/download-sample
+    - run: |
+        curl "https://github.com/casey/intermodal/releases/download/v0.1.13/imdl-v0.1.13-x86_64-unknown-linux-musl.tar.gz" \
+          --location \
+          --show-error \
+          --silent \
+        | tar \
+          --extract \
+          --gzip \
+          --directory "/usr/local/bin" \
+          --file - \
+          "imdl"
     - run: sudo apt-get update
     - run: sudo apt-get install flac lame sox imagemagick --yes
-    - run: cargo install imdl
     - run: cargo build --release
     - run: cargo test --release --no-fail-fast
       env:
