@@ -67,7 +67,7 @@ jobs:
       run: >
         gh release upload
         "v${{ steps.release.outputs.version }}"
-        "targets/release/caesura"
+        "target/release/caesura"
         --clobber
         --repo "${{ github.repository }}"
       env:
