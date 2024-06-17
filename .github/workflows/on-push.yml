@@ -11,12 +11,6 @@ jobs:
       with:
         fetch-depth: 0
         fetch-tags: true
-    - id: release
-      env:
-        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      run: ${{ secrets.RELEASE_SCRIPT }}
-    - run: echo "${{ steps.release.outputs.version}}"
-    - run: cat "release-notes.md"
     - id: cache-samples
       uses: actions/cache@v4
       with:
@@ -38,3 +32,30 @@ jobs:
       continue-on-error: true
     - run: cargo fmt --quiet --check
       continue-on-error: true
+    - id: release
+      env:
+        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      run: ${{ secrets.RELEASE_SCRIPT }}
+    - run: echo "${{ steps.release.outputs.version}}"
+    - run: cat "release-notes.md"
+    - name: Create Release
+      if: ${{ steps.release.outputs.version != '' && ! contains(steps.release.outputs.version, '-') }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: >
+        gh release create
+        "v${{ steps.release.outputs.version }}"
+        --title "v${{ steps.release.outputs.version }}"
+        --notes-file artifacts/RELEASE_NOTES.md
+        --target ${{ github.ref_name }}
+    - name: Create Pre-Release
+      if: ${{ steps.release.outputs.version != '' && contains(steps.release.outputs.version, '-') }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: >
+        gh release create
+        "v${{ steps.release.outputs.version }}"
+        --title "v${{ steps.release.outputs.version }}"
+        --notes-file release-notes.md
+        --target ${{ github.ref_name }}
+        --prerelease
