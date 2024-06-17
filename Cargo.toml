@@ -6,7 +6,16 @@ authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
 description = "An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. "
 repository = "https://github.com/RogueOneEcho/caesura"
 license = "AGPL-3.0-only"
-exclude = [".github", ".editorconfig", ".idea", "samples/"]
+include = [
+    "src/**/*",
+    "tests/**/*",
+    "build.rs",
+    "Cargo.lock",
+    "Cargo.toml",
+    "LICENSE.HISTORIC.md",
+    "LICENSE.md",
+    "README.md"
+]
 version = "0.0.0"
 publish = true
 
