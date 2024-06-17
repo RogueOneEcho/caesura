@@ -63,7 +63,7 @@ jobs:
       if: ${{ steps.release.outputs.version != ''}}
     - run: cargo set-version ${{ steps.release.outputs.version }}
       if: ${{ steps.release.outputs.version != ''}}
-    - run: |
+    - run: >
         gh release upload
         "v${{ steps.release.outputs.version }}"
         "targets/release/caesura"
