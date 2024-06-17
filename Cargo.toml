@@ -7,6 +7,8 @@ description = "An all-in-one command line tool to **transcode FLAC** audio files
 repository = "https://github.com/RogueOneEcho/caesura"
 license = "AGPL-3.0-only"
 exclude = [".github", ".editorconfig", ".idea", "samples/"]
+version = "0.0.0"
+publish = true
 
 [dependencies]
 audiotags = "^0.5"
