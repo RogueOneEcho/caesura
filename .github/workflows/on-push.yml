@@ -29,6 +29,7 @@ jobs:
           --directory "/usr/local/bin" \
           --file - \
           "imdl"
+    - run: imdl --version
     - run: sudo apt-get update
     - run: sudo apt-get install flac lame sox imagemagick --yes
     - run: cargo build --release
