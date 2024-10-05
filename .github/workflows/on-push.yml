@@ -44,7 +44,9 @@ jobs:
 #      run: ${{ secrets.RELEASE_SCRIPT }}
 
     - id: release
-      run: echo "version=0.0.1-alpha" >> $GITHUB_OUTPUT
+      run: |
+        echo "version=0.0.1-alpha" >> $GITHUB_OUTPUT
+        touch "release-notes.md"
 
     - run: echo "${{ steps.release.outputs.version}}"
 
