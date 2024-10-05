@@ -38,15 +38,10 @@ jobs:
 
     - run: sudo apt-get install flac lame sox imagemagick --yes
 
-#    - id: release
-#      env:
-#        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-#      run: ${{ secrets.RELEASE_SCRIPT }}
-
     - id: release
-      run: |
-        echo "version=0.0.1-alpha" >> $GITHUB_OUTPUT
-        touch "release-notes.md"
+      env:
+        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      run: ${{ secrets.RELEASE_SCRIPT }}
 
     - run: echo "${{ steps.release.outputs.version}}"
 
@@ -74,39 +69,39 @@ jobs:
     - run: cargo fmt --quiet --check
       continue-on-error: true
 
-#    - name: gh release create
-#      if: ${{ steps.release.outputs.version != '' && ! contains(steps.release.outputs.version, '-') }}
-#      env:
-#        GH_TOKEN: ${{ github.token }}
-#      run: >
-#        gh release create
-#        "v${{ steps.release.outputs.version }}"
-#        --title "v${{ steps.release.outputs.version }}"
-#        --notes-file release-notes.md
-#        --target ${{ github.ref_name }}
-#
-#    - name: gh release create --prerelease
-#      if: ${{ steps.release.outputs.version != '' && contains(steps.release.outputs.version, '-') }}
-#      env:
-#        GH_TOKEN: ${{ github.token }}
-#      run: >
-#        gh release create
-#        "v${{ steps.release.outputs.version }}"
-#        --title "v${{ steps.release.outputs.version }}"
-#        --notes-file release-notes.md
-#        --target ${{ github.ref_name }}
-#        --prerelease
-#
-#    - name: gh release upload
-#      run: >
-#        gh release upload
-#        "v${{ steps.release.outputs.version }}"
-#        "target/release/caesura"
-#        --clobber
-#        --repo "${{ github.repository }}"
-#      env:
-#        GH_TOKEN: ${{ github.token }}
-#      if: ${{ steps.release.outputs.version != ''}}
+    - name: gh release create
+      if: ${{ steps.release.outputs.version != '' && ! contains(steps.release.outputs.version, '-') }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: >
+        gh release create
+        "v${{ steps.release.outputs.version }}"
+        --title "v${{ steps.release.outputs.version }}"
+        --notes-file release-notes.md
+        --target ${{ github.ref_name }}
+
+    - name: gh release create --prerelease
+      if: ${{ steps.release.outputs.version != '' && contains(steps.release.outputs.version, '-') }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: >
+        gh release create
+        "v${{ steps.release.outputs.version }}"
+        --title "v${{ steps.release.outputs.version }}"
+        --notes-file release-notes.md
+        --target ${{ github.ref_name }}
+        --prerelease
+
+    - name: gh release upload
+      run: >
+        gh release upload
+        "v${{ steps.release.outputs.version }}"
+        "target/release/caesura"
+        --clobber
+        --repo "${{ github.repository }}"
+      env:
+        GH_TOKEN: ${{ github.token }}
+      if: ${{ steps.release.outputs.version != ''}}
 
     - run: cargo publish --allow-dirty
       env:
