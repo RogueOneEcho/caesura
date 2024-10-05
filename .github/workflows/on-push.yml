@@ -38,12 +38,13 @@ jobs:
 
     - run: sudo apt-get install flac lame sox imagemagick --yes
 
-    - id: release
-      env:
-        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      run: ${{ secrets.RELEASE_SCRIPT }}
+#    - id: release
+#      env:
+#        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+#      run: ${{ secrets.RELEASE_SCRIPT }}
 
-    - run: echo "version=0.0.1-alpha" >> $GITHUB_OUTPUT
+    - id: release
+      run: echo "version=0.0.1-alpha" >> $GITHUB_OUTPUT
 
     - run: echo "${{ steps.release.outputs.version}}"
 
