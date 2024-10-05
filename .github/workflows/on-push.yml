@@ -55,11 +55,13 @@ jobs:
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
       if: ${{ steps.release.outputs.version != ''}}
 
-#    - run: ls -RA /home/linuxbrew/
+    - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv
 
-    - run: la -RA /opt/homebrew
+    - run: ls -RA /home/linuxbrew/.linuxbrew/bin/
 
-    - run: la -RA /opt/homebrew/bin
+    - run: ls -RA /opt/homebrew
+
+    - run: ls -RA /opt/homebrew/bin
 
     - run: /home/linuxbrew/.linuxbrew/bin/cargo set-version ${{ steps.release.outputs.version }}
       if: ${{ steps.release.outputs.version != ''}}
