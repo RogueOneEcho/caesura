@@ -52,12 +52,10 @@ jobs:
 
     - run: cat "release-notes.md"
 
-    - if: ${{ steps.release.outputs.version != ''}}
-      run: |
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        brew install cargo-edit
+    - run: /opt/homebrew/bin/brew install cargo-edit
+      if: ${{ steps.release.outputs.version != ''}}
 
-    - run: cargo set-version ${{ steps.release.outputs.version }}
+    - run: /opt/homebrew/bin/cargo set-version ${{ steps.release.outputs.version }}
       if: ${{ steps.release.outputs.version != ''}}
 
     - run: cargo build --release
