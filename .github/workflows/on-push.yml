@@ -25,11 +25,21 @@ jobs:
 
     - run: cat "release-notes.md"
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4
       with:
-        name: notes
+        name: release-notes.md
         path: release-notes.md
+
+    - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
+      if: ${{ needs.release.outputs.version != ''}}
+
+    - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version ${{ needs.release.outputs.version }}
+      if: ${{ needs.release.outputs.version != ''}}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Cargo.toml
+        path: Cargo.toml
 
 
   cargo-build:
@@ -39,6 +49,10 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: Cargo.toml
 
     - id: cache-samples
       uses: actions/cache@v4
@@ -65,12 +79,6 @@ jobs:
 
     - run: sudo apt-get install flac lame sox imagemagick --yes
 
-    - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
-      if: ${{ needs.release.outputs.version != ''}}
-
-    - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version ${{ needs.release.outputs.version }}
-      if: ${{ needs.release.outputs.version != ''}}
-
     - run: cargo build --release
 
     - run: cargo test --release --no-fail-fast
@@ -95,8 +103,7 @@ jobs:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
       if: ${{ needs.release.outputs.version != ''}}
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4
       with:
         name: caesura
         path: target/release/caesura
@@ -112,7 +119,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: notes
+        name: release-notes.md
 
     - name: gh release create
       if: ${{ ! contains(needs.release.outputs.version, '-') }}
@@ -158,6 +165,12 @@ jobs:
     needs:
     - release
     steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: Cargo.toml
 
     - run: echo $GH_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       env:
