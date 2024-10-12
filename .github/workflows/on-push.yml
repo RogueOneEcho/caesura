@@ -21,9 +21,11 @@ jobs:
         GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       run: ${{ secrets.RELEASE_SCRIPT }}
 
-    - run: echo "${{ steps.release.outputs.version}}"
+    - run: echo "::notice::${{ steps.release.outputs.version}}"
 
-    - run: cat "release-notes.md"
+    - run: |
+        NOTES=$(cat "release-notes.md")
+        echo "::notice title=Release Notes::$NOTES"
 
     - uses: actions/upload-artifact@v4
       with:
@@ -99,8 +101,7 @@ jobs:
     - run: cargo fmt --quiet --check
       continue-on-error: true
 
-    - run: git --no-pager diff --color --exit-code
-      continue-on-error: true
+    - run: git --no-pager diff --color
 
     - uses: actions/upload-artifact@v4
       with:
