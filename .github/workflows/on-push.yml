@@ -21,7 +21,7 @@ jobs:
         GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       run: ${{ secrets.RELEASE_SCRIPT }}
 
-    - run: echo "${{ needs.release.outputs.version}}"
+    - run: echo "${{ steps.release.outputs.version}}"
 
     - run: cat "release-notes.md"
 
@@ -181,12 +181,6 @@ jobs:
     - run: docker tag caesura ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
 
     - run: docker push ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
-
-    - run: docker tag caesura ghcr.io/rogueoneecho/caesura:latest
-      if: ${{ ! contains(needs.release.outputs.version, '-') }}
-
-    - run: docker push ghcr.io/rogueoneecho/caesura:latest
-      if: ${{ ! contains(needs.release.outputs.version, '-') }}
 
 
   docker-release:
