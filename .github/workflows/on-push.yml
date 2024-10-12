@@ -23,7 +23,7 @@ jobs:
 
     - run: echo "::notice title=Version::${{ steps.release.outputs.version}}"
 
-    - run: echo "::notice title=Release Notes::$(cat release-notes.md)"
+    - run: echo "::notice title=Release Notes::$(cat release-notes.md | sed 's/$/%0A/')"
 
     - uses: actions/upload-artifact@v4
       with:
