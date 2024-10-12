@@ -195,6 +195,7 @@ jobs:
     needs:
     - release
     - cargo-build
+    - docker-build
     steps:
 
     - run: echo $GH_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
