@@ -38,10 +38,8 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: cargo-version
-        path: |
-          Cargo.toml
-          Cargo.lock
+        name: Cargo.toml
+        path: Cargo.toml
 
 
   cargo-build:
@@ -54,7 +52,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: cargo-version
+        name: Cargo.toml
 
     - id: cache-samples
       uses: actions/cache@v4
@@ -118,7 +116,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: cargo-version
+        name: Cargo.toml
 
     - run: cargo publish --allow-dirty
       env:
@@ -186,7 +184,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: cargo-version
+        name: Cargo.toml
 
     - run: echo $GH_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       env:
