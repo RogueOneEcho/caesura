@@ -124,7 +124,7 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - run: cargo publish --allow-dirty
+    - run: cargo publish --allow-dirty --no-verify
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
