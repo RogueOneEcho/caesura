@@ -31,10 +31,10 @@ jobs:
         path: release-notes.md
 
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
-      if: ${{ needs.release.outputs.version != ''}}
+      if: ${{ steps.release.outputs.version != ''}}
 
     - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version ${{ needs.release.outputs.version }}
-      if: ${{ needs.release.outputs.version != ''}}
+      if: ${{ steps.release.outputs.version != ''}}
 
     - uses: actions/upload-artifact@v4
       with:
