@@ -1,15 +1,15 @@
 use caesura::errors::AppError;
-use caesura::logging::{Debug, Logger};
+use caesura::logging::{Trace, Logger};
 use caesura::options::{BatchOptions, FileOptions, Options, OptionsProvider, RunnerOptions, SharedOptions, SpectrogramOptions, TargetOptions, UploadOptions, VerifyOptions};
 use caesura::testing::*;
 
 #[tokio::test]
 async fn validate_options() -> Result<(), AppError> {
     // Arrange
-    Logger::init_new(Debug);
+    Logger::init_new(Trace);
     let provider = OptionsProvider::new();
     let shared_options = TestOptionsFactory::from_with_env(SharedOptions {
-        verbosity: Some(Debug),
+        verbosity: Some(Trace),
         ..SharedOptions::default()
     });
     
