@@ -10,7 +10,7 @@ use caesura::testing::*;
 async fn source_provider() -> Result<(), AppError> {
     // Arrange
     Logger::init_new(Debug);
-    let shared_options = TestOptionsFactory::from_with_env(SharedOptions {
+    let shared_options = TestOptionsFactory::from(SharedOptions {
         verbosity: Some(Debug),
         ..SharedOptions::default()
     });

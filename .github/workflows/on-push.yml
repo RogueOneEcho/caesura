@@ -89,7 +89,15 @@ jobs:
 
     - run: ln -s samples/content content
 
-    - run: touch config.json
+    - run: |
+        tee config.json <<EOF
+        {
+          "announce_url": "${{ secrets.ANNOUNCE_URL }}",
+          "api_key": "${{ secrets.API_KEY }}",
+          "source": "${{ secrets.SOURCE }}",
+          "verbosity": "trace"
+        }
+        EOF
 
     - run: touch output/cache.json
 

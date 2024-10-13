@@ -1,4 +1,4 @@
-use caesura::logging::{Trace, Logger, Verbosity};
+use caesura::logging::{Logger, Trace, Verbosity};
 use caesura::options::*;
 
 const LOG_LEVEL: Verbosity = Trace;
