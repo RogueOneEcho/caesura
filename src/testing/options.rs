@@ -9,10 +9,11 @@ pub struct TestOptionsFactory;
 
 impl TestOptionsFactory {
     #[must_use]
-    pub fn from_with_env(mut options: SharedOptions) -> SharedOptions {
+    pub fn from_with_env(options: SharedOptions) -> SharedOptions {
         let provider = OptionsProvider::new();
+        let mut options = inject_from_env_var(options);
         options.merge(&provider.get());
-        inject_from_env_var(options)
+        options
     }
 
     #[must_use]
