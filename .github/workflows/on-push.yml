@@ -21,9 +21,9 @@ jobs:
         GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       run: ${{ secrets.RELEASE_SCRIPT }}
 
-    - run: echo "::notice title=Version::${{ steps.release.outputs.version}}"
+    - run: echo "# ${{ steps.release.outputs.version}}" >> $GITHUB_STEP_SUMMARY
 
-    - run: cat release-notes.md > $GITHUB_STEP_SUMMARY
+    - run: cat release-notes.md >> $GITHUB_STEP_SUMMARY
 
     - uses: actions/upload-artifact@v4
       with:
@@ -51,6 +51,17 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+
+    - id: cache-cargo
+      uses: actions/cache/restore@v4
+      with:
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
 
     - uses: actions/download-artifact@v4
       with:
@@ -84,6 +95,17 @@ jobs:
     - run: sudo apt-get install flac lame sox imagemagick --yes
 
     - run: cargo build --release
+
+    - id: cargo-cache-save
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ steps.cache-cargo.outputs.cache-primary-key }}
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
 
     - run: rm -rf content
 
@@ -213,6 +235,17 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+
+    - id: cache-cargo
+      uses: actions/cache/restore@v4
+      with:
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
 
     - uses: actions/download-artifact@v4
       with:
