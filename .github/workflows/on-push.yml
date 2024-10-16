@@ -251,7 +251,6 @@ jobs:
         --tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
         --cache-from=type=gha
         --cache-to=type=gha,mode=max
-        --push
 
     - run: docker push ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
 
