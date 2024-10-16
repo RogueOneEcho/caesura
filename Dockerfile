@@ -1,16 +1,16 @@
 # Build imdl binary
 FROM rust:alpine AS imdl
-RUN apk add libc-dev
-RUN cargo install imdl
+RUN apk add --no-cache libc-dev
+RUN cargo install imdl --version 0.1.14
 
 # Build cargo-edit binary
 FROM rust:alpine AS cargo-edit
-RUN apk add libc-dev
-RUN cargo install cargo-edit
+RUN apk add --no-cache libc-dev
+RUN cargo install cargo-edit --version 0.13.0
 
 # Build caesura binary
 FROM rust:alpine AS builder
-RUN apk add libc-dev
+RUN apk add --no-cache libc-dev
 # Build just the dependencies with version 0.0.0 so they're cached
 WORKDIR /app
 COPY Cargo.toml Cargo.lock build.rs /app
