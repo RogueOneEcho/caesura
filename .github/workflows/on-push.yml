@@ -248,14 +248,10 @@ jobs:
     - run: >
         docker buildx build .
         --build-arg VERSION=${{ needs.release.outputs.version }}
-        --tag caesura
+        --tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
         --cache-from=type=gha
         --cache-to=type=gha,mode=max
         --push
-
-    - run: docker tag caesura ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
-
-    - run: docker push ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
 
   docker-release:
     runs-on: ubuntu-latest
