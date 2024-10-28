@@ -152,7 +152,7 @@ impl UploadCommand {
                         .indexer_url
                         .clone()
                         .expect("indexer_url should be set");
-                    let link = get_permalink(base, response.group_id, response.torrent_id);
+                    let link = get_permalink(base, response.get_group_id(), response.get_torrent_id());
                     info!("{link}");
                 }
                 Err(error) => {

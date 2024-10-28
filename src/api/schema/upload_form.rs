@@ -41,6 +41,7 @@ impl UploadForm {
         let form = Form::new()
             .part("file_input", torrent_part)
             .text("type", self.category_id.to_string())
+            .text("remaster", "1")// required by OPS but not RED
             .text("remaster_title", self.remaster_title)
             .text("remaster_record_label", self.remaster_record_label)
             .text("remaster_catalogue_number", self.remaster_catalogue_number)
