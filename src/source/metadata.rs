@@ -1,5 +1,6 @@
 use html_escape::decode_html_entities;
 
+use crate::naming::join_humanized;
 use gazelle_api::{Group, Torrent};
 
 #[derive(Clone, Debug)]
@@ -15,7 +16,7 @@ impl Metadata {
     #[must_use]
     pub fn new(group: &Group, torrent: &Torrent) -> Self {
         Metadata {
-            artist: get_artist(group),
+            artist: get_artist(group).unwrap_or("Unknown Artist".to_owned()),
             album: get_album(group),
             remaster_title: get_remaster_title(torrent),
             year: get_year(group, torrent),
@@ -24,20 +25,22 @@ impl Metadata {
     }
 }
 
-fn get_artist(group: &Group) -> String {
-    let artist = get_artist_internal(group).unwrap_or("Unknown Artist".to_owned());
-    decode_html_entities(&artist).to_string()
-}
-
-fn get_artist_internal(group: &Group) -> Option<String> {
+fn get_artist(group: &Group) -> Option<String> {
     let info = group.music_info.clone()?;
-    if info.artists.len() > 1 {
-        Some("Various Artists".to_owned())
+    let artists = if !info.artists.is_empty() && info.artists.len() < 3 {
+        info.artists
+    } else if info.dj.len() == 1 {
+        info.dj
     } else if info.artists.is_empty() {
-        None
+        return None;
     } else {
-        info.artists.into_iter().map(|x| x.name).next()
-    }
+        return Some("Various Artists".to_owned());
+    };
+    let artists: Vec<String> = artists
+        .into_iter()
+        .map(|x| decode_html_entities(&x.name).to_string())
+        .collect();
+    Some(join_humanized(artists))
 }
 
 fn get_album(group: &Group) -> String {
@@ -64,7 +67,6 @@ mod tests {
     #[test]
     fn get_artist_none() {
         // Arrange
-        let expected = "Unknown Artist".to_owned();
         let group = Group {
             music_info: Some(MusicInfo {
                 artists: Vec::new(),
@@ -77,7 +79,7 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, expected);
+        assert_eq!(artist, None);
     }
 
     #[test]
@@ -99,13 +101,13 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, expected);
+        assert_eq!(artist, Some(expected));
     }
 
     #[test]
     fn get_artist_two() {
         // Arrange
-        let expected = "Various Artists".to_owned();
+        let expected = "Artist One & Artist Two".to_owned();
         let group = Group {
             music_info: Some(MusicInfo {
                 artists: vec![
@@ -127,6 +129,74 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, expected);
+        assert_eq!(artist, Some(expected));
+    }
+
+    #[test]
+    fn get_artist_three() {
+        // Arrange
+        let expected = "Various Artists".to_owned();
+        let group = Group {
+            music_info: Some(MusicInfo {
+                artists: vec![
+                    Artist {
+                        id: 12345,
+                        name: "Artist One".to_owned(),
+                    },
+                    Artist {
+                        id: 12345,
+                        name: "Artist Two".to_owned(),
+                    },
+                    Artist {
+                        id: 12345,
+                        name: "Artist Three".to_owned(),
+                    },
+                ],
+                ..MusicInfo::default()
+            }),
+            ..Group::default()
+        };
+
+        // Act
+        let artist = get_artist(&group);
+
+        // Assert
+        assert_eq!(artist, Some(expected));
+    }
+
+    #[test]
+    fn get_artist_dj() {
+        // Arrange
+        let expected = "DJ One".to_owned();
+        let group = Group {
+            music_info: Some(MusicInfo {
+                artists: vec![
+                    Artist {
+                        id: 12345,
+                        name: "Artist One".to_owned(),
+                    },
+                    Artist {
+                        id: 12345,
+                        name: "Artist Two".to_owned(),
+                    },
+                    Artist {
+                        id: 12345,
+                        name: "Artist Three".to_owned(),
+                    },
+                ],
+                dj: vec![Artist {
+                    id: 12345,
+                    name: "DJ One".to_owned(),
+                }],
+                ..MusicInfo::default()
+            }),
+            ..Group::default()
+        };
+
+        // Act
+        let artist = get_artist(&group);
+
+        // Assert
+        assert_eq!(artist, Some(expected));
     }
 }
