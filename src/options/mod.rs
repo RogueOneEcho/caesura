@@ -1,5 +1,6 @@
 pub use batch_options::*;
 pub use cache_options::*;
+pub use copy_options::*;
 pub use file_options::*;
 pub use options_provider::*;
 pub use options_trait::*;
@@ -17,6 +18,7 @@ pub use verify_options::*;
 pub(crate) mod batch_options;
 pub(crate) mod cache_options;
 pub(crate) mod config_command;
+mod copy_options;
 pub(crate) mod file_options;
 pub(crate) mod options_provider;
 pub(crate) mod options_trait;

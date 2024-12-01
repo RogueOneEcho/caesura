@@ -3,8 +3,8 @@ use clap::Subcommand;
 use crate::options::source_arg::SourceArg;
 use crate::options::verify_options::VerifyOptions;
 use crate::options::{
-    BatchOptions, CacheOptions, FileOptions, QueueAddArgs, RunnerOptions, SharedOptions,
-    SpectrogramOptions, TargetOptions, UploadOptions,
+    BatchOptions, CacheOptions, CopyOptions, FileOptions, QueueAddArgs, RunnerOptions,
+    SharedOptions, SpectrogramOptions, TargetOptions, UploadOptions,
 };
 
 /// Cli sub-commands and arguments
@@ -25,6 +25,8 @@ pub enum CommandArguments {
         runner: RunnerOptions,
         #[command(flatten)]
         spectrogram: SpectrogramOptions,
+        #[command(flatten)]
+        copy: CopyOptions,
         #[command(flatten)]
         file: FileOptions,
         #[command(flatten)]
@@ -59,6 +61,8 @@ pub enum CommandArguments {
         shared: SharedOptions,
         #[command(flatten)]
         target: TargetOptions,
+        #[command(flatten)]
+        copy: CopyOptions,
         #[command(flatten)]
         file: FileOptions,
         #[command(flatten)]

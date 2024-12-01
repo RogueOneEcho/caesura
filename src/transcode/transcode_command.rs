@@ -5,7 +5,7 @@ use crate::imdl::ImdlCommand;
 use crate::jobs::Job::Additional;
 use crate::jobs::JobRunner;
 use crate::naming::join_humanized;
-use crate::options::{FileOptions, Options, SharedOptions, SourceArg, TargetOptions};
+use crate::options::{CopyOptions, FileOptions, Options, SharedOptions, SourceArg, TargetOptions};
 use crate::queue::TimeStamp;
 use crate::source::*;
 use crate::transcode::{
@@ -27,6 +27,7 @@ pub struct TranscodeCommand {
     shared_options: Ref<SharedOptions>,
     target_options: Ref<TargetOptions>,
     source_provider: RefMut<SourceProvider>,
+    copy_options: Ref<CopyOptions>,
     file_options: Ref<FileOptions>,
     paths: Ref<PathManager>,
     targets: Ref<TargetFormatProvider>,
@@ -178,7 +179,7 @@ impl TranscodeCommand {
         self.runner.add_without_publish(jobs);
         self.runner.execute_without_publish().await?;
         let hard_link_option = self
-            .file_options
+            .copy_options
             .hard_link
             .expect("hard_link should be set");
         for target in targets.iter().skip(1) {

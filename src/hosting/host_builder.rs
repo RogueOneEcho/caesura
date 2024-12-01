@@ -48,6 +48,7 @@ impl HostBuilder {
             .add(OptionsProvider::singleton())
             .add(BatchOptions::singleton())
             .add(CacheOptions::singleton())
+            .add(CopyOptions::singleton())
             .add(FileOptions::singleton())
             .add(RunnerOptions::singleton())
             .add(SharedOptions::singleton())

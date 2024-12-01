@@ -123,7 +123,9 @@ Verify, transcode, and upload from multiple FLAC sources in one command
 
   Possible values: `full`, `zoom`
 
-* `--hard-link` — Should hard links be used when copying files?
+* `--hard-link` — Should files be hard linked instead of copied?
+
+   Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
 
    Default: `false`
 * `--no-image-compression` — Should compression of images be disabled?
@@ -543,7 +545,9 @@ Transcode each track of a FLAC source to the target formats
    Note: This is only useful for development and should probably not be used.
 
    Default: `false`
-* `--hard-link` — Should hard links be used when copying files?
+* `--hard-link` — Should files be hard linked instead of copied?
+
+   Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
 
    Default: `false`
 * `--no-image-compression` — Should compression of images be disabled?
@@ -655,11 +659,6 @@ Upload transcodes of a FLAC source
    This should be set if you wish to auto-add to your torrent client.
 
    Default: Not set
-* `--hard-link` — Should files be hard linked instead of copied?
-
-   Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
-
-   Default: `false`
 * `--dry-run` — Is this a dry run?
 
    If enabled data won't be uploaded and will instead be printed to the console.

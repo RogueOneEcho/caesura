@@ -2,7 +2,7 @@ use crate::errors::io_error;
 use crate::formats::target_format::TargetFormat;
 use crate::fs::{AdditionalFile, PathManager};
 use crate::jobs::Job;
-use crate::options::FileOptions;
+use crate::options::{CopyOptions, FileOptions};
 use crate::source::Source;
 use crate::transcode::resize::Resize;
 use crate::transcode::AdditionalJob;
@@ -14,7 +14,8 @@ use tokio::fs::{copy, create_dir_all, hard_link};
 
 #[injectable]
 pub struct AdditionalJobFactory {
-    options: Ref<FileOptions>,
+    copy_options: Ref<CopyOptions>,
+    file_options: Ref<FileOptions>,
     paths: Ref<PathManager>,
 }
 
@@ -52,12 +53,12 @@ impl AdditionalJobFactory {
         let mut output_path = output_dir.join(&file.file_name);
         let size = file.get_size().await?;
         let max_file_size = self
-            .options
+            .file_options
             .max_file_size
             .expect("max_file_size should be set");
         let is_large = size > max_file_size;
         let no_image_compression = self
-            .options
+            .file_options
             .no_image_compression
             .expect("no_image_compression should be set");
         create_dir_all(&output_dir)
@@ -77,7 +78,10 @@ impl AdditionalJobFactory {
                     source_path.display()
                 );
             }
-            let hard_link_option = self.options.hard_link.expect("hard_link should be set");
+            let hard_link_option = self
+                .copy_options
+                .hard_link
+                .expect("hard_link should be set");
             let verb = if hard_link_option {
                 hard_link(&source_path, &output_path)
                     .await
@@ -98,7 +102,7 @@ impl AdditionalJobFactory {
             return Ok(None);
         }
         let no_png_to_jpg = self
-            .options
+            .file_options
             .no_png_to_jpg
             .expect("no_png_to_jpg should be set");
         if !no_png_to_jpg && extension == "png" {
@@ -112,10 +116,13 @@ impl AdditionalJobFactory {
         }
         let id = format!("Additional {target:<7?}{index:>3}");
         let max_pixel_size = self
-            .options
+            .file_options
             .max_pixel_size
             .expect("max_pixel_size should be set");
-        let quality = self.options.jpg_quality.expect("jpg_quality should be set");
+        let quality = self
+            .file_options
+            .jpg_quality
+            .expect("jpg_quality should be set");
         let job = Job::Additional(AdditionalJob {
             id,
             resize: Resize {

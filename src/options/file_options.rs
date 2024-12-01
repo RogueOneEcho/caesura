@@ -11,12 +11,6 @@ use crate::options::{Options, OptionsProvider};
 /// Options for including additional files during [`TranscodeCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct FileOptions {
-    /// Should hard links be used when copying files?
-    ///
-    /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub hard_link: Option<bool>,
-
     /// Should compression of images be disabled?
     ///
     /// Default: `false`
@@ -69,9 +63,6 @@ impl Options for FileOptions {
     }
 
     fn merge(&mut self, alternative: &Self) {
-        if self.hard_link.is_none() {
-            self.hard_link = alternative.hard_link;
-        }
         if self.no_image_compression.is_none() {
             self.no_image_compression = alternative.no_image_compression;
         }
@@ -90,9 +81,6 @@ impl Options for FileOptions {
     }
 
     fn apply_defaults(&mut self) {
-        if self.hard_link.is_none() {
-            self.hard_link = Some(false);
-        }
         if self.no_image_compression.is_none() {
             self.no_image_compression = Some(false);
         }
@@ -121,9 +109,6 @@ impl Options for FileOptions {
             return None;
         };
         let mut options = file;
-        if options.hard_link == Some(false) {
-            options.hard_link = None;
-        }
         if options.no_image_compression == Some(false) {
             options.no_image_compression = None;
         }

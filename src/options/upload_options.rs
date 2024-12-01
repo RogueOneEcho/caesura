@@ -28,14 +28,6 @@ pub struct UploadOptions {
     #[arg(long)]
     pub copy_torrent_to: Option<PathBuf>,
 
-    /// Should files be hard linked instead of copied?
-    ///
-    /// Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
-    ///
-    /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub hard_link: Option<bool>,
-
     /// Is this a dry run?
     ///
     /// If enabled data won't be uploaded and will instead be printed to the console.
@@ -65,9 +57,6 @@ impl Options for UploadOptions {
             self.copy_torrent_to
                 .clone_from(&alternative.copy_torrent_to);
         }
-        if self.hard_link.is_none() {
-            self.hard_link = alternative.hard_link;
-        }
         if self.dry_run.is_none() {
             self.dry_run = alternative.dry_run;
         }
@@ -76,9 +65,6 @@ impl Options for UploadOptions {
     fn apply_defaults(&mut self) {
         if self.copy_transcode_to_content_dir.is_none() {
             self.copy_transcode_to_content_dir = Some(false);
-        }
-        if self.hard_link.is_none() {
-            self.hard_link = Some(false);
         }
         if self.dry_run.is_none() {
             self.dry_run = Some(false);
@@ -101,9 +87,6 @@ impl Options for UploadOptions {
         let mut options = options;
         if options.copy_transcode_to_content_dir == Some(false) {
             options.copy_transcode_to_content_dir = None;
-        }
-        if options.hard_link == Some(false) {
-            options.hard_link = None;
         }
         if options.dry_run == Some(false) {
             options.dry_run = None;

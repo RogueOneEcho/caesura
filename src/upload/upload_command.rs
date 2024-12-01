@@ -13,7 +13,7 @@ use crate::formats::{TargetFormat, TargetFormatProvider};
 use crate::fs::{copy_dir, Collector, PathManager};
 use crate::imdl::ImdlCommand;
 use crate::jobs::Job;
-use crate::options::{Options, SharedOptions, SourceArg, UploadOptions};
+use crate::options::{CopyOptions, Options, SharedOptions, SourceArg, UploadOptions};
 use crate::queue::TimeStamp;
 use crate::source::{get_permalink, Source, SourceProvider};
 use crate::transcode::{TranscodeJobFactory, Variant};
@@ -29,6 +29,7 @@ pub struct UploadCommand {
     arg: Ref<SourceArg>,
     shared_options: Ref<SharedOptions>,
     upload_options: Ref<UploadOptions>,
+    copy_options: Ref<CopyOptions>,
     source_provider: RefMut<SourceProvider>,
     api: RefMut<GazelleClient>,
     paths: Ref<PathManager>,
@@ -196,7 +197,7 @@ impl UploadCommand {
             return Ok(());
         }
         let verb = if self
-            .upload_options
+            .copy_options
             .hard_link
             .expect("hard_link should be set")
         {
@@ -227,7 +228,7 @@ impl UploadCommand {
             .expect("torrent path should have a name");
         let target_path = target_dir.join(source_file_name);
         let verb = if self
-            .upload_options
+            .copy_options
             .hard_link
             .expect("hard_link should be set")
         {

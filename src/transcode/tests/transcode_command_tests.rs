@@ -3,7 +3,7 @@ use crate::formats::TargetFormat::{Flac, V0, _320};
 use crate::formats::TargetFormatProvider;
 use crate::fs::DirectoryReader;
 use crate::hosting::HostBuilder;
-use crate::options::{FileOptions, SharedOptions, SourceArg, TargetOptions};
+use crate::options::{CopyOptions, SharedOptions, SourceArg, TargetOptions};
 use crate::source::SourceProvider;
 use crate::testing::options::TestOptionsFactory;
 use crate::testing::*;
@@ -28,16 +28,15 @@ async fn transcode_command() -> Result<(), Error> {
         allow_existing: Some(true),
         target: Some(vec![Flac, _320, V0]),
     });
-    let file_options = TestOptionsFactory::from(FileOptions {
+    let copy_options = TestOptionsFactory::from(CopyOptions {
         hard_link: Some(true),
-        ..FileOptions::default()
     });
     let output_dir = shared_options.output.clone().expect("output should be set");
     let host = HostBuilder::new()
         .with_options(source_options)
         .with_options(shared_options.clone())
         .with_options(target_options)
-        .with_options(file_options)
+        .with_options(copy_options)
         .build();
     let provider = host.services.get_required_mut::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
