@@ -11,12 +11,12 @@ pub fn get_torrent_id_from_url(url: &str) -> Result<u32, Error> {
 #[must_use]
 pub fn get_torrent_id_from_group_url(url: &str) -> Option<u32> {
     let id = Regex::new(r"/torrents\.php\?id=(\d+)&torrentid=(\d+)(#torrent\d+)?$")
-    .expect("Regex should compile")
-    .captures(url)?
-    .get(2)?
-    .as_str()
-    .parse::<u32>()
-    .expect("Number can be parsed");
+        .expect("Regex should compile")
+        .captures(url)?
+        .get(2)?
+        .as_str()
+        .parse::<u32>()
+        .expect("Number can be parsed");
     Some(id)
 }
 
@@ -36,12 +36,12 @@ pub fn get_torrent_id_from_torrent_url(url: &str) -> Option<u32> {
 #[allow(dead_code)]
 pub fn get_group_id_from_url(url: &str) -> Option<u32> {
     let id = Regex::new(r"/torrents\.php\?id=(\d+)&torrentid=(\d+)(#torrent\d+)?$")
-    .expect("Regex should compile")
-    .captures(url)?
-    .get(1)?
-    .as_str()
-    .parse::<u32>()
-    .expect("Number can be parsed");
+        .expect("Regex should compile")
+        .captures(url)?
+        .get(1)?
+        .as_str()
+        .parse::<u32>()
+        .expect("Number can be parsed");
     Some(id)
 }
 

@@ -1,6 +1,5 @@
 use crate::source::*;
 
-
 #[test]
 fn with_torrent_and_group_no_hash() {
     let url = "https://example.com/torrents.php?id=2259978&torrentid=4871992";
