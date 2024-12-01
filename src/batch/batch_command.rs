@@ -198,8 +198,10 @@ impl BatchCommand {
                         .expect("UploadCommand should be writeable")
                         .execute(&source)
                         .await;
+                    if self.upload_options.dry_run != Some(true) {
+                        item.upload = Some(status);
+                    }
                     // Errors were already logged in UploadCommand::Execute()
-                    item.upload = Some(status);
                 }
             }
             queue.set(item).await?;
