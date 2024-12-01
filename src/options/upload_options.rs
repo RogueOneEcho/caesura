@@ -78,13 +78,10 @@ impl Options for UploadOptions {
 
     #[must_use]
     fn from_args() -> Option<Self> {
-        let Some(Upload {
-            upload: options, ..
-        }) = ArgumentsParser::get()
-        else {
+        let Some(Upload { upload, .. } | Batch { upload, .. }) = ArgumentsParser::get() else {
             return None;
         };
-        let mut options = options;
+        let mut options = upload;
         if options.copy_transcode_to_content_dir == Some(false) {
             options.copy_transcode_to_content_dir = None;
         }

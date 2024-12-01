@@ -1,6 +1,6 @@
 use crate::options::{
     BatchOptions, CacheOptions, FileOptions, Options, SharedOptions, SpectrogramOptions,
-    TargetOptions, VerifyOptions,
+    TargetOptions, UploadOptions, VerifyOptions,
 };
 use crate::queue::Queue;
 use crate::source::*;
@@ -22,6 +22,7 @@ pub struct BatchCommand {
     shared_options: Ref<SharedOptions>,
     verify_options: Ref<VerifyOptions>,
     target_options: Ref<TargetOptions>,
+    upload_options: Ref<UploadOptions>,
     spectrogram_options: Ref<SpectrogramOptions>,
     file_options: Ref<FileOptions>,
     batch_options: Ref<BatchOptions>,
@@ -46,6 +47,7 @@ impl BatchCommand {
             || !self.spectrogram_options.validate()
             || !self.file_options.validate()
             || !self.batch_options.validate()
+            || !self.upload_options.validate()
         {
             return Ok(false);
         }

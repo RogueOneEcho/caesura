@@ -179,6 +179,21 @@ Verify, transcode, and upload from multiple FLAC sources in one command
 * `--cache <CACHE>` — Path to cache directory.
 
    Default: `./cache`
+* `--copy-transcode-to-content-dir` — Should the transcoded files be copied to the content directory?
+
+   This should be enabled if you wish to auto-add to your torrent client.
+
+   Default: `false`
+* `--copy-torrent-to <COPY_TORRENT_TO>` — Directory the torrent file is copied to.
+
+   This should be set if you wish to auto-add to your torrent client.
+
+   Default: Not set
+* `--dry-run` — Is this a dry run?
+
+   If enabled data won't be uploaded and will instead be printed to the console.
+
+   Default: `false`
 
 
 

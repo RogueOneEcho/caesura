@@ -33,6 +33,8 @@ pub enum CommandArguments {
         batch: BatchOptions,
         #[command(flatten)]
         cache: CacheOptions,
+        #[command(flatten)]
+        upload: UploadOptions,
     },
 
     /// Add FLAC sources to the queue without transcoding
