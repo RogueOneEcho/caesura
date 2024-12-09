@@ -9,6 +9,8 @@ use tokio::task::JoinSet;
 
 /// A [Subscriber] that updates a progress bar in the console
 pub struct ProgressBarSubscriber {
+    logger: Ref<Logger>,
+
     /// The set of jobs to track
     set: RefMut<JoinSet<Result<(), Error>>>,
 
@@ -20,8 +22,8 @@ pub struct ProgressBarSubscriber {
 impl ProgressBarSubscriber {
     /// Create a new [`ProgressBarSubscriber`]
     pub fn new(logger: Ref<Logger>, set: RefMut<JoinSet<Result<(), Error>>>) -> Self {
-        let bar = create_progress_bar(logger);
-        Self { set, bar }
+        let bar = create_progress_bar();
+        Self { logger, set, bar }
     }
 }
 
@@ -30,6 +32,8 @@ impl Subscriber for ProgressBarSubscriber {
     #[allow(clippy::as_conversions)]
     fn start(&self, _scope_id: &str) {
         self.bar.reset();
+        let style = create_progress_style(self.logger.clone());
+        self.bar.set_style(style);
         let total = self
             .set
             .read()
@@ -51,8 +55,13 @@ impl Subscriber for ProgressBarSubscriber {
     }
 }
 
-fn create_progress_bar(logger: Ref<Logger>) -> ProgressBar {
+fn create_progress_bar() -> ProgressBar {
     let bar = ProgressBar::new(100);
+    bar.set_draw_target(ProgressDrawTarget::stderr());
+    bar
+}
+
+fn create_progress_style(logger: Ref<Logger>) -> ProgressStyle {
     let prefix = logger.format_prefix(Info);
     let template = format!(
         "{} [{}] {}{}/{{len}}  {} remain",
@@ -63,11 +72,8 @@ fn create_progress_bar(logger: Ref<Logger>) -> ProgressBar {
         "{eta}".gray()
     )
     .dark_gray();
-    let style = ProgressStyle::default_bar()
+    ProgressStyle::default_bar()
         .template(template.to_string().as_str())
         .expect("Progress style should compile")
-        .progress_chars("#>-");
-    bar.set_style(style);
-    bar.set_draw_target(ProgressDrawTarget::stderr());
-    bar
+        .progress_chars("#>-")
 }
