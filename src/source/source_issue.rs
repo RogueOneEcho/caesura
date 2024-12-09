@@ -103,8 +103,8 @@ impl Display for SourceIssue {
                 error,
             } => {
                 let status = StatusCode::from_u16(*status_code)
-                    .expect("Status code is valid")
-                    .canonical_reason()
+                    .ok()
+                    .and_then(|code| code.canonical_reason())
                     .unwrap_or("Unknown");
                 format!("API responded {status} to {action}: {error}")
             }
