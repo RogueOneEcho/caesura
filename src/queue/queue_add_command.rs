@@ -1,10 +1,10 @@
-use crate::db::Hash;
 use crate::errors::{error, io_error, yaml_error};
 use crate::fs::DirectoryReader;
 use crate::options::{CacheOptions, Options, QueueAddArgs, SharedOptions};
 use crate::queue::{Queue, QueueItem, QueueStatus};
 use colored::Colorize;
 use di::{injectable, Ref, RefMut};
+use flat_db::Hash;
 use log::{info, trace};
 use rogue_logging::Error;
 use std::collections::BTreeMap;

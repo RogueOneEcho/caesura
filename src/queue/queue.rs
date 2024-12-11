@@ -2,13 +2,13 @@ use std::collections::BTreeMap;
 use std::fs::create_dir;
 use std::path::PathBuf;
 
-use crate::db::{Hash, Table};
 use crate::imdl::ImdlCommand;
 use crate::options::CacheOptions;
 use crate::queue::QueueItem;
 use crate::transcode::TranscodeStatus;
 use crate::verify::VerifyStatus;
 use di::{inject, injectable, Ref};
+use flat_db::{Hash, Table};
 use futures::stream::{iter, StreamExt};
 use log::error;
 use rogue_logging::Error;

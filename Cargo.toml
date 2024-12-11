@@ -25,6 +25,7 @@ chrono = "^0.4"
 clap = { version = "^4.5", features = ["derive"] }
 claxon = "^0.4"
 colored = "^2.1"
+flat_db = "0.1.0"
 futures = "^0.3"
 gazelle_api = "^0.3"
 html-escape = "^0.2"

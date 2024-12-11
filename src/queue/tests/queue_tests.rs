@@ -1,11 +1,11 @@
 use super::super::Queue;
-use crate::db::Hash;
 use crate::queue::{QueueItem, TimeStamp};
 use crate::source::SourceIssue;
 use crate::testing::TempDirectory;
 use crate::transcode::TranscodeStatus;
 use crate::upload::UploadStatus;
 use crate::verify::VerifyStatus;
+use flat_db::Hash;
 use rogue_logging::Error;
 use std::path::PathBuf;
 

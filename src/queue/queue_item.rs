@@ -1,10 +1,10 @@
-use crate::db::Hash;
 use crate::imdl::TorrentSummary;
 use crate::source::get_torrent_id_from_torrent_url;
 use crate::spectrogram::SpectrogramStatus;
 use crate::transcode::TranscodeStatus;
 use crate::upload::UploadStatus;
 use crate::verify::VerifyStatus;
+use flat_db::Hash;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;

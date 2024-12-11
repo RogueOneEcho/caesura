@@ -1,6 +1,6 @@
 use super::super::*;
-use crate::db::Hash;
 use crate::imdl::TorrentSummary;
+use flat_db::Hash;
 use std::path::PathBuf;
 
 #[test]
