@@ -53,18 +53,12 @@ impl Shortener {
     }
 }
 
-#[allow(clippy::if_then_some_else_none)]
 fn remove_parenthetical_suffix(input: &str) -> Option<String> {
-    let captures = Regex::new(r"^(.*)(\(.*\))$")
-        .expect("Regex should compile")
-        .captures(input)?;
-    let shortened = captures.get(1).expect("Should have captures").as_str();
-    let shortened = shortened.trim();
-    if shortened.len() > 4 {
-        Some(shortened.to_owned())
-    } else {
-        None
-    }
+    let captures = Regex::new(r"^(.+)\(.+\)$")
+        .expect("regex should compile")
+        .captures(input.trim())?;
+    let shortened = captures.get(1).expect("should have captures").as_str();
+    Some(shortened.trim().to_owned())
 }
 
 #[allow(clippy::as_conversions, clippy::cast_possible_wrap)]
@@ -89,5 +83,22 @@ mod tests {
         assert_eq!(compare_char_count("😀🙃", "😀"), -1);
         assert_eq!(compare_char_count("a\u{300}", ""), -2);
         assert_eq!(compare_char_count("\u{e0}", ""), -1);
+    }
+
+    #[test]
+    fn remove_parenthetical_suffix_tests() {
+        assert_eq!(remove_parenthetical_suffix("abc (123)"), Some("abc".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("abc (xyz)"), Some("abc".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("hello world (2023)"), Some("hello world".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("abc()"), None);
+        assert_eq!(remove_parenthetical_suffix("(123)"), None);
+        assert_eq!(remove_parenthetical_suffix("()"), None);
+        assert_eq!(remove_parenthetical_suffix("abc"), None);
+        assert_eq!(remove_parenthetical_suffix(""), None);
+        assert_eq!(remove_parenthetical_suffix("abc  (123)"), Some("abc".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("   abc (123)   "), Some("abc".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("こんにちは (世界)"), Some("こんにちは".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("😀🙃 (emoji)"), Some("😀🙃".to_owned()));
+        assert_eq!(remove_parenthetical_suffix("a!@#$%^&*() (123)"), Some("a!@#$%^&*()".to_owned()));
     }
 }
