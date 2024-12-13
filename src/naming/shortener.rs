@@ -87,21 +87,45 @@ mod tests {
 
     #[test]
     fn remove_parenthetical_suffix_tests() {
-        assert_eq!(remove_parenthetical_suffix("abc (123)"), Some("abc".to_owned()));
-        assert_eq!(remove_parenthetical_suffix("abc (xyz)"), Some("abc".to_owned()));
-        assert_eq!(remove_parenthetical_suffix("hello world (2023)"), Some("hello world".to_owned()));
+        assert_eq!(
+            remove_parenthetical_suffix("abc (123)"),
+            Some("abc".to_owned())
+        );
+        assert_eq!(
+            remove_parenthetical_suffix("abc (xyz)"),
+            Some("abc".to_owned())
+        );
+        assert_eq!(
+            remove_parenthetical_suffix("hello world (2023)"),
+            Some("hello world".to_owned())
+        );
         assert_eq!(remove_parenthetical_suffix("abc()"), None);
         assert_eq!(remove_parenthetical_suffix("(123)"), None);
         assert_eq!(remove_parenthetical_suffix("()"), None);
         assert_eq!(remove_parenthetical_suffix("abc"), None);
         assert_eq!(remove_parenthetical_suffix(""), None);
-        assert_eq!(remove_parenthetical_suffix("abc  (123)"), Some("abc".to_owned()));
-        assert_eq!(remove_parenthetical_suffix("   abc (123)   "), Some("abc".to_owned()));
-        assert_eq!(remove_parenthetical_suffix("こんにちは (世界)"), Some("こんにちは".to_owned()));
-        assert_eq!(remove_parenthetical_suffix("😀🙃 (emoji)"), Some("😀🙃".to_owned()));
-        assert_eq!(remove_parenthetical_suffix("a!@#$%^&*() (123)"), Some("a!@#$%^&*()".to_owned()));
+        assert_eq!(
+            remove_parenthetical_suffix("abc  (123)"),
+            Some("abc".to_owned())
+        );
+        assert_eq!(
+            remove_parenthetical_suffix("   abc (123)   "),
+            Some("abc".to_owned())
+        );
+        assert_eq!(
+            remove_parenthetical_suffix("こんにちは (世界)"),
+            Some("こんにちは".to_owned())
+        );
+        assert_eq!(
+            remove_parenthetical_suffix("😀🙃 (emoji)"),
+            Some("😀🙃".to_owned())
+        );
+        assert_eq!(
+            remove_parenthetical_suffix("a!@#$%^&*() (123)"),
+            Some("a!@#$%^&*()".to_owned())
+        );
     }
-    
+
     #[test]
     #[allow(clippy::unwrap_used)]
     fn shorten_album() {
@@ -121,5 +145,4 @@ mod tests {
         assert!(result.is_some());
         assert_eq!(result.unwrap().album, "This is a Long Title");
     }
-
 }
