@@ -24,11 +24,12 @@ impl Shortener {
 
     pub fn suggest_track_name(flac: &FlacFile) {
         if let Some(file_name) = TrackName::get(flac) {
-            let difference = flac.file_name.len() - file_name.len();
-            if difference > 0 {
+            let difference = compare_char_count(&flac.file_name, &file_name);
+            if difference < 0 {
                 info!(
-                    "{} track could save {difference} characters: {}",
+                    "{} track could save {} characters: {}",
                     "Renaming".bold(),
+                    difference * -1,
                     file_name.gray()
                 );
             }
@@ -62,5 +63,30 @@ fn remove_parenthetical_suffix(input: &str) -> Option<String> {
         Some(shortened.to_owned())
     } else {
         None
+    }
+}
+
+#[allow(clippy::as_conversions, clippy::cast_possible_wrap)]
+fn compare_char_count(before: &str, after: &str) -> isize {
+    after.chars().count() as isize - before.chars().count() as isize
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compare_char_count_tests() {
+        assert_eq!(compare_char_count("123", "123"), 0);
+        assert_eq!(compare_char_count("123", "1234"), 1);
+        assert_eq!(compare_char_count("1234", "123"), -1);
+        assert_eq!(
+            compare_char_count("こんにちは世界！", "こんにちは世界！"),
+            0
+        );
+        assert_eq!(compare_char_count("こんにちは世界！", "こんにちは世！"), -1);
+        assert_eq!(compare_char_count("😀🙃", "😀"), -1);
+        assert_eq!(compare_char_count("a\u{300}", ""), -2);
+        assert_eq!(compare_char_count("\u{e0}", ""), -1);
     }
 }
