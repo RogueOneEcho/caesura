@@ -40,11 +40,12 @@ impl Shortener {
         if let Some(shortened) = Shortener::shorten_album(&source.metadata) {
             let before = SourceName::get(&source.metadata);
             let after = SourceName::get(&shortened);
-            let difference = before.len() - after.len();
-            if difference > 0 {
+            let difference = compare_char_count(&before, &after);
+            if difference < 0 {
                 info!(
-                    "{} directory could save {difference} characters: {}",
+                    "{} directory could save {} characters: {}",
                     "Renaming".bold(),
+                    difference * -1,
                     after.gray()
                 );
             }
