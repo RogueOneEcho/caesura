@@ -67,11 +67,15 @@ impl PathManager {
         target: TargetFormat,
         flac: &FlacFile,
     ) -> PathBuf {
+        let sub_path = Self::get_transcode_sub_path(target, flac);
+        self.get_transcode_target_dir(source, target).join(sub_path)
+    }
+
+    #[must_use]
+    pub fn get_transcode_sub_path(target: TargetFormat, flac: &FlacFile) -> PathBuf {
         let extension = target.get_file_extension();
         let filename = flac.file_name.clone() + "." + extension.as_str();
-        self.get_transcode_target_dir(source, target)
-            .join(&flac.sub_dir)
-            .join(filename)
+        flac.sub_dir.join(filename)
     }
 
     #[must_use]
