@@ -101,4 +101,25 @@ mod tests {
         assert_eq!(remove_parenthetical_suffix("😀🙃 (emoji)"), Some("😀🙃".to_owned()));
         assert_eq!(remove_parenthetical_suffix("a!@#$%^&*() (123)"), Some("a!@#$%^&*()".to_owned()));
     }
+    
+    #[test]
+    #[allow(clippy::unwrap_used)]
+    fn shorten_album() {
+        // Arrange
+        let metadata = Metadata {
+            artist: "Artist Name".to_owned(),
+            album: "This is a Long Title (With an Even Longer Paranthetical Statement)".to_owned(),
+            remaster_title: "Remaster Title".to_owned(),
+            year: 1234,
+            media: "Vinyl".to_owned(),
+        };
+
+        // Act
+        let result = Shortener::shorten_album(&metadata);
+
+        // Assert
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().album, "This is a Long Title");
+    }
+
 }
