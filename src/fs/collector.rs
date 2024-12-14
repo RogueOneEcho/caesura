@@ -33,7 +33,7 @@ impl Collector {
     pub fn get_additional(source_dir: &PathBuf) -> Vec<AdditionalFile> {
         let paths = DirectoryReader::new()
             .with_max_depth(1)
-            .with_extensions(vec!["jpg", "jpeg", "png"])
+            .with_extensions(vec!["jpg", "jpeg", "png", "txt", "log"])
             .read(source_dir)
             .expect("Source directory should be readable");
         let mut collection = Vec::new();

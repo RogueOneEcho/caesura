@@ -12,6 +12,8 @@ use log::{trace, warn};
 use rogue_logging::Error;
 use tokio::fs::{copy, create_dir_all, hard_link};
 
+const IMAGE_EXTENSIONS: [&str; 3] = ["jpg", "jpeg", "png"];
+
 #[injectable]
 pub struct AdditionalJobFactory {
     copy_options: Ref<CopyOptions>,
@@ -56,6 +58,12 @@ impl AdditionalJobFactory {
             .file_options
             .max_file_size
             .expect("max_file_size should be set");
+        let extension = source_path
+            .extension()
+            .expect("Source has extension")
+            .to_string_lossy()
+            .to_string();
+        let is_image = IMAGE_EXTENSIONS.contains(&extension.as_str());
         let is_large = size > max_file_size;
         let no_image_compression = self
             .file_options
@@ -64,12 +72,7 @@ impl AdditionalJobFactory {
         create_dir_all(&output_dir)
             .await
             .map_err(|e| io_error(e, "create directories for additional file"))?;
-        let extension = source_path
-            .extension()
-            .expect("Source has extension")
-            .to_string_lossy()
-            .into_owned();
-        if no_image_compression || !is_large {
+        if !is_image || no_image_compression || !is_large {
             if is_large {
                 warn!(
                     "Including large {} ({} KB): {}",
