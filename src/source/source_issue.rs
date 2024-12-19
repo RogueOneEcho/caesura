@@ -2,6 +2,7 @@ use crate::formats::ExistingFormat;
 use crate::naming::join_humanized;
 use crate::source::SourceIssue::*;
 use reqwest::StatusCode;
+use rogue_logging::Colors;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Display, Formatter};
@@ -138,8 +139,8 @@ impl Display for SourceIssue {
             Imdl { details } => format!("Files do not match hash:\n{details}"),
             Length { path, excess } => {
                 format!(
-                    "Path is {excess} characters longer than allowed: {}",
-                    path.display()
+                    "Path is {excess} characters longer than allowed:\n{}",
+                    path.display().to_string().gray()
                 )
             }
             Duration { path, seconds } => {

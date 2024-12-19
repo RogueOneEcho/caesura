@@ -27,7 +27,7 @@ impl Shortener {
             let difference = compare_char_count(&flac.file_name, &file_name);
             if difference < 0 {
                 info!(
-                    "{} track could save {} characters: {}",
+                    "{} track could save {} characters:\n{}",
                     "Renaming".bold(),
                     difference * -1,
                     file_name.gray()

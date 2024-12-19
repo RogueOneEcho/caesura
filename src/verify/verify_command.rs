@@ -154,11 +154,17 @@ impl VerifyCommand {
         let max_target = self
             .targets
             .get_max_path_length(source.format, &source.existing);
+        let output_dir = self.paths.get_output_dir();
         let mut too_long = false;
         for flac in flacs {
             if let Some(max_target) = max_target {
-                let path = PathManager::get_transcode_sub_path(max_target, &flac);
-                let length = path.to_string_lossy().len() as isize;
+                let path = self
+                    .paths
+                    .get_transcode_path(source, max_target, &flac)
+                    .strip_prefix(output_dir.clone())
+                    .expect("should be able to strip prefix from transcode path")
+                    .to_path_buf();
+                let length = path.to_string_lossy().chars().count() as isize;
                 let excess = length - MAX_PATH_LENGTH;
                 if excess > 0 {
                     let excess = excess as usize;
