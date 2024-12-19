@@ -12,7 +12,8 @@ use log::{trace, warn};
 use rogue_logging::Error;
 use tokio::fs::{copy, create_dir_all, hard_link};
 
-const IMAGE_EXTENSIONS: [&str; 3] = ["jpg", "jpeg", "png"];
+pub const IMAGE_EXTENSIONS: [&str; 3] = ["jpg", "jpeg", "png"];
+pub const TEXT_EXTENSIONS: [&str; 5] = ["cue", "log", "nfo", "rtf", "txt"];
 
 #[injectable]
 pub struct AdditionalJobFactory {

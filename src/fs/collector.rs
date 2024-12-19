@@ -3,6 +3,7 @@ use crate::fs::*;
 use colored::Colorize;
 use log::trace;
 use std::path::PathBuf;
+use crate::transcode::{IMAGE_EXTENSIONS, TEXT_EXTENSIONS};
 
 /// A collection of [`FlacFile`].
 pub struct Collector;
@@ -33,7 +34,8 @@ impl Collector {
     pub fn get_additional(source_dir: &PathBuf) -> Vec<AdditionalFile> {
         let paths = DirectoryReader::new()
             .with_max_depth(1)
-            .with_extensions(vec!["jpg", "jpeg", "png", "txt", "log"])
+            .with_extensions(IMAGE_EXTENSIONS.to_vec())
+            .with_extensions(TEXT_EXTENSIONS.to_vec())
             .read(source_dir)
             .expect("Source directory should be readable");
         let mut collection = Vec::new();
