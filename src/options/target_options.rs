@@ -93,7 +93,6 @@ impl Options for TargetOptions {
         Some(options)
     }
     #[allow(clippy::absolute_paths)]
-
     fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
         serde_json::from_str(json)
     }

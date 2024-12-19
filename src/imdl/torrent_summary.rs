@@ -29,7 +29,9 @@ impl TorrentSummary {
     pub fn is_source_equal(&self, source: &str) -> bool {
         match self.source.clone() {
             None => false,
-            Some(torrent) => source.eq_ignore_ascii_case(&torrent) || red_match_pth(source, &torrent),
+            Some(torrent) => {
+                source.eq_ignore_ascii_case(&torrent) || red_match_pth(source, &torrent)
+            }
         }
     }
 }
@@ -38,11 +40,10 @@ fn red_match_pth(source: &str, torrent: &str) -> bool {
     source.eq_ignore_ascii_case("red") && torrent.eq_ignore_ascii_case("pth")
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn is_source_equal() {
         assert!(test("ops", "ops"));
@@ -64,7 +65,7 @@ mod tests {
         let torrent = TorrentSummary {
             source: Some(torrent_source.to_owned()),
             ..TorrentSummary::default()
-        };        
+        };
         torrent.is_source_equal(source)
     }
 }

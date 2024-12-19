@@ -42,7 +42,7 @@ impl<'de> Deserialize<'de> for TimeStamp {
     {
         struct TimeStampVisitor;
 
-        impl<'de> Visitor<'de> for TimeStampVisitor {
+        impl Visitor<'_> for TimeStampVisitor {
             type Value = TimeStamp;
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("a valid ISO 8601 date string")

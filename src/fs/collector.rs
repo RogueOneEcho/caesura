@@ -1,9 +1,9 @@
 use crate::fs::DirectoryReader;
 use crate::fs::*;
+use crate::transcode::{IMAGE_EXTENSIONS, TEXT_EXTENSIONS};
 use colored::Colorize;
 use log::trace;
 use std::path::PathBuf;
-use crate::transcode::{IMAGE_EXTENSIONS, TEXT_EXTENSIONS};
 
 /// A collection of [`FlacFile`].
 pub struct Collector;
