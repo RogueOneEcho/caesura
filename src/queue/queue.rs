@@ -79,6 +79,47 @@ impl Queue {
         upload_enabled: bool,
         retry_failed_transcodes: bool,
     ) -> Result<Vec<Hash<20>>, Error> {
+        let is_red = indexer == "red";
+        let mut items = self
+            .get_unprocessed_internal(
+                indexer,
+                transcode_enabled,
+                upload_enabled,
+                retry_failed_transcodes,
+            )
+            .await?;
+        if is_red {
+            let mut pth_items = self
+                .get_unprocessed_internal(
+                    "pth".to_owned(),
+                    transcode_enabled,
+                    upload_enabled,
+                    retry_failed_transcodes,
+                )
+                .await?;
+            items.append(&mut pth_items);
+        }
+        Ok(items)
+    }
+
+    /// Get the keys of the items that have not been processed.
+    ///
+    /// Items are filtered to ensure they have:
+    /// - the correct indexer
+    /// - not been verified, unless `transcode_enabled` is true
+    /// - not been transcoded, unless `upload_enabled` is true
+    /// - not been verified OR have been and `verified` is true
+    /// - not been transcoded OR have been and `success` is true
+    /// - not been uploaded
+    ///
+    /// Items are sorted by name
+    async fn get_unprocessed_internal(
+        &mut self,
+        indexer: String,
+        transcode_enabled: bool,
+        upload_enabled: bool,
+        retry_failed_transcodes: bool,
+    ) -> Result<Vec<Hash<20>>, Error> {
         let items = self.table.get_all().await?;
         let mut items: Vec<&QueueItem> = items
             .values()
