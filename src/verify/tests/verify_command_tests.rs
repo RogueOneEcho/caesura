@@ -1,15 +1,14 @@
-use crate::built_info::PKG_NAME;
 use crate::hosting::HostBuilder;
 use crate::options::TargetOptions;
+use crate::testing::init_logger;
 use crate::testing::options::TestOptionsFactory;
 use crate::verify::VerifyCommand;
 use rogue_logging::Error;
-use rogue_logging::Logger;
 
 #[tokio::test]
 async fn verify_command() -> Result<(), Error> {
     // Arrange
-    Logger::force_init(PKG_NAME.to_owned());
+    let _ = init_logger();
     let target_options = TestOptionsFactory::from(TargetOptions {
         allow_existing: Some(true),
         ..TargetOptions::default()

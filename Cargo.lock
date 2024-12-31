@@ -169,7 +169,7 @@ dependencies = [
  "num_cpus",
  "regex",
  "reqwest",
- "rogue_logging 0.2.1",
+ "rogue_logging",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -341,14 +341,14 @@ checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
 name = "flat_db"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a52e4e72102116d85d932540914f22b6f3e3a98e1f4e02ca940ecb36f42c5c9"
+checksum = "99be8df1ebc1eae9ba40b70707ba877f3b355af63c47699109f5d5855d44d09c"
 dependencies = [
  "colored",
  "futures",
  "log",
- "rogue_logging 0.3.0",
+ "rogue_logging",
  "serde",
  "serde_yaml",
  "tokio",
@@ -470,16 +470,16 @@ dependencies = [
 
 [[package]]
 name = "gazelle_api"
-version = "0.3.3"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b331b92e3a33e7df9b6d3c07b7224c36106d30f6c7c3787928a9b6e24a351bd8"
+checksum = "d3dd0ec71ccbed23013725fee766886749b53712753c8c9433c8f948577e30d4"
 dependencies = [
  "colored",
  "log",
  "regex",
  "reqwest",
  "rogue_config",
- "rogue_logging 0.2.1",
+ "rogue_logging",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -1288,23 +1288,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b071598f8267008918b3811ce31f26da1f9e390bbae61184eb2c94df97969dc9"
 dependencies = [
  "envy",
- "rogue_logging 0.3.0",
+ "rogue_logging",
  "serde",
  "serde_json",
- "serde_yaml",
-]
-
-[[package]]
-name = "rogue_logging"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "397cc08f5cf9c20adb0f7cb04896bcf3fa5042a4b92c0a0e2cf506a49600fee4"
-dependencies = [
- "chrono",
- "clap",
- "colored",
- "log",
- "serde",
  "serde_yaml",
 ]
 

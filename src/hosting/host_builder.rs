@@ -3,7 +3,6 @@ use di::{singleton_as_self, Injectable, Mut, Ref, RefMut, ServiceCollection};
 use log::error;
 use std::process::exit;
 use std::sync::Arc;
-use std::time::SystemTime;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
 
@@ -23,8 +22,7 @@ use crate::transcode::{AdditionalJobFactory, TranscodeCommand, TranscodeJobFacto
 use crate::upload::UploadCommand;
 use crate::verify::VerifyCommand;
 use gazelle_api::GazelleClientFactory;
-use rogue_logging::Error;
-use rogue_logging::Logger;
+use rogue_logging::{Error, LoggerBuilder};
 
 pub struct HostBuilder {
     pub services: ServiceCollection,
@@ -61,13 +59,12 @@ impl HostBuilder {
             // Add main services
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();
-                let logger = Logger {
-                    enabled_threshold: options.verbosity.expect("verbosity should be set"),
-                    time_format: options.log_time.expect("verbosity should be set"),
-                    start: SystemTime::now(),
-                    package_name: PKG_NAME.to_owned(),
-                };
-                Ref::new(logger)
+                LoggerBuilder::new()
+                    .with_exclude_filter("reqwest".to_owned())
+                    .with_exclude_filter("cookie".to_owned())
+                    .with_verbosity(options.verbosity.expect("verbosity should be set"))
+                    .with_time_format(options.log_time.expect("log_time should be set"))
+                    .create()
             }))
             .add(PathManager::transient())
             .add(IdProvider::transient())
@@ -138,7 +135,7 @@ impl HostBuilder {
         match self.services.build_provider() {
             Ok(services) => Host::new(services),
             Err(error) => {
-                Logger::force_init(PKG_NAME.to_owned());
+                let _ = LoggerBuilder::new().create();
                 error!("{} to build the application:", "Failed".bold());
                 error!("{error}");
                 exit(1)

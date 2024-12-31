@@ -1,13 +1,12 @@
-use std::fs::read_to_string;
-use std::path::PathBuf;
-
+use crate::options::*;
 use colored::Colorize;
 use di::injectable;
 use log::*;
-
-use crate::built_info::PKG_NAME;
-use crate::options::*;
-use rogue_logging::Logger;
+use rogue_logging::Verbosity::Trace;
+use rogue_logging::{Logger, LoggerBuilder};
+use std::fs::read_to_string;
+use std::path::PathBuf;
+use std::sync::Arc;
 
 /// Retrieve options
 ///
@@ -40,7 +39,7 @@ impl OptionsProvider {
                         options.merge(&file_options);
                     }
                     Err(error) => {
-                        Logger::force_init(PKG_NAME.to_owned());
+                        let _ = init_logger();
                         error!("{} to deserialize config file: {}", "Failed".bold(), error);
                     }
                 }
@@ -60,8 +59,16 @@ fn read_config_file(options: &SharedOptions) -> String {
         .clone()
         .unwrap_or_else(|| PathBuf::from(DEFAULT_CONFIG_PATH));
     read_to_string(path).unwrap_or_else(|error| {
-        Logger::force_init(PKG_NAME.to_owned());
+        let _ = init_logger();
         warn!("{} to read config file: {}", "Failed".bold(), error);
         "{}".to_owned()
     })
+}
+
+fn init_logger() -> Arc<Logger> {
+    LoggerBuilder::new()
+        .with_exclude_filter("reqwest".to_owned())
+        .with_exclude_filter("cookie".to_owned())
+        .with_verbosity(Trace)
+        .create()
 }

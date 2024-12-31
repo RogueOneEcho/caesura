@@ -1,4 +1,3 @@
-use crate::built_info::PKG_NAME;
 use crate::formats::TargetFormat::{Flac, V0, _320};
 use crate::formats::TargetFormatProvider;
 use crate::fs::DirectoryReader;
@@ -9,14 +8,13 @@ use crate::testing::options::TestOptionsFactory;
 use crate::testing::*;
 use crate::transcode::TranscodeCommand;
 use rogue_logging::Error;
-use rogue_logging::Logger;
 use std::fs::metadata;
 use std::os::unix::prelude::MetadataExt;
 
 #[tokio::test]
 async fn transcode_command() -> Result<(), Error> {
     // Arrange
-    Logger::force_init(PKG_NAME.to_owned());
+    let _ = init_logger();
     let source_options = TestOptionsFactory::from(SourceArg {
         source: Some("206675".to_owned()),
     });

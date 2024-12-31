@@ -35,8 +35,7 @@ impl Host {
     /// 2. Determine the command to execute
     /// 3. Execute the command
     pub async fn execute(&self) -> Result<bool, Error> {
-        let logger = self.services.get_required::<Logger>();
-        Logger::init(logger);
+        let _ = self.services.get_required::<Logger>();
         match ArgumentsParser::get_or_show_help() {
             Config => self.services.get_required::<ConfigCommand>().execute(),
             Batch { .. } => {
