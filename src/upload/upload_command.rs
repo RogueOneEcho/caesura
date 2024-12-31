@@ -119,12 +119,28 @@ impl UploadCommand {
                 .copy_transcode_to_content_dir
                 .expect("copy_transcode_to_content_dir should be set")
             {
+                trace!("{} transcode to content directory", "Copying".bold());
+                let destination = self
+                    .shared_options
+                    .content
+                    .clone()
+                    .expect("content should be set");
+                let destination = destination
+                    .first()
+                    .expect("content should contain at least one directory");
+                if let Err(error) = self.copy_transcode(&target_dir, destination).await {
+                    // If copy_transcode fails we can still continue with the upload
+                    warn!("{error}");
+                    errors.push(error);
+                }
+            }
+            if let Some(destination) = &self.upload_options.copy_transcode_to {
                 trace!(
-                    "{} {} to content directory",
+                    "{} transcode to: {}",
                     "Copying".bold(),
-                    target_dir.display()
+                    destination.display(),
                 );
-                if let Err(error) = self.copy_transcode(source, &target).await {
+                if let Err(error) = self.copy_transcode(&target_dir, destination).await {
                     // If copy_transcode fails we can still continue with the upload
                     warn!("{error}");
                     errors.push(error);
@@ -175,19 +191,11 @@ impl UploadCommand {
         status
     }
 
-    async fn copy_transcode(&self, source: &Source, target: &TargetFormat) -> Result<(), Error> {
-        let source_dir = self.paths.get_transcode_target_dir(source, *target);
-        let source_dir_name = source_dir
+    async fn copy_transcode(&self, source_path: &Path, target_parent: &Path) -> Result<(), Error> {
+        let source_dir_name = source_path
             .file_name()
             .expect("source dir should have a name");
-        let target_dir = self
-            .shared_options
-            .content
-            .clone()
-            .expect("content should be set")
-            .first()
-            .expect("content should contain at least one directory")
-            .join(source_dir_name);
+        let target_dir = target_parent.join(source_dir_name);
         if target_dir.exists() {
             warn!(
                 "{} copy as the target directory already exists: {}",
@@ -201,16 +209,16 @@ impl UploadCommand {
             .hard_link
             .expect("hard_link should be set")
         {
-            copy_dir(&source_dir, &target_dir, true).await?;
+            copy_dir(source_path, &target_dir, true).await?;
             "Hard Linked"
         } else {
-            copy_dir(&source_dir, &target_dir, false).await?;
+            copy_dir(source_path, &target_dir, false).await?;
             "Copied"
         };
         trace!(
             "{} {} to {}",
             verb.bold(),
-            source_dir.display(),
+            source_path.display(),
             target_dir.display()
         );
         Ok(())

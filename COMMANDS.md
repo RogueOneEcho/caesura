@@ -181,9 +181,12 @@ Verify, transcode, and upload from multiple FLAC sources in one command
    Default: `./cache`
 * `--copy-transcode-to-content-dir` — Should the transcoded files be copied to the content directory?
 
-   This should be enabled if you wish to auto-add to your torrent client.
-
    Default: `false`
+* `--copy-transcode-to <COPY_TRANSCODE_TO>` — Directory the transcoded files are copied to.
+
+   This should be set if you wish to auto-add to your torrent client.
+
+   Default: Not set
 * `--copy-torrent-to <COPY_TORRENT_TO>` — Directory the torrent file is copied to.
 
    This should be set if you wish to auto-add to your torrent client.
@@ -666,9 +669,12 @@ Upload transcodes of a FLAC source
    Default: `false`
 * `--copy-transcode-to-content-dir` — Should the transcoded files be copied to the content directory?
 
-   This should be enabled if you wish to auto-add to your torrent client.
-
    Default: `false`
+* `--copy-transcode-to <COPY_TRANSCODE_TO>` — Directory the transcoded files are copied to.
+
+   This should be set if you wish to auto-add to your torrent client.
+
+   Default: Not set
 * `--copy-torrent-to <COPY_TORRENT_TO>` — Directory the torrent file is copied to.
 
    This should be set if you wish to auto-add to your torrent client.

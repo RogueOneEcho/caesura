@@ -7,18 +7,24 @@ use serde::{Deserialize, Serialize};
 
 use crate::cli::ArgumentsParser;
 use crate::cli::CommandArguments::*;
-use crate::options::{Options, OptionsProvider};
+use crate::options::{DoesNotExist, OptionRule, Options, OptionsProvider};
 
 /// Options for including additional files during [`TranscodeCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct UploadOptions {
     /// Should the transcoded files be copied to the content directory?
     ///
-    /// This should be enabled if you wish to auto-add to your torrent client.
-    ///
     /// Default: `false`
     #[arg(long, default_value = None, action = ArgAction::SetTrue)]
     pub copy_transcode_to_content_dir: Option<bool>,
+
+    /// Directory the transcoded files are copied to.
+    ///
+    /// This should be set if you wish to auto-add to your torrent client.
+    ///
+    /// Default: Not set
+    #[arg(long)]
+    pub copy_transcode_to: Option<PathBuf>,
 
     /// Directory the torrent file is copied to.
     ///
@@ -53,6 +59,10 @@ impl Options for UploadOptions {
         if self.copy_transcode_to_content_dir.is_none() {
             self.copy_transcode_to_content_dir = alternative.copy_transcode_to_content_dir;
         }
+        if self.copy_transcode_to.is_none() {
+            self.copy_transcode_to
+                .clone_from(&alternative.copy_transcode_to);
+        }
         if self.copy_torrent_to.is_none() {
             self.copy_torrent_to
                 .clone_from(&alternative.copy_torrent_to);
@@ -73,7 +83,25 @@ impl Options for UploadOptions {
 
     #[must_use]
     fn validate(&self) -> bool {
-        true
+        let mut errors: Vec<OptionRule> = Vec::new();
+        if let Some(dir) = &self.copy_transcode_to {
+            if !dir.is_dir() {
+                errors.push(DoesNotExist(
+                    "Copy transcode to directory".to_owned(),
+                    dir.to_string_lossy().to_string(),
+                ));
+            }
+        }
+        if let Some(dir) = &self.copy_torrent_to {
+            if !dir.is_dir() {
+                errors.push(DoesNotExist(
+                    "Copy torrent to directory".to_owned(),
+                    dir.to_string_lossy().to_string(),
+                ));
+            }
+        }
+        OptionRule::show(&errors);
+        errors.is_empty()
     }
 
     #[must_use]
