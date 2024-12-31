@@ -679,6 +679,11 @@ Upload transcodes of a FLAC source
    If enabled data won't be uploaded and will instead be printed to the console.
 
    Default: `false`
+* `--hard-link` — Should files be hard linked instead of copied?
+
+   Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
+
+   Default: `false`
 
 
 

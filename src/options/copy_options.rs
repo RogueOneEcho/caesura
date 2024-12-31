@@ -51,7 +51,9 @@ impl Options for CopyOptions {
 
     #[must_use]
     fn from_args() -> Option<Self> {
-        let Some(Batch { copy, .. } | Transcode { copy, .. }) = ArgumentsParser::get() else {
+        let Some(Batch { copy, .. } | Transcode { copy, .. } | Upload { copy, .. }) =
+            ArgumentsParser::get()
+        else {
             return None;
         };
         let mut options = copy;

@@ -81,6 +81,8 @@ pub enum CommandArguments {
         target: TargetOptions,
         #[command(flatten)]
         upload: UploadOptions,
+        #[command(flatten)]
+        copy: CopyOptions,
     },
 
     /// Verify a FLAC source is suitable for transcoding.
