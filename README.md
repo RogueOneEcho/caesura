@@ -144,7 +144,7 @@ docker run \
 -v ./output:/output \
 -v ./cache:/cache \
 ghcr.io/rogueoneecho/caesura \
-verify https://redacted.ch/torrents.php?id=80518&torrentid=142659#torrent142659
+verify https://redacted.sh/torrents.php?id=80518&torrentid=142659#torrent142659
 ```
 
 If it looks good you can proceed to the next step, otherwise try another source.
@@ -226,7 +226,7 @@ Run the `upload` command with the source as an argument.
 > If you're unsure about this then you can append `--dry-run` to the command and instead of uploading it will print the data that would be submitted.
 
 ```bash
-docker compose run --rm caesura upload https://redacted.ch/torrents.php?id=80518&torrentid=142659#torrent142659
+docker compose run --rm caesura upload https://redacted.sh/torrents.php?id=80518&torrentid=142659#torrent142659
 ```
 
 Go to your indexer and check your uploads to make sure everything has gone to plan.
