@@ -119,7 +119,7 @@ mkdir ./output
 Create a directory for the application to cache files to:
 
 ```bash
-mkdir ./output
+mkdir ./cache
 ```
 
 > [!TIP]
