@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::ops::Not;
 use std::path::{Path, PathBuf};
 
@@ -269,11 +270,10 @@ impl UploadCommand {
             ),
             format!("[pad=0|10|0|20]Source[/pad] [url={source_url}]{source_title}[/url]"),
         ];
-        match self.get_command(source, target) {
-            Ok(transcode_command) => lines.push(format!(
+        for transcode_command in self.get_commands(source, target) {
+            lines.push(format!(
                 "[pad=0|10|0|0]Transcode[/pad] [code]{transcode_command}[/code]"
-            )),
-            Err(error) => warn!("Failed to get transcode command: {error}"),
+            ));
         }
         match self.get_details(source, target).await {
             Ok(details) => {
@@ -295,16 +295,29 @@ impl UploadCommand {
         })
     }
 
-    pub(crate) fn get_command(
+    pub(crate) fn get_commands(&self, source: &Source, target: TargetFormat) -> HashSet<String> {
+        let flacs = Collector::get_flacs(&source.directory);
+        flacs
+            .into_iter()
+            .filter_map(|flac| {
+                self.get_command_internal(flac, source, target)
+                    .unwrap_or_else(|e| {
+                        warn!("{e}");
+                        None
+                    })
+            })
+            .collect()
+    }
+
+    fn get_command_internal(
         &self,
+        flac: FlacFile,
         source: &Source,
         target: TargetFormat,
-    ) -> Result<String, Error> {
-        let flacs = Collector::get_flacs(&source.directory);
-        let flac = flacs.first().expect("Should be at least one FLAC");
+    ) -> Result<Option<String>, Error> {
         let job = self
             .transcode_job_factory
-            .create_single(0, flac, source, target)?;
+            .create_single(0, &flac, source, target)?;
         let Job::Transcode(job) = job else {
             return Err(error(
                 "get transcode command",
@@ -320,11 +333,11 @@ impl UploadCommand {
                     .expect("output should have an extension")
                     .to_string_lossy();
                 encode.output = PathBuf::from(format!("output.{extension}"));
-                format!(
+                Some(format!(
                     "{} | {}",
                     decode.to_info().display(),
                     encode.to_info().display()
-                )
+                ))
             }
             Variant::Resample(mut resample) => {
                 resample.input = PathBuf::from("input.flac");
@@ -334,12 +347,13 @@ impl UploadCommand {
                     .expect("output should have an extension")
                     .to_string_lossy();
                 resample.output = PathBuf::from(format!("output.{extension}"));
-                resample.to_info().display()
+                Some(resample.to_info().display())
             }
-            Variant::Include(_) => String::new()
+            Variant::Include(_) => None,
         };
         Ok(command)
     }
+
     async fn get_details(&self, source: &Source, target: TargetFormat) -> Result<String, Error> {
         let path = self.paths.get_transcode_target_dir(source, target);
         match target {
