@@ -46,3 +46,11 @@ pub const EYED3: &str = "eyeD3.exe";
 /// Path to the imdl binary.
 #[cfg(not(target_os = "windows"))]
 pub const EYED3: &str = "eyeD3";
+
+/// Path to the metaflac binary.
+#[cfg(target_os = "windows")]
+pub const METAFLAC: &str = "metaflac.exe";
+
+/// Path to the metaflac binary.
+#[cfg(not(target_os = "windows"))]
+pub const METAFLAC: &str = "metaflac";

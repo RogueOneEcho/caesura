@@ -13,6 +13,7 @@ use crate::options::*;
 use crate::utils::*;
 use gazelle_api::{GazelleClient, UploadForm};
 use rogue_logging::Error;
+use TargetFormat::*;
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
@@ -274,15 +275,13 @@ impl UploadCommand {
             )),
             Err(error) => warn!("Failed to get transcode command: {error}"),
         }
-        if matches!(target, TargetFormat::_320 | TargetFormat::V0) {
-            match self.get_details(source, target).await {
-                Ok(details) => {
-                    lines.push(format!(
-                        "[pad=0|10|0|19]Details[/pad] [hide][pre]{details}[/pre][/hide]"
-                    ));
-                }
-                Err(error) => warn!("Failed to get transcode details: {error}"),
+        match self.get_details(source, target).await {
+            Ok(details) => {
+                lines.push(format!(
+                    "[pad=0|10|0|19]Details[/pad] [hide][pre]{details}[/pre][/hide]"
+                ));
             }
+            Err(error) => warn!("Failed to get transcode details: {error}"),
         }
         lines.push(format!(
             "[url={}]Learn how easy it is to create and upload transcodes yourself![/url]",
@@ -342,6 +341,9 @@ impl UploadCommand {
     }
     async fn get_details(&self, source: &Source, target: TargetFormat) -> Result<String, Error> {
         let path = self.paths.get_transcode_target_dir(source, target);
-        EyeD3Command::display(&path).await
+        match target {
+            Flac => MetaflacCommand::list_dir(&path).await,
+            _320 | V0 => EyeD3Command::display(&path).await,
+        }
     }
 }
