@@ -51,6 +51,12 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - release
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+        - x86_64-unknown-linux-gnu
+        - x86_64-unknown-linux-musl
     steps:
 
     - uses: actions/checkout@v4
@@ -59,8 +65,9 @@ jobs:
       id: cache-cargo
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
+          ${{ runner.os }}-cargo-${{ matrix.target }}-
           ${{ runner.os }}-cargo-
         path: |
           ~/.cargo/bin/
@@ -75,12 +82,44 @@ jobs:
 
     - run: git --no-pager diff --color
 
+    - run: sudo apt-get update
+
+    - if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
+      run: sudo apt-get install musl-tools --yes
+
+    - if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
+      run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross --yes
+
+    - if: ${{ matrix.target == 'aarch64-unknown-linux-musl' }}
+      run: sudo apt-get install musl-tools gcc-aarch64-linux-gnu musl-dev --yes
+
+    - run: rustup target add ${{ matrix.target }}
+
+    - run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Save cargo cache
+      id: cargo-cache-save
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ steps.cache-cargo.outputs.cache-primary-key }}
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/caesura
+
     - name: Restore samples cache
       id: cache-samples
       uses: actions/cache@v4
       with:
-       path: samples/content
-       key: cache-samples
+        path: samples/content
+        key: cache-samples
 
     - if: steps.cache-samples.outputs.cache-hit != 'true'
       run: ./samples/download-sample
@@ -97,23 +136,7 @@ jobs:
           --file - \
           "imdl"
 
-    - run: sudo apt-get update
-
     - run: sudo apt-get install flac lame sox imagemagick --yes
-
-    - run: cargo build --release
-
-    - name: Save cargo cache
-      id: cargo-cache-save
-      uses: actions/cache/save@v4
-      with:
-        key: ${{ steps.cache-cargo.outputs.cache-primary-key }}
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
 
     - run: rm -rf content
 
@@ -156,15 +179,10 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: caesura
-        path: target/release/caesura
-
 
   cargo-publish:
     runs-on: ubuntu-latest
-#    if: ${{ needs.release.outputs.version != '' && ! contains(needs.release.outputs.version, '-') }}
+    if: ${{ needs.release.outputs.version != '' }}
     needs:
     - release
     - cargo-build
@@ -222,13 +240,14 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: caesura
+        pattern: caesura-${{ needs.release.outputs.version }}-*
 
     - name: gh release upload
       run: >
         gh release upload
         "v${{ needs.release.outputs.version }}"
-        caesura
+        "caesura-${{ needs.release.outputs.version }}-x86_64-unknown-linux-gnu"
+        "caesura-${{ needs.release.outputs.version }}-x86_64-unknown-linux-musl"
         --clobber
         --repo "${{ github.repository }}"
       env:
