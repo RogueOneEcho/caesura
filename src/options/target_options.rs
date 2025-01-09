@@ -35,10 +35,6 @@ impl TargetOptions {
 }
 
 impl Options for TargetOptions {
-    fn get_name() -> String {
-        "Target Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.target.is_none() {
             self.target.clone_from(&alternative.target);
@@ -91,10 +87,6 @@ impl Options for TargetOptions {
             options.allow_existing = None;
         }
         Some(options)
-    }
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

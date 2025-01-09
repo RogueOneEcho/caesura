@@ -16,7 +16,7 @@ impl TimeStamp {
         }
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn from_rfc3339(s: &str) -> Result<Self, chrono::ParseError> {
         let datetime = DateTime::parse_from_rfc3339(s)?.with_timezone(&Utc);
         Ok(TimeStamp { datetime })

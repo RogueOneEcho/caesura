@@ -83,10 +83,6 @@ impl BatchOptions {
 }
 
 impl Options for BatchOptions {
-    fn get_name() -> String {
-        "Batch Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.spectrogram.is_none() {
             self.spectrogram = alternative.spectrogram;
@@ -180,11 +176,6 @@ impl Options for BatchOptions {
             options.upload = None;
         }
         Some(options)
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

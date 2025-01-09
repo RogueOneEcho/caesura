@@ -33,7 +33,7 @@ pub fn get_torrent_id_from_torrent_url(url: &str) -> Option<u32> {
 }
 
 #[must_use]
-#[allow(dead_code)]
+#[cfg(test)]
 pub fn get_group_id_from_url(url: &str) -> Option<u32> {
     let id = Regex::new(r"/torrents\.php\?id=(\d+)&torrentid=(\d+)(#torrent\d+)?$")
         .expect("Regex should compile")

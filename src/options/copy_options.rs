@@ -28,10 +28,6 @@ impl CopyOptions {
 }
 
 impl Options for CopyOptions {
-    fn get_name() -> String {
-        "Copy Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.hard_link.is_none() {
             self.hard_link = alternative.hard_link;
@@ -61,11 +57,6 @@ impl Options for CopyOptions {
             options.hard_link = None;
         }
         Some(options)
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

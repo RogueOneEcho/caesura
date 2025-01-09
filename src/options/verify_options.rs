@@ -35,10 +35,6 @@ impl VerifyOptions {
 }
 
 impl Options for VerifyOptions {
-    fn get_name() -> String {
-        "Verify Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.no_hash_check.is_none() {
             self.no_hash_check = alternative.no_hash_check;
@@ -72,11 +68,6 @@ impl Options for VerifyOptions {
             options.no_hash_check = None;
         }
         Some(options)
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

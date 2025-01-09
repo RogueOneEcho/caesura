@@ -58,10 +58,6 @@ impl FileOptions {
 }
 
 impl Options for FileOptions {
-    fn get_name() -> String {
-        "Additional File Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.no_image_compression.is_none() {
             self.no_image_compression = alternative.no_image_compression;
@@ -116,11 +112,6 @@ impl Options for FileOptions {
             options.no_png_to_jpg = None;
         }
         Some(options)
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

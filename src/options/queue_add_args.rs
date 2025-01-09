@@ -29,10 +29,6 @@ impl QueueAddArgs {
 }
 
 impl Options for QueueAddArgs {
-    fn get_name() -> String {
-        "Queue Arguments".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.queue_add_path.is_none() {
             self.queue_add_path.clone_from(&alternative.queue_add_path);
@@ -67,11 +63,6 @@ impl Options for QueueAddArgs {
             }) => Some(args),
             _ => None,
         }
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

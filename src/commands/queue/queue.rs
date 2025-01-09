@@ -33,10 +33,8 @@ pub(crate) struct Queue {
     table: Table<20, 1, QueueItem>,
 }
 
-#[allow(dead_code)]
 impl Queue {
     /// Create a new [`Queue`]
-    #[allow(dead_code)]
     pub(crate) fn from_path(path: PathBuf) -> Self {
         Self {
             table: Table::new(path),

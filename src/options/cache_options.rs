@@ -31,10 +31,6 @@ impl CacheOptions {
 }
 
 impl Options for CacheOptions {
-    fn get_name() -> String {
-        "Cache Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.cache.is_none() {
             self.cache.clone_from(&alternative.cache);
@@ -87,11 +83,6 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
             ) => Some(cache),
             _ => None,
         }
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

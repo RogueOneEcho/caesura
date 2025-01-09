@@ -51,10 +51,6 @@ impl UploadOptions {
 }
 
 impl Options for UploadOptions {
-    fn get_name() -> String {
-        "Upload Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.copy_transcode_to_content_dir.is_none() {
             self.copy_transcode_to_content_dir = alternative.copy_transcode_to_content_dir;
@@ -117,11 +113,6 @@ impl Options for UploadOptions {
             options.dry_run = None;
         }
         Some(options)
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

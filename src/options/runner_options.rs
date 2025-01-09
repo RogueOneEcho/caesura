@@ -26,10 +26,6 @@ impl RunnerOptions {
 }
 
 impl Options for RunnerOptions {
-    fn get_name() -> String {
-        "Runner Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.cpus.is_none() {
             self.cpus.clone_from(&alternative.cpus);
@@ -55,11 +51,6 @@ impl Options for RunnerOptions {
             }
             _ => None,
         }
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

@@ -31,10 +31,6 @@ impl SourceArg {
 }
 
 impl Options for SourceArg {
-    fn get_name() -> String {
-        "Source Argument".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.source.is_none() {
             self.source.clone_from(&alternative.source);
@@ -63,11 +59,6 @@ impl Options for SourceArg {
             ) => Some(source),
             _ => None,
         }
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

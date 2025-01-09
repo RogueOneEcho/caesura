@@ -87,10 +87,6 @@ impl SharedOptions {
 }
 
 impl Options for SharedOptions {
-    fn get_name() -> String {
-        "Shared Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.announce_url.is_none() {
             self.announce_url.clone_from(&alternative.announce_url);
@@ -258,11 +254,6 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
             ) => Some(shared),
             _ => None,
         }
-    }
-
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {

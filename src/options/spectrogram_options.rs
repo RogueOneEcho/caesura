@@ -25,10 +25,6 @@ impl SpectrogramOptions {
 }
 
 impl Options for SpectrogramOptions {
-    fn get_name() -> String {
-        "Spectrogram Options".to_owned()
-    }
-
     fn merge(&mut self, alternative: &Self) {
         if self.spectrogram_size.is_none() {
             self.spectrogram_size
@@ -59,10 +55,6 @@ impl Options for SpectrogramOptions {
             Some(Batch { spectrogram, .. } | Spectrogram { spectrogram, .. }) => Some(spectrogram),
             _ => None,
         }
-    }
-    #[allow(clippy::absolute_paths)]
-    fn from_json(json: &str) -> Result<Self, serde_json::error::Error> {
-        serde_json::from_str(json)
     }
 
     fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
