@@ -4,9 +4,10 @@ use clap::{ArgAction, Args};
 use di::{injectable, Ref};
 use serde::{Deserialize, Serialize};
 
-use crate::cli::ArgumentsParser;
-use crate::cli::CommandArguments::*;
-use crate::options::{Options, OptionsProvider};
+use crate::commands::*;
+use crate::options::*;
+
+use crate::commands::CommandArguments::*;
 
 /// Options for [`VerifyCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]

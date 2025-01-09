@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 pub trait Options: Clone + Default + Display {
     /// Get a friendly display name.
+    #[allow(dead_code)]
     fn get_name() -> String;
 
     /// Merge values with [`Self`]
@@ -17,7 +18,7 @@ pub trait Options: Clone + Default + Display {
     fn from_args() -> Option<Self>;
 
     /// Deserialize [`Self`] from JSON
-    #[allow(clippy::absolute_paths)]
+    #[allow(clippy::absolute_paths, dead_code)]
     fn from_json(json: &str) -> Result<Self, serde_json::error::Error>;
 
     /// Deserialize [`Self`] from YAML

@@ -1,8 +1,8 @@
-use crate::options::*;
 use colored::Colorize;
 use log::error;
 use std::fmt::{Display, Formatter};
 
+use crate::options::*;
 #[derive(Debug)]
 pub enum OptionRule {
     Changed(String, String, String),

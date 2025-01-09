@@ -1,5 +1,5 @@
 use crate::options::*;
-use crate::testing::init_logger;
+use crate::utils::*;
 
 #[tokio::test]
 async fn batch_options_validate() {

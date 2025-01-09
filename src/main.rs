@@ -1,4 +1,4 @@
-use caesura::hosting::HostBuilder;
+use caesura::HostBuilder;
 use std::process::ExitCode;
 
 #[tokio::main]

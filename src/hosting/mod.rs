@@ -1,5 +1,5 @@
-pub use host::*;
+pub(crate) use host::*;
 pub use host_builder::*;
 
-pub mod host;
+mod host;
 mod host_builder;

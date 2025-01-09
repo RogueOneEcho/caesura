@@ -1,19 +1,18 @@
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 
-use crate::cli::ArgumentsParser;
 use clap::Args;
 use di::{injectable, Ref};
 use serde::{Deserialize, Serialize};
 
-use crate::cli::CommandArguments::{Batch, Queue, Spectrogram, Transcode, Upload, Verify};
-use crate::cli::QueueCommandArguments::{Add, List, Summary};
-use crate::options::{
-    Changed, DoesNotExist, NotSet, OptionRule, Options, OptionsProvider, UrlInvalidSuffix,
-    UrlNotHttp,
-};
+use crate::commands::CommandArguments::*;
+use crate::commands::QueueCommandArguments::*;
+
 use rogue_logging::{TimeFormat, Verbosity};
 
+use crate::commands::CommandArguments::{Batch, Queue};
+use crate::commands::*;
+use crate::options::*;
 pub const DEFAULT_CONFIG_PATH: &str = "config.yml";
 const DEFAULT_CONTENT_PATH: &str = "./content";
 const DEFAULT_OUTPUT_PATH: &str = "./output";

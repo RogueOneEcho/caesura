@@ -1,12 +1,12 @@
+use crate::commands::*;
+use crate::options::*;
 use std::fmt::{Display, Formatter};
 
 use clap::{ArgAction, Args};
 use di::{injectable, Ref};
 use serde::{Deserialize, Serialize};
 
-use crate::cli::ArgumentsParser;
-use crate::cli::CommandArguments::*;
-use crate::options::{Options, OptionsProvider};
+use crate::commands::CommandArguments::*;
 
 /// Options for copying files during [`TranscodeCommand`] and [`UploadCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]

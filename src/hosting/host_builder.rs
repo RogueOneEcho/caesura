@@ -1,26 +1,19 @@
 use colored::Colorize;
-use di::{singleton_as_self, Injectable, Mut, Ref, RefMut, ServiceCollection};
+#[cfg(test)]
+use di::Ref;
+use di::{singleton_as_self, Injectable, Mut, RefMut, ServiceCollection};
 use log::error;
 use std::process::exit;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
 
-use crate::batch::BatchCommand;
-use crate::built_info::{PKG_HOMEPAGE, PKG_NAME, PKG_VERSION};
-use crate::formats::TargetFormatProvider;
-use crate::fs::PathManager;
-use crate::hosting::Host;
-use crate::jobs::{DebugSubscriber, JobRunner, ProgressBarSubscriber, Publisher};
-use crate::options::config_command::ConfigCommand;
+use crate::commands::*;
+use crate::hosting::*;
 use crate::options::*;
-use crate::queue::queue_summary_command::QueueSummaryCommand;
-use crate::queue::{Queue, QueueAddCommand, QueueListCommand};
-use crate::source::{IdProvider, SourceProvider};
-use crate::spectrogram::{SpectrogramCommand, SpectrogramJobFactory};
-use crate::transcode::{AdditionalJobFactory, TranscodeCommand, TranscodeJobFactory};
-use crate::upload::UploadCommand;
-use crate::verify::VerifyCommand;
+use crate::utils::*;
+
+use crate::built_info::{PKG_HOMEPAGE, PKG_NAME, PKG_VERSION};
 use gazelle_api::GazelleClientFactory;
 use rogue_logging::{Error, LoggerBuilder};
 
@@ -125,6 +118,7 @@ impl HostBuilder {
     }
 
     #[must_use]
+    #[cfg(test)]
     pub fn with_options<T: Options + 'static>(&mut self, options: T) -> &mut Self {
         self.services
             .add(singleton_as_self().from(move |_| Ref::new(options.clone())));

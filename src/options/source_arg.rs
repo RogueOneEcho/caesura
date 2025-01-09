@@ -1,12 +1,13 @@
 use std::fmt::{Display, Formatter};
 
-use crate::cli::ArgumentsParser;
 use clap::Args;
 use di::{injectable, Ref};
 use serde::{Deserialize, Serialize};
 
-use crate::cli::CommandArguments::{Spectrogram, Transcode, Upload, Verify};
-use crate::options::{NotSet, OptionRule, Options, OptionsProvider};
+use crate::commands::*;
+use crate::options::*;
+
+use crate::commands::CommandArguments::*;
 
 /// Source argument used by Verify, Spectrogram, Transcode, and Upload commands
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
