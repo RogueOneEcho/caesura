@@ -62,6 +62,7 @@ impl HostBuilder {
                 LoggerBuilder::new()
                     .with_exclude_filter("reqwest".to_owned())
                     .with_exclude_filter("cookie".to_owned())
+                    .with_exclude_filter("lofty".to_owned())
                     .with_verbosity(options.verbosity.expect("verbosity should be set"))
                     .with_time_format(options.log_time.expect("log_time should be set"))
                     .create()
