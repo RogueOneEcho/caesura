@@ -336,6 +336,7 @@ impl UploadCommand {
                 resample.output = PathBuf::from(format!("output.{extension}"));
                 resample.to_info().display()
             }
+            Variant::Include(_) => String::new()
         };
         Ok(command)
     }

@@ -1,6 +1,7 @@
 use crate::commands::*;
 use crate::utils::*;
 
+use colored::Colorize;
 use lofty::config::WriteOptions;
 use lofty::prelude::TagExt;
 use lofty::tag::ItemKey::{Popularimeter, Work};
@@ -9,6 +10,7 @@ use log::{trace, warn};
 use rogue_logging::Error;
 use std::fs::create_dir_all;
 use std::process::Stdio;
+use tokio::fs::{copy, hard_link};
 use tokio::join;
 
 pub(crate) struct TranscodeJob {
@@ -22,6 +24,7 @@ impl TranscodeJob {
         let output_path = match &self.variant {
             Variant::Transcode(_, encode) => encode.output.clone(),
             Variant::Resample(resample) => resample.output.clone(),
+            Variant::Include(include) => include.output.clone(),
         };
         let output_dir = output_path
             .parent()
@@ -30,6 +33,7 @@ impl TranscodeJob {
         match self.variant {
             Variant::Transcode(decode, encode) => execute_transcode(decode, encode).await?,
             Variant::Resample(resample) => execute_resample(resample).await?,
+            Variant::Include(include) => execute_include(include).await?,
         };
         if let Some(mut tags) = self.tags {
             let exclude = [Popularimeter, Work];
@@ -92,5 +96,26 @@ async fn execute_resample(resample: Resample) -> Result<(), Error> {
         .await
         .map_err(|e| command_error(e, "execute resample job", &program))?;
     OutputHandler::execute(output, "execute resample job", "transcode")?;
+    Ok(())
+}
+
+async fn execute_include(include: Include) -> Result<(), Error> {
+    let verb = if include.hard_link {
+        hard_link(&include.input, &include.output)
+            .await
+            .map_err(|e| io_error(e, "hard link flac file"))?;
+        "Hard Linked"
+    } else {
+        copy(&include.input, &include.output)
+            .await
+            .map_err(|e| io_error(e, "copy flac file"))?;
+        "Copied"
+    };
+    trace!(
+        "{} {} to {}",
+        verb.bold(),
+        &include.input.display(),
+        &include.output.display()
+    );
     Ok(())
 }

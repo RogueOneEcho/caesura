@@ -4,11 +4,13 @@ use crate::commands::*;
 use crate::utils::*;
 
 use rogue_logging::Error;
+use crate::options::CopyOptions;
 
 /// Create a [`TranscodeJob`] for each [`FlacFile`] in the [`Vec<FlacFile>`].
 #[injectable]
 pub(crate) struct TranscodeJobFactory {
     paths: Ref<PathManager>,
+    copy_options: Ref<CopyOptions>,
 }
 
 impl TranscodeJobFactory {
@@ -39,26 +41,37 @@ impl TranscodeJobFactory {
             .map_err(|e| claxon_error(e, "read FLAC"))?;
         let id = format!("Transcode {:<4}{index:>3}", format.to_string());
         let output_path = self.paths.get_transcode_path(source, format, flac);
-        let variant = if matches!(format, TargetFormat::Flac) && is_resample_required(&info) {
-            Variant::Resample(Resample {
-                input: flac.path.clone(),
-                output: output_path.clone(),
-                resample_rate: get_resample_rate(&info)?,
-            })
-        } else {
-            let resample_rate = is_resample_required(&info)
-                .then(|| get_resample_rate(&info))
-                .transpose()?;
-            Variant::Transcode(
-                Decode {
-                    input: flac.path.clone(),
-                    resample_rate,
-                },
-                Encode {
-                    format,
-                    output: output_path.clone(),
-                },
-            )
+        let variant = match format {
+            TargetFormat::Flac => {
+                if is_resample_required(&info) {
+                    Variant::Resample(Resample {
+                        input: flac.path.clone(),
+                        output: output_path.clone(),
+                        resample_rate: get_resample_rate(&info)?,
+                    })
+                } else {
+                    Variant::Include(Include {
+                        input: flac.path.clone(),
+                        output: output_path.clone(),
+                        hard_link: self.copy_options.hard_link.expect("hard_link should be set"),
+                    })
+                }                
+            },
+            TargetFormat::_320 | TargetFormat::V0 => {
+                let resample_rate = is_resample_required(&info)
+                    .then(|| get_resample_rate(&info))
+                    .transpose()?;
+                Variant::Transcode(
+                    Decode {
+                        input: flac.path.clone(),
+                        resample_rate,
+                    },
+                    Encode {
+                        format,
+                        output: output_path.clone(),
+                    },
+                )
+            }
         };
         let tags = if matches!(format, TargetFormat::_320 | TargetFormat::V0) {
             let mut tags = get_vorbis_tags(flac)?;
