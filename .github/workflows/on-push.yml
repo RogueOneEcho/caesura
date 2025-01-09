@@ -51,6 +51,12 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - release
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+        - x86_64-unknown-linux-gnu
+        - x86_64-unknown-linux-musl
     steps:
 
     - uses: actions/checkout@v4
@@ -59,8 +65,9 @@ jobs:
       id: cache-cargo
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
+          ${{ runner.os }}-cargo-${{ matrix.target }}-
           ${{ runner.os }}-cargo-
         path: |
           ~/.cargo/bin/
@@ -75,33 +82,20 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - name: Restore samples cache
-      id: cache-samples
-      uses: actions/cache@v4
-      with:
-       path: samples/content
-       key: cache-samples
-
-    - if: steps.cache-samples.outputs.cache-hit != 'true'
-      run: ./samples/download-sample
-
-    - run: |
-        curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
-          --location \
-          --show-error \
-          --silent \
-        | tar \
-          --extract \
-          --gzip \
-          --directory "/usr/local/bin" \
-          --file - \
-          "imdl"
-
     - run: sudo apt-get update
 
-    - run: sudo apt-get install flac lame sox imagemagick --yes
+    - if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
+      run: sudo apt-get install musl-tools --yes
 
-    - run: cargo build --release
+    - if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
+      run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross --yes
+
+    - if: ${{ matrix.target == 'aarch64-unknown-linux-musl' }}
+      run: sudo apt-get install musl-tools gcc-aarch64-linux-gnu musl-dev --yes
+
+    - run: rustup target add ${{ matrix.target }}
+
+    - run: cargo build --release --target ${{ matrix.target }}
 
     - name: Save cargo cache
       id: cargo-cache-save
@@ -115,11 +109,46 @@ jobs:
           ~/.cargo/git/db/
           target/
 
-    - run: rm -rf content
+    - uses: actions/upload-artifact@v4
+      with:
+        name: caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/caesura
 
-    - run: ln -s samples/content content
+    - name: Restore samples cache
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      id: cache-samples
+      uses: actions/cache@v4
+      with:
+        path: samples/content
+        key: cache-samples
 
-    - run: |
+    - if: matrix.target == 'x86_64-unknown-linux-gnu' && steps.cache-samples.outputs.cache-hit != 'true'
+      run: ./samples/download-sample
+
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: |
+        curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
+          --location \
+          --show-error \
+          --silent \
+        | tar \
+          --extract \
+          --gzip \
+          --directory "/usr/local/bin" \
+          --file - \
+          "imdl"
+
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: sudo apt-get install flac lame sox imagemagick --yes
+
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: rm -rf content
+
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: ln -s samples/content content
+
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: |
         tee config.yml <<EOF
         announce_url: ${{ secrets.ANNOUNCE_URL }}
         api_key: ${{ secrets.API_KEY }}
@@ -127,13 +156,17 @@ jobs:
         verbosity: trace
         EOF
 
-    - run: touch output/cache.json
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: touch output/cache.json
 
-    - run: touch output/queue.yml
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: touch output/queue.yml
 
-    - run: cargo test --release --no-fail-fast
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: cargo test --release --no-fail-fast
 
     - name: Run cargo check
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
         if ! cargo check --quiet --all-targets --message-format short
         then
@@ -141,6 +174,7 @@ jobs:
         fi
 
     - name: Run cargo clippy
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
         if ! cargo clippy --quiet --all-targets --message-format short
         then
@@ -148,6 +182,7 @@ jobs:
         fi
 
     - name: Run cargo fmt
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
         if ! cargo fmt --check
         then
@@ -156,15 +191,10 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: caesura
-        path: target/release/caesura
-
 
   cargo-publish:
     runs-on: ubuntu-latest
-#    if: ${{ needs.release.outputs.version != '' && ! contains(needs.release.outputs.version, '-') }}
+    if: ${{ needs.release.outputs.version != '' }}
     needs:
     - release
     - cargo-build
@@ -222,13 +252,15 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: caesura
+        pattern: caesura-${{ needs.release.outputs.version }}-*
+        merge-multiple: true
 
     - name: gh release upload
       run: >
         gh release upload
         "v${{ needs.release.outputs.version }}"
-        caesura
+        "caesura-${{ needs.release.outputs.version }}-x86_64-unknown-linux-gnu"
+        "caesura-${{ needs.release.outputs.version }}-x86_64-unknown-linux-musl"
         --clobber
         --repo "${{ github.repository }}"
       env:
