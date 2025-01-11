@@ -156,7 +156,7 @@ impl UploadCommand {
             if self.upload_options.dry_run.expect("dry_run should be set") {
                 warn!("{} upload as this is a dry run", "Skipping".bold());
                 info!("{} data of {target} for {source}:", "Upload".bold());
-                info!("{}", form);
+                info!("\n{form}");
                 continue;
             }
             match api.upload_torrent(form).await {
