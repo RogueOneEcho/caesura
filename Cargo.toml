@@ -24,14 +24,14 @@ bytes = "1.9.0"
 chrono = "0.4.39"
 clap = { version = "4.5.23", features = ["derive"] }
 claxon = "0.4.3"
-colored = "2.2.0"
+colored = "3.0.0"
 flat_db = "0.2.0"
 futures = "0.3.31"
-gazelle_api = "0.5.1"
+gazelle_api = "0.6.0-alpha.4"
 html-escape = "0.2.13"
 humantime = "2.1.0"
 indicatif = "0.17.9"
-lofty = "0.21.1"
+lofty = "0.22.0"
 log = { version = "0.4.22", features = ["std"] }
 more-di = { version = "3.1.0", features = ["async", "builder"] }
 num_cpus = "1.16.0"
@@ -39,9 +39,9 @@ regex = "1.11.1"
 reqwest = { version = "0.12.11", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
 rogue_logging = "0.3.0"
 serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.134"
+serde_json = "1.0.135"
 serde_yaml = "0.9.34"
-tokio = { version = "1.42.0", features = ["full"] }
+tokio = { version = "1.43.0", features = ["full"] }
 
 [build-dependencies]
 built = "^0.7"

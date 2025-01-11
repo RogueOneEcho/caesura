@@ -1,11 +1,10 @@
 use regex::Regex;
-use rogue_logging::Error;
 
 use crate::utils::*;
-pub fn get_torrent_id_from_url(url: &str) -> Result<u32, Error> {
+pub fn get_torrent_id_from_url(url: &str) -> Result<u32, IdProviderError> {
     get_torrent_id_from_group_url(url)
         .or_else(|| get_torrent_id_from_torrent_url(url))
-        .ok_or_else(|| error("get torrent id from url", "failed to parse id".to_owned()))
+        .ok_or(IdProviderError::UrlInvalid)
 }
 
 #[must_use]

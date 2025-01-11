@@ -214,12 +214,7 @@ impl VerifyCommand {
             };
             let buffer = match api.get_torrent_file_as_buffer(source.torrent.id).await {
                 Ok(buffer) => buffer,
-                Err(e) => {
-                    return vec![SourceIssue::Error {
-                        domain: "API".to_owned(),
-                        details: e.to_string(),
-                    }]
-                }
+                Err(e) => return vec![Provider(e)],
             };
             if let Err(e) = file.write_all(&buffer).await {
                 return vec![SourceIssue::Error {

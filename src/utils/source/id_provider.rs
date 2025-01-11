@@ -1,12 +1,14 @@
+use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
-
-use di::{injectable, Ref};
-
-use rogue_logging::Error;
 
 use crate::dependencies::*;
 use crate::options::*;
+use crate::utils::IdProviderError::*;
 use crate::utils::*;
+use di::{injectable, Ref};
+use log::warn;
+use serde::{Deserialize, Serialize};
+
 /// Retrieve the id of a source.
 #[injectable]
 pub struct IdProvider {
@@ -14,13 +16,28 @@ pub struct IdProvider {
     arg: Ref<SourceArg>,
 }
 
+/// Error types returned by the [`IdProvider`]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum IdProviderError {
+    /// Input did not match any known types
+    NoMatch,
+    /// Input was a URL that could not be parsed
+    UrlInvalid,
+    /// Input was a torrent file that did not exist
+    TorrentFileNotFound,
+    /// Input was a torrent file that IMDL failed to show
+    TorrentFileInvalid,
+    /// Input was a torrent file with an unwanted source
+    TorrentFileSource { actual: String, expected: String },
+}
+
 impl IdProvider {
-    pub async fn get_by_options(&self) -> Result<u32, Error> {
+    pub async fn get_by_options(&self) -> Result<u32, IdProviderError> {
         let source_input = self.arg.source.clone().unwrap_or_default();
         self.get_by_string(&source_input).await
     }
 
-    pub async fn get_by_string(&self, input: &String) -> Result<u32, Error> {
+    async fn get_by_string(&self, input: &String) -> Result<u32, IdProviderError> {
         if let Ok(id) = input.parse::<u32>() {
             Ok(id)
         } else if input.starts_with("http") {
@@ -30,30 +47,43 @@ impl IdProvider {
             if path.exists() {
                 self.get_by_file(&path).await
             } else {
-                Err(error(
-                    "get source from torrent file",
-                    "File does not exist".to_owned(),
-                ))
+                Err(TorrentFileNotFound)
             }
         } else {
-            Err(error("get source", format!("Unknown source: {input}")))
+            Err(NoMatch)
         }
     }
 
-    async fn get_by_file(&self, path: &Path) -> Result<u32, Error> {
-        let summary = ImdlCommand::show(path).await?;
+    async fn get_by_file(&self, path: &Path) -> Result<u32, IdProviderError> {
+        let summary = ImdlCommand::show(path).await.map_err(|e| {
+            warn!("{e}");
+            TorrentFileInvalid
+        })?;
         let tracker_id = self.options.indexer.clone().expect("indexer should be set");
         if summary.is_source_equal(&tracker_id) {
             let url = summary.comment.unwrap_or_default();
             get_torrent_id_from_url(&url)
         } else {
-            Err(error(
-                "get source by file",
-                format!(
-                    "incorrect source\nExpected: {tracker_id}\nActual: {}",
-                    summary.source.unwrap_or_default()
-                ),
-            ))
+            Err(TorrentFileSource {
+                actual: summary.source.unwrap_or_default(),
+                expected: tracker_id.to_ascii_uppercase(),
+            })
         }
+    }
+}
+
+impl Display for IdProviderError {
+    #[allow(clippy::absolute_paths)]
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        let message = match self {
+            NoMatch => "Input did not match any known types".to_owned(),
+            UrlInvalid => "Input was a URL that could not be parsed".to_owned(),
+            TorrentFileNotFound => "Input was a torrent file that did not exist".to_owned(),
+            TorrentFileInvalid => "Input was a torrent file that could not be read".to_owned(),
+            TorrentFileSource { actual, expected } => {
+                format!("Input was a torrent file with source {actual} not {expected}")
+            }
+        };
+        message.fmt(formatter)
     }
 }

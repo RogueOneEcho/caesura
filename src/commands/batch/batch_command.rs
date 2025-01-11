@@ -1,13 +1,16 @@
 use crate::commands::*;
 use crate::options::*;
 use crate::utils::*;
+use std::time::Duration;
 
 use colored::Colorize;
 use di::{injectable, Ref, RefMut};
+use gazelle_api::GazelleError;
 use log::{debug, error, info, trace, warn};
-use reqwest::StatusCode;
 use rogue_logging::Error;
 use tokio::time::sleep;
+
+const PAUSE_DURATION: u64 = 10;
 
 /// Batch a FLAC source is suitable for transcoding.
 #[injectable]
@@ -111,32 +114,36 @@ impl BatchCommand {
             let source = match source_provider.get(id).await {
                 Ok(source) => source,
                 Err(issue) => {
-                    if let SourceIssue::ApiResponse {
-                        action: _,
-                        status_code,
-                        error,
-                    } = issue.clone()
-                    {
-                        let reason = StatusCode::from_u16(status_code).map_or_else(
-                            |_| status_code.to_string(),
-                            |sc| sc.canonical_reason().unwrap_or("").to_owned(),
-                        );
-                        if status_code == 429 || status_code >= 500 {
-                            warn!("{} {item} due to {reason}", "Skipping".bold());
-                            warn!("{error}");
-                            warn!("This is likely to be a temporary issue with the API.");
-                            warn!("If it persists, please submit an issue on GitHub.");
-                        } else {
-                            debug!("{} {item} due to {reason}", "Skipping".bold());
-                            debug!("{error}");
+                    debug!("{} {item}", "Skipping".bold());
+                    debug!("{issue}");
+                    match issue.clone() {
+                        SourceIssue::Provider(GazelleError::Unauthorized) => {
+                            return Err(error("get source", format!("{} response received. This likely means the API Key is invalid.", "Unauthorized".bold())));
+                        }
+                        SourceIssue::Provider(GazelleError::TooManyRequests) => {
+                            warn!("{} rate limit", "Exceeded".bold());
+                            pause().await;
+                        }
+                        SourceIssue::Provider(GazelleError::Unexpected(code, message)) => {
+                            warn!(
+                                "{} response received. {}: {message}",
+                                "Unexpected".bold(),
+                                status_code_and_reason(code)
+                            );
+                            pause().await;
+                        }
+                        SourceIssue::Provider(GazelleError::Empty(code)) => {
+                            warn!(
+                                "{} response received without an error message: {}",
+                                "Unexpected".bold(),
+                                status_code_and_reason(code)
+                            );
+                            pause().await;
+                        }
+                        _ => {
                             item.verify = Some(VerifyStatus::from_issue(issue));
                             queue.set(item).await?;
                         }
-                    } else {
-                        debug!("{} {item}", "Skipping".bold());
-                        debug!("{issue}");
-                        item.verify = Some(VerifyStatus::from_issue(issue));
-                        queue.set(item).await?;
                     }
                     continue;
                 }
@@ -210,4 +217,11 @@ impl BatchCommand {
         info!("{} batch process of {count} items", "Completed".bold());
         Ok(true)
     }
+}
+
+async fn pause() {
+    info!("There is no retry logic so you will need to re-run the command");
+    info!("If it persists, please submit an issue on GitHub.");
+    info!("{} for {PAUSE_DURATION} seconds.", "Pausing".bold());
+    sleep(Duration::from_secs(PAUSE_DURATION)).await;
 }

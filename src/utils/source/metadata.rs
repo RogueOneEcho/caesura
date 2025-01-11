@@ -63,15 +63,15 @@ fn get_year(group: &Group, torrent: &Torrent) -> u16 {
 mod tests {
 
     use super::*;
-    use gazelle_api::{Artist, Group, MusicInfo};
+    use gazelle_api::{Credit, Credits, Group};
 
     #[test]
     fn get_artist_none() {
         // Arrange
         let group = Group {
-            music_info: Some(MusicInfo {
+            music_info: Some(Credits {
                 artists: Vec::new(),
-                ..MusicInfo::default()
+                ..Credits::default()
             }),
             ..Group::default()
         };
@@ -88,12 +88,12 @@ mod tests {
         // Arrange
         let expected = "Hello, world!".to_owned();
         let group = Group {
-            music_info: Some(MusicInfo {
-                artists: vec![Artist {
+            music_info: Some(Credits {
+                artists: vec![Credit {
                     id: 12345,
                     name: expected.clone(),
                 }],
-                ..MusicInfo::default()
+                ..Credits::default()
             }),
             ..Group::default()
         };
@@ -110,18 +110,18 @@ mod tests {
         // Arrange
         let expected = "Artist One & Artist Two".to_owned();
         let group = Group {
-            music_info: Some(MusicInfo {
+            music_info: Some(Credits {
                 artists: vec![
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist One".to_owned(),
                     },
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist Two".to_owned(),
                     },
                 ],
-                ..MusicInfo::default()
+                ..Credits::default()
             }),
             ..Group::default()
         };
@@ -138,22 +138,22 @@ mod tests {
         // Arrange
         let expected = "Various Artists".to_owned();
         let group = Group {
-            music_info: Some(MusicInfo {
+            music_info: Some(Credits {
                 artists: vec![
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist One".to_owned(),
                     },
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist Two".to_owned(),
                     },
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist Three".to_owned(),
                     },
                 ],
-                ..MusicInfo::default()
+                ..Credits::default()
             }),
             ..Group::default()
         };
@@ -170,26 +170,26 @@ mod tests {
         // Arrange
         let expected = "DJ One".to_owned();
         let group = Group {
-            music_info: Some(MusicInfo {
+            music_info: Some(Credits {
                 artists: vec![
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist One".to_owned(),
                     },
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist Two".to_owned(),
                     },
-                    Artist {
+                    Credit {
                         id: 12345,
                         name: "Artist Three".to_owned(),
                     },
                 ],
-                dj: vec![Artist {
+                dj: vec![Credit {
                     id: 12345,
                     name: "DJ One".to_owned(),
                 }],
-                ..MusicInfo::default()
+                ..Credits::default()
             }),
             ..Group::default()
         };

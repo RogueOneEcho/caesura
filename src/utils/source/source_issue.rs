@@ -1,6 +1,7 @@
 use crate::utils::*;
 use SourceIssue::*;
 
+use gazelle_api::GazelleError;
 use reqwest::StatusCode;
 use rogue_logging::Colors;
 use serde::{Deserialize, Serialize};
@@ -15,18 +16,24 @@ pub const MAX_DURATION: u32 = 12 * 60 * 60;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum SourceIssue {
+    /// DEPRECATED
+    /// Replaced by [`Id`]
     IdError {
         details: String,
     },
+    Id(IdProviderError),
     GroupMismatch {
         actual: u32,
         expected: u32,
     },
+    /// DEPRECATED
+    /// Replaced by [`Provider`]
     ApiResponse {
         action: String,
         status_code: u16,
         error: String,
     },
+    Provider(GazelleError),
     Category {
         actual: String,
     },
@@ -97,6 +104,7 @@ impl Display for SourceIssue {
     #[allow(clippy::absolute_paths)]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         let message = match self {
+            Id(error) => error.to_string(),
             IdError { details } => format!("Invalid source id: {details}"),
             ApiResponse {
                 action,
@@ -109,6 +117,7 @@ impl Display for SourceIssue {
                     .unwrap_or("Unknown");
                 format!("API responded {status} to {action}: {error}")
             }
+            Provider(error) => error.to_string(),
             GroupMismatch { actual, expected } => {
                 format!("Group of torrent `{actual}` did not match torrent group `{expected}`")
             }

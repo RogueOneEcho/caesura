@@ -14,7 +14,7 @@ use crate::options::*;
 use crate::utils::*;
 
 use crate::built_info::{PKG_HOMEPAGE, PKG_NAME, PKG_VERSION};
-use gazelle_api::GazelleClientFactory;
+use gazelle_api::{GazelleClientFactory, GazelleClientOptions};
 use rogue_logging::{Error, LoggerBuilder};
 
 pub struct HostBuilder {
@@ -66,12 +66,16 @@ impl HostBuilder {
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();
                 let factory = GazelleClientFactory {
-                    url: options
-                        .indexer_url
-                        .clone()
-                        .expect("indexer_url should be set"),
-                    key: options.api_key.clone().expect("api_key should be set"),
-                    user_agent: format!("{PKG_NAME}/{PKG_VERSION} ({PKG_HOMEPAGE})"),
+                    options: GazelleClientOptions {
+                        url: options
+                            .indexer_url
+                            .clone()
+                            .expect("indexer_url should be set"),
+                        key: options.api_key.clone().expect("api_key should be set"),
+                        user_agent: format!("{PKG_NAME}/{PKG_VERSION} ({PKG_HOMEPAGE})"),
+                        requests_allowed_per_duration: None,
+                        request_limit_duration: None,
+                    },
                 };
                 let api = factory.create();
                 RefMut::new(Mut::new(api))

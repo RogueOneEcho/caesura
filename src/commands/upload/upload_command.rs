@@ -97,7 +97,6 @@ impl UploadCommand {
             if let Err(e) = ImdlCommand::verify(&torrent_path, &target_dir).await {
                 let error = error("verify torrent content", e.to_string());
                 error.log();
-                error.log();
                 errors.push(error);
                 status.success = false;
                 continue;
@@ -173,9 +172,9 @@ impl UploadCommand {
                     info!("{link}");
                     formats.push(UploadFormatStatus { format: target, id });
                 }
-                Err(error) => {
-                    error.log();
-                    errors.push(error);
+                Err(e) => {
+                    warn!("{e}");
+                    errors.push(error("upload", e.to_string()));
                     status.success = false;
                     continue;
                 }
