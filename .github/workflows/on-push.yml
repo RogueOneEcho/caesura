@@ -171,7 +171,7 @@ jobs:
       run: touch output/queue.yml
 
     - if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: cargo test --release --no-fail-fast
+      run: cargo test --release --no-fail-fast --target ${{ matrix.target }}
 
     - name: Run cargo check
       if: matrix.target == 'x86_64-unknown-linux-gnu'
