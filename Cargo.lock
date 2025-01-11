@@ -489,9 +489,9 @@ dependencies = [
 
 [[package]]
 name = "gazelle_api"
-version = "0.6.0-alpha.4"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb611e30d0626ceff28ab95c24d9c05c9e1b353008aec66bc66aa2982c9b51d0"
+checksum = "152adcdf3692112cdc07416c87a95628a73c8df7a20266b4fe1c182c4ed9075d"
 dependencies = [
  "colored 3.0.0",
  "log",
