@@ -212,7 +212,7 @@ impl VerifyCommand {
                     }]
                 }
             };
-            let buffer = match api.get_torrent_file_as_buffer(source.torrent.id).await {
+            let buffer = match api.download_torrent(source.torrent.id).await {
                 Ok(buffer) => buffer,
                 Err(e) => return vec![Provider(e)],
             };
