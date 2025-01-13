@@ -19,13 +19,13 @@ pub struct SourceProvider {
 impl SourceProvider {
     pub async fn get(&mut self, id: u32) -> Result<Source, SourceIssue> {
         let mut api = self.api.write().expect("API should be available to read");
-        let response = api.get_torrent(id).await.map_err(SourceIssue::Provider)?;
+        let response = api.get_torrent(id).await.map_err(SourceIssue::api)?;
         let torrent = response.torrent;
         let group = response.group;
         let response = api
             .get_torrent_group(group.id)
             .await
-            .map_err(SourceIssue::Provider)?;
+            .map_err(SourceIssue::api)?;
         if group.id != response.group.id {
             return Err(SourceIssue::GroupMismatch {
                 actual: group.id,

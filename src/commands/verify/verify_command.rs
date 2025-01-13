@@ -214,7 +214,7 @@ impl VerifyCommand {
             };
             let buffer = match api.download_torrent(source.torrent.id).await {
                 Ok(buffer) => buffer,
-                Err(e) => return vec![Provider(e)],
+                Err(e) => return vec![SourceIssue::api(e)],
             };
             if let Err(e) = file.write_all(&buffer).await {
                 return vec![SourceIssue::Error {

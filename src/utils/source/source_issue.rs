@@ -27,13 +27,19 @@ pub enum SourceIssue {
         expected: u32,
     },
     /// DEPRECATED
-    /// Replaced by [`Provider`]
+    /// Replaced by [`Api`]
     ApiResponse {
         action: String,
         status_code: u16,
         error: String,
     },
-    Provider(GazelleError),
+    /// DEPRECATED
+    /// Replaced by [`Api`]
+    #[allow(dead_code)]
+    Provider,
+    Api {
+        response: GazelleError,
+    },
     Category {
         actual: String,
     },
@@ -100,6 +106,12 @@ pub enum SourceIssue {
     Other(String),
 }
 
+impl SourceIssue {
+    pub(crate) fn api(error: GazelleError) -> Self {
+        Api { response: error }
+    }
+}
+
 impl Display for SourceIssue {
     #[allow(clippy::absolute_paths)]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
@@ -117,7 +129,8 @@ impl Display for SourceIssue {
                     .unwrap_or("Unknown");
                 format!("API responded {status} to {action}: {error}")
             }
-            Provider(error) => error.to_string(),
+            Provider => "Received unsuccessful API response".to_owned(),
+            Api { response: issue } => issue.to_string(),
             GroupMismatch { actual, expected } => {
                 format!("Group of torrent `{actual}` did not match torrent group `{expected}`")
             }

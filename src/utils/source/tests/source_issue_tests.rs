@@ -1,4 +1,4 @@
-use crate::utils::SourceIssue::{ApiResponse, Id, IdError, Provider};
+use crate::utils::SourceIssue::{Api, ApiResponse, Id, IdError, Provider};
 use crate::utils::{IdProviderError, SourceIssue};
 use gazelle_api::GazelleError::*;
 
@@ -20,14 +20,39 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
             status_code: 200,
             error: "test".to_owned(),
         },
-        Provider(BadRequest),
-        Provider(NotFound),
-        Provider(Deserialization(
-            "A deserialization error occured".to_owned(),
-        )),
-        Provider(Request("A request error occured".to_owned())),
-        Provider(Unexpected(503, "Service unavailable".to_owned())),
-        Provider(Empty(500)),
+        Provider,
+        Api {
+            response: BadRequest {
+                message: String::new(),
+            },
+        },
+        Api {
+            response: NotFound {
+                message: String::new(),
+            },
+        },
+        Api {
+            response: Deserialization {
+                error: "A deserialization error occured".to_owned(),
+            },
+        },
+        Api {
+            response: Request {
+                error: "A request error occured".to_owned(),
+            },
+        },
+        Api {
+            response: Other {
+                status: 503,
+                message: Some("Service unavailable".to_owned()),
+            },
+        },
+        Api {
+            response: Other {
+                status: 500,
+                message: None,
+            },
+        },
     ];
     let expected = "- type: id_error
   details: Hello, world!
@@ -44,6 +69,84 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
   status_code: 200
   error: test
 - type: provider
+- type: api
+  response:
+    type: bad_request
+    message: ''
+- type: api
+  response:
+    type: not_found
+    message: ''
+- type: api
+  response:
+    type: deserialization
+    error: A deserialization error occured
+- type: api
+  response:
+    type: request
+    error: A request error occured
+- type: api
+  response:
+    type: other
+    status: 503
+    message: Service unavailable
+- type: api
+  response:
+    type: other
+    status: 500
+    message: null
+";
+
+    // Act
+    let yaml = serde_yaml::to_string(&example)?;
+    println!("{yaml}");
+    let deserialized: Vec<SourceIssue> = serde_yaml::from_str(expected)?;
+
+    // Assert
+    assert_eq!(yaml, expected);
+    assert_eq!(deserialized.len(), example.len());
+    Ok(())
+}
+
+#[test]
+#[allow(clippy::similar_names)]
+fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
+    // Arrange
+    let example = vec![
+        Api {
+            response: BadRequest {
+                message: String::new(),
+            },
+        },
+        Api {
+            response: NotFound {
+                message: String::new(),
+            },
+        },
+        Api {
+            response: Deserialization {
+                error: "A deserialization error occured".to_owned(),
+            },
+        },
+        Api {
+            response: Request {
+                error: "A request error occured".to_owned(),
+            },
+        },
+        Api {
+            response: Other {
+                status: 503,
+                message: Some("Service unavailable".to_owned()),
+            },
+        },
+        Api {
+            response: Other {
+                status: 500,
+                message: None,
+            },
+        },
+    ];
+    let before = "- type: provider
   BadRequest: null
 - type: provider
   NotFound: null
@@ -58,14 +161,45 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
 - type: provider
   Empty: 500
 ";
+    let after = "- type: api
+  response:
+    type: bad_request
+    message: ''
+- type: api
+  response:
+    type: not_found
+    message: ''
+- type: api
+  response:
+    type: deserialization
+    error: A deserialization error occured
+- type: api
+  response:
+    type: request
+    error: A request error occured
+- type: api
+  response:
+    type: other
+    status: 503
+    message: Service unavailable
+- type: api
+  response:
+    type: other
+    status: 500
+    message: null
+";
 
     // Act
+    let before_deserialized: Vec<SourceIssue> = serde_yaml::from_str(before)?;
+    let after_deserialized: Vec<SourceIssue> = serde_yaml::from_str(after)?;
     let yaml = serde_yaml::to_string(&example)?;
     println!("{yaml}");
-    let deserialized: Vec<SourceIssue> = serde_yaml::from_str(expected)?;
+    let before_reserialized = serde_yaml::to_string(&before_deserialized)?;
+    println!("--------------------");
+    println!("{before_reserialized}");
 
     // Assert
-    assert_eq!(yaml, expected);
-    assert_eq!(deserialized.len(), example.len());
+    assert_eq!(yaml, after);
+    assert_eq!(before_deserialized.len(), after_deserialized.len());
     Ok(())
 }

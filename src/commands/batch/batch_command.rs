@@ -117,27 +117,28 @@ impl BatchCommand {
                     debug!("{} {item}", "Skipping".bold());
                     debug!("{issue}");
                     match issue.clone() {
-                        SourceIssue::Provider(GazelleError::Unauthorized) => {
+                        SourceIssue::Api {
+                            response: GazelleError::Unauthorized { message: _ },
+                        } => {
+                            trace!("{issue}");
                             return Err(error("get source", format!("{} response received. This likely means the API Key is invalid.", "Unauthorized".bold())));
                         }
-                        SourceIssue::Provider(GazelleError::TooManyRequests) => {
+                        SourceIssue::Api {
+                            response: GazelleError::TooManyRequests { message: _ },
+                        } => {
+                            trace!("{issue}");
                             warn!("{} rate limit", "Exceeded".bold());
                             pause().await;
                         }
-                        SourceIssue::Provider(GazelleError::Unexpected(code, message)) => {
-                            warn!(
-                                "{} response received. {}: {message}",
-                                "Unexpected".bold(),
-                                status_code_and_reason(code)
-                            );
-                            pause().await;
-                        }
-                        SourceIssue::Provider(GazelleError::Empty(code)) => {
-                            warn!(
-                                "{} response received without an error message: {}",
-                                "Unexpected".bold(),
-                                status_code_and_reason(code)
-                            );
+                        SourceIssue::Api {
+                            response:
+                                GazelleError::Other {
+                                    status: _,
+                                    message: _,
+                                },
+                        } => {
+                            warn!("{} response received", "Unexpected".bold());
+                            warn!("{issue}");
                             pause().await;
                         }
                         _ => {
