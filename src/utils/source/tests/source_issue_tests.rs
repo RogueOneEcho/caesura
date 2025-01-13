@@ -22,7 +22,9 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
         },
         Provider(BadRequest),
         Provider(NotFound),
-        Provider(Deserialization("A deserialization error occured".to_owned())),
+        Provider(Deserialization(
+            "A deserialization error occured".to_owned(),
+        )),
         Provider(Request("A request error occured".to_owned())),
         Provider(Unexpected(503, "Service unavailable".to_owned())),
         Provider(Empty(500)),
@@ -30,11 +32,11 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
     let expected = "- type: id_error
   details: Hello, world!
 - type: id
-  NoMatch: null
+  no_match: null
 - type: id
-  UrlInvalid: null
+  url_invalid: null
 - type: id
-  TorrentFileSource:
+  torrent_file_source:
     actual: ABC
     expected: CBA
 - type: api_response

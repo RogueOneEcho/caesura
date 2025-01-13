@@ -17,17 +17,28 @@ pub struct IdProvider {
 }
 
 /// Error types returned by the [`IdProvider`]
+///
+/// ## Notes
+/// In v0.24.0 the keys were serialized as `PascalCase`.
+/// In v0.24.1 behaviour was fixed to serialize as `snake_case` therefore `alias` are necessary
+/// to ensure backwards compatibility.
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum IdProviderError {
     /// Input did not match any known types
+    #[serde(alias = "NoMatch")]
     NoMatch,
     /// Input was a URL that could not be parsed
+    #[serde(alias = "UrlInvalid")]
     UrlInvalid,
     /// Input was a torrent file that did not exist
+    #[serde(alias = "TorrentFileNotFound")]
     TorrentFileNotFound,
     /// Input was a torrent file that IMDL failed to show
+    #[serde(alias = "TorrentFileInvalid")]
     TorrentFileInvalid,
     /// Input was a torrent file with an unwanted source
+    #[serde(alias = "TorrentFileSource")]
     TorrentFileSource { actual: String, expected: String },
 }
 
