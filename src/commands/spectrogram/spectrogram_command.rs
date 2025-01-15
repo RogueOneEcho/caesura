@@ -54,6 +54,18 @@ impl SpectrogramCommand {
     /// Errors are not logged so should be handled by the caller.
     #[must_use]
     pub(crate) async fn execute(&self, source: &Source) -> SpectrogramStatus {
+        let path = self.paths.get_spectrogram_dir(source);
+        if path.is_dir() {
+            info!("{} existing spectrograms {source}", "Found".bold());
+            debug!("in {}", path.display());
+            return SpectrogramStatus {
+                success: true,
+                path: Some(path),
+                count: 0,
+                completed: TimeStamp::now(),
+                error: None,
+            };
+        }
         info!("{} spectrograms for {}", "Creating".bold(), source);
         let collection = Collector::get_flacs(&source.directory);
         let jobs = self.factory.create(&collection, source);
@@ -62,9 +74,7 @@ impl SpectrogramCommand {
         match self.runner.execute().await {
             Ok(()) => {
                 info!("{} {count} spectrograms for {source}", "Created".bold());
-                let path = self.paths.get_spectrogram_dir(source);
-                let path_display = path.to_string_lossy().to_string();
-                debug!("in {path_display}");
+                debug!("in {}", path.display());
                 SpectrogramStatus {
                     success: true,
                     path: Some(path),
