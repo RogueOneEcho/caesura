@@ -1,8 +1,13 @@
 use html_escape::decode_html_entities;
 
-use gazelle_api::{Group, Torrent};
-
 use crate::utils::*;
+use gazelle_api::{Group, Torrent};
+use log::{debug, warn};
+
+const MAX_ARTISTS: usize = 2;
+const UNKNOWN_ARTIST: &str = "Unknown Artist";
+const VARIOUS_ARTISTS: &str = "Various Artists";
+
 #[derive(Clone, Debug)]
 pub struct Metadata {
     pub artist: String,
@@ -16,7 +21,7 @@ impl Metadata {
     #[must_use]
     pub fn new(group: &Group, torrent: &Torrent) -> Self {
         Metadata {
-            artist: get_artist(group).unwrap_or("Unknown Artist".to_owned()),
+            artist: get_artist(group),
             album: get_album(group),
             remaster_title: get_remaster_title(torrent),
             year: get_year(group, torrent),
@@ -25,22 +30,34 @@ impl Metadata {
     }
 }
 
-fn get_artist(group: &Group) -> Option<String> {
-    let info = group.music_info.clone()?;
-    let artists = if !info.artists.is_empty() && info.artists.len() < 3 {
+fn get_artist(group: &Group) -> String {
+    let Some(info) = group.music_info.clone() else {
+        warn!("Unable to determine a suitable artist for name. Defaulting to `{UNKNOWN_ARTIST}` which likely isn't ideal");
+        return UNKNOWN_ARTIST.to_owned();
+    };
+    let artists = if !info.artists.is_empty() && info.artists.len() <= MAX_ARTISTS {
         info.artists
     } else if info.dj.len() == 1 {
+        debug!(
+            "Source has {} artists so using DJ in name",
+            info.artists.len()
+        );
         info.dj
     } else if info.artists.is_empty() {
-        return None;
+        warn!("Unable to determine a suitable artist for name. Defaulting to `{UNKNOWN_ARTIST}` which likely isn't ideal");
+        return UNKNOWN_ARTIST.to_owned();
     } else {
-        return Some("Various Artists".to_owned());
+        debug!(
+            "Source has {} artists so name will be condensed as `{VARIOUS_ARTISTS}`",
+            info.artists.len()
+        );
+        return VARIOUS_ARTISTS.to_owned();
     };
     let artists: Vec<String> = artists
         .into_iter()
         .map(|x| decode_html_entities(&x.name).to_string())
         .collect();
-    Some(join_humanized(artists))
+    join_humanized(artists)
 }
 
 fn get_album(group: &Group) -> String {
@@ -80,7 +97,7 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, None);
+        assert_eq!(artist, UNKNOWN_ARTIST);
     }
 
     #[test]
@@ -102,7 +119,7 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, Some(expected));
+        assert_eq!(artist, expected);
     }
 
     #[test]
@@ -130,13 +147,13 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, Some(expected));
+        assert_eq!(artist, expected);
     }
 
     #[test]
     fn get_artist_three() {
         // Arrange
-        let expected = "Various Artists".to_owned();
+        let expected = VARIOUS_ARTISTS.to_owned();
         let group = Group {
             music_info: Some(Credits {
                 artists: vec![
@@ -162,7 +179,7 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, Some(expected));
+        assert_eq!(artist, expected);
     }
 
     #[test]
@@ -198,6 +215,6 @@ mod tests {
         let artist = get_artist(&group);
 
         // Assert
-        assert_eq!(artist, Some(expected));
+        assert_eq!(artist, expected);
     }
 }
