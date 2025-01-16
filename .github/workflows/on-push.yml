@@ -9,7 +9,7 @@ env:
 jobs:
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.release.outputs.version }}
     steps:
@@ -48,7 +48,7 @@ jobs:
 
 
   cargo-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
     - release
     strategy:
@@ -201,7 +201,7 @@ jobs:
 
 
   cargo-publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.release.outputs.version != '' }}
     needs:
     - release
@@ -222,7 +222,7 @@ jobs:
 
 
   github-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.release.outputs.version != ''}}
     needs:
       - release
@@ -276,7 +276,7 @@ jobs:
 
 
   docker-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.release.outputs.version != ''}}
     needs:
     - release
@@ -312,7 +312,7 @@ jobs:
     - run: mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   docker-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
     - release
     - cargo-build
