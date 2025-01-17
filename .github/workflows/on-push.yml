@@ -69,10 +69,10 @@ jobs:
       id: cache-cargo
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        key: cargo-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
-          ${{ runner.os }}-cargo-${{ matrix.target }}-
-          ${{ runner.os }}-cargo-
+          cargo-${{ runner.os }}-${{ matrix.target }}-
+          cargo-${{ runner.os }}-
         path: |
           ~/.cargo/bin/
           ~/.cargo/registry/index/
