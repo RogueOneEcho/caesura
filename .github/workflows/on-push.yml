@@ -34,10 +34,10 @@ jobs:
         path: release-notes.md
 
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
-      if: ${{ steps.release.outputs.version != ''}}
+      if: steps.release.outputs.version != ''
 
     - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version ${{ steps.release.outputs.version }}
-      if: ${{ steps.release.outputs.version != ''}}
+      if: steps.release.outputs.version != ''
 
     - run: git --no-pager diff --color
 
@@ -48,15 +48,19 @@ jobs:
 
 
   cargo-build:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     needs:
     - release
     strategy:
       fail-fast: false
       matrix:
-        target:
-        - x86_64-unknown-linux-gnu
-        - x86_64-unknown-linux-musl
+        include:
+        - os: ubuntu-24.04
+          target: x86_64-unknown-linux-gnu
+          test: true
+        - os: ubuntu-24.04
+          target: x86_64-unknown-linux-musl
+
     steps:
 
     - uses: actions/checkout@v4
@@ -82,15 +86,13 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - run: sudo apt-get update
+    - if: contains(matrix.os, 'ubuntu')
+      run: sudo apt-get update
 
-    - if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
-      run: sudo apt-get install musl-tools --yes
-
-    - if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
+    - if: matrix.target == 'aarch64-unknown-linux-gnu'
       run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross --yes
 
-    - if: ${{ matrix.target == 'aarch64-unknown-linux-musl' }}
+    - if: matrix.target == 'aarch64-unknown-linux-musl'
       run: sudo apt-get install musl-tools gcc-aarch64-linux-gnu musl-dev --yes
 
     - run: rustup target add ${{ matrix.target }}
@@ -123,17 +125,17 @@ jobs:
     - run: rm -rf artifacts
 
     - name: Restore samples cache
-      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      if: matrix.test
       id: cache-samples
       uses: actions/cache@v4
       with:
         path: samples/content
         key: cache-samples
 
-    - if: matrix.target == 'x86_64-unknown-linux-gnu' && steps.cache-samples.outputs.cache-hit != 'true'
+    - if: matrix.test && steps.cache-samples.outputs.cache-hit != 'true'
       run: ./samples/download-sample
 
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+    - if: matrix.test
       run: |
         curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
           --location \
@@ -146,31 +148,21 @@ jobs:
           --file - \
           "imdl"
 
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+    - if: matrix.test && contains(matrix.os, 'ubuntu')
       run: sudo apt-get install flac lame sox imagemagick --yes
 
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: rm -rf content
-
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: ln -s samples/content content
-
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+    - if: matrix.test
       run: |
         tee config.yml <<EOF
         announce_url: ${{ secrets.ANNOUNCE_URL }}
         api_key: ${{ secrets.API_KEY }}
+        content: 
+        - samples/content
         source: ${{ secrets.SOURCE }}
         verbosity: trace
         EOF
 
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: touch output/cache.json
-
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: touch output/queue.yml
-
-    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+    - if: matrix.test
       run: cargo test --release --no-fail-fast --target ${{ matrix.target }}
 
     - name: Run cargo check
@@ -202,7 +194,7 @@ jobs:
 
   cargo-publish:
     runs-on: ubuntu-24.04
-    if: ${{ needs.release.outputs.version != '' }}
+    if: needs.release.outputs.version != ''
     needs:
     - release
     - cargo-build
@@ -223,7 +215,7 @@ jobs:
 
   github-release:
     runs-on: ubuntu-24.04
-    if: ${{ needs.release.outputs.version != ''}}
+    if: needs.release.outputs.version != ''
     needs:
       - release
       - cargo-build
@@ -236,7 +228,7 @@ jobs:
         name: release-notes.md
 
     - name: gh release create
-      if: ${{ ! contains(needs.release.outputs.version, '-') }}
+      if: contains(needs.release.outputs.version, '-') == false
       env:
         GH_TOKEN: ${{ github.token }}
       run: >
@@ -247,7 +239,7 @@ jobs:
         --target ${{ github.ref_name }}
 
     - name: gh release create --prerelease
-      if: ${{ contains(needs.release.outputs.version, '-') }}
+      if: contains(needs.release.outputs.version, '-')
       env:
         GH_TOKEN: ${{ github.token }}
       run: >
@@ -267,8 +259,7 @@ jobs:
       run: >
         gh release upload
         "v${{ needs.release.outputs.version }}"
-        "caesura-${{ needs.release.outputs.version }}-x86_64-unknown-linux-gnu"
-        "caesura-${{ needs.release.outputs.version }}-x86_64-unknown-linux-musl"
+        "caesura-${{ needs.release.outputs.version }}-"*
         --clobber
         --repo "${{ github.repository }}"
       env:
@@ -277,7 +268,7 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-24.04
-    if: ${{ needs.release.outputs.version != ''}}
+    if: needs.release.outputs.version != ''
     needs:
     - release
     steps:
@@ -326,13 +317,13 @@ jobs:
     - run: docker pull ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
 
     - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:${{ github.ref_name }}
-      if: ${{ github.ref_name == 'alpha' }}
+      if: github.ref_name == 'alpha'
 
     - run: docker push ghcr.io/rogueoneecho/caesura:${{ github.ref_name }}
-      if: ${{ github.ref_name == 'alpha' }}
+      if: github.ref_name == 'alpha'
 
     - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:latest
-      if: ${{ ! contains(needs.release.outputs.version, '-') }}
+      if: contains(needs.release.outputs.version, '-') == false
 
     - run: docker push ghcr.io/rogueoneecho/caesura:latest
-      if: ${{ ! contains(needs.release.outputs.version, '-') }}
+      if: contains(needs.release.outputs.version, '-') == false

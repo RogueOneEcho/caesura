@@ -1,19 +1,14 @@
 use crate::utils::*;
 
 use rogue_logging::Error;
-use std::fs::read_dir;
 use std::path::PathBuf;
 
 #[tokio::test]
 async fn test_copy_dir() -> Result<(), Error> {
     // Arrange
-    let source_dir = read_dir(PathBuf::from("./content"))
-        .map_err(|e| io_error(e, "read source dir"))?
-        .filter_map(Result::ok) // Filter out errors
-        .find(|entry| entry.path().is_dir())
-        .map(|entry| entry.path())
-        .expect("Should have a directory");
+    let source_dir = PathBuf::from("./samples/content");
     let target_dir = TempDirectory::create("caesura").join("target");
+    assert!(source_dir.is_dir(), "Sample directory should exist: {}", source_dir.display());
 
     // Act
     copy_dir(&source_dir, &target_dir, false).await?;
