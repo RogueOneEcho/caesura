@@ -45,8 +45,12 @@ impl QueueRemoveCommand {
                 );
                 Ok(false)
             }
-            Some(_item) => {
-                info!("{} {hash} from queue", "Removed".bold());
+            Some(item) => {
+                info!(
+                    "{} item from queue: {}",
+                    "Removed".bold(),
+                    item.name.dimmed()
+                );
                 Ok(true)
             }
         }
