@@ -13,6 +13,7 @@ pub enum OptionRule {
     UrlInvalidSuffix(String, String),
     DoesNotExist(String, String),
     DurationInvalid(String, String),
+    HashInvalid(String, String),
 }
 
 impl Display for OptionRule {
@@ -31,6 +32,7 @@ impl Display for OptionRule {
             }
             DoesNotExist(name, value) => format!("{name} does not exist: {value}"),
             DurationInvalid(name, value) => format!("{name} could not be parsed: {value}"),
+            HashInvalid(name, value) => format!("{name} could not be parsed as a hash: {value}"),
         };
         output.fmt(formatter)
     }

@@ -61,6 +61,16 @@ impl Host {
                     .await
             }
             Queue {
+                command: Remove { .. },
+            } => {
+                self.services
+                    .get_required_mut::<QueueRemoveCommand>()
+                    .write()
+                    .expect("QueueRemoveCommand should be available to write")
+                    .execute_cli()
+                    .await
+            }
+            Queue {
                 command: Summary { .. },
             } => {
                 self.services

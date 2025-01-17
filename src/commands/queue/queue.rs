@@ -161,6 +161,11 @@ impl Queue {
         self.table.set_many(items, replace).await
     }
 
+    /// Remove an item from the queue
+    pub(crate) async fn remove(&mut self, hash: Hash<20>) -> Result<Option<QueueItem>, Error> {
+        self.table.remove(hash).await
+    }
+
     /// Insert torrent files into the queue if they are not already present
     /// Returns the number of items added
     pub(crate) async fn insert_new_torrent_files(

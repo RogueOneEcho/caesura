@@ -47,6 +47,7 @@ impl HostBuilder {
             .add(SpectrogramOptions::singleton())
             .add(TargetOptions::singleton())
             .add(QueueAddArgs::singleton())
+            .add(QueueRemoveArgs::singleton())
             .add(UploadOptions::singleton())
             .add(VerifyOptions::singleton())
             // Add main services
@@ -92,6 +93,7 @@ impl HostBuilder {
             // Add queue services
             .add(QueueAddCommand::transient().as_mut())
             .add(QueueListCommand::transient().as_mut())
+            .add(QueueRemoveCommand::transient().as_mut())
             .add(QueueSummaryCommand::transient().as_mut())
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<CacheOptions>();

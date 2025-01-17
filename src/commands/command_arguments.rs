@@ -115,6 +115,17 @@ pub enum QueueCommandArguments {
         batch: BatchOptions,
     },
 
+    /// Remove an item from the queue
+    #[command(name = "rm")]
+    Remove {
+        #[command(flatten)]
+        shared: SharedOptions,
+        #[command(flatten)]
+        cache: CacheOptions,
+        #[command(flatten)]
+        args: QueueRemoveArgs,
+    },
+
     /// Summarize the sources in the queue
     Summary {
         #[command(flatten)]
