@@ -139,10 +139,20 @@ jobs:
       uses: actions/cache@v4
       with:
         path: samples/content
-        key: cache-samples
+        key: sample_16bit
 
     - if: matrix.test && steps.cache-samples.outputs.cache-hit != 'true'
-      run: ./samples/download-sample
+      run: >
+        cargo test --release --no-fail-fast --target ${{ matrix.target }} 
+        utils::testing::sample_16bit::fetch_16bit_sample
+        -- --nocapture --ignored
+
+    - name: Save samples cache
+      if: matrix.test
+      uses: actions/cache/save@v4
+      with:
+        path: samples/content
+        key: ${{ steps.cache-samples.outputs.cache-primary-key }}
 
     - if: matrix.test
       run: |
