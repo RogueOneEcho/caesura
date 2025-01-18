@@ -60,6 +60,10 @@ jobs:
           test: true
         - os: ubuntu-24.04
           target: x86_64-unknown-linux-musl
+        - os: ubuntu-24.04-arm
+          target: aarch64-unknown-linux-gnu
+        - os: ubuntu-24.04-arm
+          target: armv7-unknown-linux-gnueabihf
         - os: macos-13
           target: x86_64-apple-darwin
           test: true
