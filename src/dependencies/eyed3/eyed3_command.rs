@@ -17,8 +17,11 @@ impl EyeD3Command {
             .output()
             .await
             .map_err(|e| command_error(e, "get details", EYED3))?;
-        let output = OutputHandler::execute(output, "get details", "eyeD3")?;
-        Ok(String::from_utf8(output.stdout).unwrap_or_default())
+        if output.status.success() {
+            Ok(String::from_utf8(output.stdout).unwrap_or_default())
+        } else {
+            Err(output_error(output, "get details", "eyeD3"))
+        }
     }
 }
 

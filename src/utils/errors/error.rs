@@ -1,7 +1,6 @@
 use rogue_logging::Error;
+use std::process::Output;
 use tokio::task::JoinError;
-
-use crate::utils::*;
 
 #[allow(clippy::absolute_paths)]
 pub fn error(action: &str, message: String) -> Error {
@@ -44,10 +43,19 @@ pub fn io_error(error: std::io::Error, action: &str) -> Error {
     }
 }
 
-pub fn output_error(error: CommandError, action: &str, domain: &str) -> Error {
+pub fn output_error(output: Output, action: &str, domain: &str) -> Error {
+    let stderr = String::from_utf8(output.stderr).unwrap_or_default();
+    let stdout = String::from_utf8(output.stdout).unwrap_or_default();
+    let message = if !stderr.is_empty() {
+        stderr
+    } else if !stdout.is_empty() {
+        stdout
+    } else {
+        "unexplained failure".to_owned()
+    };
     Error {
         action: action.to_owned(),
-        message: error.to_string(),
+        message,
         domain: Some(domain.to_owned()),
         ..Error::default()
     }

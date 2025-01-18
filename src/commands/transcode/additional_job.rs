@@ -28,7 +28,10 @@ impl AdditionalJob {
             .output()
             .await
             .map_err(|e| command_error(e, "execute resize image", CONVERT))?;
-        OutputHandler::execute(output, "resize image", "convert")?;
-        Ok(())
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(output_error(output, "resize image", "convert"))
+        }
     }
 }

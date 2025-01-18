@@ -1,7 +1,6 @@
 use rogue_logging::Error;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
-use std::process::Output;
 use tokio::process::Command;
 
 use crate::commands::*;
@@ -37,7 +36,7 @@ impl SpectrogramJob {
         Ok(())
     }
 
-    async fn execute_zoom(&self) -> Result<Output, Error> {
+    async fn execute_zoom(&self) -> Result<(), Error> {
         let output = Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
@@ -65,10 +64,14 @@ impl SpectrogramJob {
             .output()
             .await
             .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
-        OutputHandler::execute(output, "generate spectrogram", "IMDL")
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(output_error(output, "generate spectrogram", SOX))
+        }
     }
 
-    async fn execute_full(&self) -> Result<Output, Error> {
+    async fn execute_full(&self) -> Result<(), Error> {
         let output = Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
@@ -92,6 +95,10 @@ impl SpectrogramJob {
             .output()
             .await
             .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
-        OutputHandler::execute(output, "generate spectrogram", "IMDL")
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(output_error(output, "generate spectrogram", SOX))
+        }
     }
 }

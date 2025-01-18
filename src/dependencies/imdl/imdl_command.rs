@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::process::{Output, Stdio};
+use std::process::Stdio;
 
 use crate::built_info::{PKG_NAME, PKG_VERSION};
 use crate::dependencies::*;
@@ -23,7 +23,7 @@ impl ImdlCommand {
         output_path: &Path,
         announce_url: String,
         source: String,
-    ) -> Result<Output, Error> {
+    ) -> Result<(), Error> {
         let output = Command::new(IMDL)
             .arg("torrent")
             .arg("create")
@@ -42,7 +42,11 @@ impl ImdlCommand {
             .output()
             .await
             .map_err(|e| command_error(e, "execute create torrent", IMDL))?;
-        OutputHandler::execute(output, "create torrent", "IMDL")
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(output_error(output, "create torrent", "IMDL"))
+        }
     }
 
     /// Get a summary of the torrent file.
@@ -55,7 +59,9 @@ impl ImdlCommand {
             .output()
             .await
             .map_err(|e| command_error(e, "execute read torrent", IMDL))?;
-        let output = OutputHandler::execute(output, "read torrent", "IMDL")?;
+        if !output.status.success() {
+            return Err(output_error(output, "read torrent", "IMDL"));
+        }
         let reader = output.stdout.reader();
         serde_json::from_reader(reader).map_err(|e| json_error(e, "deserialize torrent"))
     }

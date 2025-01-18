@@ -82,8 +82,15 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> 
     if !decode_exit.success() {
         warn!("Decode was not successful: {decode_exit}");
     }
-    OutputHandler::execute(encode_output, "execute resample job", "transcode")?;
-    Ok(())
+    if encode_output.status.success() {
+        Ok(())
+    } else {
+        Err(output_error(
+            encode_output,
+            "execute resample job",
+            "transcode",
+        ))
+    }
 }
 
 async fn execute_resample(resample: Resample) -> Result<(), Error> {
@@ -95,8 +102,11 @@ async fn execute_resample(resample: Resample) -> Result<(), Error> {
         .output()
         .await
         .map_err(|e| command_error(e, "execute resample job", &program))?;
-    OutputHandler::execute(output, "execute resample job", "transcode")?;
-    Ok(())
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(output_error(output, "execute resample job", "transcode"))
+    }
 }
 
 async fn execute_include(include: Include) -> Result<(), Error> {

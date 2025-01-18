@@ -18,8 +18,11 @@ impl MetaflacCommand {
             .output()
             .await
             .map_err(|e| command_error(e, "get details", METAFLAC))?;
-        let output = OutputHandler::execute(output, "get details", "metaflac")?;
-        Ok(String::from_utf8(output.stdout).unwrap_or_default())
+        if output.status.success() {
+            Ok(String::from_utf8(output.stdout).unwrap_or_default())
+        } else {
+            Err(output_error(output, "get details", "metaflac"))
+        }
     }
 
     /// List tags and stream info for a directory of flac files.
