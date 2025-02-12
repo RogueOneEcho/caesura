@@ -391,9 +391,9 @@ This is based around the setup in this guide: [how to set up Deluge via Proton V
 ```yaml
 announce_url: https://flacsfor.me/YOUR_ANNOUNCE_KEY/announce
 api_key: YOUR_API_KEY
-cache: /srv/shared/caesura/cache.json
-content: /srv/shared/deluge
-limit: 5
+content:
+- /srv/shared/deluge
+limit: 2
 output: /srv/shared/caesura
 source: /srv/deluge/state
 verbosity: debug
