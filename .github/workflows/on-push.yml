@@ -26,12 +26,12 @@ jobs:
 
     - run: echo "# ${{ steps.release.outputs.version}}" >> $GITHUB_STEP_SUMMARY
 
-    - run: cat release-notes.md >> $GITHUB_STEP_SUMMARY
+    - run: cat /tmp/release-notes.md >> $GITHUB_STEP_SUMMARY
 
     - uses: actions/upload-artifact@v4
       with:
         name: release-notes.md
-        path: release-notes.md
+        path: /tmp/release-notes.md
 
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
       if: steps.release.outputs.version != ''
@@ -328,11 +328,11 @@ jobs:
 
     - run: docker pull ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
 
-    - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:${{ github.ref_name }}
-      if: github.ref_name == 'alpha'
+    - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:alpha
+      if: github.ref_name == 'main'
 
-    - run: docker push ghcr.io/rogueoneecho/caesura:${{ github.ref_name }}
-      if: github.ref_name == 'alpha'
+    - run: docker push ghcr.io/rogueoneecho/caesura:alpha
+      if: github.ref_name == 'main'
 
     - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:latest
       if: contains(needs.release.outputs.version, '-') == false
