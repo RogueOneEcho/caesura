@@ -139,7 +139,7 @@ impl Display for SourceIssue {
             LossyMaster => "Lossy master releases need approval".to_owned(),
             LossyWeb => "Lossy web releases need approval".to_owned(),
             Trumpable => "Source is trumpable".to_owned(),
-            Unconfirmed => "Unconfirmed Release need to be confirmed".to_owned(),
+            Unconfirmed => "Source is missing edition information".to_owned(),
             Excluded { tags } => format!("Excluded tags: {}", join_humanized(tags)),
             Existing { formats } => {
                 format!(
