@@ -311,6 +311,78 @@ docker compose run --rm caesura batch --upload --limit 10 --wait-before-upload 3
 
 Check out the [full documentation of configuration options in COMMANDS.md](COMMANDS.md), in particular you may want to use `--copy-transcode-to-content-dir` and `--copy-torrent-to` to suit your preferred setup.
 
+### 11. Upload to both RED and OPS
+
+`caesura` is designed to work with both `RED` and `OPS`. There's no need for separate cache or output directories, however, you will need a separate configuration for each and the commands must be run separately.
+
+Make a copy of `config.yml` for each indexer. For clarity I recommend naming them `config.red.yml` and `config.ops.yml`
+
+```bash
+cp config.yml config.red.yml
+cp config.yml config.ops.yml
+```
+
+Edit each config file to include the API key and announce URL for that indexer.
+
+```yaml
+announce_url: https://home.opsfet.ch/YOUR_ANNOUNCE_KEY/announce
+api_key: "YOUR_API_KEY"
+```
+
+Edit `docker-compose.yml` to include separate services for each indexer. The only difference between them is the mapping of the the config file.
+
+```yaml
+services:
+
+  caesura-red:
+    container_name: caesura-red
+    image: ghcr.io/rogueoneecho/caesura
+    volumes:
+    - ./config.red.yml:/config.yml:ro
+    - /path/to/your/content:/content:ro
+    - ./output:/output
+    - ./cache:/cache
+
+  caesura-red:
+    container_name: caesura-ops
+    image: ghcr.io/rogueoneecho/caesura
+    volumes:
+    - ./config.ops.yml:/config.yml:ro
+    - /path/to/your/content:/content:ro
+    - ./output:/output
+    - ./cache:/cache
+```
+
+Run the config command to verify the config is loaded correctly for each:
+
+```bash
+docker compose run --rm caesura-red config
+docker compose run --rm caesura-ops config
+```
+
+The `queue` command is indexer agnostic so as long as both configurations use the same `cache` it only needs to be run once.
+
+```bash
+docker compose run --rm caesura-red queue add /path/to/your/torrents
+```
+
+Then run the `batch` command for each indexer:
+
+```bash
+docker compose run --rm caesura-red batch --transcode --upload
+docker compose run --rm caesura-ops batch --transcode --upload
+```
+
+> [!NOTE]
+> If you start a transcode for a source on OPS that you've already transcoded for RED then `caesura` will detect this automatically and instead of re-transcoding it simply creates a `*.ops.torrent` file from the existing transcode so there's no duplication of effort and the existing files are re-used without taking up additional space.
+>
+> Therefore the first time you run the `batch` command for the new indexer you will likely see a few messages along the lines of:
+>
+> ```
+> Found existing 320 transcode
+> Found existing V0 transcode
+> ```
+
 ## Directory Structure
 
 The application requires two writable directories.
