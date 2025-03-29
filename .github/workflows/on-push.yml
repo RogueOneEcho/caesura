@@ -225,9 +225,36 @@ jobs:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
 
+  git-tag:
+    runs-on: ubuntu-24.04
+    if: needs.release.outputs.version != '' && contains(needs.release.outputs.version, '-')
+    needs:
+    - release
+    - cargo-build
+    steps:
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: release-notes.md
+
+    - name: git config
+      run: ${{ secrets.GIT_CONFIG }}
+
+    - name: git tag
+      run: git tag "v${{ needs.release.outputs.version }}"
+
+    - name: git push
+      run: git push origin "v${{ needs.release.outputs.version }}"
+
+
   github-release:
     runs-on: ubuntu-24.04
-    if: needs.release.outputs.version != ''
+    if: needs.release.outputs.version != '' && contains(needs.release.outputs.version, '-') == false
     needs:
       - release
       - cargo-build
