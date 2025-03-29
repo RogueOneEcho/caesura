@@ -209,6 +209,8 @@ Inspect the transcodes in the output directory.
 > - Tags
 > - Audio quality
 > - Image size and compression quality
+ 
+Two `.torrent` files are created for each transcode, one with the indexer as a suffix (`*.red.torrent` or `*.ops.torrent`) and one without. For now these files are identical but if you subsequently transcode the same source for a different indexer they may differ.
 
 ### 8. Upload transcodes
 
@@ -228,6 +230,25 @@ Run the `upload` command with the source as an argument.
 ```bash
 docker compose run --rm caesura upload https://redacted.sh/torrents.php?id=80518&torrentid=142659#torrent142659
 ```
+
+If you haven't already then add the `*.red.torrent` or `*.ops.torrent` file to your torrent client.
+
+> [!TIP]
+> `caesura` can automatically add the `.torrent` to your torrent client if it supports an autoadd directory.
+> 
+> Either use the `--copy-torrent-to path/to/autoadd/directory` CLI option or add the following to `config.yml` 
+>
+> ```yaml
+> copy_torrent_to: path/to/autoadd/directory
+> ```
+> 
+> Don't forget to ensure the path is mounted as a volume in `docker-compose.yml`.
+> 
+> In qBittorrent you can configure auto add under: Options > Downloads > Automatically add torrents from
+> 
+> Monitored Folder: `path/to/autoadd/directory`
+> 
+> Override save location: `path/to/caesura/output`
 
 Go to your indexer and check your uploads to make sure everything has gone to plan.
 
