@@ -364,7 +364,7 @@ services:
     - ./output:/output
     - ./cache:/cache
 
-  caesura-red:
+  caesura-ops:
     container_name: caesura-ops
     image: ghcr.io/rogueoneecho/caesura
     volumes:
