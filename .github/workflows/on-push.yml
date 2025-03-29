@@ -206,7 +206,7 @@ jobs:
 
   cargo-publish:
     runs-on: ubuntu-24.04
-    if: needs.release.outputs.version != ''
+    if: needs.release.outputs.version != '' && contains(needs.release.outputs.version, '-') == false
     needs:
     - release
     - cargo-build
