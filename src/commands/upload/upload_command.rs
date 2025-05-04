@@ -101,13 +101,6 @@ impl UploadCommand {
                 status.success = false;
                 continue;
             }
-            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to {
-                if let Err(error) = self.copy_torrent(source, &target, torrent_dir).await {
-                    // If copy_torrent fails we can still continue with the upload
-                    warn!("{error}");
-                    errors.push(error);
-                }
-            }
             if self
                 .upload_options
                 .copy_transcode_to_content_dir
@@ -136,6 +129,13 @@ impl UploadCommand {
                 );
                 if let Err(error) = self.copy_transcode(&target_dir, destination).await {
                     // If copy_transcode fails we can still continue with the upload
+                    warn!("{error}");
+                    errors.push(error);
+                }
+            }
+            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to {
+                if let Err(error) = self.copy_torrent(source, &target, torrent_dir).await {
+                    // If copy_torrent fails we can still continue with the upload
                     warn!("{error}");
                     errors.push(error);
                 }
