@@ -1,5 +1,5 @@
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use log::{debug, info};
 
 use rogue_logging::Error;

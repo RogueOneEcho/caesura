@@ -1,10 +1,10 @@
 use std::fmt::{Display, Formatter};
 
+use CommandArguments::Queue;
 use clap::Args;
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use flat_db::Hash;
 use serde::{Deserialize, Serialize};
-use CommandArguments::Queue;
 
 use crate::commands::QueueCommandArguments::Remove;
 use crate::commands::*;

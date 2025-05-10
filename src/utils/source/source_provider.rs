@@ -2,7 +2,7 @@ use crate::options::*;
 use crate::utils::*;
 
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use gazelle_api::{GazelleClient, Torrent};
 use html_escape::decode_html_entities;
 use log::{trace, warn};

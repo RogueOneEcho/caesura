@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::utils::*;
 
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use rogue_logging::Error;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;

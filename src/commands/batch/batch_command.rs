@@ -4,7 +4,7 @@ use crate::utils::*;
 use std::time::Duration;
 
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use gazelle_api::GazelleError;
 use log::{debug, error, info, trace, warn};
 use rogue_logging::Error;
@@ -121,7 +121,13 @@ impl BatchCommand {
                             response: GazelleError::Unauthorized { message: _ },
                         } => {
                             trace!("{issue}");
-                            return Err(error("get source", format!("{} response received. This likely means the API Key is invalid.", "Unauthorized".bold())));
+                            return Err(error(
+                                "get source",
+                                format!(
+                                    "{} response received. This likely means the API Key is invalid.",
+                                    "Unauthorized".bold()
+                                ),
+                            ));
                         }
                         SourceIssue::Api {
                             response: GazelleError::TooManyRequests { message: _ },

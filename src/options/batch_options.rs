@@ -1,5 +1,5 @@
 use clap::{ArgAction, Args};
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::time::Duration;

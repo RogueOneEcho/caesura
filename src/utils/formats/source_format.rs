@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter};
 use SourceFormat::*;
+use std::fmt::{Display, Formatter};
 
 use crate::utils::*;
 /// Format of a [Source].

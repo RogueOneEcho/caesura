@@ -2,7 +2,7 @@ use crate::commands::*;
 use crate::options::*;
 use crate::utils::*;
 use colored::Colorize;
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use log::{trace, warn};
 use rogue_logging::Error;
 use tokio::fs::{copy, create_dir_all, hard_link};
@@ -29,7 +29,7 @@ impl AdditionalJobFactory {
         for (index, file) in files.iter().enumerate() {
             if let Some(job) = self.create_single(index, file, source, target).await? {
                 jobs.push(job);
-            };
+            }
         }
         Ok(jobs)
     }

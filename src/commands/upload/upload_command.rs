@@ -3,7 +3,7 @@ use std::ops::Not;
 use std::path::{Path, PathBuf};
 
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use log::{info, trace, warn};
 use tokio::fs::{copy, hard_link};
 
@@ -12,9 +12,9 @@ use crate::commands::*;
 use crate::dependencies::*;
 use crate::options::*;
 use crate::utils::*;
+use TargetFormat::*;
 use gazelle_api::{GazelleClient, UploadForm};
 use rogue_logging::Error;
-use TargetFormat::*;
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
@@ -79,7 +79,9 @@ impl UploadCommand {
             let torrent_path = self.paths.get_torrent_path(source, target, true);
             if !torrent_path.exists() {
                 warn!("In v0.19.0 the torrent file name format changed.");
-                warn!("Running the transcode command will update existing transcodes without re-transcoding.");
+                warn!(
+                    "Running the transcode command will update existing transcodes without re-transcoding."
+                );
                 let error = error(
                     "upload",
                     format!(
@@ -176,7 +178,6 @@ impl UploadCommand {
                     warn!("{e}");
                     errors.push(error("upload", e.to_string()));
                     status.success = false;
-                    continue;
                 }
             }
         }

@@ -1,7 +1,7 @@
 use std::fs::create_dir;
 use std::path::PathBuf;
 
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use rogue_logging::Error;
 
 use crate::dependencies::*;

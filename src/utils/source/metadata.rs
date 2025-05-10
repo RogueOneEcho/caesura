@@ -32,7 +32,9 @@ impl Metadata {
 
 fn get_artist(group: &Group) -> String {
     let Some(info) = group.music_info.clone() else {
-        warn!("Unable to determine a suitable artist for name. Defaulting to `{UNKNOWN_ARTIST}` which likely isn't ideal");
+        warn!(
+            "Unable to determine a suitable artist for name. Defaulting to `{UNKNOWN_ARTIST}` which likely isn't ideal"
+        );
         return UNKNOWN_ARTIST.to_owned();
     };
     let artists = if !info.artists.is_empty() && info.artists.len() <= MAX_ARTISTS {
@@ -51,13 +53,18 @@ fn get_artist(group: &Group) -> String {
         info.composers
     } else if info.artists.is_empty() {
         if info.with.is_empty() {
-            warn!("Source has no main or guest artists. Defaulting to `{UNKNOWN_ARTIST}` which likely isn't ideal");
+            warn!(
+                "Source has no main or guest artists. Defaulting to `{UNKNOWN_ARTIST}` which likely isn't ideal"
+            );
             return UNKNOWN_ARTIST.to_owned();
         } else if info.with.len() <= MAX_ARTISTS {
             warn!("Source has no main artist so using guest artists in name");
             info.with
         } else {
-            debug!("Source has no main artist and {} guest artists so name will be condensed as `{VARIOUS_ARTISTS}`", info.with.len());
+            debug!(
+                "Source has no main artist and {} guest artists so name will be condensed as `{VARIOUS_ARTISTS}`",
+                info.with.len()
+            );
             return VARIOUS_ARTISTS.to_owned();
         }
     } else {

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use claxon::metadata::StreamInfo;
 use claxon::FlacReader;
+use claxon::metadata::StreamInfo;
 
 /// A representation of a FLAC file.
 pub struct FlacFile {

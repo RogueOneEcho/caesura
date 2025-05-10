@@ -1,7 +1,7 @@
 use crate::options::*;
 use crate::utils::*;
 
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use rogue_logging::Error;
 use serde_json::Value;
 use std::collections::BTreeMap;

@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 
 use clap::Args;
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 
 use crate::commands::CommandArguments::{Batch, Queue};

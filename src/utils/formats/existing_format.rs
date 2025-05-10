@@ -1,3 +1,4 @@
+use ExistingFormat::*;
 use clap::ValueEnum;
 use colored::Colorize;
 use gazelle_api::Torrent;
@@ -5,7 +6,6 @@ use log::trace;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
-use ExistingFormat::*;
 
 use crate::utils::*;
 /// Format of an existing release.

@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 
 use crate::options::*;
 use crate::utils::*;

@@ -1,7 +1,7 @@
 use colored::Colorize;
 #[cfg(test)]
 use di::Ref;
-use di::{singleton_as_self, Injectable, Mut, RefMut, ServiceCollection};
+use di::{Injectable, Mut, RefMut, ServiceCollection, singleton_as_self};
 use log::error;
 use std::process::exit;
 use std::sync::Arc;

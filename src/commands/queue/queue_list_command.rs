@@ -2,7 +2,7 @@ use crate::commands::*;
 use crate::options::*;
 
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use log::{debug, error, info};
 use rogue_logging::Error;
 

@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use clap::Args;
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 
 use crate::commands::CommandArguments::*;

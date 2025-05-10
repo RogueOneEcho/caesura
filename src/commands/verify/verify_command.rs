@@ -1,5 +1,5 @@
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use log::*;
 
 use crate::commands::*;
@@ -209,7 +209,7 @@ impl VerifyCommand {
                     return vec![SourceIssue::Error {
                         domain: "File System".to_owned(),
                         details: e.to_string(),
-                    }]
+                    }];
                 }
             };
             let buffer = match api.download_torrent(source.torrent.id).await {

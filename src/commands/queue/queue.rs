@@ -6,9 +6,9 @@ use crate::commands::*;
 use crate::dependencies::*;
 use crate::options::*;
 
-use di::{inject, injectable, Ref};
+use di::{Ref, inject, injectable};
 use flat_db::{Hash, Table};
-use futures::stream::{iter, StreamExt};
+use futures::stream::{StreamExt, iter};
 use log::error;
 use rogue_logging::Error;
 

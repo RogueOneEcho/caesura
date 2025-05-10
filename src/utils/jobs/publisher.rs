@@ -1,4 +1,4 @@
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use rogue_logging::Verbosity;
 
 use crate::options::*;

@@ -5,7 +5,7 @@ use crate::utils::*;
 
 use crate::utils::Job::Additional;
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use log::*;
 use rogue_logging::Colors;
 use rogue_logging::Error;

@@ -34,7 +34,7 @@ impl TranscodeJob {
             Variant::Transcode(decode, encode) => execute_transcode(decode, encode).await?,
             Variant::Resample(resample) => execute_resample(resample).await?,
             Variant::Include(include) => execute_include(include).await?,
-        };
+        }
         if let Some(mut tags) = self.tags {
             let exclude = [Popularimeter, Work];
             for key in exclude {

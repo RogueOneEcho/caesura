@@ -2,7 +2,7 @@ use crate::commands::*;
 use crate::options::*;
 
 use colored::Colorize;
-use di::{injectable, Ref, RefMut};
+use di::{Ref, RefMut, injectable};
 use flat_db::Hash;
 use log::{debug, info, warn};
 use rogue_logging::Error;

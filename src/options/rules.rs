@@ -43,7 +43,7 @@ impl OptionRule {
         if !errors.is_empty() {
             error!("{} configuration", "Invalid".bold());
             for error in errors {
-                error!("{}", error);
+                error!("{error}");
             }
         }
     }

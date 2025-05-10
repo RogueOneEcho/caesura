@@ -1,4 +1,4 @@
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 
 use crate::commands::*;
 use crate::utils::*;

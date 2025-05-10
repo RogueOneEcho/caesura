@@ -5,7 +5,7 @@ use crate::dependencies::*;
 use crate::options::*;
 use crate::utils::IdProviderError::*;
 use crate::utils::*;
-use di::{injectable, Ref};
+use di::{Ref, injectable};
 use log::warn;
 use serde::{Deserialize, Serialize};
 
