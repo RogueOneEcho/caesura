@@ -1,6 +1,6 @@
 [package]
 name = "caesura"
-edition = "2021"
+edition = "2024"
 build = "build.rs"
 authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
 description = "An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. "
@@ -20,31 +20,31 @@ version = "0.0.0"
 publish = true
 
 [dependencies]
-bytes = "1.9.0"
-chrono = "0.4.39"
-clap = { version = "4.5.26", features = ["derive"] }
+bytes = "1.10.1"
+chrono = "0.4.41"
+clap = { version = "4.5.37", features = ["derive"] }
 claxon = "0.4.3"
 colored = "3.0.0"
 flat_db = "0.3.0"
 futures = "0.3.31"
 gazelle_api = "0.9.0"
 html-escape = "0.2.13"
-humantime = "2.1.0"
-indicatif = "0.17.9"
-lofty = "0.22.1"
-log = { version = "0.4.22", features = ["std"] }
+humantime = "2.2.0"
+indicatif = "0.17.11"
+lofty = "0.22.4"
+log = { version = "0.4.27", features = ["std"] }
 more-di = { version = "3.1.0", features = ["async", "builder"] }
 num_cpus = "1.16.0"
 regex = "1.11.1"
-reqwest = { version = "0.12.12", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
+reqwest = { version = "0.12.15", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
 rogue_logging = "0.3.0"
-serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.135"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 serde_yaml = "0.9.34"
-tokio = { version = "1.43.0", features = ["full"] }
+tokio = { version = "1.45.0", features = ["full"] }
 
 [build-dependencies]
-built = "0.7.5"
+built = "0.8.0"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
