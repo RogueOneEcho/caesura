@@ -10,6 +10,7 @@ This document contains the help content for the `caesura` command-line program.
 * [`caesura queue`↴](#caesura-queue)
 * [`caesura queue add`↴](#caesura-queue-add)
 * [`caesura queue list`↴](#caesura-queue-list)
+* [`caesura queue rm`↴](#caesura-queue-rm)
 * [`caesura queue summary`↴](#caesura-queue-summary)
 * [`caesura spectrogram`↴](#caesura-spectrogram)
 * [`caesura transcode`↴](#caesura-transcode)
@@ -210,6 +211,7 @@ Add FLAC sources to the queue without transcoding
 
 * `add` — Add a directory of `.torrent` files to the queue
 * `list` — List the sources in the queue
+* `rm` — Remove an item from the queue
 * `summary` — Summarize the sources in the queue
 
 
@@ -360,6 +362,69 @@ List the sources in the queue
    The duration is a string that can be parsed such as `500ms`, `5m`, `1h30m15s`.
 
    Default: `null`
+
+
+
+## `caesura queue rm`
+
+Remove an item from the queue
+
+**Usage:** `caesura queue rm [OPTIONS] [HASH]`
+
+###### **Arguments:**
+
+* `<HASH>` — A torrent hash
+
+###### **Options:**
+
+* `--announce-url <ANNOUNCE_URL>` — Announce URL including passkey
+
+   Examples: `https://flacsfor.me/a1b2c3d4e5f6/announce`, `https://home.opsfet.ch/a1b2c3d4e5f6/announce`
+* `--api-key <API_KEY>` — API key with torrent permissions for the indexer
+* `--indexer <INDEXER>` — ID of the tracker as it appears in the source field of a torrent.
+
+   Examples: `red`, `pth`, `ops`
+
+   Default: Determined by `announce_url`
+* `--indexer-url <INDEXER_URL>` — URL of the indexer.
+
+   Examples: `https://redacted.sh`, `https://orpheus.network`
+
+   Default: Determined by `announce_url`
+* `--content <CONTENT>` — Directories containing torrent content.
+
+   Typically this is set as the download directory in your torrent client.
+
+   Default: `./content`
+* `--verbosity <VERBOSITY>` — Level of logs to display.
+
+   Default: `info`
+
+  Possible values: `silent`, `error`, `warn`, `info`, `debug`, `trace`
+
+* `--config <CONFIG>` — Path to the configuration file.
+
+   Default: `./config.yml`
+* `--log-time <LOG_TIME>` — Time format to use in logs.
+
+   Default: `datetime`
+
+  Possible values:
+  - `local`:
+    Local date and time in an ISO 8601 like format
+  - `utc`:
+    Utc date and time in an ISO 8601 like format
+  - `elapsed`:
+    Elapsed time since the start of the program formatted in seconds with millisecond precision
+  - `none`:
+    No timestamp
+
+* `--output <OUTPUT>` — Directory where transcodes and spectrograms will be written.
+
+   Default: `./output`
+* `--cache <CACHE>` — Path to cache directory.
+
+   Default: `./cache`
 
 
 

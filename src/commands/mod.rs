@@ -1,4 +1,4 @@
-pub(crate) use arguments_parser::*;
+pub use arguments_parser::*;
 pub(crate) use batch::*;
 pub(crate) use command_arguments::*;
 pub(crate) use config::*;

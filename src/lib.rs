@@ -1,4 +1,7 @@
+#[allow(unused_imports)]
+pub use commands::*;
 pub use hosting::*;
+
 mod commands;
 mod dependencies;
 mod hosting;

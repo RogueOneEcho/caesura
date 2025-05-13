@@ -6,7 +6,7 @@ use crate::commands::*;
 /// Command line argument parser.
 #[derive(Parser)]
 #[command(version, about)]
-pub(crate) struct ArgumentsParser {
+pub struct ArgumentsParser {
     /// The command to run
     #[command(subcommand)]
     pub command: Option<CommandArguments>,
