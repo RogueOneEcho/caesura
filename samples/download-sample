@@ -20,3 +20,5 @@ fi
 mkdir samples/content
 unzip "$ZIP" -d "$OUT"
 rm "$ZIP"
+# Create a file with uppercase extension
+cp "$OUT/cover.jpg" "$OUT/UPPERCASE.JPG"

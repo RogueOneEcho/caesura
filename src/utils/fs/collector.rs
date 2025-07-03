@@ -29,7 +29,7 @@ impl Collector {
         collection
     }
 
-    /// Create [`AdditionalFile`] for each additonal file in a directory.
+    /// Create [`AdditionalFile`] for each additional file in a directory.
     #[must_use]
     pub fn get_additional(source_dir: &PathBuf) -> Vec<AdditionalFile> {
         let paths = DirectoryReader::new()
