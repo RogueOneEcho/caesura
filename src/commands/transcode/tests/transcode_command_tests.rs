@@ -63,7 +63,7 @@ async fn transcode_command() -> Result<(), Error> {
         .with_extension("jpg")
         .read(&output_dir)
         .expect("Should be able to read dir");
-    assert_eq!(generated_files.len(), target_count);
+    assert_eq!(generated_files.len(), target_count * 2); // 2 covers per target
     let cover = generated_files.first().expect("should be at least one");
     let hard_links = metadata(cover)
         .expect("should be able to get metadata")

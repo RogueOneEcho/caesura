@@ -58,7 +58,8 @@ impl AdditionalJobFactory {
             .extension()
             .expect("Source has extension")
             .to_string_lossy()
-            .to_string();
+            .to_string()
+            .to_lowercase();
         let is_image = IMAGE_EXTENSIONS.contains(&extension.as_str());
         let is_large = size > max_file_size;
         let no_image_compression = self

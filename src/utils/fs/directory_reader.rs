@@ -67,7 +67,7 @@ impl DirectoryReader {
         if self.included_extensions.is_empty() {
             true
         } else if let Some(extension) = path.extension() {
-            let extension = extension.to_string_lossy().to_string();
+            let extension = extension.to_string_lossy().to_string().to_lowercase();
             self.included_extensions.contains(&extension)
         } else {
             false
