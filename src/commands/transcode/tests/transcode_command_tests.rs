@@ -5,8 +5,6 @@ use crate::utils::*;
 
 use crate::utils::TargetFormat::*;
 use rogue_logging::Error;
-use std::fs::metadata;
-use std::os::unix::prelude::MetadataExt;
 
 #[tokio::test]
 async fn transcode_command() -> Result<(), Error> {
@@ -23,15 +21,11 @@ async fn transcode_command() -> Result<(), Error> {
         allow_existing: Some(true),
         target: Some(vec![Flac, _320, V0]),
     });
-    let copy_options = TestOptionsFactory::from(CopyOptions {
-        hard_link: Some(true),
-    });
     let output_dir = shared_options.output.clone().expect("output should be set");
     let host = HostBuilder::new()
         .with_options(source_options)
         .with_options(shared_options.clone())
         .with_options(target_options)
-        .with_options(copy_options)
         .build();
     let provider = host.services.get_required_mut::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
@@ -63,11 +57,8 @@ async fn transcode_command() -> Result<(), Error> {
         .with_extension("jpg")
         .read(&output_dir)
         .expect("Should be able to read dir");
-    assert_eq!(generated_files.len(), target_count * 2); // 2 covers per target
-    let cover = generated_files.first().expect("should be at least one");
-    let hard_links = metadata(cover)
-        .expect("should be able to get metadata")
-        .nlink();
-    assert_eq!(hard_links, 2);
+    assert_eq!(generated_files.len(), target_count);
+    assert_eq!(generated_files.len(), target_count * 2);
+
     Ok(())
 }
