@@ -80,21 +80,21 @@ impl Options for UploadOptions {
     #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
-        if let Some(dir) = &self.copy_transcode_to {
-            if !dir.is_dir() {
-                errors.push(DoesNotExist(
-                    "Copy transcode to directory".to_owned(),
-                    dir.to_string_lossy().to_string(),
-                ));
-            }
+        if let Some(dir) = &self.copy_transcode_to
+            && !dir.is_dir()
+        {
+            errors.push(DoesNotExist(
+                "Copy transcode to directory".to_owned(),
+                dir.to_string_lossy().to_string(),
+            ));
         }
-        if let Some(dir) = &self.copy_torrent_to {
-            if !dir.is_dir() {
-                errors.push(DoesNotExist(
-                    "Copy torrent to directory".to_owned(),
-                    dir.to_string_lossy().to_string(),
-                ));
-            }
+        if let Some(dir) = &self.copy_torrent_to
+            && !dir.is_dir()
+        {
+            errors.push(DoesNotExist(
+                "Copy torrent to directory".to_owned(),
+                dir.to_string_lossy().to_string(),
+            ));
         }
         OptionRule::show(&errors);
         errors.is_empty()

@@ -214,11 +214,11 @@ impl BatchCommand {
             }
             queue.set(item).await?;
             count += 1;
-            if let Some(limit) = limit {
-                if count >= limit {
-                    info!("{} batch limit: {limit}", "Reached".bold());
-                    break;
-                }
+            if let Some(limit) = limit
+                && count >= limit
+            {
+                info!("{} batch limit: {limit}", "Reached".bold());
+                break;
             }
         }
         info!("{} batch process of {count} items", "Completed".bold());

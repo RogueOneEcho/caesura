@@ -135,12 +135,12 @@ impl UploadCommand {
                     errors.push(error);
                 }
             }
-            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to {
-                if let Err(error) = self.copy_torrent(source, &target, torrent_dir).await {
-                    // If copy_torrent fails we can still continue with the upload
-                    warn!("{error}");
-                    errors.push(error);
-                }
+            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to
+                && let Err(error) = self.copy_torrent(source, &target, torrent_dir).await
+            {
+                // If copy_torrent fails we can still continue with the upload
+                warn!("{error}");
+                errors.push(error);
             }
             let form = UploadForm {
                 path: torrent_path,

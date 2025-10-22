@@ -23,21 +23,21 @@ impl StreamVerifier {
                 rate: info.sample_rate,
             });
         }
-        if let Some(rate) = get_average_bit_rate(&info) {
-            if rate < MIN_BIT_RATE_KBPS * 1000 {
-                errors.push(BitRate {
-                    path: flac.path.clone(),
-                    rate,
-                });
-            }
+        if let Some(rate) = get_average_bit_rate(&info)
+            && rate < MIN_BIT_RATE_KBPS * 1000
+        {
+            errors.push(BitRate {
+                path: flac.path.clone(),
+                rate,
+            });
         }
-        if let Some(seconds) = get_duration(&info) {
-            if seconds > MAX_DURATION {
-                errors.push(Duration {
-                    path: flac.path.clone(),
-                    seconds,
-                });
-            }
+        if let Some(seconds) = get_duration(&info)
+            && seconds > MAX_DURATION
+        {
+            errors.push(Duration {
+                path: flac.path.clone(),
+                seconds,
+            });
         }
         if info.channels > 2 {
             errors.push(Channels {

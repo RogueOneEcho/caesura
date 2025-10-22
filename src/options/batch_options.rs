@@ -132,13 +132,13 @@ impl Options for BatchOptions {
     #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
-        if let Some(wait_before_upload) = &self.wait_before_upload {
-            if self.get_wait_before_upload().is_none() {
-                errors.push(OptionRule::DurationInvalid(
-                    "Wait Before Upload".to_owned(),
-                    wait_before_upload.clone(),
-                ));
-            }
+        if let Some(wait_before_upload) = &self.wait_before_upload
+            && self.get_wait_before_upload().is_none()
+        {
+            errors.push(OptionRule::DurationInvalid(
+                "Wait Before Upload".to_owned(),
+                wait_before_upload.clone(),
+            ));
         }
         if self.upload == Some(true) && self.transcode != Some(true) {
             errors.push(OptionRule::Dependent(

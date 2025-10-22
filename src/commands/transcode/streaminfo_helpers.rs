@@ -8,9 +8,9 @@ pub(crate) fn is_resample_required(info: &StreamInfo) -> bool {
 }
 
 pub(crate) fn get_resample_rate(info: &StreamInfo) -> Result<u32, Error> {
-    if info.sample_rate % 44100 == 0 {
+    if info.sample_rate.is_multiple_of(44100) {
         Ok(44100)
-    } else if info.sample_rate % 48000 == 0 {
+    } else if info.sample_rate.is_multiple_of(48000) {
         Ok(48000)
     } else {
         Err(error("get sample rate", "invalid sample rate".to_owned()))

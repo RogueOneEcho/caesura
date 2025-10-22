@@ -32,16 +32,16 @@ impl OptionsProvider {
     #[must_use]
     pub fn get<T: Options>(&self) -> T {
         let mut options = T::from_args().unwrap_or_default();
-        if let Some(yaml) = &self.yaml {
-            if !yaml.is_empty() {
-                match T::from_yaml(yaml) {
-                    Ok(file_options) => {
-                        options.merge(&file_options);
-                    }
-                    Err(error) => {
-                        let _ = init_logger();
-                        error!("{} to deserialize config file: {}", "Failed".bold(), error);
-                    }
+        if let Some(yaml) = &self.yaml
+            && !yaml.is_empty()
+        {
+            match T::from_yaml(yaml) {
+                Ok(file_options) => {
+                    options.merge(&file_options);
+                }
+                Err(error) => {
+                    let _ = init_logger();
+                    error!("{} to deserialize config file: {}", "Failed".bold(), error);
                 }
             }
         }
