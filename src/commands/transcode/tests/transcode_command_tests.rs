@@ -54,11 +54,9 @@ async fn transcode_command() -> Result<(), Error> {
         * target_count;
     assert_eq!(generated_files.len(), expected_file_count);
     let generated_files = DirectoryReader::new()
-        .with_extension("jpg")
+        .with_extensions(IMAGE_EXTENSIONS.to_vec())
         .read(&output_dir)
         .expect("Should be able to read dir");
-    assert_eq!(generated_files.len(), target_count);
     assert_eq!(generated_files.len(), target_count * 2);
-
     Ok(())
 }
