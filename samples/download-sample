@@ -7,7 +7,7 @@ ZIP="/tmp/sample.zip"
 OUT="samples/content/Tennyson - With You (2014) [Digital] "'{'"16-44.1 Bandcamp"'}'" (FLAC)"
 EXPECTED="c599d74d09ce6c13b6f04a5bb050e62f1354215360757b97b7608978d2bba2cb  $ZIP"
 curl --location --create-dirs --output "$ZIP" "$URL"
-ACTUAL=$(sha256sum $ZIP)
+ACTUAL=$(shasum -a 256 "$ZIP")
 echo "Expected: $EXPECTED"
 echo "Actual:   $ACTUAL"
 if [[ "$EXPECTED" == "$ACTUAL" ]]
@@ -21,4 +21,4 @@ mkdir samples/content
 unzip "$ZIP" -d "$OUT"
 rm "$ZIP"
 # Create a file with uppercase extension
-cp "$OUT/cover.jpg" "$OUT/UPPERCASE.JPG"
+cp "$OUT/cover.png" "$OUT/UPPERCASE.PNG"
