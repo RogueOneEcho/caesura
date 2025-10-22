@@ -283,10 +283,6 @@ impl UploadCommand {
             }
             Err(error) => warn!("Failed to get transcode details: {error}"),
         }
-        lines.push(format!(
-            "[url={}]Learn how easy it is to create and upload transcodes yourself![/url]",
-            PKG_REPOSITORY
-        ));
         lines.into_iter().fold(String::new(), |mut output, line| {
             output.push_str("[quote]");
             output.push_str(&line);
