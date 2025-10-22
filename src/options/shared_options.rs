@@ -153,7 +153,6 @@ impl Options for SharedOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(config) = &self.config {

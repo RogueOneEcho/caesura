@@ -57,7 +57,6 @@ impl Options for TargetOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(targets) = &self.target {
@@ -71,7 +70,6 @@ impl Options for TargetOptions {
         errors.is_empty()
     }
 
-    #[must_use]
     fn from_args() -> Option<Self> {
         let Some(
             Batch { target, .. }

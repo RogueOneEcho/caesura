@@ -174,7 +174,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    #[ignore]
+    #[ignore = "sample required"]
     async fn imdl_show() -> Result<(), Error> {
         // Arrange
         let paths = DirectoryReader::new()

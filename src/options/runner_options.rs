@@ -39,7 +39,6 @@ impl Options for RunnerOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         true
     }

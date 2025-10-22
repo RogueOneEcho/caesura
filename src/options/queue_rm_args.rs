@@ -30,7 +30,6 @@ impl Options for QueueRemoveArgs {
 
     fn apply_defaults(&mut self) {}
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(hash) = &self.queue_rm_hash {

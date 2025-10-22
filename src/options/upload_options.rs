@@ -77,7 +77,6 @@ impl Options for UploadOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(dir) = &self.copy_transcode_to
@@ -100,7 +99,6 @@ impl Options for UploadOptions {
         errors.is_empty()
     }
 
-    #[must_use]
     fn from_args() -> Option<Self> {
         let Some(Upload { upload, .. } | Batch { upload, .. }) = ArgumentsParser::get() else {
             return None;

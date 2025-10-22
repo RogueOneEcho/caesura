@@ -40,12 +40,10 @@ impl Options for CopyOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         true
     }
 
-    #[must_use]
     fn from_args() -> Option<Self> {
         let Some(Batch { copy, .. } | Transcode { copy, .. } | Upload { copy, .. }) =
             ArgumentsParser::get()

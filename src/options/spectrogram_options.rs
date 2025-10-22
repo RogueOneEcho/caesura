@@ -38,7 +38,6 @@ impl Options for SpectrogramOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         let size = self.spectrogram_size.as_ref();
@@ -49,7 +48,6 @@ impl Options for SpectrogramOptions {
         errors.is_empty()
     }
 
-    #[must_use]
     fn from_args() -> Option<SpectrogramOptions> {
         match ArgumentsParser::get() {
             Some(Batch { spectrogram, .. } | Spectrogram { spectrogram, .. }) => Some(spectrogram),

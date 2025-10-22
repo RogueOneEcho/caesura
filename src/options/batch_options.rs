@@ -129,7 +129,6 @@ impl Options for BatchOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(wait_before_upload) = &self.wait_before_upload
@@ -150,7 +149,6 @@ impl Options for BatchOptions {
         errors.is_empty()
     }
 
-    #[must_use]
     #[allow(clippy::manual_let_else)]
     fn from_args() -> Option<Self> {
         let options = match ArgumentsParser::get() {

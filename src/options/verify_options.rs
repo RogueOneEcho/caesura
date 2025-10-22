@@ -53,12 +53,10 @@ impl Options for VerifyOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         true
     }
 
-    #[must_use]
     fn from_args() -> Option<Self> {
         let Some(Batch { verify, .. } | Verify { verify, .. }) = ArgumentsParser::get() else {
             return None;

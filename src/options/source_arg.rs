@@ -39,7 +39,6 @@ impl Options for SourceArg {
 
     fn apply_defaults(&mut self) {}
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if self.source.is_none() {

@@ -49,7 +49,7 @@ mod tests {
     use std::path::PathBuf;
 
     #[tokio::test]
-    #[ignore]
+    #[ignore = "sample required"]
     async fn metaflac_list() -> Result<(), Error> {
         // Arrange
         let paths = DirectoryReader::new()

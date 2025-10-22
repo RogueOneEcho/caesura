@@ -37,7 +37,6 @@ impl Options for QueueAddArgs {
 
     fn apply_defaults(&mut self) {}
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(path) = &self.queue_add_path {

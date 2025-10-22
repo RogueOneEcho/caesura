@@ -94,12 +94,10 @@ impl Options for FileOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         true
     }
 
-    #[must_use]
     fn from_args() -> Option<Self> {
         let Some(Batch { file, .. } | Transcode { file, .. }) = ArgumentsParser::get() else {
             return None;

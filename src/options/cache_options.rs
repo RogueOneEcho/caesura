@@ -43,7 +43,6 @@ impl Options for CacheOptions {
         }
     }
 
-    #[must_use]
     fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(cache) = &self.cache {
@@ -71,7 +70,6 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
         errors.is_empty()
     }
 
-    #[must_use]
     #[allow(clippy::manual_let_else)]
     fn from_args() -> Option<Self> {
         match ArgumentsParser::get() {
