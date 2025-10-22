@@ -21,27 +21,27 @@ publish = true
 
 [dependencies]
 bytes = "1.10.1"
-chrono = "0.4.41"
-clap = { version = "4.5.37", features = ["derive"] }
+chrono = "0.4.42"
+clap = { version = "4.5.50", features = ["derive"] }
 claxon = "0.4.3"
 colored = "3.0.0"
 flat_db = "0.3.0"
 futures = "0.3.31"
 gazelle_api = "0.9.0"
 html-escape = "0.2.13"
-humantime = "2.2.0"
-indicatif = "0.17.11"
+humantime = "2.3.0"
+indicatif = "0.18.1"
 lofty = "0.22.4"
-log = { version = "0.4.27", features = ["std"] }
+log = { version = "0.4.28", features = ["std"] }
 more-di = { version = "3.1.0", features = ["async", "builder"] }
-num_cpus = "1.16.0"
-regex = "1.11.1"
-reqwest = { version = "0.12.15", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
+num_cpus = "1.17.0"
+regex = "1.12.2"
+reqwest = { version = "0.12.24", features = ["rustls-tls", "json", "multipart", "stream"], default-features = false }
 rogue_logging = "0.3.0"
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
 serde_yaml = "0.9.34"
-tokio = { version = "1.45.0", features = ["full"] }
+tokio = { version = "1.48.0", features = ["full"] }
 
 [build-dependencies]
 built = "0.8.0"
@@ -99,8 +99,5 @@ unwrap_used = "warn"
 wildcard_enum_match_arm = "allow"
 wildcard_imports = "allow"
 wrong_self_convention = "allow"
-# TODO COULD re-consider the following allows:
 result_large_err = "allow"
-
-# TODO SHOULD investigate solution to await_holding_lock
 await_holding_lock = "allow"
