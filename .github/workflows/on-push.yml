@@ -123,7 +123,7 @@ jobs:
     - run: mkdir artifacts
 
     - run: >
-        cp target/${{ matrix.target }}/release/caesura 
+        cp target/${{ matrix.target }}/release/caesura
         artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
 
     - uses: actions/upload-artifact@v4
@@ -144,7 +144,7 @@ jobs:
     - if: matrix.test && steps.cache-samples.outputs.cache-hit != 'true'
       run: ./samples/download-sample
 
-    - if: matrix.test
+    - if: matrix.test && contains(matrix.os, 'ubuntu')
       run: |
         curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
           --location \
@@ -161,14 +161,14 @@ jobs:
       run: sudo apt-get install flac lame sox imagemagick --yes
 
     - if: matrix.test && contains(matrix.os, 'macos')
-      run: brew install flac lame sox imagemagick eye-d3
+      run: brew install flac lame sox imagemagick eye-d3 intermodal
 
     - if: matrix.test
       run: |
         tee config.yml <<EOF
         announce_url: ${{ secrets.ANNOUNCE_URL }}
         api_key: ${{ secrets.API_KEY }}
-        content: 
+        content:
         - samples/content
         source: ${{ secrets.SOURCE }}
         verbosity: trace
