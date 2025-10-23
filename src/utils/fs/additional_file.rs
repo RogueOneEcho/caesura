@@ -1,5 +1,4 @@
 use rogue_logging::Error;
-use std::os::unix::prelude::MetadataExt;
 use std::path::PathBuf;
 use tokio::fs::File;
 
@@ -45,6 +44,6 @@ impl AdditionalFile {
             .metadata()
             .await
             .map_err(|e| io_error(e, "read metadata of additional file"))?;
-        Ok(metadata.size())
+        Ok(metadata.len())
     }
 }

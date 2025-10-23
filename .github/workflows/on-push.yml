@@ -6,6 +6,9 @@ concurrency:
   cancel-in-progress: true
 env:
   CARGO_TERM_COLOR: always
+defaults:
+  run:
+    shell: bash
 jobs:
 
   release:
@@ -66,6 +69,9 @@ jobs:
         - os: macos-14
           target: aarch64-apple-darwin
           test: true
+        - os: windows-2025
+          target: x86_64-pc-windows-msvc
+          test: true
 
     steps:
 
@@ -122,9 +128,15 @@ jobs:
 
     - run: mkdir artifacts
 
-    - run: >
+    - if: matrix.test && contains(matrix.os, 'windows') == false
+      run: >
         cp target/${{ matrix.target }}/release/caesura
         artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
+
+    - if: matrix.test && contains(matrix.os, 'windows')
+      run: >
+        cp target/${{ matrix.target }}/release/caesura.exe
+        artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}.exe
 
     - uses: actions/upload-artifact@v4
       with:
@@ -162,6 +174,20 @@ jobs:
 
     - if: matrix.test && contains(matrix.os, 'macos')
       run: brew install flac lame sox imagemagick eye-d3 intermodal
+
+    - if: matrix.test && contains(matrix.os, 'windows')
+      run: choco install flac lame sox.portable imagemagick
+
+    - if: matrix.test && contains(matrix.os, 'windows')
+      run: |
+        curl -L -o "$TEMP/imdl.zip" https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-pc-windows-msvc.zip
+        unzip -o "$TEMP/imdl.zip" imdl.exe -d "$HOME/bin"
+        echo "$HOME/bin" >> $GITHUB_PATH
+
+    - if: matrix.test && contains(matrix.os, 'windows')
+      run: |
+        pip install python-magic-bin
+        pip install eyeD3
 
     - if: matrix.test
       run: |
