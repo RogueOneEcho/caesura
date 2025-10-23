@@ -7,7 +7,7 @@ use std::path::PathBuf;
 async fn test_copy_dir() -> Result<(), Error> {
     // Arrange
     let source_dir = PathBuf::from("./samples/content");
-    let target_dir = TempDirectory::create("caesura").join("target");
+    let target_dir = TempDirectory::create("test_copy_dir").join("target");
     assert!(
         source_dir.is_dir(),
         "Sample directory should exist: {}",

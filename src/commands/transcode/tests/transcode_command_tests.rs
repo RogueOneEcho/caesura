@@ -15,7 +15,7 @@ async fn transcode_command() -> Result<(), Error> {
         source: Some("206675".to_owned()),
     });
     let shared_options = TestOptionsFactory::from(SharedOptions {
-        output: Some(TempDirectory::create("caesura")),
+        output: Some(TempDirectory::create("transcode_command")),
         ..SharedOptions::default()
     });
     let target_options = TestOptionsFactory::from(TargetOptions {

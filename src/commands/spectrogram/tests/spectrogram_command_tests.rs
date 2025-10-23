@@ -11,7 +11,7 @@ async fn spectrogram_command() -> Result<(), Error> {
     // Arrange
     let _ = init_logger();
     let shared_options = TestOptionsFactory::from(SharedOptions {
-        output: Some(TempDirectory::create("caesura")),
+        output: Some(TempDirectory::create("spectrogram_command")),
         ..SharedOptions::default()
     });
     let output_dir = shared_options.output.clone().expect("Should have value");
