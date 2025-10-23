@@ -2,6 +2,7 @@ use crate::commands::*;
 use crate::hosting::*;
 use crate::options::*;
 use crate::utils::*;
+use log::trace;
 
 use crate::utils::TargetFormat::*;
 use rogue_logging::Error;
@@ -57,6 +58,14 @@ async fn transcode_command() -> Result<(), Error> {
         .with_extensions(IMAGE_EXTENSIONS.to_vec())
         .read(&output_dir)
         .expect("Should be able to read dir");
+    trace!(
+        "{}",
+        generated_files
+            .iter()
+            .map(|f| f.display().to_string())
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
     assert_eq!(generated_files.len(), target_count * 2);
     Ok(())
 }
