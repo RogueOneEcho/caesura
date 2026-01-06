@@ -10,6 +10,17 @@ pub struct SourceProvider {
     id_provider: Ref<IdProvider>,
 }
 
+fn libtorrent_safe_path(path: &str) -> String {
+    // https://github.com/arvidn/libtorrent/blob/9c1897645265c6a450930e766ab46c02a240891f/src/torrent_info.cpp#L100
+    path.replace(
+        [
+            '/', '\\', '\u{200e}', '\u{200f}', '\u{202a}', '\u{202b}', '\u{202c}', '\u{202d}',
+            '\u{202e}',
+        ],
+        "",
+    )
+}
+
 impl SourceProvider {
     /// Retrieve a [`Source`] by torrent ID.
     pub async fn get(&self, id: u32) -> Result<Source, SourceIssue> {
@@ -51,11 +62,16 @@ impl SourceProvider {
 
     fn get_source_directory(&self, torrent: &Torrent) -> Result<PathBuf, SourceIssue> {
         let path = decode_html_entities(&torrent.file_path).to_string();
+        let safe_path = libtorrent_safe_path(&path);
+
+        let mut paths = vec![&path, &safe_path];
+        paths.dedup();
+
         let directories: Vec<PathBuf> = self
             .options
             .content
             .iter()
-            .map(|x| x.join(path.clone()))
+            .flat_map(|x| paths.iter().map(|p| x.join((*p).clone())))
             .filter(|x| x.exists() && x.is_dir())
             .collect();
         if directories.is_empty() {
