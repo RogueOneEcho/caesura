@@ -54,18 +54,19 @@ impl Shortener {
 
     #[must_use]
     pub fn longest_common_prefix(paths: &[PathBuf]) -> PathBuf {
-        if paths.is_empty() {
-            return PathBuf::new();
-        }
-        let mut prefix = paths[0].clone();
-        for path in paths.iter().skip(1) {
-            while !path.starts_with(&prefix) {
-                if !prefix.pop() {
-                    return PathBuf::new();
+        if let Some(first) = paths.first() {
+            let mut prefix = first.clone();
+            for path in paths.iter().skip(1) {
+                while !path.starts_with(&prefix) {
+                    if !prefix.pop() {
+                        return PathBuf::new();
+                    }
                 }
             }
+            prefix
+        } else {
+            PathBuf::new()
         }
-        prefix
     }
 }
 

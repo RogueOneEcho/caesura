@@ -243,7 +243,7 @@ impl VerifyCommand {
             .map_or_else(Vec::new, |x| vec![x])
     }
 
-    pub fn subdirectory_checks(flacs: &Vec<FlacFile>) -> Vec<SourceIssue> {
+    pub fn subdirectory_checks(flacs: &[FlacFile]) -> Vec<SourceIssue> {
         // source.directory is the root directory of the torrent. If all flacs share a subdirectory
         // within that, it is unnecessary and trumpable. Multi-disc sets may separate items by
         // subdirs, so they will not be a common prefix.
