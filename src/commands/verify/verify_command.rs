@@ -147,19 +147,7 @@ impl VerifyCommand {
             });
         }
 
-        // source.directory is the root directory of the torrent. If all flacs share a subdirectory
-        // within that, it is unnecessary and trumpable. Multi-disc sets may separate items by
-        // subdirs, so they will not be a common prefix.
-        // Note that this is meant to verify the most common case, where a single unnecessary
-        // directory contains all flac content, likely due to a misunderstanding of how the
-        // creation tool works.
-        let flac_sub_dirs = flacs.iter().map(|x| x.sub_dir.clone()).collect::<Vec<_>>();
-        let common_prefix = Shortener::longest_common_prefix(&flac_sub_dirs);
-        if common_prefix.components().count() > 0 {
-            issues.push(UnnecessaryDirectory {
-                path: common_prefix,
-            })
-        }
+        issues.append(&mut VerifyCommand::subdirectory_checks(&flacs));
 
         let max_target = self
             .targets
@@ -253,5 +241,22 @@ impl VerifyCommand {
                 })
             })
             .map_or_else(Vec::new, |x| vec![x])
+    }
+
+    pub fn subdirectory_checks(flacs: &Vec<FlacFile>) -> Vec<SourceIssue> {
+        // source.directory is the root directory of the torrent. If all flacs share a subdirectory
+        // within that, it is unnecessary and trumpable. Multi-disc sets may separate items by
+        // subdirs, so they will not be a common prefix.
+        // Note that this is meant to verify the most common case, where a single unnecessary
+        // directory contains all flac content, likely due to a misunderstanding of how the
+        // creation tool works.
+        let flac_sub_dirs = flacs.iter().map(|x| x.sub_dir.clone()).collect::<Vec<_>>();
+        let common_prefix = Shortener::longest_common_prefix(&flac_sub_dirs);
+        if common_prefix.components().count() > 0 {
+            return vec![UnnecessaryDirectory {
+                path: common_prefix,
+            }];
+        }
+        vec![]
     }
 }
