@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use colored::Colorize;
 use log::info;
 use regex::Regex;
@@ -48,6 +50,22 @@ impl Shortener {
                 );
             }
         }
+    }
+
+    #[must_use]
+    pub fn longest_common_prefix(paths: &[PathBuf]) -> PathBuf {
+        if paths.is_empty() {
+            return PathBuf::new();
+        }
+        let mut prefix = paths[0].clone();
+        for path in paths.iter().skip(1) {
+            while !path.starts_with(&prefix) {
+                if !prefix.pop() {
+                    return PathBuf::new();
+                }
+            }
+        }
+        prefix
     }
 }
 
@@ -142,5 +160,33 @@ mod tests {
         // Assert
         assert!(result.is_some());
         assert_eq!(result.unwrap().album, "This is a Long Title");
+    }
+
+    #[test]
+    fn longest_common_prefix_tests() {
+        let paths = vec![
+            PathBuf::from("a/b/c"),
+            PathBuf::from("a/b/c"),
+            PathBuf::from("a/b/"),
+        ];
+        assert_eq!(
+            Shortener::longest_common_prefix(&paths),
+            PathBuf::from("a/b")
+        );
+
+        let paths = vec![PathBuf::from("a/b/c"), PathBuf::from("a/b/c")];
+        assert_eq!(
+            Shortener::longest_common_prefix(&paths),
+            PathBuf::from("a/b/c")
+        );
+
+        let paths = vec![PathBuf::from("a/b/c"), PathBuf::from("x/y")];
+        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
+
+        let paths = vec![];
+        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
+
+        let paths = vec![PathBuf::from("")];
+        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
     }
 }

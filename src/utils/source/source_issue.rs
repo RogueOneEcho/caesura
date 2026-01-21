@@ -61,6 +61,9 @@ pub enum SourceIssue {
     MissingDirectory {
         path: PathBuf,
     },
+    UnnecessaryDirectory {
+        path: PathBuf,
+    },
     NoFlacs {
         path: PathBuf,
     },
@@ -150,6 +153,12 @@ impl Display for SourceIssue {
             NotSource { format, encoding } => format!("Not a suitable source: {format} {encoding}"),
             MissingDirectory { path } => {
                 format!("Source directory does not exist: {}", path.display())
+            }
+            UnnecessaryDirectory { path } => {
+                format!(
+                    "Source content is nested within an unnecessary directory: {}",
+                    path.display()
+                )
             }
             NoFlacs { path } => format!(
                 "No FLAC files found in source directory: {}",
