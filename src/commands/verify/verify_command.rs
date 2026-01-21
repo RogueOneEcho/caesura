@@ -146,6 +146,9 @@ impl VerifyCommand {
                 actual: flacs.len(),
             });
         }
+
+        issues.append(&mut VerifyCommand::subdirectory_checks(&flacs));
+
         let max_target = self
             .targets
             .get_max_path_length(source.format, &source.existing);
@@ -238,5 +241,19 @@ impl VerifyCommand {
                 })
             })
             .map_or_else(Vec::new, |x| vec![x])
+    }
+
+    pub fn subdirectory_checks(flacs: &[FlacFile]) -> Vec<SourceIssue> {
+        // source.directory is the root directory of the torrent. If all flacs share a subdirectory
+        // within that, it is unnecessary and trumpable. Multi-disc sets may separate items by
+        // subdirs, so they will not be a common prefix.
+        // Note that this is meant to verify the most common case, where a single unnecessary
+        // directory contains all flac content, likely due to a misunderstanding of how the
+        // creation tool works.
+        let flac_sub_dirs: Vec<_> = flacs.iter().map(|x| &x.sub_dir).collect();
+        if let Some(prefix) = Shortener::longest_common_prefix(&flac_sub_dirs) {
+            return vec![UnnecessaryDirectory { prefix }];
+        }
+        vec![]
     }
 }
