@@ -31,30 +31,39 @@ async fn verify_command() -> Result<(), Error> {
 #[test]
 #[allow(clippy::indexing_slicing)]
 fn test_subdirectory_checks() {
+    let source_dir = PathBuf::from("source/dir");
+
     // Good source because all flacs share the 'b' subdirectory.
     let result = VerifyCommand::subdirectory_checks(&[
-        FlacFile::new(PathBuf::from("a/b/c.flac"), &PathBuf::from("a/b")),
-        FlacFile::new(PathBuf::from("a/b/d.flac"), &PathBuf::from("a/b")),
+        FlacFile::new(PathBuf::from("source/dir/a.flac"), &source_dir),
+        FlacFile::new(PathBuf::from("source/dir/b.flac"), &source_dir),
     ]);
     assert_eq!(result.len(), 0);
+
+    // Bad source because all flacs share the 'c' subdirectory.
+    let result = VerifyCommand::subdirectory_checks(&[
+        FlacFile::new(PathBuf::from("source/dir/a/b.flac"), &source_dir),
+        FlacFile::new(PathBuf::from("source/dir/a/c.flac"), &source_dir),
+    ]);
+    assert_eq!(result.len(), 1);
 
     // Good multi-cd source
     let result = VerifyCommand::subdirectory_checks(&[
         FlacFile::new(
-            PathBuf::from("/root/album/CD1/a.flac"),
-            &PathBuf::from("/root/album/"),
+            PathBuf::from("source/dir/CD1/a.flac"),
+            &source_dir,
         ),
         FlacFile::new(
-            PathBuf::from("/root/album/CD2/a.flac"),
-            &PathBuf::from("/root/album/"),
+            PathBuf::from("source/dir/CD2/b.flac"),
+            &source_dir,
         ),
     ]);
     assert_eq!(result.len(), 0);
 
     // Bad source because all flacs share the unnecessary 'c' subdirectory.
     let result = VerifyCommand::subdirectory_checks(&[FlacFile::new(
-        PathBuf::from("a/b/c/d.flac"),
-        &PathBuf::from("a/b"),
+        PathBuf::from("source/dir/c/d.flac"),
+        &source_dir,
     )]);
     assert_eq!(result.len(), 1);
     assert_eq!(
@@ -64,4 +73,11 @@ fn test_subdirectory_checks() {
         }
         .to_string()
     );
+
+    // Good single-file release directly in source directory
+    let result = VerifyCommand::subdirectory_checks(&[FlacFile::new(
+        PathBuf::from("/root/album/track.flac"),
+        &PathBuf::from("/root/album/"),
+    )]);
+    assert_eq!(result.len(), 0);
 }
