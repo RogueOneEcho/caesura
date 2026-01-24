@@ -166,224 +166,185 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn longest_common_prefix_tests() {
-        let paths = vec![
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/d"),
-        ];
+        // Two paths with shared prefix
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b")
-        );
-        let paths = vec![
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/"),
-        ];
-        assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b")
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/d")]),
+            p("a/b")
         );
 
-        let paths = vec![PathBuf::from("a/b/c"), PathBuf::from("a/b/c")];
+        // Three paths with shared prefix (one with trailing slash)
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b/c")
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/c"), p("a/b/")]),
+            p("a/b")
         );
 
-        let paths = vec![PathBuf::from("a/b/c"), PathBuf::from("x/y")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
+        // Identical paths
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/c")]),
+            p("a/b/c")
+        );
 
-        let paths = vec![];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
+        // No shared prefix
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("x/y")]),
+            empty()
+        );
 
-        let paths = vec![PathBuf::from("")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
+        // Empty input
+        assert_eq!(Shortener::longest_common_prefix(&[]), empty());
 
-        let paths = vec![
-            PathBuf::from("a/b/c"),
-            PathBuf::from(""),
-            PathBuf::from(""),
-            PathBuf::from(""),
-        ];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
+        // Single empty path
+        assert_eq!(Shortener::longest_common_prefix(&[empty()]), empty());
+
+        // First path valid, rest empty
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/b/c"), empty(), empty(), empty()]),
+            empty()
+        );
 
         // Absolute paths share root
-        let paths = vec![PathBuf::from("/a"), PathBuf::from("/b")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("/"));
-
-        // Relative paths have no common prefix
-        let paths = vec![PathBuf::from("a"), PathBuf::from("b")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
-
-        // Current directory variants
-        let paths = vec![PathBuf::from(".")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("."));
-
-        let paths = vec![PathBuf::from("./")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("./")
+            Shortener::longest_common_prefix(&[p("/a"), p("/b")]),
+            p("/")
         );
 
-        let paths = vec![PathBuf::from("."), PathBuf::from(".")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("."));
+        // Relative paths have no common prefix
+        assert_eq!(Shortener::longest_common_prefix(&[p("a"), p("b")]), empty());
 
-        let paths = vec![PathBuf::from("./a"), PathBuf::from("./b")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("."));
-
-        let paths = vec![PathBuf::from("./a/b"), PathBuf::from("./a/c")];
+        // Current directory variants
+        assert_eq!(Shortener::longest_common_prefix(&[p(".")]), p("."));
+        assert_eq!(Shortener::longest_common_prefix(&[p("./")]), p("./"));
+        assert_eq!(Shortener::longest_common_prefix(&[p("."), p(".")]), p("."));
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("./a")
+            Shortener::longest_common_prefix(&[p("./a"), p("./b")]),
+            p(".")
+        );
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("./a/b"), p("./a/c")]),
+            p("./a")
         );
 
         // Mixed current directory and relative
-        let paths = vec![PathBuf::from("./a"), PathBuf::from("a")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
-
-        // Parent directory
-        let paths = vec![PathBuf::from("../a"), PathBuf::from("../b")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("..")
+            Shortener::longest_common_prefix(&[p("./a"), p("a")]),
+            empty()
         );
 
-        let paths = vec![PathBuf::from(".."), PathBuf::from("..")];
+        // Parent directory
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("..")
+            Shortener::longest_common_prefix(&[p("../a"), p("../b")]),
+            p("..")
+        );
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p(".."), p("..")]),
+            p("..")
         );
 
         // Home directory (tilde is not expanded by PathBuf)
-        let paths = vec![PathBuf::from("~/a"), PathBuf::from("~/b")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("~"));
-
-        let paths = vec![PathBuf::from("~"), PathBuf::from("~")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("~"));
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("~/a"), p("~/b")]),
+            p("~")
+        );
+        assert_eq!(Shortener::longest_common_prefix(&[p("~"), p("~")]), p("~"));
 
         // Paths with embedded parent references (not canonicalized)
-        let paths = vec![PathBuf::from("a/../b"), PathBuf::from("a/../c")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/..")
+            Shortener::longest_common_prefix(&[p("a/../b"), p("a/../c")]),
+            p("a/..")
         );
-
-        let paths = vec![PathBuf::from("a/b/../c"), PathBuf::from("a/b/../d")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b/..")
+            Shortener::longest_common_prefix(&[p("a/b/../c"), p("a/b/../d")]),
+            p("a/b/..")
         );
 
         // Paths with embedded current directory references
-        let paths = vec![PathBuf::from("a/./b"), PathBuf::from("a/./c")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/.")
+            Shortener::longest_common_prefix(&[p("a/./b"), p("a/./c")]),
+            p("a/.")
         );
 
         // Mixed weird paths
-        let paths = vec![PathBuf::from("a/../b"), PathBuf::from("a/b")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("a"));
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/../b"), p("a/b")]),
+            p("a")
+        );
 
         // Double dots in sequence
-        let paths = vec![PathBuf::from("a/../../b"), PathBuf::from("a/../../c")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/../..")
+            Shortener::longest_common_prefix(&[p("a/../../b"), p("a/../../c")]),
+            p("a/../..")
         );
 
         // Trailing slashes
-        let paths = vec![PathBuf::from("a/b/"), PathBuf::from("a/b/")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b/")
+            Shortener::longest_common_prefix(&[p("a/b/"), p("a/b/")]),
+            p("a/b/")
         );
-
-        let paths = vec![PathBuf::from("a/b/"), PathBuf::from("a/b")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b")
+            Shortener::longest_common_prefix(&[p("a/b/"), p("a/b")]),
+            p("a/b")
         );
 
         // Different roots with same structure
-        let paths = vec![PathBuf::from("a/../b"), PathBuf::from("c/../b")];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from(""));
-
-        // One path is prefix of another
-        let paths = vec![PathBuf::from("a/b"), PathBuf::from("a/b/c")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b")
+            Shortener::longest_common_prefix(&[p("a/../b"), p("c/../b")]),
+            empty()
         );
 
-        let paths = vec![PathBuf::from("a/b/c"), PathBuf::from("a/b")];
+        // One path is prefix of another
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b")
+            Shortener::longest_common_prefix(&[p("a/b"), p("a/b/c")]),
+            p("a/b")
+        );
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b")]),
+            p("a/b")
         );
 
         // More than two paths
-        let paths = vec![
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/d"),
-            PathBuf::from("a/b/e"),
-            PathBuf::from("a/b/f"),
-        ];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b")
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/d"), p("a/b/e"), p("a/b/f")]),
+            p("a/b")
+        );
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/d"), p("a/x/e")]),
+            p("a")
         );
 
-        let paths = vec![
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/d"),
-            PathBuf::from("a/x/e"),
-        ];
-        assert_eq!(Shortener::longest_common_prefix(&paths), PathBuf::from("a"));
-
         // Paths with spaces
-        let paths = vec![PathBuf::from("a b/c d"), PathBuf::from("a b/e f")];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a b")
+            Shortener::longest_common_prefix(&[p("a b/c d"), p("a b/e f")]),
+            p("a b")
         );
 
         // Unicode paths
-        let paths = vec![
-            PathBuf::from("音楽/アルバム/曲.flac"),
-            PathBuf::from("音楽/アルバム/別曲.flac"),
-        ];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("音楽/アルバム")
+            Shortener::longest_common_prefix(&[
+                p("音楽/アルバム/曲.flac"),
+                p("音楽/アルバム/別曲.flac")
+            ]),
+            p("音楽/アルバム")
         );
-
-        let paths = vec![
-            PathBuf::from("музика/альбом"),
-            PathBuf::from("музика/інший"),
-        ];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("музика")
+            Shortener::longest_common_prefix(&[p("музика/альбом"), p("музика/інший")]),
+            p("музика")
         );
 
         // All identical paths
-        let paths = vec![
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/c"),
-            PathBuf::from("a/b/c"),
-        ];
         assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b/c")
+            Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/c"), p("a/b/c")]),
+            p("a/b/c")
         );
 
         // Single path returns itself
-        // TODO While this is understandable I think it may cause issues.
-        let paths = vec![PathBuf::from("a/b/c")];
-        assert_eq!(
-            Shortener::longest_common_prefix(&paths),
-            PathBuf::from("a/b/c")
-        );
+        assert_eq!(Shortener::longest_common_prefix(&[p("a/b/c")]), p("a/b/c"));
+    }
+
+    fn p(path: &str) -> PathBuf {
+        PathBuf::from(path)
+    }
+
+    fn empty() -> PathBuf {
+        PathBuf::new()
     }
 }
