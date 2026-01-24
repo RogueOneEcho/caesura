@@ -53,19 +53,20 @@ impl Shortener {
     }
 
     #[must_use]
-    pub fn longest_common_prefix(paths: &[PathBuf]) -> PathBuf {
-        if let Some(first) = paths.first() {
-            let mut prefix = first.clone();
-            for path in paths.iter().skip(1) {
-                while !path.starts_with(&prefix) {
-                    if !prefix.pop() {
-                        return PathBuf::new();
-                    }
+    pub fn longest_common_prefix(paths: &[PathBuf]) -> Option<PathBuf> {
+        let first = paths.first()?;
+        let mut prefix = first.clone();
+        for path in paths.iter().skip(1) {
+            while !path.starts_with(&prefix) {
+                if !prefix.pop() {
+                    return None;
                 }
             }
-            prefix
+        }
+        if prefix.as_os_str().is_empty() {
+            None
         } else {
-            PathBuf::new()
+            Some(prefix)
         }
     }
 }
@@ -169,152 +170,155 @@ mod tests {
         // Two paths with shared prefix
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/d")]),
-            p("a/b")
+            Some(p("a/b"))
         );
 
         // Three paths with shared prefix (one with trailing slash)
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/c"), p("a/b/")]),
-            p("a/b")
+            Some(p("a/b"))
         );
 
         // Identical paths
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/c")]),
-            p("a/b/c")
+            Some(p("a/b/c"))
         );
 
         // No shared prefix
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("x/y")]),
-            empty()
+            None
         );
 
         // Empty input
-        assert_eq!(Shortener::longest_common_prefix(&[]), empty());
+        assert_eq!(Shortener::longest_common_prefix(&[]), None);
 
         // Single empty path
-        assert_eq!(Shortener::longest_common_prefix(&[empty()]), empty());
+        assert_eq!(Shortener::longest_common_prefix(&[p("")]), None);
 
         // First path valid, rest empty
         assert_eq!(
-            Shortener::longest_common_prefix(&[p("a/b/c"), empty(), empty(), empty()]),
-            empty()
+            Shortener::longest_common_prefix(&[p("a/b/c"), p(""), p(""), p("")]),
+            None
         );
 
         // Absolute paths share root
         assert_eq!(
             Shortener::longest_common_prefix(&[p("/a"), p("/b")]),
-            p("/")
+            Some(p("/"))
         );
 
         // Relative paths have no common prefix
-        assert_eq!(Shortener::longest_common_prefix(&[p("a"), p("b")]), empty());
+        assert_eq!(Shortener::longest_common_prefix(&[p("a"), p("b")]), None);
 
         // Current directory variants
-        assert_eq!(Shortener::longest_common_prefix(&[p(".")]), p("."));
-        assert_eq!(Shortener::longest_common_prefix(&[p("./")]), p("./"));
-        assert_eq!(Shortener::longest_common_prefix(&[p("."), p(".")]), p("."));
+        assert_eq!(Shortener::longest_common_prefix(&[p(".")]), Some(p(".")));
+        assert_eq!(Shortener::longest_common_prefix(&[p("./")]), Some(p("./")));
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("."), p(".")]),
+            Some(p("."))
+        );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("./a"), p("./b")]),
-            p(".")
+            Some(p("."))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("./a/b"), p("./a/c")]),
-            p("./a")
+            Some(p("./a"))
         );
 
         // Mixed current directory and relative
-        assert_eq!(
-            Shortener::longest_common_prefix(&[p("./a"), p("a")]),
-            empty()
-        );
+        assert_eq!(Shortener::longest_common_prefix(&[p("./a"), p("a")]), None);
 
         // Parent directory
         assert_eq!(
             Shortener::longest_common_prefix(&[p("../a"), p("../b")]),
-            p("..")
+            Some(p(".."))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p(".."), p("..")]),
-            p("..")
+            Some(p(".."))
         );
 
         // Home directory (tilde is not expanded by PathBuf)
         assert_eq!(
             Shortener::longest_common_prefix(&[p("~/a"), p("~/b")]),
-            p("~")
+            Some(p("~"))
         );
-        assert_eq!(Shortener::longest_common_prefix(&[p("~"), p("~")]), p("~"));
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("~"), p("~")]),
+            Some(p("~"))
+        );
 
         // Paths with embedded parent references (not canonicalized)
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/../b"), p("a/../c")]),
-            p("a/..")
+            Some(p("a/.."))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/../c"), p("a/b/../d")]),
-            p("a/b/..")
+            Some(p("a/b/.."))
         );
 
         // Paths with embedded current directory references
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/./b"), p("a/./c")]),
-            p("a/.")
+            Some(p("a/."))
         );
 
         // Mixed weird paths
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/../b"), p("a/b")]),
-            p("a")
+            Some(p("a"))
         );
 
         // Double dots in sequence
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/../../b"), p("a/../../c")]),
-            p("a/../..")
+            Some(p("a/../.."))
         );
 
         // Trailing slashes
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/"), p("a/b/")]),
-            p("a/b/")
+            Some(p("a/b/"))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/"), p("a/b")]),
-            p("a/b")
+            Some(p("a/b"))
         );
 
         // Different roots with same structure
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/../b"), p("c/../b")]),
-            empty()
+            None
         );
 
         // One path is prefix of another
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b"), p("a/b/c")]),
-            p("a/b")
+            Some(p("a/b"))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b")]),
-            p("a/b")
+            Some(p("a/b"))
         );
 
         // More than two paths
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/d"), p("a/b/e"), p("a/b/f")]),
-            p("a/b")
+            Some(p("a/b"))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/d"), p("a/x/e")]),
-            p("a")
+            Some(p("a"))
         );
 
         // Paths with spaces
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a b/c d"), p("a b/e f")]),
-            p("a b")
+            Some(p("a b"))
         );
 
         // Unicode paths
@@ -323,28 +327,27 @@ mod tests {
                 p("音楽/アルバム/曲.flac"),
                 p("音楽/アルバム/別曲.flac")
             ]),
-            p("音楽/アルバム")
+            Some(p("音楽/アルバム"))
         );
         assert_eq!(
             Shortener::longest_common_prefix(&[p("музика/альбом"), p("музика/інший")]),
-            p("музика")
+            Some(p("музика"))
         );
 
         // All identical paths
         assert_eq!(
             Shortener::longest_common_prefix(&[p("a/b/c"), p("a/b/c"), p("a/b/c")]),
-            p("a/b/c")
+            Some(p("a/b/c"))
         );
 
         // Single path returns itself
-        assert_eq!(Shortener::longest_common_prefix(&[p("a/b/c")]), p("a/b/c"));
+        assert_eq!(
+            Shortener::longest_common_prefix(&[p("a/b/c")]),
+            Some(p("a/b/c"))
+        );
     }
 
     fn p(path: &str) -> PathBuf {
         PathBuf::from(path)
-    }
-
-    fn empty() -> PathBuf {
-        PathBuf::new()
     }
 }

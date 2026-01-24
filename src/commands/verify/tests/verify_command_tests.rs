@@ -49,14 +49,8 @@ fn test_subdirectory_checks() {
 
     // Good multi-cd source
     let result = VerifyCommand::subdirectory_checks(&[
-        FlacFile::new(
-            PathBuf::from("source/dir/CD1/a.flac"),
-            &source_dir,
-        ),
-        FlacFile::new(
-            PathBuf::from("source/dir/CD2/b.flac"),
-            &source_dir,
-        ),
+        FlacFile::new(PathBuf::from("source/dir/CD1/a.flac"), &source_dir),
+        FlacFile::new(PathBuf::from("source/dir/CD2/b.flac"), &source_dir),
     ]);
     assert_eq!(result.len(), 0);
 
