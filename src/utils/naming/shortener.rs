@@ -52,6 +52,13 @@ impl Shortener {
         }
     }
 
+    /// Find the longest path prefix shared by all paths.
+    ///
+    /// Starts with the first path and progressively shortens it until all paths match.
+    ///
+    /// Returns `None` if paths is empty or no common prefix exists.
+    ///
+    /// Note: no canonicalization is applied.
     #[must_use]
     pub fn longest_common_prefix(paths: &[impl AsRef<Path>]) -> Option<PathBuf> {
         let first = paths.first()?;
