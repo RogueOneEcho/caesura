@@ -29,16 +29,17 @@ async fn verify_command() -> Result<(), Error> {
 }
 
 #[test]
+#[allow(clippy::indexing_slicing)]
 fn test_subdirectory_checks() {
     // Good source because all flacs share the 'b' subdirectory.
-    let result = VerifyCommand::subdirectory_checks(&vec![
+    let result = VerifyCommand::subdirectory_checks(&[
         FlacFile::new(PathBuf::from("a/b/c.flac"), &PathBuf::from("a/b")),
         FlacFile::new(PathBuf::from("a/b/d.flac"), &PathBuf::from("a/b")),
     ]);
     assert_eq!(result.len(), 0);
 
     // Good multi-cd source
-    let result = VerifyCommand::subdirectory_checks(&vec![
+    let result = VerifyCommand::subdirectory_checks(&[
         FlacFile::new(
             PathBuf::from("/root/album/CD1/a.flac"),
             &PathBuf::from("/root/album/"),
@@ -51,7 +52,7 @@ fn test_subdirectory_checks() {
     assert_eq!(result.len(), 0);
 
     // Bad source because all flacs share the unnecessary 'c' subdirectory.
-    let result = VerifyCommand::subdirectory_checks(&vec![FlacFile::new(
+    let result = VerifyCommand::subdirectory_checks(&[FlacFile::new(
         PathBuf::from("a/b/c/d.flac"),
         &PathBuf::from("a/b"),
     )]);
