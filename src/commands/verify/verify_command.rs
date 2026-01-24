@@ -251,11 +251,9 @@ impl VerifyCommand {
         // directory contains all flac content, likely due to a misunderstanding of how the
         // creation tool works.
         let flac_sub_dirs = flacs.iter().map(|x| x.sub_dir.clone()).collect::<Vec<_>>();
-        let common_prefix = Shortener::longest_common_prefix(&flac_sub_dirs);
-        if common_prefix.components().count() > 0 {
-            return vec![UnnecessaryDirectory {
-                path: common_prefix,
-            }];
+        let prefix = Shortener::longest_common_prefix(&flac_sub_dirs);
+        if prefix.components().count() > 0 {
+            return vec![UnnecessaryDirectory { prefix }];
         }
         vec![]
     }

@@ -60,7 +60,7 @@ fn test_subdirectory_checks() {
     assert_eq!(
         result[0].to_string(),
         UnnecessaryDirectory {
-            path: PathBuf::from("c")
+            prefix: PathBuf::from("c")
         }
         .to_string()
     );

@@ -62,7 +62,7 @@ pub enum SourceIssue {
         path: PathBuf,
     },
     UnnecessaryDirectory {
-        path: PathBuf,
+        prefix: PathBuf,
     },
     NoFlacs {
         path: PathBuf,
@@ -154,10 +154,10 @@ impl Display for SourceIssue {
             MissingDirectory { path } => {
                 format!("Source directory does not exist: {}", path.display())
             }
-            UnnecessaryDirectory { path } => {
+            UnnecessaryDirectory { prefix } => {
                 format!(
                     "Source content is nested within an unnecessary directory: {}",
-                    path.display()
+                    prefix.display()
                 )
             }
             NoFlacs { path } => format!(
