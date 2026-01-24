@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use colored::Colorize;
 use log::info;
@@ -53,11 +53,11 @@ impl Shortener {
     }
 
     #[must_use]
-    pub fn longest_common_prefix(paths: &[PathBuf]) -> Option<PathBuf> {
+    pub fn longest_common_prefix(paths: &[impl AsRef<Path>]) -> Option<PathBuf> {
         let first = paths.first()?;
-        let mut prefix = first.clone();
+        let mut prefix = first.as_ref().to_path_buf();
         for path in paths.iter().skip(1) {
-            while !path.starts_with(&prefix) {
+            while !path.as_ref().starts_with(&prefix) {
                 if !prefix.pop() {
                     return None;
                 }
@@ -192,7 +192,10 @@ mod tests {
         );
 
         // Empty input
-        assert_eq!(Shortener::longest_common_prefix(&[]), None);
+        assert_eq!(
+            Shortener::longest_common_prefix(&Vec::<PathBuf>::new()),
+            None
+        );
 
         // Single empty path
         assert_eq!(Shortener::longest_common_prefix(&[p("")]), None);

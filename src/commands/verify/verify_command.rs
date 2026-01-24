@@ -250,7 +250,7 @@ impl VerifyCommand {
         // Note that this is meant to verify the most common case, where a single unnecessary
         // directory contains all flac content, likely due to a misunderstanding of how the
         // creation tool works.
-        let flac_sub_dirs = flacs.iter().map(|x| x.sub_dir.clone()).collect::<Vec<_>>();
+        let flac_sub_dirs: Vec<_> = flacs.iter().map(|x| &x.sub_dir).collect();
         if let Some(prefix) = Shortener::longest_common_prefix(&flac_sub_dirs) {
             return vec![UnnecessaryDirectory { prefix }];
         }
