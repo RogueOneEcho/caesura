@@ -60,10 +60,10 @@ jobs:
           test: true
         - os: ubuntu-24.04
           target: x86_64-unknown-linux-musl
-        - os: macos-13
+        - os: macos-15-intel
           target: x86_64-apple-darwin
           test: true
-        - os: macos-14
+        - os: macos-15
           target: aarch64-apple-darwin
           test: true
 
