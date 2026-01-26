@@ -1,8 +1,10 @@
+#[allow(deprecated)]
 use crate::utils::SourceIssue::{Api, ApiResponse, Id, IdError, Provider};
 use crate::utils::{IdProviderError, SourceIssue};
 use gazelle_api::GazelleError::*;
 
 #[test]
+#[allow(deprecated)]
 fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
     // Arrange
     let example = vec![
@@ -109,7 +111,7 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
 }
 
 #[test]
-#[allow(clippy::similar_names)]
+#[allow(deprecated, clippy::similar_names)]
 fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
     // Arrange
     let example = vec![

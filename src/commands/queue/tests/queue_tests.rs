@@ -8,6 +8,7 @@ use crate::commands::*;
 use crate::utils::*;
 
 #[tokio::test]
+#[allow(deprecated)]
 async fn queue_get_unprocessed() -> Result<(), Error> {
     // Arrange
     let new = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;

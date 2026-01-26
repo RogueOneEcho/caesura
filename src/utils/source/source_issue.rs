@@ -16,8 +16,7 @@ pub const MAX_DURATION: u32 = 12 * 60 * 60;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum SourceIssue {
-    /// DEPRECATED
-    /// Replaced by [`Id`]
+    #[deprecated(since = "0.24.0", note = "use `Id` instead")]
     IdError {
         details: String,
     },
@@ -26,15 +25,13 @@ pub enum SourceIssue {
         actual: u32,
         expected: u32,
     },
-    /// DEPRECATED
-    /// Replaced by [`Api`]
+    #[deprecated(since = "0.24.1", note = "use `Api` instead")]
     ApiResponse {
         action: String,
         status_code: u16,
         error: String,
     },
-    /// DEPRECATED
-    /// Replaced by [`Api`]
+    #[deprecated(since = "0.24.1", note = "use `Api` instead")]
     #[allow(dead_code)]
     Provider,
     Api {
@@ -116,7 +113,7 @@ impl SourceIssue {
 }
 
 impl Display for SourceIssue {
-    #[allow(clippy::absolute_paths)]
+    #[allow(deprecated, clippy::absolute_paths)]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         let message = match self {
             Id(error) => error.to_string(),

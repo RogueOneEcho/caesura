@@ -104,9 +104,7 @@ impl BatchCommand {
             trace!("{} {item}", "Processing".bold());
             let Some(id) = item.id else {
                 debug!("{} {item} as it doesn't have an id", "Skipping".bold());
-                let status = VerifyStatus::from_issue(SourceIssue::IdError {
-                    details: "missing id".to_owned(),
-                });
+                let status = VerifyStatus::from_issue(SourceIssue::Id(IdProviderError::NoId));
                 item.verify = Some(status);
                 queue.set(item).await?;
                 continue;

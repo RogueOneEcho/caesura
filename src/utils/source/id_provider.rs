@@ -25,6 +25,8 @@ pub struct IdProvider {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum IdProviderError {
+    /// No ID was provided
+    NoId,
     /// Input did not match any known types
     #[serde(alias = "NoMatch")]
     NoMatch,
@@ -87,6 +89,7 @@ impl Display for IdProviderError {
     #[allow(clippy::absolute_paths)]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         let message = match self {
+            NoId => "No ID was provided".to_owned(),
             NoMatch => "Input did not match any known types".to_owned(),
             UrlInvalid => "Input was a URL that could not be parsed".to_owned(),
             TorrentFileNotFound => "Input was a torrent file that did not exist".to_owned(),
