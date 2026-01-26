@@ -90,10 +90,9 @@ fn get_remaster_title(torrent: &Torrent) -> String {
 }
 
 fn get_year(group: &Group, torrent: &Torrent) -> u16 {
-    if torrent.remaster_year.is_none() || torrent.remaster_year == Some(0) {
-        group.year
-    } else {
-        torrent.remaster_year.expect("Remaster year should be set")
+    match torrent.remaster_year {
+        Some(year) if year != 0 => year,
+        _ => group.year,
     }
 }
 
