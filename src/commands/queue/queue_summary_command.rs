@@ -2,18 +2,18 @@ use crate::commands::*;
 use crate::options::*;
 use crate::utils::*;
 
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use rogue_logging::Error;
 
 /// List the sources in the queue
 #[injectable]
 pub(crate) struct QueueSummaryCommand {
     cache_options: Ref<CacheOptions>,
-    queue: RefMut<Queue>,
+    queue: Ref<Queue>,
 }
 
 impl QueueSummaryCommand {
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.cache_options.validate() {
             return Ok(false);
         }
@@ -24,9 +24,8 @@ impl QueueSummaryCommand {
         Ok(true)
     }
 
-    pub(crate) async fn execute(&mut self) -> Result<QueueSummary, Error> {
-        let mut queue = self.queue.write().expect("Queue should be writeable");
-        let items = queue.get_all().await?;
+    pub(crate) async fn execute(&self) -> Result<QueueSummary, Error> {
+        let items = self.queue.get_all().await?;
         let mut summary = QueueSummary::default();
         for (_, item) in items {
             summary.total += 1;

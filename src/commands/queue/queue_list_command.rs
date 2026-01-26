@@ -2,7 +2,7 @@ use crate::commands::*;
 use crate::options::*;
 
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use log::{debug, error, info};
 use rogue_logging::Error;
 
@@ -12,18 +12,17 @@ pub(crate) struct QueueListCommand {
     shared_options: Ref<SharedOptions>,
     cache_options: Ref<CacheOptions>,
     batch_options: Ref<BatchOptions>,
-    queue: RefMut<Queue>,
+    queue: Ref<Queue>,
 }
 
 impl QueueListCommand {
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.shared_options.validate()
             || !self.cache_options.validate()
             || !self.batch_options.validate()
         {
             return Ok(false);
         }
-        let mut queue = self.queue.write().expect("Queue should be writeable");
         let transcode_enabled = self
             .batch_options
             .transcode
@@ -38,7 +37,8 @@ impl QueueListCommand {
             .indexer
             .clone()
             .expect("indexer should be set");
-        let items = queue
+        let items = self
+            .queue
             .get_unprocessed(
                 indexer.clone(),
                 transcode_enabled,
@@ -64,7 +64,7 @@ impl QueueListCommand {
         let pad = found.to_string().len();
         let mut index = 1;
         for hash in items {
-            let Some(item) = queue.get(hash)? else {
+            let Some(item) = self.queue.get(hash)? else {
                 error!("{} to retrieve {hash} from the queue", "Failed".bold());
                 continue;
             };

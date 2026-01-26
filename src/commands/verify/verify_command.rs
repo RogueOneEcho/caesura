@@ -1,5 +1,5 @@
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use log::*;
 
 use crate::commands::*;
@@ -19,8 +19,8 @@ pub(crate) struct VerifyCommand {
     arg: Ref<SourceArg>,
     shared_options: Ref<SharedOptions>,
     verify_options: Ref<VerifyOptions>,
-    source_provider: RefMut<SourceProvider>,
-    api: RefMut<GazelleClient>,
+    source_provider: Ref<SourceProvider>,
+    api: Ref<GazelleClient>,
     targets: Ref<TargetFormatProvider>,
     paths: Ref<PathManager>,
 }
@@ -33,19 +33,14 @@ impl VerifyCommand {
     /// [`SourceIssue`] issues are logged as warnings.
     ///
     /// Returns `true` if the source is verified.
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.arg.validate()
             || !self.shared_options.validate()
             || !self.verify_options.validate()
         {
             return Ok(false);
         }
-        let source = self
-            .source_provider
-            .write()
-            .expect("Source provider should be writeable")
-            .get_from_options()
-            .await;
+        let source = self.source_provider.get_from_options().await;
         let (status, id) = match source {
             Ok(source) => (self.execute(&source).await, source.to_string()),
             Err(issue) => (VerifyStatus::from_issue(issue), "unknown".to_owned()),
@@ -67,7 +62,7 @@ impl VerifyCommand {
     ///
     /// [`SourceIssue`] issues are not logged so must be handled by the caller.
     #[must_use]
-    pub(crate) async fn execute(&mut self, source: &Source) -> VerifyStatus {
+    pub(crate) async fn execute(&self, source: &Source) -> VerifyStatus {
         debug!("{} {}", "Verifying".bold(), source);
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.append(&mut self.api_checks(source));
@@ -189,7 +184,7 @@ impl VerifyCommand {
         issues
     }
 
-    async fn hash_check(&mut self, source: &Source) -> Vec<SourceIssue> {
+    async fn hash_check(&self, source: &Source) -> Vec<SourceIssue> {
         if self
             .verify_options
             .no_hash_check
@@ -198,7 +193,6 @@ impl VerifyCommand {
             debug!("{} hash check due to settings", "Skipped".bold());
             return Vec::new();
         }
-        let mut api = self.api.write().expect("API should be available");
         let torrent_path = self.paths.get_source_torrent_path(source);
         if !torrent_path.is_file() {
             trace!(
@@ -215,7 +209,7 @@ impl VerifyCommand {
                     }];
                 }
             };
-            let buffer = match api.download_torrent(source.torrent.id).await {
+            let buffer = match self.api.download_torrent(source.torrent.id).await {
                 Ok(buffer) => buffer,
                 Err(e) => return vec![SourceIssue::api(e)],
             };

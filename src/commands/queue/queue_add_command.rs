@@ -3,7 +3,7 @@ use crate::options::*;
 use crate::utils::*;
 
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use flat_db::Hash;
 use log::{info, trace};
 use rogue_logging::Error;
@@ -18,11 +18,11 @@ pub(crate) struct QueueAddCommand {
     shared_options: Ref<SharedOptions>,
     cache_options: Ref<CacheOptions>,
     args: Ref<QueueAddArgs>,
-    queue: RefMut<Queue>,
+    queue: Ref<Queue>,
 }
 
 impl QueueAddCommand {
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.shared_options.validate()
             || !self.cache_options.validate()
             || !self.args.validate()
@@ -44,7 +44,7 @@ impl QueueAddCommand {
         Ok(true)
     }
 
-    async fn execute(&mut self, path: PathBuf) -> Result<QueueStatus, Error> {
+    async fn execute(&self, path: PathBuf) -> Result<QueueStatus, Error> {
         if path.is_dir() {
             self.execute_directory(path).await
         } else if path.is_file() {
@@ -57,9 +57,9 @@ impl QueueAddCommand {
         }
     }
 
-    async fn execute_directory(&mut self, path: PathBuf) -> Result<QueueStatus, Error> {
-        let mut queue = self.queue.write().expect("queue should be writeable");
-        let existing_paths: Vec<PathBuf> = queue
+    async fn execute_directory(&self, path: PathBuf) -> Result<QueueStatus, Error> {
+        let existing_paths: Vec<PathBuf> = self
+            .queue
             .get_all()
             .await?
             .values()
@@ -87,7 +87,7 @@ impl QueueAddCommand {
         if remaining > 250 {
             info!("This may take a while");
         }
-        let added = queue.insert_new_torrent_files(paths).await?;
+        let added = self.queue.insert_new_torrent_files(paths).await?;
         Ok(QueueStatus {
             success: true,
             added,
@@ -95,7 +95,7 @@ impl QueueAddCommand {
         })
     }
 
-    async fn execute_file(&mut self, path: PathBuf) -> Result<QueueStatus, Error> {
+    async fn execute_file(&self, path: PathBuf) -> Result<QueueStatus, Error> {
         trace!("Reading queue file: {}", path.display());
         let file = File::open(path).map_err(|e| io_error(e, "open chunk file"))?;
         let reader = BufReader::new(file);
@@ -106,8 +106,7 @@ impl QueueAddCommand {
         if found > 250 {
             info!("This may take a while");
         }
-        let queue = self.queue.write().expect("queue should be writeable");
-        let added = queue.set_many(items, true).await?;
+        let added = self.queue.set_many(items, true).await?;
         Ok(QueueStatus {
             success: true,
             added,

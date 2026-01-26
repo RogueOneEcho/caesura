@@ -3,7 +3,7 @@ use std::ops::Not;
 use std::path::{Path, PathBuf};
 
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use log::{info, trace, warn};
 use tokio::fs::{copy, hard_link};
 
@@ -25,8 +25,8 @@ pub(crate) struct UploadCommand {
     shared_options: Ref<SharedOptions>,
     upload_options: Ref<UploadOptions>,
     copy_options: Ref<CopyOptions>,
-    source_provider: RefMut<SourceProvider>,
-    api: RefMut<GazelleClient>,
+    source_provider: Ref<SourceProvider>,
+    api: Ref<GazelleClient>,
     paths: Ref<PathManager>,
     targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
@@ -38,7 +38,7 @@ impl UploadCommand {
     /// [`Source`] is retrieved from the CLI arguments.
     ///
     /// Returns `true` if all the uploads succeed.
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.arg.validate()
             || !self.shared_options.validate()
             || !self.upload_options.validate()
@@ -47,8 +47,6 @@ impl UploadCommand {
         }
         let source = self
             .source_provider
-            .write()
-            .expect("Source provider should be writeable")
             .get_from_options()
             .await
             .map_err(|e| error("get source from options", e.to_string()))?;
@@ -64,9 +62,8 @@ impl UploadCommand {
     /// Errors are logged so do NOT need to be handled by the caller.
     #[must_use]
     #[allow(clippy::too_many_lines)]
-    pub(crate) async fn execute(&mut self, source: &Source) -> UploadStatus {
+    pub(crate) async fn execute(&self, source: &Source) -> UploadStatus {
         let targets = self.targets.get(source.format, &source.existing);
-        let mut api = self.api.write().expect("API should be available to read");
         let mut status = UploadStatus {
             success: true,
             formats: None,
@@ -161,7 +158,7 @@ impl UploadCommand {
                 info!("\n{form}");
                 continue;
             }
-            match api.upload_torrent(form).await {
+            match self.api.upload_torrent(form).await {
                 Ok(response) => {
                     info!("{} {target} for {source}", "Uploaded".bold());
                     let base = &self

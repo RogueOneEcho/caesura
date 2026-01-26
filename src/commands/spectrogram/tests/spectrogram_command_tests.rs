@@ -18,11 +18,9 @@ async fn spectrogram_command() -> Result<(), Error> {
     let host = HostBuilder::new()
         .with_options(shared_options.clone())
         .build();
-    let provider = host.services.get_required_mut::<SourceProvider>();
+    let provider = host.services.get_required::<SourceProvider>();
     let generator = host.services.get_required::<SpectrogramCommand>();
     let source = provider
-        .write()
-        .expect("Source provider should be writeable")
         .get_from_options()
         .await
         .expect("Source provider should not fail");

@@ -2,7 +2,7 @@ use crate::options::*;
 use crate::utils::*;
 
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use gazelle_api::{GazelleClient, Torrent};
 use html_escape::decode_html_entities;
 use log::{trace, warn};
@@ -11,18 +11,18 @@ use std::path::PathBuf;
 /// Retrieve [Source] from the [Api] via a [provider design pattern](https://en.wikipedia.org/wiki/Provider_model)
 #[injectable]
 pub struct SourceProvider {
-    api: RefMut<GazelleClient>,
+    api: Ref<GazelleClient>,
     options: Ref<SharedOptions>,
     id_provider: Ref<IdProvider>,
 }
 
 impl SourceProvider {
-    pub async fn get(&mut self, id: u32) -> Result<Source, SourceIssue> {
-        let mut api = self.api.write().expect("API should be available to read");
-        let response = api.get_torrent(id).await.map_err(SourceIssue::api)?;
+    pub async fn get(&self, id: u32) -> Result<Source, SourceIssue> {
+        let response = self.api.get_torrent(id).await.map_err(SourceIssue::api)?;
         let torrent = response.torrent;
         let group = response.group;
-        let response = api
+        let response = self
+            .api
             .get_torrent_group(group.id)
             .await
             .map_err(SourceIssue::api)?;
@@ -81,7 +81,7 @@ impl SourceProvider {
         Ok(directories.first().expect("should be at least one").clone())
     }
 
-    pub async fn get_from_options(&mut self) -> Result<Source, SourceIssue> {
+    pub async fn get_from_options(&self) -> Result<Source, SourceIssue> {
         let id = self
             .id_provider
             .get_by_options()

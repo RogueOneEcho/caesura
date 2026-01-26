@@ -4,7 +4,7 @@ use crate::utils::*;
 use std::time::Duration;
 
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use gazelle_api::GazelleError;
 use log::{debug, error, info, trace, warn};
 use rogue_logging::Error;
@@ -23,12 +23,12 @@ pub(crate) struct BatchCommand {
     spectrogram_options: Ref<SpectrogramOptions>,
     file_options: Ref<FileOptions>,
     batch_options: Ref<BatchOptions>,
-    source_provider: RefMut<SourceProvider>,
-    verify: RefMut<VerifyCommand>,
+    source_provider: Ref<SourceProvider>,
+    verify: Ref<VerifyCommand>,
     spectrogram: Ref<SpectrogramCommand>,
     transcode: Ref<TranscodeCommand>,
-    upload: RefMut<UploadCommand>,
-    queue: RefMut<Queue>,
+    upload: Ref<UploadCommand>,
+    queue: Ref<Queue>,
 }
 
 impl BatchCommand {
@@ -36,7 +36,7 @@ impl BatchCommand {
     ///
     /// Returns `true` if the batch process succeeds.
     #[allow(clippy::too_many_lines)]
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.cache_options.validate()
             || !self.shared_options.validate()
             || !self.verify_options.validate()
@@ -48,11 +48,6 @@ impl BatchCommand {
         {
             return Ok(false);
         }
-        let mut queue = self.queue.write().expect("Queue should be writeable");
-        let mut source_provider = self
-            .source_provider
-            .write()
-            .expect("SourceProvider should be writable");
         let spectrogram_enabled = self
             .batch_options
             .spectrogram
@@ -72,7 +67,8 @@ impl BatchCommand {
             .clone()
             .expect("indexer should be set");
         let limit = self.batch_options.get_limit();
-        let items = queue
+        let items = self
+            .queue
             .get_unprocessed(
                 indexer.clone(),
                 transcode_enabled,
@@ -97,7 +93,7 @@ impl BatchCommand {
         );
         let mut count = 0;
         for hash in items {
-            let Some(mut item) = queue.get(hash)? else {
+            let Some(mut item) = self.queue.get(hash)? else {
                 error!("{} to retrieve {hash} from the queue", "Failed".bold());
                 continue;
             };
@@ -106,10 +102,10 @@ impl BatchCommand {
                 debug!("{} {item} as it doesn't have an id", "Skipping".bold());
                 let status = VerifyStatus::from_issue(SourceIssue::Id(IdProviderError::NoId));
                 item.verify = Some(status);
-                queue.set(item).await?;
+                self.queue.set(item).await?;
                 continue;
             };
-            let source = match source_provider.get(id).await {
+            let source = match self.source_provider.get(id).await {
                 Ok(source) => source,
                 Err(issue) => {
                     debug!("{} {item}", "Skipping".bold());
@@ -147,18 +143,13 @@ impl BatchCommand {
                         }
                         _ => {
                             item.verify = Some(VerifyStatus::from_issue(issue));
-                            queue.set(item).await?;
+                            self.queue.set(item).await?;
                         }
                     }
                     continue;
                 }
             };
-            let status = self
-                .verify
-                .write()
-                .expect("VerifyCommand should be writeable")
-                .execute(&source)
-                .await;
+            let status = self.verify.execute(&source).await;
             if status.verified {
                 debug!("{} {}", "Verified".bold(), source);
                 item.verify = Some(status);
@@ -171,7 +162,7 @@ impl BatchCommand {
                     }
                 }
                 item.verify = Some(status);
-                queue.set(item).await?;
+                self.queue.set(item).await?;
                 continue;
             }
             if spectrogram_enabled {
@@ -190,7 +181,7 @@ impl BatchCommand {
                     item.transcode = Some(status);
                 } else {
                     item.transcode = Some(status);
-                    queue.set(item).await?;
+                    self.queue.set(item).await?;
                     continue;
                 }
                 if upload_enabled {
@@ -198,19 +189,14 @@ impl BatchCommand {
                         info!("{} {wait_before_upload:?} before upload", "Waiting".bold());
                         sleep(wait_before_upload).await;
                     }
-                    let status = self
-                        .upload
-                        .write()
-                        .expect("UploadCommand should be writeable")
-                        .execute(&source)
-                        .await;
+                    let status = self.upload.execute(&source).await;
                     if self.upload_options.dry_run != Some(true) {
                         item.upload = Some(status);
                     }
                     // Errors were already logged in UploadCommand::Execute()
                 }
             }
-            queue.set(item).await?;
+            self.queue.set(item).await?;
             count += 1;
             if let Some(limit) = limit
                 && count >= limit

@@ -2,7 +2,7 @@ use crate::commands::*;
 use crate::options::*;
 
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use flat_db::Hash;
 use log::{debug, info, warn};
 use rogue_logging::Error;
@@ -13,11 +13,11 @@ pub(crate) struct QueueRemoveCommand {
     shared_options: Ref<SharedOptions>,
     cache_options: Ref<CacheOptions>,
     args: Ref<QueueRemoveArgs>,
-    queue: RefMut<Queue>,
+    queue: Ref<Queue>,
 }
 
 impl QueueRemoveCommand {
-    pub(crate) async fn execute_cli(&mut self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
         if !self.shared_options.validate()
             || !self.cache_options.validate()
             || !self.args.validate()
@@ -34,10 +34,9 @@ impl QueueRemoveCommand {
         Ok(status)
     }
 
-    async fn execute(&mut self, hash: Hash<20>) -> Result<bool, Error> {
-        let mut queue = self.queue.write().expect("queue should be writeable");
+    async fn execute(&self, hash: Hash<20>) -> Result<bool, Error> {
         debug!("{} item {hash} from queue", "Removing".bold());
-        match queue.remove(hash).await? {
+        match self.queue.remove(hash).await? {
             None => {
                 warn!(
                     "{} to remove {hash} from queue. Item does not exist",

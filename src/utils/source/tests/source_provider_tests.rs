@@ -13,15 +13,10 @@ async fn source_provider() -> Result<(), Error> {
         ..TargetOptions::default()
     });
     let host = HostBuilder::new().with_options(target_options).build();
-    let provider = host.services.get_required_mut::<SourceProvider>();
+    let provider = host.services.get_required::<SourceProvider>();
 
     // Act
-    let source = provider
-        .write()
-        .expect("Source provider should be writeable")
-        .get_from_options()
-        .await
-        .unwrap();
+    let source = provider.get_from_options().await.unwrap();
 
     // Assert
     let file_count = DirectoryReader::new()

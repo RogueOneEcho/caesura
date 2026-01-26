@@ -70,7 +70,7 @@ impl Queue {
     ///
     /// Items are sorted by name
     pub(crate) async fn get_unprocessed(
-        &mut self,
+        &self,
         indexer: String,
         transcode_enabled: bool,
         upload_enabled: bool,
@@ -111,7 +111,7 @@ impl Queue {
     ///
     /// Items are sorted by name
     async fn get_unprocessed_internal(
-        &mut self,
+        &self,
         indexer: String,
         transcode_enabled: bool,
         upload_enabled: bool,
@@ -137,12 +137,12 @@ impl Queue {
     /// Get all items.
     ///
     /// Items are unsorted.
-    pub(crate) async fn get_all(&mut self) -> Result<BTreeMap<Hash<20>, QueueItem>, Error> {
+    pub(crate) async fn get_all(&self) -> Result<BTreeMap<Hash<20>, QueueItem>, Error> {
         self.table.get_all().await
     }
 
     /// Update an item into the queue
-    pub(crate) async fn set(&mut self, item: QueueItem) -> Result<(), Error> {
+    pub(crate) async fn set(&self, item: QueueItem) -> Result<(), Error> {
         self.table.set(item.hash, item).await
     }
 
@@ -162,14 +162,14 @@ impl Queue {
     }
 
     /// Remove an item from the queue
-    pub(crate) async fn remove(&mut self, hash: Hash<20>) -> Result<Option<QueueItem>, Error> {
+    pub(crate) async fn remove(&self, hash: Hash<20>) -> Result<Option<QueueItem>, Error> {
         self.table.remove(hash).await
     }
 
     /// Insert torrent files into the queue if they are not already present
     /// Returns the number of items added
     pub(crate) async fn insert_new_torrent_files(
-        &mut self,
+        &self,
         paths: Vec<PathBuf>,
     ) -> Result<usize, Error> {
         let stream = iter(paths.into_iter());

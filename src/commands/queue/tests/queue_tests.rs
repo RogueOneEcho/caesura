@@ -19,7 +19,7 @@ async fn queue_get_unprocessed() -> Result<(), Error> {
     let uploaded = Hash::<20>::from_string("0600000000000000000000000000000000000000")?;
     let not_uploaded = Hash::<20>::from_string("0700000000000000000000000000000000000000")?;
 
-    let mut queue = Queue::from_path(TempDirectory::create("queue_get_unprocessed"));
+    let queue = Queue::from_path(TempDirectory::create("queue_get_unprocessed"));
     queue
         .set(QueueItem {
             name: "NEW".to_owned(),

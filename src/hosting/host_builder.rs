@@ -1,7 +1,5 @@
 use colored::Colorize;
-#[cfg(test)]
-use di::Ref;
-use di::{Injectable, Mut, RefMut, ServiceCollection, singleton_as_self};
+use di::{Injectable, Mut, Ref, RefMut, ServiceCollection, singleton_as_self};
 use log::error;
 use std::process::exit;
 use std::sync::Arc;
@@ -63,7 +61,7 @@ impl HostBuilder {
             }))
             .add(PathManager::transient())
             .add(IdProvider::transient())
-            .add(SourceProvider::transient().as_mut())
+            .add(SourceProvider::transient())
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();
                 let factory = GazelleClientFactory {
@@ -78,8 +76,7 @@ impl HostBuilder {
                         request_limit_duration: None,
                     },
                 };
-                let api = factory.create();
-                RefMut::new(Mut::new(api))
+                Ref::new(factory.create())
             }))
             .add(JobRunner::transient())
             .add(Publisher::transient())
@@ -89,16 +86,15 @@ impl HostBuilder {
             // Add config services
             .add(ConfigCommand::transient())
             // Add batch services
-            .add(BatchCommand::transient().as_mut())
+            .add(BatchCommand::transient())
             // Add queue services
-            .add(QueueAddCommand::transient().as_mut())
-            .add(QueueListCommand::transient().as_mut())
-            .add(QueueRemoveCommand::transient().as_mut())
-            .add(QueueSummaryCommand::transient().as_mut())
+            .add(QueueAddCommand::transient())
+            .add(QueueListCommand::transient())
+            .add(QueueRemoveCommand::transient())
+            .add(QueueSummaryCommand::transient())
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<CacheOptions>();
-                let queue = Queue::from_options(options);
-                RefMut::new(Mut::new(queue))
+                Ref::new(Queue::from_options(options))
             }))
             // Add spectrogram services
             .add(SpectrogramCommand::transient())
@@ -117,9 +113,9 @@ impl HostBuilder {
             .add(TranscodeJobFactory::transient())
             .add(AdditionalJobFactory::transient())
             // Add upload services
-            .add(UploadCommand::transient().as_mut())
+            .add(UploadCommand::transient())
             // Add verify services
-            .add(VerifyCommand::transient().as_mut());
+            .add(VerifyCommand::transient());
         this
     }
 

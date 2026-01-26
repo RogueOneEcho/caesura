@@ -5,7 +5,7 @@ use crate::utils::*;
 
 use crate::utils::Job::Additional;
 use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use di::{Ref, injectable};
 use log::*;
 use rogue_logging::Colors;
 use rogue_logging::Error;
@@ -18,7 +18,7 @@ pub(crate) struct TranscodeCommand {
     arg: Ref<SourceArg>,
     shared_options: Ref<SharedOptions>,
     target_options: Ref<TargetOptions>,
-    source_provider: RefMut<SourceProvider>,
+    source_provider: Ref<SourceProvider>,
     copy_options: Ref<CopyOptions>,
     file_options: Ref<FileOptions>,
     paths: Ref<PathManager>,
@@ -44,8 +44,6 @@ impl TranscodeCommand {
         }
         let source = self
             .source_provider
-            .write()
-            .expect("Source provider should be writeable")
             .get_from_options()
             .await
             .map_err(|e| error("get source from options", e.to_string()))?;

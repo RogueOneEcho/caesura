@@ -28,11 +28,9 @@ async fn transcode_command() -> Result<(), Error> {
         .with_options(shared_options.clone())
         .with_options(target_options)
         .build();
-    let provider = host.services.get_required_mut::<SourceProvider>();
+    let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let source = provider
-        .write()
-        .expect("Source provider should be writeable")
         .get_from_options()
         .await
         .expect("Source provider should not fail");

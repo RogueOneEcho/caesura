@@ -16,10 +16,7 @@ async fn verify_command() -> Result<(), Error> {
         ..TargetOptions::default()
     });
     let host = HostBuilder::new().with_options(target_options).build();
-    let verifier = host.services.get_required_mut::<VerifyCommand>();
-    let mut verifier = verifier
-        .write()
-        .expect("verifier should be available to write");
+    let verifier = host.services.get_required::<VerifyCommand>();
 
     // Act
     let _is_verified = verifier.execute_cli().await?;
