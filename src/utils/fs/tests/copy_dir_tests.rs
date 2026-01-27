@@ -6,6 +6,7 @@ use std::path::PathBuf;
 #[tokio::test]
 async fn test_copy_dir() -> Result<(), Error> {
     // Arrange
+    let _ = get_samples(SampleFormat::FLAC16_441).await;
     let source_dir = PathBuf::from("./samples/content");
     let target_dir = TempDirectory::create("test_copy_dir").join("target");
     assert!(

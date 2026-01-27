@@ -13,7 +13,7 @@ use crate::dependencies::*;
 use crate::options::*;
 use crate::utils::*;
 use TargetFormat::*;
-use gazelle_api::{GazelleClient, UploadForm};
+use gazelle_api::{GazelleClientTrait, UploadForm};
 use rogue_logging::Error;
 
 const MUSIC_CATEGORY_ID: u8 = 0;
@@ -26,7 +26,7 @@ pub(crate) struct UploadCommand {
     upload_options: Ref<UploadOptions>,
     copy_options: Ref<CopyOptions>,
     source_provider: Ref<SourceProvider>,
-    api: Ref<GazelleClient>,
+    api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     paths: Ref<PathManager>,
     targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
@@ -166,8 +166,9 @@ impl UploadCommand {
                         .indexer_url
                         .clone()
                         .expect("indexer_url should be set");
-                    let id = response.get_torrent_id();
-                    let link = get_permalink(base, response.get_group_id(), id);
+                    let id = response.torrent_id.expect("torrent_id should be set");
+                    let link =
+                        get_permalink(base, response.group_id.expect("group_id should be set"), id);
                     info!("{link}");
                     formats.push(UploadFormatStatus { format: target, id });
                 }
@@ -288,6 +289,7 @@ impl UploadCommand {
         })
     }
 
+    /// Collect unique transcode commands for a source and target format.
     pub(crate) fn get_commands(&self, source: &Source, target: TargetFormat) -> HashSet<String> {
         let flacs = Collector::get_flacs(&source.directory);
         flacs

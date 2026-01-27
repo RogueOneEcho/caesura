@@ -92,6 +92,7 @@ async fn verify_options_validate() {
     assert!(verify_options.validate());
 }
 
+#[ignore = "requires config.yml with API credentials"]
 #[tokio::test]
 async fn shared_options_validate() {
     // Arrange

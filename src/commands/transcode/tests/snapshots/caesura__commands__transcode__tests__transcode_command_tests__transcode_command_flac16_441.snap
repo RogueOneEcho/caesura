@@ -1,0 +1,128 @@
+---
+source: src/commands/transcode/tests/transcode_command_tests.rs
+expression: snapshot
+---
+- directory: "Unknown Artist - Test Album [2020] [WEB 320]"
+  filename: Test Artist - Test Album - 01 Track One.mp3
+  size: 2604910
+  sha256: 4e76283e8ce81c0d46943f4a65a2790fd23a7c7ecf29fc632e94408710256e86
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "1"
+        TrackTitle: Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Unknown Artist - Test Album [2020] [WEB 320]"
+  filename: Test Artist - Test Album - 02 Track Two.mp3
+  size: 2604910
+  sha256: 8389931d0ba5c292272c969b6bca26adc92dcd043f4acadc422eaff2887dd46f
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "2"
+        TrackTitle: Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Unknown Artist - Test Album [2020] [WEB 320]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Unknown Artist - Test Album [2020] [WEB V0]"
+  filename: Test Artist - Test Album - 01 Track One.mp3
+  size: 786253
+  sha256: 68578fcc279615f270c6b04ef93c1adb523c4e96c847d554e4cd1a8129cd9ef3
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "1"
+        TrackTitle: Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Unknown Artist - Test Album [2020] [WEB V0]"
+  filename: Test Artist - Test Album - 02 Track Two.mp3
+  size: 737374
+  sha256: d5c035704159dbdcbc937a3bfe21e7145cef97c24a0027b4ec764c0e0bb0aee9
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 90
+    audio_bitrate: 90
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "2"
+        TrackTitle: Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Unknown Artist - Test Album [2020] [WEB V0]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8

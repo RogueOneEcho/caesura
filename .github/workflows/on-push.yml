@@ -78,7 +78,6 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-${{ matrix.target }}-
-          ${{ runner.os }}-cargo-
         path: |
           ~/.cargo/bin/
           ~/.cargo/registry/index/
@@ -133,49 +132,54 @@ jobs:
 
     - run: rm -rf artifacts
 
-    - name: Restore samples cache
+    - name: Restore brew cache
+      id: cache-brew
       if: matrix.test
-      id: cache-samples
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
-        path: samples/content
-        key: cache-samples
-
-    - if: matrix.test && steps.cache-samples.outputs.cache-hit != 'true'
-      run: ./samples/download-sample
-
-    - if: matrix.test && contains(matrix.os, 'ubuntu')
-      run: |
-        curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
-          --location \
-          --show-error \
-          --silent \
-        | tar \
-          --extract \
-          --gzip \
-          --directory "/usr/local/bin" \
-          --file - \
-          "imdl"
+        key: ${{ runner.os }}-brew-${{ matrix.target }}-v2-
+        path: |
+          /home/linuxbrew/.linuxbrew
+          ~/Library/Caches/Homebrew
+          /opt/homebrew
+          /usr/local/Cellar
+          /usr/local/opt
+          /usr/local/bin
 
     - if: matrix.test && contains(matrix.os, 'ubuntu')
-      run: sudo apt-get install flac lame sox imagemagick --yes
+      run: echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
 
-    - if: matrix.test && contains(matrix.os, 'macos')
+    - if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
+      run: /home/linuxbrew/.linuxbrew/bin/brew install flac lame sox imagemagick eye-d3 intermodal
+
+    - if: matrix.test && contains(matrix.os, 'macos') && steps.cache-brew.outputs.cache-hit != 'true'
       run: brew install flac lame sox imagemagick eye-d3 intermodal
+
+    - name: Save brew cache
+      if: matrix.test && steps.cache-brew.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ steps.cache-brew.outputs.cache-primary-key }}
+        path: |
+          /home/linuxbrew/.linuxbrew
+          ~/Library/Caches/Homebrew
+          /opt/homebrew
+          /usr/local/Cellar
+          /usr/local/opt
+          /usr/local/bin
 
     - if: matrix.test
       run: |
         tee config.yml <<EOF
-        announce_url: ${{ secrets.ANNOUNCE_URL }}
-        api_key: ${{ secrets.API_KEY }}
-        content:
-        - samples/content
-        source: ${{ secrets.SOURCE }}
         verbosity: trace
         EOF
 
     - if: matrix.test
       run: cargo test --release --no-fail-fast --target ${{ matrix.target }}
+
+    - name: Run determinism tests
+      if: matrix.test && contains(matrix.os, 'ubuntu')
+      run: cargo test --release --target ${{ matrix.target }} -- --ignored sample_flac
 
     - name: Run cargo check
       if: matrix.target == 'x86_64-unknown-linux-gnu'

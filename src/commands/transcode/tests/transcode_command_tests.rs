@@ -1,69 +1,66 @@
 use crate::commands::*;
 use crate::hosting::*;
-use crate::options::*;
 use crate::utils::*;
-use log::trace;
-
-use crate::utils::TargetFormat::*;
-use rogue_logging::Error;
+use insta::assert_yaml_snapshot;
 
 #[tokio::test]
-async fn transcode_command() -> Result<(), Error> {
+#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+async fn transcode_command_flac16_441() {
+    let snapshot = transcode_command_helper(SampleFormat::FLAC16_441).await;
+    assert_yaml_snapshot!(snapshot);
+}
+
+#[tokio::test]
+#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+async fn transcode_command_flac16_48() {
+    let snapshot = transcode_command_helper(SampleFormat::FLAC16_48).await;
+    assert_yaml_snapshot!(snapshot);
+}
+
+#[tokio::test]
+#[ignore = "Non-deterministic due to SoX dithering"]
+async fn transcode_command_flac24_441() {
+    let snapshot = transcode_command_helper(SampleFormat::FLAC24_441).await;
+    assert_yaml_snapshot!(snapshot);
+}
+
+#[tokio::test]
+#[ignore = "Non-deterministic due to SoX dithering"]
+async fn transcode_command_flac24_48() {
+    let snapshot = transcode_command_helper(SampleFormat::FLAC24_48).await;
+    assert_yaml_snapshot!(snapshot);
+}
+
+#[tokio::test]
+#[ignore = "Non-deterministic due to SoX dithering"]
+async fn transcode_command_flac24_96() {
+    let snapshot = transcode_command_helper(SampleFormat::FLAC24_96).await;
+    assert_yaml_snapshot!(snapshot);
+}
+
+async fn transcode_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
     // Arrange
     let _ = init_logger();
-    let source_options = TestOptionsFactory::from(SourceArg {
-        source: Some("206675".to_owned()),
-    });
-    let shared_options = TestOptionsFactory::from(SharedOptions {
-        output: Some(TempDirectory::create("transcode_command")),
-        ..SharedOptions::default()
-    });
-    let target_options = TestOptionsFactory::from(TargetOptions {
-        allow_existing: Some(true),
-        target: Some(vec![Flac, _320, V0]),
-    });
-    let output_dir = shared_options.output.clone().expect("output should be set");
+    let output_dir = TempDirectory::for_current_test();
     let host = HostBuilder::new()
-        .with_options(source_options)
-        .with_options(shared_options.clone())
-        .with_options(target_options)
+        .with_mock_samples(format, output_dir.clone())
+        .await
         .build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let source = provider
-        .get_from_options()
+        .get(SampleDataBuilder::TORRENT_ID)
         .await
         .expect("Source provider should not fail");
 
     // Act
-    transcoder.execute_cli().await?;
+    let status = transcoder.execute(&source).await;
 
     // Assert
-    let generated_files = DirectoryReader::new()
-        .with_extensions(vec!["flac", "mp3"])
-        .read(&output_dir)
-        .expect("Should be able to read dir");
-    let targets = host.services.get_required::<TargetFormatProvider>();
-    let target_count = targets.get(source.format, &source.existing).len();
-    let expected_file_count = DirectoryReader::new()
-        .with_extension("flac")
-        .read(&source.directory)
-        .expect("Should be able to read source dir")
-        .len()
-        * target_count;
-    assert_eq!(generated_files.len(), expected_file_count);
-    let generated_files = DirectoryReader::new()
-        .with_extensions(IMAGE_EXTENSIONS.to_vec())
-        .read(&output_dir)
-        .expect("Should be able to read dir");
-    trace!(
-        "{}",
-        generated_files
-            .iter()
-            .map(|f| f.display().to_string())
-            .collect::<Vec<_>>()
-            .join("\n")
-    );
-    assert_eq!(generated_files.len(), target_count * 2);
-    Ok(())
+    assert!(status.success);
+    DirectorySnapshot::new()
+        .with_directory(&output_dir)
+        .without_extensions(&["torrent"])
+        .create()
+        .expect("should read output directory")
 }

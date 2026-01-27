@@ -1,0 +1,87 @@
+use std::error::Error;
+use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::io::{Error as IoError, ErrorKind};
+
+use super::CommandError;
+
+/// Errors that can occur during sample generation.
+#[derive(Debug)]
+pub enum SampleError {
+    /// Failed to create a directory.
+    CreateDirectory(IoError),
+    /// Failed to remove a temporary file.
+    RemoveFile(IoError),
+
+    /// SOX command failed.
+    Sox(CommandError),
+
+    /// metaflac failed to set tags.
+    MetaflacTags(CommandError),
+    /// metaflac failed to import picture.
+    MetaflacPicture(CommandError),
+
+    /// Failed to save image.
+    ImageSave(image::ImageError),
+
+    /// Failed to create torrent.
+    TorrentCreate(rogue_logging::Error),
+
+    /// Failed to read torrent file.
+    ReadTorrent(IoError),
+}
+
+impl Display for SampleError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        match self {
+            Self::CreateDirectory(e) => write!(f, "Failed to create directory\n{e}"),
+            Self::RemoveFile(e) => write!(f, "Failed to remove file\n{e}"),
+            Self::Sox(e) => fmt_command_error(f, e, "sox", "Failed to generate FLAC"),
+            Self::MetaflacTags(e) => fmt_command_error(f, e, "metaflac", "Failed to set tags"),
+            Self::MetaflacPicture(e) => {
+                fmt_command_error(f, e, "metaflac", "Failed to import picture")
+            }
+            Self::ImageSave(e) => write!(f, "Failed to save image\n{e}"),
+            Self::TorrentCreate(e) => write!(f, "Failed to create torrent\n{e}"),
+            Self::ReadTorrent(e) => write!(f, "Failed to read torrent file\n{e}"),
+        }
+    }
+}
+
+impl Error for SampleError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::CreateDirectory(e) | Self::RemoveFile(e) | Self::ReadTorrent(e) => Some(e),
+            Self::Sox(e) | Self::MetaflacTags(e) | Self::MetaflacPicture(e) => e.source(),
+            Self::ImageSave(e) => Some(e),
+            Self::TorrentCreate(e) => Some(e),
+        }
+    }
+}
+
+impl From<image::ImageError> for SampleError {
+    fn from(err: image::ImageError) -> Self {
+        Self::ImageSave(err)
+    }
+}
+
+impl From<rogue_logging::Error> for SampleError {
+    fn from(err: rogue_logging::Error) -> Self {
+        Self::TorrentCreate(err)
+    }
+}
+
+/// Format a command error with a custom message, handling "not found" specially.
+fn fmt_command_error(
+    f: &mut Formatter<'_>,
+    error: &CommandError,
+    command: &str,
+    action: &str,
+) -> FmtResult {
+    match error {
+        CommandError::Spawn(e) if e.kind() == ErrorKind::NotFound => {
+            write!(f, "`{command}` not found\nIs it installed and in PATH?")
+        }
+        CommandError::Spawn(e) => write!(f, "Failed to spawn `{command}`\n{e}"),
+        CommandError::Failed(output) => write!(f, "{action} with `{command}`\n{output}"),
+    }
+}

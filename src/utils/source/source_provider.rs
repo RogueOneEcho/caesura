@@ -3,20 +3,21 @@ use crate::utils::*;
 
 use colored::Colorize;
 use di::{Ref, injectable};
-use gazelle_api::{GazelleClient, Torrent};
+use gazelle_api::{GazelleClientTrait, Torrent};
 use html_escape::decode_html_entities;
 use log::{trace, warn};
 use std::path::PathBuf;
 
-/// Retrieve [Source] from the [Api] via a [provider design pattern](https://en.wikipedia.org/wiki/Provider_model)
+/// Retrieve [`Source`] from the API.
 #[injectable]
 pub struct SourceProvider {
-    api: Ref<GazelleClient>,
+    api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     options: Ref<SharedOptions>,
     id_provider: Ref<IdProvider>,
 }
 
 impl SourceProvider {
+    /// Retrieve a [`Source`] by torrent ID.
     pub async fn get(&self, id: u32) -> Result<Source, SourceIssue> {
         let response = self.api.get_torrent(id).await.map_err(SourceIssue::api)?;
         let torrent = response.torrent;
@@ -81,6 +82,7 @@ impl SourceProvider {
         Ok(directories.first().expect("should be at least one").clone())
     }
 
+    /// Retrieve a [`Source`] using the ID from CLI options.
     pub async fn get_from_options(&self) -> Result<Source, SourceIssue> {
         let id = self
             .id_provider

@@ -1,27 +1,38 @@
 use crate::commands::*;
 use crate::hosting::*;
-use crate::options::*;
+use crate::utils::SourceIssue::UnnecessaryDirectory;
 use crate::utils::*;
+use rogue_logging::Error;
 use std::path::PathBuf;
 
-use crate::utils::SourceIssue::UnnecessaryDirectory;
-use rogue_logging::Error;
-
 #[tokio::test]
-async fn verify_command() -> Result<(), Error> {
+async fn verify_command_mocked() -> Result<(), Error> {
     // Arrange
     let _ = init_logger();
-    let target_options = TestOptionsFactory::from(TargetOptions {
-        allow_existing: Some(true),
-        ..TargetOptions::default()
-    });
-    let host = HostBuilder::new().with_options(target_options).build();
+    let output_dir = TempDirectory::for_current_test();
+    let host = HostBuilder::new()
+        .with_mock_samples(SampleFormat::FLAC16_441, output_dir)
+        .await
+        .build();
+    let provider = host.services.get_required::<SourceProvider>();
     let verifier = host.services.get_required::<VerifyCommand>();
 
     // Act
-    let _is_verified = verifier.execute_cli().await?;
+    let source = provider
+        .get(SampleDataBuilder::TORRENT_ID)
+        .await
+        .expect("should get source");
+    let status = verifier.execute(&source).await;
 
-    // Assert not required
+    // Assert
+    if !status.verified
+        && let Some(issues) = &status.issues
+    {
+        for issue in issues {
+            eprintln!("Issue: {issue}");
+        }
+    }
+    assert!(status.verified);
     Ok(())
 }
 

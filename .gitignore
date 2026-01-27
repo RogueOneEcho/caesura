@@ -8,3 +8,4 @@ config.yml
 config.*.yml
 **/*.rs.bk
 *.pdb
+*.snap.new

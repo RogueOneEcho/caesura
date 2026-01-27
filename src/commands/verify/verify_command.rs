@@ -8,7 +8,7 @@ use crate::options::*;
 use crate::utils::*;
 
 use crate::utils::SourceIssue::*;
-use gazelle_api::GazelleClient;
+use gazelle_api::GazelleClientTrait;
 use rogue_logging::Error;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -20,7 +20,7 @@ pub(crate) struct VerifyCommand {
     shared_options: Ref<SharedOptions>,
     verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
-    api: Ref<GazelleClient>,
+    api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     targets: Ref<TargetFormatProvider>,
     paths: Ref<PathManager>,
 }

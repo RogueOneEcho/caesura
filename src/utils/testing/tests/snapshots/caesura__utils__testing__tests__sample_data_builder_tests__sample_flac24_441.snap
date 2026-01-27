@@ -1,0 +1,66 @@
+---
+source: src/utils/testing/tests/sample_data_builder_tests.rs
+expression: snapshot
+---
+- directory: ~
+  filename: Test Artist - Test Album - 01 Track One.flac
+  size: 2661189
+  sha256: 45b1c1207e06f527e4cdb0e33f53c2129d9dc68038de72c89ce55db06081dc3d
+  audio:
+    duration_ms: 65000
+    overall_bitrate: 327
+    audio_bitrate: 327
+    sample_rate: 44100
+    bit_depth: 24
+    channels: 2
+    channel_mask: ~
+    tags:
+      VorbisComments:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSoftware: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "1"
+        TrackTitle: Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: ~
+  filename: Test Artist - Test Album - 02 Track Two.flac
+  size: 3216212
+  sha256: 0d724b87d5fba867e6120bf397d36ced9ce5d1ddb0102cc3b459808e61a1564f
+  audio:
+    duration_ms: 65000
+    overall_bitrate: 395
+    audio_bitrate: 395
+    sample_rate: 44100
+    bit_depth: 24
+    channels: 2
+    channel_mask: ~
+    tags:
+      VorbisComments:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSoftware: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "2"
+        TrackTitle: Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: ~
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8

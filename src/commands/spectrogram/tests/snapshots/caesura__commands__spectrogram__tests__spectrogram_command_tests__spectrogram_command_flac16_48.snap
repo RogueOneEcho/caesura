@@ -1,0 +1,36 @@
+---
+source: src/commands/spectrogram/tests/spectrogram_command_tests.rs
+expression: snapshot
+---
+- directory: "Unknown Artist - Test Album [2020] [WEB SPECTROGRAMS]"
+  filename: Test Artist - Test Album - 01 Track One.full.png
+  size: 14270
+  sha256: 98dca6950a162848ba88cd2dd9e101c70b5dc584e1613d152f80203e47477b9c
+  image:
+    width: 3144
+    height: 611
+    color_type: Rgb8
+- directory: "Unknown Artist - Test Album [2020] [WEB SPECTROGRAMS]"
+  filename: Test Artist - Test Album - 01 Track One.zoom.png
+  size: 10765
+  sha256: af4684919fe88ee9f3a59e2cd0d3bf00f71ae88e3a8dae902bb1ed79eea9fb29
+  image:
+    width: 644
+    height: 1123
+    color_type: Rgb8
+- directory: "Unknown Artist - Test Album [2020] [WEB SPECTROGRAMS]"
+  filename: Test Artist - Test Album - 02 Track Two.full.png
+  size: 13360
+  sha256: c1905c813d394c050179ec3338bc15dfa07911b2e59f90746a7bcfa4e03839c1
+  image:
+    width: 3144
+    height: 611
+    color_type: Rgb8
+- directory: "Unknown Artist - Test Album [2020] [WEB SPECTROGRAMS]"
+  filename: Test Artist - Test Album - 02 Track Two.zoom.png
+  size: 10607
+  sha256: 94d5ab2de9ab00d2b91b4c4a41c1137d207064672d01e3c38fb8024f18706d02
+  image:
+    width: 644
+    height: 1123
+    color_type: Rgb8

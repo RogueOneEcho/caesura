@@ -1,0 +1,21 @@
+---
+source: src/utils/testing/tests/flac_generator_tests.rs
+expression: metadata
+---
+duration_ms: 65000
+overall_bitrate: 104
+audio_bitrate: 104
+sample_rate: 44100
+bit_depth: 16
+channels: 2
+channel_mask: ~
+tags:
+  VorbisComments:
+    Comment: Processed by SoX
+    EncoderSoftware: reference libFLAC 1.5.0 20250211
+pictures:
+  - picture_type: CoverFront
+    mime_type: Png
+    description: ~
+    size: 849
+    sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
