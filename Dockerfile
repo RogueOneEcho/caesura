@@ -1,7 +1,13 @@
-# Build imdl binary
-FROM rust:alpine AS imdl
+# Download imdl binary
+FROM alpine:latest AS imdl
+ARG TARGETARCH
 RUN apk add --no-cache curl
-RUN curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
+RUN case "${TARGETARCH}" in \
+      amd64) ARCH="x86_64" ;; \
+      arm64) ARCH="aarch64" ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-${ARCH}-unknown-linux-musl.tar.gz" \
       --location \
       --show-error \
       --silent \

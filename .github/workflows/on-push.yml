@@ -307,10 +307,18 @@ jobs:
 
 
   docker-build:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     if: needs.release.outputs.version != ''
     needs:
     - release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          arch: amd64
+        - os: ubuntu-24.04-arm
+          arch: arm64
     steps:
 
     - uses: actions/checkout@v4
@@ -318,9 +326,9 @@ jobs:
     - uses: actions/cache@v4
       with:
         path: /tmp/.buildx-cache
-        key: buildx-${{ github.sha }}
+        key: buildx-${{ matrix.arch }}-${{ github.sha }}
         restore-keys: |
-          buildx-
+          buildx-${{ matrix.arch }}-
 
     - run: echo $GH_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       env:
@@ -331,7 +339,7 @@ jobs:
     - run: >
         docker buildx build .
         --build-arg VERSION=${{ needs.release.outputs.version }}
-        --tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
+        --tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}-${{ matrix.arch }}
         --cache-from=type=local,src=/tmp/.buildx-cache
         --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max
         --push
@@ -354,16 +362,23 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - run: docker pull ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
+    - name: Create and push version manifest
+      run: >
+        docker buildx imagetools create
+        --tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
+        ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}-amd64
+        ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}-arm64
 
-    - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:alpha
+    - name: Tag alpha manifest
       if: github.ref_name == 'main'
+      run: >
+        docker buildx imagetools create
+        --tag ghcr.io/rogueoneecho/caesura:alpha
+        ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
 
-    - run: docker push ghcr.io/rogueoneecho/caesura:alpha
-      if: github.ref_name == 'main'
-
-    - run: docker tag ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }} ghcr.io/rogueoneecho/caesura:latest
+    - name: Tag latest manifest
       if: contains(needs.release.outputs.version, '-') == false
-
-    - run: docker push ghcr.io/rogueoneecho/caesura:latest
-      if: contains(needs.release.outputs.version, '-') == false
+      run: >
+        docker buildx imagetools create
+        --tag ghcr.io/rogueoneecho/caesura:latest
+        ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}
