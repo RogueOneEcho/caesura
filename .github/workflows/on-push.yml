@@ -66,6 +66,9 @@ jobs:
         - os: macos-15
           target: aarch64-apple-darwin
           test: true
+        - os: ubuntu-24.04-arm
+          target: aarch64-unknown-linux-gnu
+          test: true
 
     steps:
 
@@ -96,12 +99,6 @@ jobs:
 
     - if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
       run: sudo apt-get install musl-tools --yes
-
-    - if: matrix.target == 'aarch64-unknown-linux-gnu'
-      run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross --yes
-
-    - if: matrix.target == 'aarch64-unknown-linux-musl'
-      run: sudo apt-get install musl-tools gcc-aarch64-linux-gnu musl-dev --yes
 
     - run: rustup target add ${{ matrix.target }}
 
@@ -178,7 +175,7 @@ jobs:
       run: cargo test --release --no-fail-fast --target ${{ matrix.target }}
 
     - name: Run determinism tests
-      if: matrix.test && contains(matrix.os, 'ubuntu')
+      if: matrix.test && matrix.os == 'ubuntu-24.04'
       run: cargo test --release --target ${{ matrix.target }} -- --ignored sample_flac
 
     - name: Run cargo check
