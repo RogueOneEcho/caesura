@@ -18,21 +18,21 @@ async fn transcode_command_flac16_48() {
 }
 
 #[tokio::test]
-#[ignore = "Non-deterministic due to SoX dithering"]
+#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn transcode_command_flac24_441() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC24_441).await;
     assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
-#[ignore = "Non-deterministic due to SoX dithering"]
+#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn transcode_command_flac24_48() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC24_48).await;
     assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
-#[ignore = "Non-deterministic due to SoX dithering"]
+#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn transcode_command_flac24_96() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC24_96).await;
     assert_yaml_snapshot!(snapshot);

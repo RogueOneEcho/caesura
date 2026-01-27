@@ -25,6 +25,16 @@ pub struct TargetOptions {
     /// Default: `false`
     #[arg(long, default_value = None, action = ArgAction::SetTrue)]
     pub allow_existing: Option<bool>,
+
+    /// Use random dithering when resampling with `SoX`.
+    ///
+    /// By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither
+    /// random number generator with a fixed value, producing deterministic output.
+    /// Set this to `true` to use random dithering instead.
+    ///
+    /// Default: `false`
+    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
+    pub sox_random_dither: Option<bool>,
 }
 
 #[injectable]
@@ -42,6 +52,9 @@ impl Options for TargetOptions {
         if self.allow_existing.is_none() {
             self.allow_existing = alternative.allow_existing;
         }
+        if self.sox_random_dither.is_none() {
+            self.sox_random_dither = alternative.sox_random_dither;
+        }
     }
 
     fn apply_defaults(&mut self) {
@@ -54,6 +67,9 @@ impl Options for TargetOptions {
         }
         if self.allow_existing.is_none() {
             self.allow_existing = Some(false);
+        }
+        if self.sox_random_dither.is_none() {
+            self.sox_random_dither = Some(false);
         }
     }
 
@@ -83,6 +99,9 @@ impl Options for TargetOptions {
         let mut options = target;
         if options.allow_existing == Some(false) {
             options.allow_existing = None;
+        }
+        if options.sox_random_dither == Some(false) {
+            options.sox_random_dither = None;
         }
         Some(options)
     }

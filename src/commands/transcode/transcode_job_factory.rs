@@ -3,7 +3,7 @@ use di::{Ref, injectable};
 use crate::commands::*;
 use crate::utils::*;
 
-use crate::options::CopyOptions;
+use crate::options::{CopyOptions, TargetOptions};
 use rogue_logging::Error;
 
 /// Create a [`TranscodeJob`] for each [`FlacFile`] in the [`Vec<FlacFile>`].
@@ -11,6 +11,7 @@ use rogue_logging::Error;
 pub(crate) struct TranscodeJobFactory {
     paths: Ref<PathManager>,
     copy_options: Ref<CopyOptions>,
+    target_options: Ref<TargetOptions>,
 }
 
 impl TranscodeJobFactory {
@@ -41,6 +42,10 @@ impl TranscodeJobFactory {
             .map_err(|e| claxon_error(e, "read FLAC"))?;
         let id = format!("Transcode {:<4}{index:>3}", format.to_string());
         let output_path = self.paths.get_transcode_path(source, format, flac);
+        let repeatable = !self
+            .target_options
+            .sox_random_dither
+            .expect("sox_random_dither should be set");
         let variant = match format {
             TargetFormat::Flac => {
                 if is_resample_required(&info) {
@@ -48,6 +53,7 @@ impl TranscodeJobFactory {
                         input: flac.path.clone(),
                         output: output_path.clone(),
                         resample_rate: get_resample_rate(&info)?,
+                        repeatable,
                     })
                 } else {
                     Variant::Include(Include {
@@ -68,6 +74,7 @@ impl TranscodeJobFactory {
                     Decode {
                         input: flac.path.clone(),
                         resample_rate,
+                        repeatable,
                     },
                     Encode {
                         format,

@@ -169,6 +169,7 @@ impl HostBuilder {
             .with_options(TargetOptions {
                 allow_existing: None,
                 target: Some(vec![Flac, _320, V0]),
+                sox_random_dither: Some(false),
             })
     }
 

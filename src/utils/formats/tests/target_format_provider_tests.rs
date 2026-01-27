@@ -106,6 +106,7 @@ fn create_provider(target: BTreeSet<TargetFormat>, allow_existing: bool) -> Targ
         options: Ref::new(TargetOptions {
             target: Some(target.iter().copied().collect()),
             allow_existing: Some(allow_existing),
+            sox_random_dither: None,
         }),
     }
 }
