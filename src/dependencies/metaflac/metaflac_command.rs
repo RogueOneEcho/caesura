@@ -52,10 +52,11 @@ mod tests {
     async fn metaflac_list() -> Result<(), Error> {
         // Arrange
         let album = AlbumProvider::get(SampleFormat::default()).await;
-        let paths = DirectoryReader::new()
+        let mut paths = DirectoryReader::new()
             .with_extension("flac")
             .read(&album.source_dir())
             .expect("Directory should exist");
+        paths.sort();
         let path = paths.first().expect("Should be at least one sample");
 
         // Act

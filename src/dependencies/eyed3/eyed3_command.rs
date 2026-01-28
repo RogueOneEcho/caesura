@@ -25,17 +25,20 @@ impl EyeD3Command {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use insta::assert_snapshot;
     use rogue_logging::Error;
 
     #[tokio::test]
+    #[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
     async fn eyed3_display() -> Result<(), Error> {
         // Arrange
         let transcode_config =
             TranscodeProvider::get(SampleFormat::FLAC16_441, TargetFormat::_320).await;
-        let paths = DirectoryReader::new()
+        let mut paths = DirectoryReader::new()
             .with_extension("mp3")
             .read(&transcode_config.transcode_dir())
             .expect("Directory should exist");
+        paths.sort();
         let path = paths.first().expect("Should be at least one sample");
 
         // Act
@@ -44,7 +47,7 @@ mod tests {
         println!("{output}");
 
         // Assert
-        assert!(!output.is_empty());
+        assert_snapshot!(output);
 
         Ok(())
     }

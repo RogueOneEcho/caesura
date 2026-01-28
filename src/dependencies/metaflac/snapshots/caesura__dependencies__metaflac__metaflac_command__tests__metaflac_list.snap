@@ -8,13 +8,13 @@ METADATA block #0
   length: 34
   minimum blocksize: 4096 samples
   maximum blocksize: 4096 samples
-  minimum framesize: 1398 bytes
-  maximum framesize: 1589 bytes
+  minimum framesize: 1127 bytes
+  maximum framesize: 1275 bytes
   sample_rate: 44100 Hz
   channels: 2
   bits-per-sample: 16
   total samples: 2866500
-  MD5 signature: 4d91ed13e29e2632809cebd3333adb3e
+  MD5 signature: 026705f44d70e004e1ae7675bda3f65f
 METADATA block #1
   type: 4 (VORBIS_COMMENT)
   is last: false
@@ -24,6 +24,6 @@ METADATA block #1
     comment[0]: Comment=Processed by SoX
     comment[1]: ARTIST=Test Artist
     comment[2]: ALBUM=Test Album
-    comment[3]: TITLE=Track Two
-    comment[4]: TRACKNUMBER=2
+    comment[3]: TITLE=Track One
+    comment[4]: TRACKNUMBER=1
     comment[5]: DATE=2020

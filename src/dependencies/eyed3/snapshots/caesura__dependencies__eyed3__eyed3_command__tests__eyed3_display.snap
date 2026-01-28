@@ -1,0 +1,20 @@
+---
+source: src/dependencies/eyed3/eyed3_command.rs
+expression: output
+---
+...bum [2020] [WEB 320]/Test Artist - Test Album - 01 Track One.mp3 [ 2.48 MB ]
+------------------------
+Time: 01:05	MPEG1, Layer III	[ 320 kb/s @ 44100 Hz - Joint stereo ]
+------------------------
+ID3 v2.4:
+title: Track One
+artist: Test Artist
+album: Test Album
+recording date: 2020
+track: 1		
+Comment: [Description: ] [Lang: XXX]
+Processed by SoX
+FRONT_COVER Image: [Size: 849 bytes] [Type: image/png]
+Description: 
+
+------------------------
