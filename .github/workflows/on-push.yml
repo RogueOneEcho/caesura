@@ -129,19 +129,13 @@ jobs:
 
     - run: rm -rf artifacts
 
-    - name: Restore brew cache
+    - name: Restore brew cache (Linux only)
       id: cache-brew
-      if: matrix.test
+      if: matrix.test && contains(matrix.os, 'ubuntu')
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.os }}-brew-${{ matrix.target }}-v2-
-        path: |
-          /home/linuxbrew/.linuxbrew
-          ~/Library/Caches/Homebrew
-          /opt/homebrew
-          /usr/local/Cellar
-          /usr/local/opt
-          /usr/local/bin
+        key: ${{ runner.os }}-brew-${{ runner.arch }}-v3-
+        path: /home/linuxbrew/.linuxbrew
 
     - if: matrix.test && contains(matrix.os, 'ubuntu')
       run: echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
@@ -149,21 +143,15 @@ jobs:
     - if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
       run: /home/linuxbrew/.linuxbrew/bin/brew install flac lame sox imagemagick eye-d3 intermodal
 
-    - if: matrix.test && contains(matrix.os, 'macos') && steps.cache-brew.outputs.cache-hit != 'true'
+    - if: matrix.test && contains(matrix.os, 'macos')
       run: brew install flac lame sox imagemagick eye-d3 intermodal
 
-    - name: Save brew cache
-      if: matrix.test && steps.cache-brew.outputs.cache-hit != 'true'
+    - name: Save brew cache (Linux only)
+      if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         key: ${{ steps.cache-brew.outputs.cache-primary-key }}
-        path: |
-          /home/linuxbrew/.linuxbrew
-          ~/Library/Caches/Homebrew
-          /opt/homebrew
-          /usr/local/Cellar
-          /usr/local/opt
-          /usr/local/bin
+        path: /home/linuxbrew/.linuxbrew
 
     - if: matrix.test
       run: |
