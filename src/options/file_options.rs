@@ -17,6 +17,15 @@ pub struct FileOptions {
     #[arg(long, default_value = None, action = ArgAction::SetTrue)]
     pub no_image_compression: Option<bool>,
 
+    /// Should transcoded files be renamed from source filenames to a
+    /// standardized format: `{track:0>N} {title}.{ext}`?
+    ///
+    /// Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.
+    ///
+    /// Default: `false`
+    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
+    pub rename_tracks: Option<bool>,
+
     /// Maximum file size in bytes beyond which images are compressed.
     ///
     /// Default: `750000`
@@ -65,6 +74,9 @@ impl Options for FileOptions {
         if self.no_png_to_jpg.is_none() {
             self.no_png_to_jpg = alternative.no_png_to_jpg;
         }
+        if self.rename_tracks.is_none() {
+            self.rename_tracks = alternative.rename_tracks;
+        }
         if self.max_file_size.is_none() {
             self.max_file_size = alternative.max_file_size;
         }
@@ -82,6 +94,9 @@ impl Options for FileOptions {
         }
         if self.no_png_to_jpg.is_none() {
             self.no_png_to_jpg = Some(false);
+        }
+        if self.rename_tracks.is_none() {
+            self.rename_tracks = Some(false);
         }
         if self.max_file_size.is_none() {
             self.max_file_size = Some(750_000);
@@ -108,6 +123,9 @@ impl Options for FileOptions {
         }
         if options.no_png_to_jpg == Some(false) {
             options.no_png_to_jpg = None;
+        }
+        if options.rename_tracks == Some(false) {
+            options.rename_tracks = None;
         }
         Some(options)
     }

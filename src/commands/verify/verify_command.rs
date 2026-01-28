@@ -127,7 +127,7 @@ impl VerifyCommand {
                 path: source.directory.clone(),
             }];
         }
-        let flacs = Collector::get_flacs(&source.directory);
+        let flacs = Collector::get_flacs_with_context(&source.directory);
         if flacs.is_empty() {
             return vec![NoFlacs {
                 path: source.directory.clone(),

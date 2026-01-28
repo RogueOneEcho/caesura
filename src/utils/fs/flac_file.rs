@@ -2,6 +2,11 @@ use std::path::PathBuf;
 
 use claxon::FlacReader;
 use claxon::metadata::StreamInfo;
+use lofty::tag::Tag;
+use once_cell::sync::OnceCell;
+use rogue_logging::Error;
+
+use crate::utils::{DiscContext, convert_to_id3v2, fix_track_numbering, get_vorbis_tags};
 
 /// A representation of a FLAC file.
 pub struct FlacFile {
@@ -13,6 +18,16 @@ pub struct FlacFile {
 
     /// Subdirectory of the file.
     pub sub_dir: PathBuf,
+
+    /// Cached ID3 tags.
+    ///
+    /// Lazily loaded, converted from Vorbis. Uses thread-safe `OnceCell`.
+    id3_tags: OnceCell<Tag>,
+
+    /// Disc context for track renaming.
+    ///
+    /// Set once after collection
+    pub disc_context: Option<DiscContext>,
 }
 
 impl FlacFile {
@@ -36,7 +51,19 @@ impl FlacFile {
             path,
             file_name,
             sub_dir,
+            id3_tags: OnceCell::new(),
+            disc_context: None,
         }
+    }
+
+    /// Get cached ID3 tags, converting from Vorbis and fixing track numbering.
+    pub fn id3_tags(&self) -> Result<&Tag, Error> {
+        self.id3_tags.get_or_try_init(|| {
+            let mut tags = get_vorbis_tags(self)?;
+            convert_to_id3v2(&mut tags);
+            let _ = fix_track_numbering(&mut tags);
+            Ok(tags)
+        })
     }
 
     #[must_use]

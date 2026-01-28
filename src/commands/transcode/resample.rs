@@ -10,7 +10,6 @@ pub(crate) struct Resample {
     /// Path to the output file
     pub output: PathBuf,
     /// Resample rate
-    #[allow(clippy::struct_field_names)]
     pub resample_rate: u32,
     /// Use repeatable mode for `SoX` (deterministic dithering)
     pub repeatable: bool,

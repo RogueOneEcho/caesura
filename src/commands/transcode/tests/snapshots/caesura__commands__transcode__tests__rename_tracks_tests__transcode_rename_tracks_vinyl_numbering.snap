@@ -1,0 +1,244 @@
+---
+source: src/commands/transcode/tests/rename_tracks_tests.rs
+expression: snapshot
+---
+- directory: "Rename Artist - Vinyl Album [2024] [WEB 320]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD1"
+  filename: 1 Side A Track One.mp3
+  size: 2604932
+  sha256: 2521ab501fd738644615b38fbf708446f9e5bc65a2396408a87645bc80566004
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Side A Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD1"
+  filename: 2 Side A Track Two.mp3
+  size: 2604932
+  sha256: bd8b6514a5defce279ab6dbd8b411ceda6609e26a785f4345107ba9b8f0ad2c4
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Side A Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD2"
+  filename: 1 Side B Track One.mp3
+  size: 2604932
+  sha256: 057b291682c0558d89c2bb06aeb0fe4f2c416a9f9da2536be49e295b16b2a2c8
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Side B Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD2"
+  filename: 2 Side B Track Two.mp3
+  size: 2604932
+  sha256: 8105ec22a193cad1552f942643c1b22a70386f9ad29f2271e57158e8c639af25
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Side B Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB V0]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD1"
+  filename: 1 Side A Track One.mp3
+  size: 786275
+  sha256: a4ca462abc6df35bfb5db4192eee9581ebd92a7d9006402d329a5487c5c6f001
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Side A Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD1"
+  filename: 2 Side A Track Two.mp3
+  size: 764955
+  sha256: 58ce48f3e4d2f27257f7766a98a6626f16b233dfa22c93fa77d6893945c27c48
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 94
+    audio_bitrate: 93
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Side A Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD2"
+  filename: 1 Side B Track One.mp3
+  size: 785002
+  sha256: 4c417228a4cda7bf86e03363b62dfb1985705540b35c15b20ca356deef3f0c59
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Side B Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD2"
+  filename: 2 Side B Track Two.mp3
+  size: 755778
+  sha256: 9d5e6a8a9d0211a42aae631a22169159009aa6e9958612cb1b2b766eb90f4159
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 92
+    audio_bitrate: 92
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Vinyl Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Side B Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588

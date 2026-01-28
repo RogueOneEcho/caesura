@@ -1,0 +1,244 @@
+---
+source: src/commands/transcode/tests/rename_tracks_tests.rs
+expression: snapshot
+---
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD1"
+  filename: 1 First Track.mp3
+  size: 2604932
+  sha256: 19236a002727ffc280d1c10c1f6bf9eb7d255623141df292bd645412f2185075
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: First Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD1"
+  filename: 2 Second Track.mp3
+  size: 2604933
+  sha256: 9ba5c3b9b017d301be5fc74f755e478ef4bd7de7d8369fc0b4107a5fdde4019d
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Second Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD2"
+  filename: 1 Third Track.mp3
+  size: 2604932
+  sha256: e1cbeaad55891da00e14f147e9fee46a6684d7b4f92d102ad45d8129dc4765dd
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Third Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD2"
+  filename: 2 Fourth Track.mp3
+  size: 2604933
+  sha256: 3d64d882b3f0fc6231110c699b95230fd6ee4b7b45e7da96432e9f7b07a94c8e
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Fourth Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD1"
+  filename: 1 First Track.mp3
+  size: 786275
+  sha256: 5c68c2b600940fe7a04f72dad083c832fdb43957a7c82e3b0d6ad8908bd8a564
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: First Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD1"
+  filename: 2 Second Track.mp3
+  size: 764956
+  sha256: 4b1e0edb1ebbfbaa9764374ac8be0bc2d26d9ade8458f049566f4fd2b447d530
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 94
+    audio_bitrate: 93
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "1"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Second Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD2"
+  filename: 1 Third Track.mp3
+  size: 785002
+  sha256: cfb3ba181b1ab2a7fbb0afd90342fb9e51ba7d298e3d106b433a95dd1bc0e506
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Third Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD2"
+  filename: 2 Fourth Track.mp3
+  size: 755779
+  sha256: 6c0f667e6673f98357a77714c3254eb3f6102c472e58431e7f68a0d2d726ab1a
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 92
+    audio_bitrate: 92
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Multi Disc Album
+        Comment: Processed by SoX
+        DiscNumber: "2"
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Fourth Track
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588

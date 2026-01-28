@@ -200,6 +200,7 @@ dependencies = [
  "log",
  "more-di",
  "num_cpus",
+ "once_cell",
  "regex",
  "reqwest",
  "rogue_logging",
