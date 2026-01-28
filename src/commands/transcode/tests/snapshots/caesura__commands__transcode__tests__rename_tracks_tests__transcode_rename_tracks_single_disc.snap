@@ -1,0 +1,128 @@
+---
+source: src/commands/transcode/tests/rename_tracks_tests.rs
+expression: snapshot
+---
+- directory: "Rename Artist - Single Disc Album [2024] [WEB 320]"
+  filename: 1 Track One.mp3
+  size: 2604919
+  sha256: 303e2c0e0026d9069ded179f865eba836bb50aa8c35930d34806b2a23393206d
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Single Disc Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Single Disc Album [2024] [WEB 320]"
+  filename: 2 Track Two.mp3
+  size: 2604919
+  sha256: 5037fcb2436ff539edef46c3ec8a1f4acb19033ecc52039723d89b87408b2699
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Single Disc Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Single Disc Album [2024] [WEB 320]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Rename Artist - Single Disc Album [2024] [WEB V0]"
+  filename: 1 Track One.mp3
+  size: 786262
+  sha256: 78bf58a16c0772153fd25892157d3c58d92b6a288dccc229276ed07c3c6f1683
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Single Disc Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: Track One
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Single Disc Album [2024] [WEB V0]"
+  filename: 2 Track Two.mp3
+  size: 737383
+  sha256: 12485e48b0cc8bf73d99156316b59375d7deb09385fe27729fd99622072d8ad8
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 90
+    audio_bitrate: 90
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Single Disc Album
+        Comment: Processed by SoX
+        EncoderSettings: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Track Two
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Single Disc Album [2024] [WEB V0]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8

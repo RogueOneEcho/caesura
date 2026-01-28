@@ -11,6 +11,7 @@ use crate::utils::*;
 pub struct PathManager {
     shared_options: Ref<SharedOptions>,
     cache_options: Ref<CacheOptions>,
+    file_options: Ref<FileOptions>,
 }
 
 impl PathManager {
@@ -65,9 +66,22 @@ impl PathManager {
         flac: &FlacFile,
     ) -> PathBuf {
         let extension = target.get_file_extension();
-        let filename = flac.file_name.clone() + "." + extension.as_str();
-        let sub_path = flac.sub_dir.join(filename);
-        self.get_transcode_target_dir(source, target).join(sub_path)
+        let rename_tracks = self
+            .file_options
+            .rename_tracks
+            .expect("rename_tracks should be set");
+        // If rename_tracks enabled and disc context is set on flac, use renamed paths
+        let (base_name, sub_dir) = if rename_tracks && flac.disc_context.is_some() {
+            (
+                flac.renamed_file_stem(),
+                flac.renamed_sub_dir().unwrap_or_default(),
+            )
+        } else {
+            (flac.file_name.clone(), flac.sub_dir.clone())
+        };
+        self.get_transcode_target_dir(source, target)
+            .join(sub_dir)
+            .join(format!("{base_name}.{extension}"))
     }
 
     #[must_use]

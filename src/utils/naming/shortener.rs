@@ -23,16 +23,15 @@ impl Shortener {
     }
 
     pub fn suggest_track_name(flac: &FlacFile) {
-        if let Some(file_name) = TrackName::get(flac) {
-            let difference = compare_char_count(&flac.file_name, &file_name);
-            if difference < 0 {
-                info!(
-                    "{} track could save {} characters:\n{}",
-                    "Renaming".bold(),
-                    difference * -1,
-                    file_name.gray()
-                );
-            }
+        let file_stem = flac.renamed_file_stem();
+        let difference = compare_char_count(&flac.file_name, &file_stem);
+        if difference < 0 {
+            info!(
+                "{} track could save {} characters:\n{}",
+                "Renaming".bold(),
+                difference * -1,
+                file_stem.gray()
+            );
         }
     }
 

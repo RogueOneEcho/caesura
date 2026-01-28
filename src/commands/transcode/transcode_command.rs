@@ -132,7 +132,16 @@ impl TranscodeCommand {
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
     ) -> Result<(), Error> {
-        let flacs = Collector::get_flacs(&source.directory);
+        let rename_tracks = self
+            .file_options
+            .rename_tracks
+            .expect("rename_tracks should be set");
+        let flacs = if rename_tracks {
+            Collector::get_flacs_with_context(&source.directory)
+        } else {
+            Collector::get_flacs(&source.directory)
+        };
+
         info!(
             "{} to {} for {} FLACs in {}",
             "Transcoding".bold(),

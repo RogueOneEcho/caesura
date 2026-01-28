@@ -84,10 +84,7 @@ impl TranscodeJobFactory {
             }
         };
         let tags = if matches!(format, TargetFormat::_320 | TargetFormat::V0) {
-            let mut tags = get_vorbis_tags(flac)?;
-            convert_to_id3v2(&mut tags);
-            let _ = fix_track_numbering(&mut tags);
-            Some(tags)
+            Some(flac.id3_tags()?.clone())
         } else {
             None
         };

@@ -8,9 +8,7 @@ pub(crate) struct TagVerifier;
 
 impl TagVerifier {
     pub(crate) fn execute(flac: &FlacFile, source: &Source) -> Result<Vec<String>, Error> {
-        let mut tags = get_vorbis_tags(flac)?;
-        convert_to_id3v2(&mut tags);
-        let _ = fix_track_numbering(&mut tags);
+        let tags = flac.id3_tags()?;
         let mut missing: Vec<String> = Vec::new();
         if tags.artist().is_none() {
             missing.push("artist".to_owned());
@@ -27,6 +25,12 @@ impl TagVerifier {
         }
         if tags.track().is_none() {
             missing.push("track_number".to_owned());
+        }
+        if let Some(context) = &flac.disc_context
+            && context.is_multi_disc
+            && tags.disk().is_none()
+        {
+            missing.push("disc_number".to_owned());
         }
         Ok(missing)
     }

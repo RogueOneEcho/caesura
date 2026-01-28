@@ -29,6 +29,21 @@ impl Collector {
         collection
     }
 
+    /// Create [`FlacFile`] for each `.flac` file in a directory with [`DiscContext`] attached.
+    ///
+    /// This variant computes disc context (multi-disc detection, track padding) and
+    /// attaches it to each flac. Use this when you need disc/track information for
+    /// renaming or validation.
+    #[must_use]
+    pub fn get_flacs_with_context(source_dir: &PathBuf) -> Vec<FlacFile> {
+        let mut flacs = Self::get_flacs(source_dir);
+        let context = DiscContext::from_flacs(&flacs);
+        for flac in &mut flacs {
+            flac.disc_context = Some(context.clone());
+        }
+        flacs
+    }
+
     /// Create [`AdditionalFile`] for each additional file in a directory.
     #[must_use]
     pub fn get_additional(source_dir: &PathBuf) -> Vec<AdditionalFile> {
