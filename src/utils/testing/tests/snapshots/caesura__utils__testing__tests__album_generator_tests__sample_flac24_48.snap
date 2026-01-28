@@ -1,16 +1,20 @@
 ---
-source: src/utils/testing/tests/sample_data_builder_tests.rs
+source: src/utils/testing/tests/album_generator_tests.rs
 expression: snapshot
 ---
 - directory: ~
+  filename: ".generated"
+  size: 0
+  sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- directory: ~
   filename: Test Artist - Test Album - 01 Track One.flac
-  size: 2661189
-  sha256: 45b1c1207e06f527e4cdb0e33f53c2129d9dc68038de72c89ce55db06081dc3d
+  size: 2861359
+  sha256: 209a62d961f52f9714395465d2fb89ab51e8b599a35bcf59143c0ed287b6f5e2
   audio:
     duration_ms: 65000
-    overall_bitrate: 327
-    audio_bitrate: 327
-    sample_rate: 44100
+    overall_bitrate: 352
+    audio_bitrate: 352
+    sample_rate: 48000
     bit_depth: 24
     channels: 2
     channel_mask: ~
@@ -31,13 +35,13 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: ~
   filename: Test Artist - Test Album - 02 Track Two.flac
-  size: 3216212
-  sha256: 0d724b87d5fba867e6120bf397d36ced9ce5d1ddb0102cc3b459808e61a1564f
+  size: 3830487
+  sha256: 1c8fac11d390266addc7a0e4e5581533466dc58c81b15daf3be52ef72c4d09b8
   audio:
     duration_ms: 65000
-    overall_bitrate: 395
-    audio_bitrate: 395
-    sample_rate: 44100
+    overall_bitrate: 471
+    audio_bitrate: 471
+    sample_rate: 48000
     bit_depth: 24
     channels: 2
     channel_mask: ~

@@ -135,7 +135,8 @@ impl HostBuilder {
     #[must_use]
     #[cfg(test)]
     #[allow(clippy::as_conversions)]
-    pub fn with_mock_api(&mut self, client: impl GazelleClientTrait + 'static) -> &mut Self {
+    pub fn with_mock_api(&mut self, album_config: AlbumConfig) -> &mut Self {
+        let client = album_config.api();
         let client: Ref<Box<dyn GazelleClientTrait + Send + Sync>> =
             Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
         self.services
@@ -143,34 +144,43 @@ impl HostBuilder {
         self
     }
 
-    /// Configure the builder with generated sample data and mock API for testing.
+    /// Configure test options for the builder.
+    ///
+    /// - Sets up content, output, and cache directories
+    /// - Configures target formats (FLAC, 320, V0)
     #[cfg(test)]
-    #[allow(clippy::absolute_paths)]
-    pub async fn with_mock_samples(
-        &mut self,
-        format: SampleFormat,
-        output: std::path::PathBuf,
-    ) -> &mut Self {
+    pub async fn with_test_options(&mut self, test_dir: &TestDirectory) -> &mut Self {
         use crate::utils::TargetFormat::{_320, Flac, V0};
         use rogue_logging::{TimeFormat, Verbosity};
-        let mock = get_samples(format).await;
-        self.with_mock_api(mock)
-            .with_options(SharedOptions {
-                content: Some(vec![std::path::PathBuf::from(SAMPLES_CONTENT_DIR)]),
-                output: Some(output),
-                verbosity: Some(Verbosity::Debug),
-                log_time: Some(TimeFormat::None),
-                indexer: Some("red".to_owned()),
-                indexer_url: Some("https://redacted.sh".to_owned()),
-                announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-                api_key: Some("test_api_key".to_owned()),
-                ..SharedOptions::default()
-            })
-            .with_options(TargetOptions {
-                allow_existing: None,
-                target: Some(vec![Flac, _320, V0]),
-                sox_random_dither: Some(false),
-            })
+        use std::path::PathBuf;
+        use tokio::fs::create_dir_all;
+        let output_dir = test_dir.output();
+        let cache_dir = test_dir.cache();
+        create_dir_all(&output_dir)
+            .await
+            .expect("should be able to create output dir");
+        create_dir_all(&cache_dir)
+            .await
+            .expect("should be able to create cache dir");
+        self.with_options(SharedOptions {
+            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
+            output: Some(output_dir),
+            verbosity: Some(Verbosity::Debug),
+            log_time: Some(TimeFormat::None),
+            indexer: Some("red".to_owned()),
+            indexer_url: Some("https://redacted.sh".to_owned()),
+            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
+            api_key: Some("test_api_key".to_owned()),
+            ..SharedOptions::default()
+        })
+        .with_options(TargetOptions {
+            allow_existing: None,
+            target: Some(vec![Flac, _320, V0]),
+            sox_random_dither: Some(false),
+        })
+        .with_options(CacheOptions {
+            cache: Some(cache_dir),
+        })
     }
 
     /// Build the [`Host`] from the configured services.

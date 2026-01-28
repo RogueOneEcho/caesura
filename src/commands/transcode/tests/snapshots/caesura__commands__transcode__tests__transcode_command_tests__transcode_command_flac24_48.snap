@@ -2,7 +2,7 @@
 source: src/commands/transcode/tests/transcode_command_tests.rs
 expression: snapshot
 ---
-- directory: "Unknown Artist - Test Album [2020] [WEB 320]"
+- directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: Test Artist - Test Album - 01 Track One.mp3
   size: 2604630
   sha256: 6bd7a1b9b4beeac832f874eb8b190c70d956e2d6e20270ca640a745c9ab37908
@@ -29,7 +29,7 @@ expression: snapshot
         description: ~
         size: 849
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
-- directory: "Unknown Artist - Test Album [2020] [WEB 320]"
+- directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: Test Artist - Test Album - 02 Track Two.mp3
   size: 2604630
   sha256: 4deb6f40f3d33fe6c98ee7f53d541b74bd31a73b41369cb22eb9d60ccdcf091f
@@ -56,7 +56,7 @@ expression: snapshot
         description: ~
         size: 849
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
-- directory: "Unknown Artist - Test Album [2020] [WEB 320]"
+- directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: cover.png
   size: 849
   sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
@@ -64,7 +64,7 @@ expression: snapshot
     width: 100
     height: 100
     color_type: Rgb8
-- directory: "Unknown Artist - Test Album [2020] [WEB V0]"
+- directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 01 Track One.mp3
   size: 1385118
   sha256: 4bf7fc62f42aaa4062345b71cf765dd1cbfd1ed2ecaf9e5d92ea32437d5aec62
@@ -91,7 +91,7 @@ expression: snapshot
         description: ~
         size: 849
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
-- directory: "Unknown Artist - Test Album [2020] [WEB V0]"
+- directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 02 Track Two.mp3
   size: 1409094
   sha256: 18a67abbe93c00f6c65d9c00c334b09802f39432406b55a1c14ea86e2a57ac44
@@ -118,7 +118,7 @@ expression: snapshot
         description: ~
         size: 849
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
-- directory: "Unknown Artist - Test Album [2020] [WEB V0]"
+- directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: cover.png
   size: 849
   sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588

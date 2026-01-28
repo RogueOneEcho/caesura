@@ -1,2 +1,3 @@
+mod album_generator_tests;
 mod flac_generator_tests;
-mod sample_data_builder_tests;
+mod transcode_provider_tests;

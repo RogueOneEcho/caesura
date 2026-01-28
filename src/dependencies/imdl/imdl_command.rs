@@ -169,26 +169,20 @@ impl ImdlCommand {
 #[cfg(test)]
 mod tests {
     use rogue_logging::Error;
-    use std::path::PathBuf;
 
     use super::*;
 
     #[tokio::test]
-    #[ignore = "sample required"]
     async fn imdl_show() -> Result<(), Error> {
         // Arrange
-        let paths = DirectoryReader::new()
-            .with_extension("torrent")
-            .read(&PathBuf::from(TORRENTS_SAMPLES_DIR))
-            .expect("Directory should exist");
-        let path = paths.first().expect("Should be at least one sample");
+        let album = AlbumProvider::get(SampleFormat::default()).await;
+        let path = album.torrent_path();
 
         // Act
-        let summary = ImdlCommand::show(path).await?;
+        let summary = ImdlCommand::show(&path).await?;
 
         // Assert
         assert!(!summary.files.is_empty());
-
         Ok(())
     }
 }

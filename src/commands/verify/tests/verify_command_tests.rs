@@ -9,9 +9,11 @@ use std::path::PathBuf;
 async fn verify_command_mocked() -> Result<(), Error> {
     // Arrange
     let _ = init_logger();
-    let output_dir = TempDirectory::for_current_test();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
-        .with_mock_samples(SampleFormat::FLAC16_441, output_dir)
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
         .await
         .build();
     let provider = host.services.get_required::<SourceProvider>();
@@ -19,7 +21,7 @@ async fn verify_command_mocked() -> Result<(), Error> {
 
     // Act
     let source = provider
-        .get(SampleDataBuilder::TORRENT_ID)
+        .get(AlbumConfig::TORRENT_ID)
         .await
         .expect("should get source");
     let status = verifier.execute(&source).await;

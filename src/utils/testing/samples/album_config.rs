@@ -1,0 +1,310 @@
+use crate::utils::{SAMPLE_SOURCES_DIR, SampleFormat};
+use gazelle_api::{
+    Credit, Credits, Group, GroupResponse, MockGazelleClient, Torrent, TorrentResponse,
+};
+use std::fs;
+use std::path::{Path, PathBuf};
+
+/// Configuration for generating a test album.
+#[derive(Debug, Clone)]
+pub struct AlbumConfig {
+    /// Track configurations for the album.
+    pub tracks: Vec<TrackConfig>,
+    /// Artist name.
+    pub artist: &'static str,
+    /// Album title.
+    pub album: &'static str,
+    /// Release year.
+    pub year: u16,
+    /// Audio format (bit depth and sample rate).
+    pub format: SampleFormat,
+}
+
+/// Configuration for a single track within an album.
+#[derive(Debug, Clone)]
+pub struct TrackConfig {
+    /// Track title.
+    pub title: &'static str,
+    /// Track number (numeric like "1" or vinyl-style like "A1").
+    pub track_number: &'static str,
+    /// Disc number for multi-disc albums.
+    pub disc_number: Option<&'static str>,
+    /// Sine wave frequency in Hz for the generated audio.
+    pub frequency: u32,
+}
+
+impl Default for AlbumConfig {
+    fn default() -> Self {
+        Self {
+            artist: "Test Artist",
+            album: "Test Album",
+            year: 2020,
+            format: SampleFormat::default(),
+            tracks: vec![
+                TrackConfig {
+                    title: "Track One",
+                    track_number: "1",
+                    disc_number: None,
+                    frequency: 440,
+                },
+                TrackConfig {
+                    title: "Track Two",
+                    track_number: "2",
+                    disc_number: None,
+                    frequency: 880,
+                },
+            ],
+        }
+    }
+}
+
+impl AlbumConfig {
+    /// Mock torrent ID used in tests.
+    pub const TORRENT_ID: u32 = 12345;
+
+    /// Create config with specific format, using default metadata.
+    #[must_use]
+    pub fn with_format(format: SampleFormat) -> Self {
+        Self {
+            format,
+            ..Self::default()
+        }
+    }
+
+    /// Create a single-disc album configuration for rename tests.
+    pub fn single_disc() -> Self {
+        Self {
+            artist: "Rename Artist",
+            album: "Single Disc Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            tracks: vec![
+                TrackConfig {
+                    title: "Track One",
+                    track_number: "1",
+                    disc_number: None,
+                    frequency: 440,
+                },
+                TrackConfig {
+                    title: "Track Two",
+                    track_number: "2",
+                    disc_number: None,
+                    frequency: 880,
+                },
+            ],
+        }
+    }
+
+    /// Create a multi-disc album configuration for rename tests.
+    pub fn multi_disc() -> Self {
+        Self {
+            artist: "Rename Artist",
+            album: "Multi Disc Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            tracks: vec![
+                TrackConfig {
+                    title: "First Track",
+                    track_number: "1",
+                    disc_number: Some("1"),
+                    frequency: 440,
+                },
+                TrackConfig {
+                    title: "Second Track",
+                    track_number: "2",
+                    disc_number: Some("1"),
+                    frequency: 550,
+                },
+                TrackConfig {
+                    title: "Third Track",
+                    track_number: "1",
+                    disc_number: Some("2"),
+                    frequency: 660,
+                },
+                TrackConfig {
+                    title: "Fourth Track",
+                    track_number: "2",
+                    disc_number: Some("2"),
+                    frequency: 770,
+                },
+            ],
+        }
+    }
+
+    /// Create an album with 10 tracks for testing zero-padded track numbers.
+    pub fn double_digit_tracks() -> Self {
+        Self {
+            artist: "Rename Artist",
+            album: "Double Digit Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            tracks: (1..=10_u32)
+                .map(|i| {
+                    let title = match i {
+                        1 => "Track One",
+                        2 => "Track Two",
+                        3 => "Track Three",
+                        4 => "Track Four",
+                        5 => "Track Five",
+                        6 => "Track Six",
+                        7 => "Track Seven",
+                        8 => "Track Eight",
+                        9 => "Track Nine",
+                        10 => "Track Ten",
+                        _ => unreachable!(),
+                    };
+                    TrackConfig {
+                        title,
+                        track_number: Box::leak(i.to_string().into_boxed_str()),
+                        disc_number: None,
+                        frequency: 440 + i * 50,
+                    }
+                })
+                .collect(),
+        }
+    }
+
+    /// Create an album with vinyl-style track numbers (A1, A2, B1, B2).
+    pub fn vinyl_tracks() -> Self {
+        Self {
+            artist: "Rename Artist",
+            album: "Vinyl Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            tracks: vec![
+                TrackConfig {
+                    title: "Side A Track One",
+                    track_number: "A1",
+                    disc_number: None,
+                    frequency: 440,
+                },
+                TrackConfig {
+                    title: "Side A Track Two",
+                    track_number: "A2",
+                    disc_number: None,
+                    frequency: 550,
+                },
+                TrackConfig {
+                    title: "Side B Track One",
+                    track_number: "B1",
+                    disc_number: None,
+                    frequency: 660,
+                },
+                TrackConfig {
+                    title: "Side B Track Two",
+                    track_number: "B2",
+                    disc_number: None,
+                    frequency: 770,
+                },
+            ],
+        }
+    }
+
+    /// Directory name in standard format: `Artist - Album (Year) [WEB] {16-44.1} (FLAC)`
+    fn dir_name(&self) -> String {
+        format!(
+            "{} - {} ({}) [WEB] {} (FLAC)",
+            self.artist,
+            self.album,
+            self.year,
+            self.format.dir_suffix()
+        )
+    }
+
+    /// Full path to the cached samples directory.
+    #[must_use]
+    pub fn source_dir(&self) -> PathBuf {
+        Path::new(SAMPLE_SOURCES_DIR).join(self.dir_name())
+    }
+
+    /// Full path to the torrent file.
+    #[must_use]
+    pub fn torrent_path(&self) -> PathBuf {
+        Path::new(SAMPLE_SOURCES_DIR).join(self.torrent_filename())
+    }
+
+    /// Torrent filename for this sample set.
+    #[must_use]
+    fn torrent_filename(&self) -> String {
+        format!("{}.torrent", self.dir_name())
+    }
+
+    /// Track filename in format: `Artist - Album - 01 Title.flac`
+    #[must_use]
+    pub fn track_filename(&self, track: &TrackConfig) -> String {
+        format!(
+            "{} - {} - {:02} {}.flac",
+            self.artist,
+            self.album,
+            track.track_number.parse::<u8>().unwrap_or(0),
+            track.title
+        )
+    }
+
+    /// File list in Gazelle API format.
+    fn file_list(&self) -> String {
+        self.tracks
+            .iter()
+            .map(|t| format!("{}{{{{{{8972941}}}}}}", self.track_filename(t)))
+            .collect::<Vec<_>>()
+            .join("|||")
+            + "|||"
+    }
+
+    /// Build a mock API client configured for this album.
+    ///
+    /// - Reads the generated torrent file
+    /// - Panics if torrent doesn't exist (call [`AlbumProvider::get`] first)
+    #[must_use]
+    pub fn api(&self) -> MockGazelleClient {
+        let torrent_bytes = fs::read(self.torrent_path())
+            .expect("torrent file should exist - ensure AlbumProvider::get() was called first");
+        build_mock_client(self, torrent_bytes, Self::TORRENT_ID, 123)
+    }
+}
+
+fn build_mock_client(
+    config: &AlbumConfig,
+    torrent_bytes: Vec<u8>,
+    torrent_id: u32,
+    group_id: u32,
+) -> MockGazelleClient {
+    let torrent = Torrent {
+        id: torrent_id,
+        format: "FLAC".to_owned(),
+        encoding: "Lossless".to_owned(),
+        media: "WEB".to_owned(),
+        remastered: true,
+        remaster_year: Some(config.year),
+        file_path: config.dir_name(),
+        file_list: config.file_list(),
+        file_count: u32::try_from(config.tracks.len()).expect("track count fits in u32"),
+        ..Torrent::default()
+    };
+
+    let group = Group {
+        id: group_id,
+        name: config.album.to_owned(),
+        year: config.year,
+        category_name: "Music".to_owned(),
+        music_info: Some(Credits {
+            artists: vec![Credit {
+                id: 1,
+                name: config.artist.to_owned(),
+            }],
+            ..Credits::default()
+        }),
+        ..Group::default()
+    };
+
+    MockGazelleClient::new()
+        .with_get_torrent(Ok(TorrentResponse {
+            group: group.clone(),
+            torrent: torrent.clone(),
+        }))
+        .with_get_torrent_group(Ok(GroupResponse {
+            group,
+            torrents: vec![torrent],
+        }))
+        .with_download_torrent(Ok(torrent_bytes))
+}

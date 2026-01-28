@@ -26,15 +26,15 @@ impl EyeD3Command {
 mod tests {
     use super::*;
     use rogue_logging::Error;
-    use std::path::PathBuf;
 
     #[tokio::test]
-    #[ignore = "sample required"]
     async fn eyed3_display() -> Result<(), Error> {
         // Arrange
+        let transcode_config =
+            TranscodeProvider::get(SampleFormat::FLAC16_441, TargetFormat::_320).await;
         let paths = DirectoryReader::new()
             .with_extension("mp3")
-            .read(&PathBuf::from("./output"))
+            .read(&transcode_config.transcode_dir())
             .expect("Directory should exist");
         let path = paths.first().expect("Should be at least one sample");
 

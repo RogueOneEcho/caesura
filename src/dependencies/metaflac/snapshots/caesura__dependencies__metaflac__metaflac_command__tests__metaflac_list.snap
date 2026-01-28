@@ -1,0 +1,29 @@
+---
+source: src/dependencies/metaflac/metaflac_command.rs
+expression: output
+---
+METADATA block #0
+  type: 0 (STREAMINFO)
+  is last: false
+  length: 34
+  minimum blocksize: 4096 samples
+  maximum blocksize: 4096 samples
+  minimum framesize: 1398 bytes
+  maximum framesize: 1589 bytes
+  sample_rate: 44100 Hz
+  channels: 2
+  bits-per-sample: 16
+  total samples: 2866500
+  MD5 signature: 4d91ed13e29e2632809cebd3333adb3e
+METADATA block #1
+  type: 4 (VORBIS_COMMENT)
+  is last: false
+  length: 159
+  vendor string: reference libFLAC 1.5.0 20250211
+  comments: 6
+    comment[0]: Comment=Processed by SoX
+    comment[1]: ARTIST=Test Artist
+    comment[2]: ALBUM=Test Album
+    comment[3]: TITLE=Track Two
+    comment[4]: TRACKNUMBER=2
+    comment[5]: DATE=2020
