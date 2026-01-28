@@ -34,9 +34,7 @@ impl Host {
             Config => self.services.get_required::<ConfigCommand>().execute(),
             Batch { .. } => {
                 self.services
-                    .get_required_mut::<BatchCommand>()
-                    .write()
-                    .expect("BatchCommand should be available to write")
+                    .get_required::<BatchCommand>()
                     .execute_cli()
                     .await
             }
@@ -44,9 +42,7 @@ impl Host {
                 command: Add { .. },
             } => {
                 self.services
-                    .get_required_mut::<QueueAddCommand>()
-                    .write()
-                    .expect("QueueAddCommand should be available to write")
+                    .get_required::<QueueAddCommand>()
                     .execute_cli()
                     .await
             }
@@ -54,9 +50,7 @@ impl Host {
                 command: List { .. },
             } => {
                 self.services
-                    .get_required_mut::<QueueListCommand>()
-                    .write()
-                    .expect("QueueListCommand should be available to write")
+                    .get_required::<QueueListCommand>()
                     .execute_cli()
                     .await
             }
@@ -64,9 +58,7 @@ impl Host {
                 command: Remove { .. },
             } => {
                 self.services
-                    .get_required_mut::<QueueRemoveCommand>()
-                    .write()
-                    .expect("QueueRemoveCommand should be available to write")
+                    .get_required::<QueueRemoveCommand>()
                     .execute_cli()
                     .await
             }
@@ -74,9 +66,7 @@ impl Host {
                 command: Summary { .. },
             } => {
                 self.services
-                    .get_required_mut::<QueueSummaryCommand>()
-                    .write()
-                    .expect("QueueSummaryCommand should be available to write")
+                    .get_required::<QueueSummaryCommand>()
                     .execute_cli()
                     .await
             }
@@ -94,17 +84,13 @@ impl Host {
             }
             Upload { .. } => {
                 self.services
-                    .get_required_mut::<UploadCommand>()
-                    .write()
-                    .expect("UploadCommand should be available to write")
+                    .get_required::<UploadCommand>()
                     .execute_cli()
                     .await
             }
             Verify { .. } => {
                 self.services
-                    .get_required_mut::<VerifyCommand>()
-                    .write()
-                    .expect("VerifyCommand should be available to write")
+                    .get_required::<VerifyCommand>()
                     .execute_cli()
                     .await
             }
