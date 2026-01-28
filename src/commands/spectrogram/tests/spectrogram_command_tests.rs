@@ -19,15 +19,17 @@ async fn spectrogram_command_flac16_48() {
 async fn spectrogram_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
     // Arrange
     let _ = init_logger();
-    let output_dir = TempDirectory::for_current_test();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(format).await;
     let host = HostBuilder::new()
-        .with_mock_samples(format, output_dir.clone())
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
         .await
         .build();
     let provider = host.services.get_required::<SourceProvider>();
     let generator = host.services.get_required::<SpectrogramCommand>();
     let source = provider
-        .get(SampleDataBuilder::TORRENT_ID)
+        .get(AlbumConfig::TORRENT_ID)
         .await
         .expect("Source provider should not fail");
 
@@ -37,7 +39,7 @@ async fn spectrogram_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
     // Assert
     assert!(status.success);
     DirectorySnapshot::new()
-        .with_directory(&output_dir)
+        .with_directory(test_dir.output())
         .create()
         .expect("should read output directory")
 }

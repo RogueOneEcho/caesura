@@ -1,5 +1,5 @@
 /// Audio bit depth.
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Depth {
     /// 16-bit depth.
     _16,
@@ -18,7 +18,7 @@ impl Depth {
 }
 
 /// Audio sample rate.
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Rate {
     /// 44.1 kHz (CD quality).
     _44100,
@@ -52,12 +52,18 @@ impl Rate {
 }
 
 /// Audio format specification combining bit depth and sample rate.
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SampleFormat {
     /// Bit depth.
     pub depth: Depth,
     /// Sample rate.
     pub rate: Rate,
+}
+
+impl Default for SampleFormat {
+    fn default() -> Self {
+        Self::FLAC16_441
+    }
 }
 
 impl SampleFormat {

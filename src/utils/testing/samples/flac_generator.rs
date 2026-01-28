@@ -50,6 +50,7 @@ pub struct FlacGenerator {
     album: Option<String>,
     title: Option<String>,
     track_number: Option<String>,
+    disc_number: Option<String>,
     date: Option<String>,
 
     // Cover image
@@ -158,6 +159,13 @@ impl FlacGenerator {
         self
     }
 
+    /// Set the DISCNUMBER metadata tag if present.
+    #[must_use]
+    pub fn with_disc_number(mut self, disc: Option<impl Into<String>>) -> Self {
+        self.disc_number = disc.map(Into::into);
+        self
+    }
+
     /// Set the DATE metadata tag.
     #[must_use]
     pub fn with_date(mut self, date: impl Into<String>) -> Self {
@@ -259,6 +267,9 @@ impl FlacGenerator {
         }
         if let Some(track) = &self.track_number {
             args.push(format!("--set-tag=TRACKNUMBER={track}"));
+        }
+        if let Some(disc) = &self.disc_number {
+            args.push(format!("--set-tag=DISCNUMBER={disc}"));
         }
         if let Some(date) = &self.date {
             args.push(format!("--set-tag=DATE={date}"));

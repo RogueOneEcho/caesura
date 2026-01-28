@@ -1,9 +1,9 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Summary of a torrent file
 ///
 /// <https://github.com/casey/intermodal/blob/master/src/torrent_summary.rs>
-#[derive(Default, Deserialize)]
+#[derive(Default, Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct TorrentSummary {
     pub name: String,

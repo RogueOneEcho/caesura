@@ -26,8 +26,8 @@ pub enum SampleError {
     /// Failed to create torrent.
     TorrentCreate(rogue_logging::Error),
 
-    /// Failed to read torrent file.
-    ReadTorrent(IoError),
+    /// Transcode operation failed.
+    Transcode(String),
 }
 
 impl Display for SampleError {
@@ -42,7 +42,7 @@ impl Display for SampleError {
             }
             Self::ImageSave(e) => write!(f, "Failed to save image\n{e}"),
             Self::TorrentCreate(e) => write!(f, "Failed to create torrent\n{e}"),
-            Self::ReadTorrent(e) => write!(f, "Failed to read torrent file\n{e}"),
+            Self::Transcode(e) => write!(f, "Transcode failed\n{e}"),
         }
     }
 }
@@ -50,10 +50,11 @@ impl Display for SampleError {
 impl Error for SampleError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            Self::CreateDirectory(e) | Self::RemoveFile(e) | Self::ReadTorrent(e) => Some(e),
+            Self::CreateDirectory(e) | Self::RemoveFile(e) => Some(e),
             Self::Sox(e) | Self::MetaflacTags(e) | Self::MetaflacPicture(e) => e.source(),
             Self::ImageSave(e) => Some(e),
             Self::TorrentCreate(e) => Some(e),
+            Self::Transcode(_) => None,
         }
     }
 }

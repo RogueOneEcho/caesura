@@ -5,11 +5,14 @@ async fn test_sample_format_determinism(format: SampleFormat, name: &str) {
     let temp_dir = TempDirectory::create(name);
 
     // Generate samples in temp directory (bypassing the shared cache)
-    SampleDataBuilder::new(format)
-        .with_directory(&temp_dir)
-        .build()
-        .await
-        .expect("should build samples");
+    let config = AlbumConfig::with_format(format);
+    let result = AlbumGenerator::generate_in_dir(&config, &temp_dir).await;
+
+    assert!(
+        result.is_ok(),
+        "Sample generation failed: {}",
+        result.as_ref().expect_err("checked is_ok above")
+    );
 
     // Create snapshot excluding torrent (has timestamps) and marker files
     let snapshot = DirectorySnapshot::new()

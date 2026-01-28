@@ -7,9 +7,11 @@ use rogue_logging::Error;
 async fn source_provider_mocked() -> Result<(), Error> {
     // Arrange
     let _ = init_logger();
-    let output_dir = TempDirectory::for_current_test();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
-        .with_mock_samples(SampleFormat::FLAC16_441, output_dir)
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
         .await
         .with_options(TargetOptions {
             allow_existing: Some(true),
@@ -19,7 +21,7 @@ async fn source_provider_mocked() -> Result<(), Error> {
     let provider = host.services.get_required::<SourceProvider>();
 
     // Act
-    let source = provider.get(SampleDataBuilder::TORRENT_ID).await;
+    let source = provider.get(AlbumConfig::TORRENT_ID).await;
 
     // Assert
     assert!(source.is_ok());

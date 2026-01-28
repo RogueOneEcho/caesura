@@ -45,16 +45,16 @@ impl MetaflacCommand {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use insta::assert_snapshot;
     use rogue_logging::Error;
-    use std::path::PathBuf;
 
     #[tokio::test]
-    #[ignore = "sample required"]
     async fn metaflac_list() -> Result<(), Error> {
         // Arrange
+        let album = AlbumProvider::get(SampleFormat::default()).await;
         let paths = DirectoryReader::new()
             .with_extension("flac")
-            .read(&PathBuf::from("./output"))
+            .read(&album.source_dir())
             .expect("Directory should exist");
         let path = paths.first().expect("Should be at least one sample");
 
@@ -64,7 +64,7 @@ mod tests {
         println!("{output}");
 
         // Assert
-        assert!(!output.is_empty());
+        assert_snapshot!(output);
 
         Ok(())
     }
