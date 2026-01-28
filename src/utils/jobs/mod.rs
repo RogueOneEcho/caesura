@@ -14,3 +14,6 @@ mod publisher;
 mod subscriber;
 mod subscriber_debug;
 mod subscriber_progress_bar;
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests;

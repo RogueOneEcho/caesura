@@ -1,6 +1,7 @@
-use crate::utils::{SAMPLE_SOURCES_DIR, SampleFormat};
+use crate::utils::{SAMPLE_SOURCES_DIR, SampleFormat, TempDirectory};
 use gazelle_api::{
     Credit, Credits, Group, GroupResponse, MockGazelleClient, Torrent, TorrentResponse,
+    UploadResponse,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -201,7 +202,7 @@ impl AlbumConfig {
     }
 
     /// Directory name in standard format: `Artist - Album (Year) [WEB] {16-44.1} (FLAC)`
-    fn dir_name(&self) -> String {
+    pub fn dir_name(&self) -> String {
         format!(
             "{} - {} ({}) [WEB] {} (FLAC)",
             self.artist,
@@ -221,6 +222,15 @@ impl AlbumConfig {
     #[must_use]
     pub fn torrent_path(&self) -> PathBuf {
         Path::new(SAMPLE_SOURCES_DIR).join(self.torrent_filename())
+    }
+
+    /// Create a temp directory containing only this album's torrent file.
+    #[must_use]
+    pub fn single_torrent_dir(&self) -> PathBuf {
+        let dir = TempDirectory::create("single_torrent");
+        let dest = dir.join(self.torrent_filename());
+        fs::copy(self.torrent_path(), &dest).expect("should copy torrent file");
+        dir
     }
 
     /// Torrent filename for this sample set.
@@ -307,4 +317,11 @@ fn build_mock_client(
             torrents: vec![torrent],
         }))
         .with_download_torrent(Ok(torrent_bytes))
+        .with_upload_torrent(Ok(UploadResponse {
+            torrent_id: Some(99999),
+            group_id: Some(group_id),
+            private: true,
+            request_id: None,
+            source: false,
+        }))
 }

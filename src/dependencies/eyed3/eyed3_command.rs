@@ -33,7 +33,7 @@ mod tests {
     async fn eyed3_display() -> Result<(), Error> {
         // Arrange
         let transcode_config =
-            TranscodeProvider::get(SampleFormat::FLAC16_441, TargetFormat::_320).await;
+            TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
         let mut paths = DirectoryReader::new()
             .with_extension("mp3")
             .read(&transcode_config.transcode_dir())

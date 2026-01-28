@@ -181,6 +181,13 @@ impl HostBuilder {
         .with_options(CacheOptions {
             cache: Some(cache_dir),
         })
+        .with_options(BatchOptions {
+            spectrogram: Some(false),
+            transcode: Some(false),
+            retry_transcode: Some(false),
+            upload: Some(false),
+            ..BatchOptions::default()
+        })
     }
 
     /// Build the [`Host`] from the configured services.

@@ -1,3 +1,6 @@
+mod queue_add_command_integration_tests;
 mod queue_item_tests;
+mod queue_list_command_integration_tests;
+mod queue_rm_command_integration_tests;
 mod queue_tests;
 mod timestamp_tests;
