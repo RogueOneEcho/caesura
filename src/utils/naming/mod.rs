@@ -1,3 +1,5 @@
+//! Directory and file naming conventions for transcodes and spectrograms.
+
 pub(crate) use disc_context::*;
 pub(crate) use humanize::*;
 pub(crate) use sanitizer::*;

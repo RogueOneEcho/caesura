@@ -13,9 +13,13 @@ use std::process::Stdio;
 use tokio::fs::{copy, hard_link};
 use tokio::join;
 
+/// Job to transcode a single FLAC file to a target format.
 pub(crate) struct TranscodeJob {
+    /// Job identifier for progress tracking.
     pub id: String,
+    /// Transcode operation to perform.
     pub variant: Variant,
+    /// ID3 tags to write to MP3 output.
     pub tags: Option<Tag>,
 }
 
@@ -50,6 +54,7 @@ impl TranscodeJob {
     }
 }
 
+/// Pipe decode output directly to encode input.
 async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> {
     let decode_info = decode.to_info();
     let encode_info = encode.to_info();

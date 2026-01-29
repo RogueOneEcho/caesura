@@ -7,9 +7,9 @@ use std::path::PathBuf;
 
 /// Information required to create an encode command [`Command`].
 pub(crate) struct Encode {
-    /// Path to the input file
+    /// Path to the output file.
     pub output: PathBuf,
-    /// Optional resample rate
+    /// Target format to encode to.
     pub format: TargetFormat,
 }
 

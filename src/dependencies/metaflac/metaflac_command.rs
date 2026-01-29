@@ -5,6 +5,9 @@ use tokio::process::Command;
 use crate::dependencies::*;
 use crate::utils::*;
 
+/// Facade for the `metaflac` CLI binary.
+///
+/// Invokes `metaflac` as a subprocess for FLAC metadata inspection.
 pub struct MetaflacCommand;
 
 impl MetaflacCommand {

@@ -1,3 +1,5 @@
+//! File system operations, FLAC file handling, and path management.
+
 pub(crate) use additional_file::*;
 pub(crate) use collector::*;
 pub(crate) use copy_dir::*;

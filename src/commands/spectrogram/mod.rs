@@ -1,3 +1,5 @@
+//! Spectrogram generation for FLAC files.
+
 pub(crate) use size::*;
 pub(crate) use spectrogram_command::*;
 pub(crate) use spectrogram_job::*;

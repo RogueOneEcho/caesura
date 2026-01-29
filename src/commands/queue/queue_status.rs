@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Result of a queue add operation.
 #[derive(Clone, Default, Deserialize, Serialize)]
 pub(crate) struct QueueStatus {
     /// Did the queue command succeed?

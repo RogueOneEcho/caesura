@@ -1,3 +1,5 @@
+//! Facades for external CLI binaries invoked as subprocesses.
+
 pub(crate) use binaries::*;
 pub(crate) use eyed3::*;
 pub(crate) use imdl::*;

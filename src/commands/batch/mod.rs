@@ -1,3 +1,5 @@
+//! Batch processing of multiple sources from a queue.
+
 pub(crate) use batch_command::*;
 
 mod batch_command;

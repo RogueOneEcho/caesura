@@ -20,6 +20,7 @@ pub enum ExistingFormat {
 }
 
 impl ExistingFormat {
+    /// Determine format from torrent metadata.
     pub fn from_torrent(torrent: &Torrent) -> Option<ExistingFormat> {
         match (torrent.format.as_str(), torrent.encoding.as_str()) {
             ("FLAC", "Lossless") => Some(Flac),
@@ -36,6 +37,7 @@ impl ExistingFormat {
         }
     }
 
+    /// Display name of the format.
     #[must_use]
     pub fn get_name(&self) -> &str {
         match self {
@@ -46,6 +48,7 @@ impl ExistingFormat {
         }
     }
 
+    /// Convert to [`SourceFormat`] if this is a lossless format.
     pub fn to_source(self) -> Option<SourceFormat> {
         match self {
             Flac24 => Some(SourceFormat::Flac24),

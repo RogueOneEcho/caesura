@@ -17,6 +17,7 @@ pub enum TargetFormat {
 }
 
 impl TargetFormat {
+    /// Display name of the format.
     #[must_use]
     pub fn get_name(&self) -> &str {
         match self {
@@ -26,6 +27,7 @@ impl TargetFormat {
         }
     }
 
+    /// Convert to the equivalent [`ExistingFormat`].
     #[must_use]
     pub fn to_existing(self) -> ExistingFormat {
         match self {
@@ -35,6 +37,7 @@ impl TargetFormat {
         }
     }
 
+    /// File extension for this format.
     #[must_use]
     pub fn get_file_extension(self) -> String {
         match self {
@@ -43,6 +46,7 @@ impl TargetFormat {
         }
     }
 
+    /// Bitrate description for the API.
     #[must_use]
     pub fn get_bitrate(&self) -> &str {
         match self {

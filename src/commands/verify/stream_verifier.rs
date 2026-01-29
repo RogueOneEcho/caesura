@@ -2,6 +2,7 @@ use crate::commands::*;
 use crate::utils::SourceIssue::*;
 use crate::utils::*;
 
+/// Verify FLAC stream properties are suitable for transcoding.
 pub(crate) struct StreamVerifier;
 
 impl StreamVerifier {

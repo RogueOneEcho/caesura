@@ -4,14 +4,15 @@ use crate::utils::*;
 use rogue_logging::Error;
 use serde::{Deserialize, Serialize};
 
+/// Result of an [`UploadCommand`] execution.
 #[derive(Clone, Deserialize, Serialize)]
 pub(crate) struct UploadStatus {
     /// Did the upload command succeed?
     pub success: bool,
-    /// Uploaded formats
+    /// Uploaded formats.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formats: Option<Vec<UploadFormatStatus>>,
-    /// Time the transcode completed
+    /// Time the upload completed.
     pub completed: TimeStamp,
     /// Error messages
     ///
@@ -22,6 +23,7 @@ pub(crate) struct UploadStatus {
     pub errors: Option<Vec<Error>>,
 }
 
+/// Status of a single format upload.
 #[derive(Clone, Deserialize, Serialize)]
 pub(crate) struct UploadFormatStatus {
     /// Transcode format

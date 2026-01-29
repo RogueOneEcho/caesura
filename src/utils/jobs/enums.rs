@@ -1,10 +1,15 @@
 use std::fmt::{Display, Formatter};
 
+/// Execution status of a [`Job`].
 #[derive(Clone)]
 pub enum Status {
+    /// Job created but not yet queued.
     Created,
+    /// Job queued and waiting for a permit.
     Queued,
+    /// Job acquired a permit and is executing.
     Started,
+    /// Job finished execution.
     Completed,
 }
 

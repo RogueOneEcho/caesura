@@ -3,6 +3,7 @@ use crate::dependencies::*;
 
 use std::path::PathBuf;
 
+/// Information needed to decode a FLAC file to raw audio.
 pub(crate) struct Decode {
     /// Path to the input file
     pub input: PathBuf,

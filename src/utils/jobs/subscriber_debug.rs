@@ -13,12 +13,15 @@ use rogue_logging::Colors;
 /// Log all [Command] status updates to the console by subscribing to
 /// [`CommandRunner`] as a [Subscriber].
 pub struct DebugSubscriber {
+    /// Semaphore to check available permits.
     pub semaphore: Arc<Semaphore>,
+    /// Total CPU count for display.
     pub cpus: u16,
 }
 
 #[injectable]
 impl DebugSubscriber {
+    /// Create a new [`DebugSubscriber`].
     pub fn new(options: Arc<RunnerOptions>, semaphore: Arc<Semaphore>) -> Self {
         let cpus = options.cpus.expect("cpus should be set");
         Self { semaphore, cpus }

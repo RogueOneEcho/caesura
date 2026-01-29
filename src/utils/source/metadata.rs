@@ -8,16 +8,23 @@ const MAX_ARTISTS: usize = 2;
 const UNKNOWN_ARTIST: &str = "Unknown Artist";
 const VARIOUS_ARTISTS: &str = "Various Artists";
 
+/// Album metadata extracted from the API.
 #[derive(Clone, Debug)]
 pub struct Metadata {
+    /// Artist name or "Various Artists" for compilations.
     pub artist: String,
+    /// Album title.
     pub album: String,
+    /// Remaster or edition title.
     pub remaster_title: String,
+    /// Release year.
     pub year: u16,
+    /// Media type.
     pub media: String,
 }
 
 impl Metadata {
+    /// Create [`Metadata`] from API response.
     #[must_use]
     pub fn new(group: &Group, torrent: &Torrent) -> Self {
         Metadata {

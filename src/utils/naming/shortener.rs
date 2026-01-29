@@ -6,9 +6,12 @@ use regex::Regex;
 use rogue_logging::Colors;
 
 use crate::utils::*;
+
+/// Suggest shorter names for albums and tracks.
 pub struct Shortener;
 
 impl Shortener {
+    /// Attempt to shorten album name by removing parenthetical suffix.
     #[must_use]
     pub fn shorten_album(metadata: &Metadata) -> Option<Metadata> {
         let result = remove_parenthetical_suffix(&metadata.album);
@@ -22,6 +25,7 @@ impl Shortener {
         }
     }
 
+    /// Log a suggestion if renaming the track would save characters.
     pub fn suggest_track_name(flac: &FlacFile) {
         let file_stem = flac.renamed_file_stem();
         let difference = compare_char_count(&flac.file_name, &file_stem);
@@ -35,6 +39,7 @@ impl Shortener {
         }
     }
 
+    /// Log a suggestion if renaming the album would save characters.
     pub fn suggest_album_name(source: &Source) {
         if let Some(shortened) = Shortener::shorten_album(&source.metadata) {
             let before = SourceName::get(&source.metadata);

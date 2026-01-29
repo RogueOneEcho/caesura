@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
 
+/// UTC timestamp for queue item status tracking.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct TimeStamp {
     datetime: DateTime<Utc>,

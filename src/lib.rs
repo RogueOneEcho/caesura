@@ -1,3 +1,5 @@
+//! CLI tool for transcoding FLAC audio and uploading to Gazelle-based music trackers.
+
 #[allow(unused_imports)]
 pub use commands::*;
 pub use hosting::*;

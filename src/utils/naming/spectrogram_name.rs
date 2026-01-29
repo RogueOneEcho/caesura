@@ -1,8 +1,10 @@
 use crate::utils::*;
 
+/// Generate directory names for spectrograms.
 pub struct SpectrogramName;
 
 impl SpectrogramName {
+    /// Sanitized directory name for spectrograms.
     #[must_use]
     pub fn get(metadata: &Metadata) -> String {
         let prefix = SourceName::get(metadata);

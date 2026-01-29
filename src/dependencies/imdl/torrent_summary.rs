@@ -26,6 +26,7 @@ pub struct TorrentSummary {
 }
 
 impl TorrentSummary {
+    /// Check if the torrent source matches the expected source.
     pub fn is_source_equal(&self, source: &str) -> bool {
         match self.source.clone() {
             None => false,

@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+/// Common interface for configuration option structs.
 pub trait Options: Clone + Default + Display {
     /// Merge values with [`Self`]
     fn merge(&mut self, alternative: &Self);

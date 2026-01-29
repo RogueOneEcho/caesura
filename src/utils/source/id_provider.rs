@@ -45,6 +45,7 @@ pub enum IdProviderError {
 }
 
 impl IdProvider {
+    /// Get source ID from CLI options.
     pub async fn get_by_options(&self) -> Result<u32, IdProviderError> {
         let source_input = self.arg.source.clone().unwrap_or_default();
         self.get_by_string(&source_input).await

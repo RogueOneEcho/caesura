@@ -31,6 +31,7 @@ pub struct FlacFile {
 }
 
 impl FlacFile {
+    /// Create a new [`FlacFile`] from a path.
     #[must_use]
     pub fn new(path: PathBuf, source_dir: &PathBuf) -> Self {
         let sub_dir = path
@@ -66,11 +67,13 @@ impl FlacFile {
         })
     }
 
+    /// Full path as a string.
     #[must_use]
     pub fn get_path_string(&self) -> String {
         self.path.to_string_lossy().into_owned()
     }
 
+    /// FLAC stream info containing sample rate, channels, and bit depth.
     pub fn get_stream_info(&self) -> Result<StreamInfo, claxon::Error> {
         let reader = FlacReader::open(&self.path)?;
         Ok(reader.streaminfo())

@@ -6,7 +6,7 @@ use rogue_logging::Error;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
-/// Config a FLAC source is suitable for transcoding.
+/// Display the current configuration options.
 #[injectable]
 pub struct ConfigCommand {
     batch_options: Ref<BatchOptions>,

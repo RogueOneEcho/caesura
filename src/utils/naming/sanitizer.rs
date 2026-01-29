@@ -36,9 +36,11 @@ const RESTRICTED: [char; 16] = [
 const RESTRICTED_DIVIDERS: [char; 5] = ['/', '\\', '|', EN_DASH, EM_DASH];
 const DIVIDER_REPLACEMENT: char = '-';
 
+/// Remove or replace characters that are invalid in file paths.
 pub struct Sanitizer;
 
 impl Sanitizer {
+    /// Sanitize a string for use in file paths.
     #[must_use]
     pub fn execute(input: String) -> String {
         input

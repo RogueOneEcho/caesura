@@ -3,7 +3,7 @@ use di::{Ref, injectable};
 use crate::commands::*;
 use crate::utils::*;
 
-/// A factory for creating [`SpectrogramJob`] from multiple flac files.
+/// Factory for creating [`SpectrogramJob`] instances.
 #[injectable]
 pub(crate) struct SpectrogramJobFactory {
     paths: Ref<PathManager>,

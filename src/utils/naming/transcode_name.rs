@@ -1,8 +1,10 @@
 use crate::utils::*;
 
+/// Generate directory names for transcodes.
 pub struct TranscodeName;
 
 impl TranscodeName {
+    /// Sanitized directory name for a transcode.
     #[must_use]
     pub fn get(metadata: &Metadata, target: TargetFormat) -> String {
         let prefix = SourceName::get(metadata);

@@ -12,7 +12,7 @@ use tokio::time::sleep;
 
 const PAUSE_DURATION: u64 = 10;
 
-/// Batch a FLAC source is suitable for transcoding.
+/// Process multiple sources from the queue.
 #[injectable]
 pub(crate) struct BatchCommand {
     cache_options: Ref<CacheOptions>,

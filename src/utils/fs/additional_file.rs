@@ -4,6 +4,8 @@ use std::path::PathBuf;
 use tokio::fs::File;
 
 use crate::utils::*;
+
+/// A non-FLAC file to include in transcodes.
 pub struct AdditionalFile {
     /// Path to the file
     pub path: PathBuf,
@@ -16,6 +18,7 @@ pub struct AdditionalFile {
 }
 
 impl AdditionalFile {
+    /// Create a new [`AdditionalFile`] from a path.
     #[must_use]
     pub fn new(path: PathBuf, source_dir: &PathBuf) -> Self {
         let sub_dir = path
@@ -37,6 +40,7 @@ impl AdditionalFile {
         }
     }
 
+    /// File size in bytes.
     pub async fn get_size(&self) -> Result<u64, Error> {
         let file = File::open(&self.path)
             .await

@@ -5,10 +5,13 @@ use tokio::process::Command;
 use crate::dependencies::*;
 use crate::utils::*;
 
+/// Facade for the `eyeD3` CLI binary.
+///
+/// Invokes `eyeD3` as a subprocess for MP3 tag inspection.
 pub struct EyeD3Command;
 
 impl EyeD3Command {
-    /// Create a torrent
+    /// Display tags and metadata for an audio file.
     pub async fn display(path: &Path) -> Result<String, Error> {
         let output = Command::new(EYED3)
             .arg(path.to_string_lossy().to_string())

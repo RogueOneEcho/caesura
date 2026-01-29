@@ -1,3 +1,5 @@
+//! Configuration structs loaded from CLI args and YAML config.
+
 pub(crate) use batch_options::*;
 pub(crate) use cache_options::*;
 pub(crate) use copy_options::*;

@@ -9,10 +9,14 @@ use std::collections::BTreeSet;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 
+/// Maximum allowed path length for transcodes.
 pub const MAX_PATH_LENGTH: isize = 180;
+/// Minimum required bit rate in kbps.
 pub const MIN_BIT_RATE_KBPS: u32 = 192;
+/// Maximum allowed duration in seconds.
 pub const MAX_DURATION: u32 = 12 * 60 * 60;
 
+/// Validation issues that prevent transcoding a source.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum SourceIssue {

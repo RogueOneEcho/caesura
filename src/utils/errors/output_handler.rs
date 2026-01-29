@@ -3,9 +3,12 @@ use std::os::unix::process::ExitStatusExt;
 use std::process::Output;
 
 use crate::utils::*;
+
+/// Handle command output and convert failures to errors.
 pub struct OutputHandler {}
 
 impl OutputHandler {
+    /// Convert command output to a result, returning an error if the command failed.
     pub fn execute(output: Output, action: &str, domain: &str) -> Result<Output, Error> {
         if output.status.success() {
             Ok(output)

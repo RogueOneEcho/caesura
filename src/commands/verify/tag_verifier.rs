@@ -4,6 +4,7 @@ use lofty::prelude::Accessor;
 use lofty::prelude::ItemKey::Composer;
 use rogue_logging::Error;
 
+/// Verify FLAC files have required metadata tags.
 pub(crate) struct TagVerifier;
 
 impl TagVerifier {

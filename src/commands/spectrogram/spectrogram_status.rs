@@ -3,6 +3,7 @@ use rogue_logging::Error;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+/// Result of a [`SpectrogramCommand`] execution.
 #[derive(Clone, Deserialize, Serialize)]
 pub(crate) struct SpectrogramStatus {
     /// Did the spectrogram command succeed?

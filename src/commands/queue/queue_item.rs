@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 
+/// A source in the batch processing queue.
 #[derive(Clone, Deserialize, Serialize, Default)]
 pub(crate) struct QueueItem {
     /// Source name

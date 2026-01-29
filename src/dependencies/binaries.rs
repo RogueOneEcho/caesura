@@ -43,7 +43,7 @@ pub const IMDL: &str = "imdl";
 #[cfg(target_os = "windows")]
 pub const EYED3: &str = "eyeD3.exe";
 
-/// Path to the imdl binary.
+/// Path to the eyeD3 binary.
 #[cfg(not(target_os = "windows"))]
 pub const EYED3: &str = "eyeD3";
 

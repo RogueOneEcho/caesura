@@ -1,3 +1,5 @@
+//! Queue management for batch processing.
+
 pub(crate) use queue::*;
 pub(crate) use queue_add_command::*;
 pub(crate) use queue_item::*;

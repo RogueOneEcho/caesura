@@ -14,8 +14,11 @@ use rogue_logging::Error;
 ///
 /// In theory, they could produce a result but the implement here is `Result<()>`.
 pub enum Job {
+    /// Resize and copy an additional file.
     Additional(AdditionalJob),
+    /// Generate a spectrogram image.
     Spectrogram(SpectrogramJob),
+    /// Transcode a FLAC file.
     Transcode(TranscodeJob),
 }
 

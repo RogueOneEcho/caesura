@@ -1,3 +1,5 @@
+//! Parallel job execution with progress tracking.
+
 pub(crate) use enums::Status::*;
 pub(crate) use enums::*;
 pub(crate) use job::*;

@@ -6,7 +6,7 @@ use crate::utils::*;
 use crate::options::{CopyOptions, TargetOptions};
 use rogue_logging::Error;
 
-/// Create a [`TranscodeJob`] for each [`FlacFile`] in the [`Vec<FlacFile>`].
+/// Factory for creating [`TranscodeJob`] instances.
 #[injectable]
 pub(crate) struct TranscodeJobFactory {
     paths: Ref<PathManager>,

@@ -1,3 +1,5 @@
+//! FLAC transcoding to MP3 and lossless formats.
+
 pub(crate) use additional_job::*;
 pub(crate) use additional_job_factory::*;
 pub(crate) use command_info::*;

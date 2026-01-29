@@ -13,6 +13,7 @@ pub struct Publisher {
 
 #[injectable]
 impl Publisher {
+    /// Create a new [`Publisher`] with appropriate subscriber based on verbosity.
     #[must_use]
     pub fn new(
         options: Ref<SharedOptions>,

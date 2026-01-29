@@ -13,6 +13,9 @@ use tokio::fs::copy;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
+/// Facade for the `imdl` CLI binary.
+///
+/// Invokes `imdl` as a subprocess for torrent creation and verification.
 pub struct ImdlCommand;
 
 impl ImdlCommand {

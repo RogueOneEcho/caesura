@@ -1,3 +1,5 @@
+//! Source identification, metadata extraction, and validation.
+
 pub(crate) use id_provider::*;
 pub(crate) use metadata::*;
 pub(crate) use source::*;

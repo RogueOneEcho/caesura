@@ -10,6 +10,7 @@ use tokio::fs::{copy, create_dir_all, hard_link};
 pub const IMAGE_EXTENSIONS: [&str; 3] = ["jpg", "jpeg", "png"];
 pub const TEXT_EXTENSIONS: [&str; 5] = ["cue", "log", "nfo", "rtf", "txt"];
 
+/// Factory for creating [`AdditionalJob`] instances.
 #[injectable]
 pub(crate) struct AdditionalJobFactory {
     copy_options: Ref<CopyOptions>,
@@ -18,7 +19,7 @@ pub(crate) struct AdditionalJobFactory {
 }
 
 impl AdditionalJobFactory {
-    /// Create a [`AdditionalJob`] for each [`FlacFile`] in the [`Vec<FlacFile>`].
+    /// Create an [`AdditionalJob`] for each [`AdditionalFile`].
     pub(crate) async fn create(
         &self,
         files: &[AdditionalFile],

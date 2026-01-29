@@ -5,8 +5,10 @@ use di::{Ref, injectable};
 use crate::options::*;
 use crate::utils::*;
 
+/// Determine target formats for a source.
 #[injectable]
 pub struct TargetFormatProvider {
+    /// Target format options.
     pub options: Ref<TargetOptions>,
 }
 

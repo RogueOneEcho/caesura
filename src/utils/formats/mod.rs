@@ -1,3 +1,5 @@
+//! Audio format types and conversion utilities.
+
 pub(crate) use existing_format::*;
 pub(crate) use existing_format_provider::*;
 pub(crate) use source_format::*;

@@ -15,8 +15,11 @@ use tokio::task::JoinSet;
 /// [observer design pattern](https://refactoring.guru/design-patterns/observer) when the status
 /// of a [Job] changes.
 pub struct JobRunner {
+    /// Semaphore to limit concurrent job execution.
     pub semaphore: Arc<Semaphore>,
+    /// Set of spawned job tasks.
     pub set: RefMut<JoinSet<Result<(), Error>>>,
+    /// Publisher for job status updates.
     pub publisher: Ref<Publisher>,
 }
 
@@ -57,7 +60,7 @@ impl JobRunner {
         }
     }
 
-    /// Add commands to be run when [execute] is called.
+    /// Add jobs to be run without publishing status updates.
     pub fn add_without_publish(&self, jobs: Vec<Job>) {
         for job in jobs {
             let semaphore = self.semaphore.clone();
@@ -73,10 +76,12 @@ impl JobRunner {
         }
     }
 
+    /// Execute all queued jobs and wait for completion.
     pub async fn execute(&self) -> Result<(), Error> {
         self.execute_internal(true).await
     }
 
+    /// Execute all queued jobs without publishing status updates.
     pub async fn execute_without_publish(&self) -> Result<(), Error> {
         self.execute_internal(false).await
     }

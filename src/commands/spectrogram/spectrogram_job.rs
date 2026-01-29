@@ -14,10 +14,15 @@ use crate::utils::*;
 /// so the execution of the command can be deferred and multiple commands can be executed
 /// in parallel via the multithreaded [`SpectrogramCommandRunner`].
 pub(crate) struct SpectrogramJob {
+    /// Job identifier for progress tracking.
     pub id: String,
+    /// Path to the source FLAC file.
     pub source_path: String,
+    /// Path to write the spectrogram image.
     pub output_path: PathBuf,
+    /// Title to embed in the spectrogram image.
     pub image_title: String,
+    /// Spectrogram size variant.
     pub size: Size,
 }
 
@@ -65,7 +70,7 @@ impl SpectrogramJob {
             .output()
             .await
             .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
-        OutputHandler::execute(output, "generate spectrogram", "IMDL")
+        OutputHandler::execute(output, "generate spectrogram", "SOX")
     }
 
     async fn execute_full(&self) -> Result<Output, Error> {
@@ -92,6 +97,6 @@ impl SpectrogramJob {
             .output()
             .await
             .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
-        OutputHandler::execute(output, "generate spectrogram", "IMDL")
+        OutputHandler::execute(output, "generate spectrogram", "SOX")
     }
 }

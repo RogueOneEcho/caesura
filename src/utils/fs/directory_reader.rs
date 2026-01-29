@@ -1,12 +1,14 @@
 use std::io::Error;
 use std::path::{Path, PathBuf};
 
+/// Read files from a directory with optional filtering.
 pub struct DirectoryReader {
     included_extensions: Vec<String>,
     max_depth: Option<usize>,
 }
 
 impl DirectoryReader {
+    /// Create a new [`DirectoryReader`].
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -15,11 +17,13 @@ impl DirectoryReader {
         }
     }
 
+    /// Filter to include only files with this extension.
     pub fn with_extension(&mut self, extension: &str) -> &mut Self {
         self.included_extensions.push(extension.to_owned());
         self
     }
 
+    /// Filter to include files with any of these extensions.
     pub fn with_extensions(&mut self, extensions: Vec<&str>) -> &mut Self {
         for extension in extensions {
             self.included_extensions.push(extension.to_owned());
@@ -27,11 +31,13 @@ impl DirectoryReader {
         self
     }
 
+    /// Limit directory traversal to this depth.
     pub fn with_max_depth(&mut self, max_depth: usize) -> &mut Self {
         self.max_depth = Some(max_depth);
         self
     }
 
+    /// Read all matching files from the directory.
     pub fn read(&mut self, path: &Path) -> Result<Vec<PathBuf>, Error> {
         let depth = 0;
         let mut files: Vec<PathBuf> = Vec::new();

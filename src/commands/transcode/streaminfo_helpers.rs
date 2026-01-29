@@ -2,11 +2,15 @@ use crate::utils::*;
 use claxon::metadata::StreamInfo;
 use rogue_logging::Error;
 
+/// Check if the FLAC needs resampling to 16-bit/48kHz or below.
 #[must_use]
 pub(crate) fn is_resample_required(info: &StreamInfo) -> bool {
     info.sample_rate > 48000 || info.bits_per_sample > 16
 }
 
+/// Determine the target sample rate for resampling.
+///
+/// Returns 44100 or 48000 based on which the source rate is a multiple of.
 pub(crate) fn get_resample_rate(info: &StreamInfo) -> Result<u32, Error> {
     if info.sample_rate.is_multiple_of(44100) {
         Ok(44100)

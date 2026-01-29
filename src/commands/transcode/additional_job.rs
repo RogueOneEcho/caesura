@@ -6,8 +6,11 @@ use colored::Colorize;
 use log::trace;
 use rogue_logging::Error;
 
+/// Job to resize and copy an additional file to the transcode directory.
 pub(crate) struct AdditionalJob {
+    /// Job identifier for progress tracking.
     pub id: String,
+    /// Resize operation to perform.
     pub resize: Resize,
 }
 

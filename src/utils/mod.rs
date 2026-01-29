@@ -1,3 +1,5 @@
+//! Core utilities for error handling, file operations, naming, and format conversion.
+
 pub(crate) use errors::*;
 pub(crate) use formats::*;
 pub(crate) use fs::*;

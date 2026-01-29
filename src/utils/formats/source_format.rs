@@ -10,6 +10,7 @@ pub enum SourceFormat {
 }
 
 impl SourceFormat {
+    /// Display name of the format.
     #[must_use]
     pub fn get_name(&self) -> &str {
         match self {
@@ -18,6 +19,7 @@ impl SourceFormat {
         }
     }
 
+    /// Convert to the equivalent [`ExistingFormat`].
     #[must_use]
     pub fn to_existing(self) -> ExistingFormat {
         match self {
@@ -25,6 +27,8 @@ impl SourceFormat {
             Flac => ExistingFormat::Flac,
         }
     }
+
+    /// Full title for the API.
     #[must_use]
     pub fn get_title(&self) -> &str {
         match self {
