@@ -1,8 +1,0 @@
-[package]
-name = "markdown_help"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-caesura = { path = "../" }
-clap-markdown = "0.1.5"

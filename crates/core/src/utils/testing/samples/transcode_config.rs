@@ -1,7 +1,7 @@
 //! Configuration for cached transcodes in tests.
 
 use crate::utils::{AlbumConfig, SAMPLE_TRANSCODES_DIR, TargetFormat};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 /// Configuration for a cached transcode output.
 #[derive(Debug, Clone)]
@@ -38,12 +38,12 @@ impl TranscodeConfig {
     /// Full path to the cached transcode directory.
     #[must_use]
     pub fn transcode_dir(&self) -> PathBuf {
-        Path::new(SAMPLE_TRANSCODES_DIR).join(self.dir_name())
+        SAMPLE_TRANSCODES_DIR.join(self.dir_name())
     }
 
     /// Full path to the torrent file.
     #[must_use]
     pub fn torrent_path(&self) -> PathBuf {
-        Path::new(SAMPLE_TRANSCODES_DIR).join(format!("{}.torrent", self.dir_name()))
+        SAMPLE_TRANSCODES_DIR.join(format!("{}.torrent", self.dir_name()))
     }
 }

@@ -1,14 +1,26 @@
 use crate::built_info::PKG_NAME;
 use std::env::temp_dir;
 use std::fs::create_dir_all;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
 use std::time::SystemTime;
 
+/// Workspace root directory (two levels up from crates/core).
+static WORKSPACE_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("Should be able to find workspace root")
+        .to_path_buf()
+});
+
 /// Directory containing sample sources for testing.
-pub const SAMPLE_SOURCES_DIR: &str = "samples/sources";
+pub static SAMPLE_SOURCES_DIR: LazyLock<PathBuf> =
+    LazyLock::new(|| WORKSPACE_DIR.join("samples/sources"));
 
 /// Directory containing cached transcodes for testing.
-pub const SAMPLE_TRANSCODES_DIR: &str = "samples/transcodes";
+pub static SAMPLE_TRANSCODES_DIR: LazyLock<PathBuf> =
+    LazyLock::new(|| WORKSPACE_DIR.join("samples/transcodes"));
 
 /// Utility for creating timestamped temporary directories.
 pub struct TempDirectory;

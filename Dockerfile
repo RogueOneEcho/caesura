@@ -43,14 +43,20 @@ FROM rust:alpine AS builder
 RUN apk add --no-cache libc-dev cargo-edit
 # Build just the dependencies with version 0.0.0 so they're cached
 WORKDIR /app
-COPY Cargo.toml Cargo.lock build.rs /app
-RUN mkdir -p src && echo 'fn main() {}' > /app/src/main.rs
+COPY Cargo.toml Cargo.lock /app/
+COPY crates/core/Cargo.toml /app/crates/core/
+COPY crates/core/build.rs /app/crates/core/
+COPY crates/markdown_help/Cargo.toml /app/crates/markdown_help/
+RUN mkdir -p crates/core/src crates/markdown_help/src \
+    && echo 'pub fn stub() {}' > crates/core/src/lib.rs \
+    && echo 'fn main() {}' > crates/core/src/main.rs \
+    && echo 'fn main() {}' > crates/markdown_help/src/main.rs
 RUN cargo fetch
 RUN cargo build --release --locked
 # Set the version
 COPY . /app
 ARG VERSION=0.0.0
-RUN cargo set-version $VERSION
+RUN cargo set-version -p caesura $VERSION
 # Build the release binary
 RUN cargo build --release
 

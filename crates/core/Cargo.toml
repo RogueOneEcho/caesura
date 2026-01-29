@@ -1,0 +1,57 @@
+[package]
+name = "caesura"
+edition = "2024"
+build = "build.rs"
+authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
+description = "An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. "
+repository = "https://github.com/RogueOneEcho/caesura"
+license = "AGPL-3.0-only"
+include = [
+    "src/**/*",
+    "build.rs",
+    "Cargo.toml",
+]
+readme = "../../README.md"
+version = "0.0.0"
+publish = true
+
+[[bin]]
+name = "caesura"
+path = "src/main.rs"
+
+[dependencies]
+bytes = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true }
+claxon = { workspace = true }
+colored = { workspace = true }
+flat_db = { workspace = true }
+futures = { workspace = true }
+gazelle_api = { workspace = true }
+html-escape = { workspace = true }
+humantime = { workspace = true }
+indicatif = { workspace = true }
+lofty = { workspace = true }
+log = { workspace = true }
+once_cell = { workspace = true }
+more-di = { workspace = true }
+num_cpus = { workspace = true }
+regex = { workspace = true }
+reqwest = { workspace = true }
+rogue_logging = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+tokio = { workspace = true }
+
+[dev-dependencies]
+gazelle_api = { workspace = true, features = ["mock"] }
+image = { workspace = true }
+insta = { workspace = true }
+sha2 = { workspace = true }
+
+[build-dependencies]
+built = { workspace = true }
+
+[lints]
+workspace = true

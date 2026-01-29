@@ -1,0 +1,11 @@
+[package]
+name = "markdown_help"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+caesura = { workspace = true }
+clap-markdown = { workspace = true }
+
+[lints]
+workspace = true

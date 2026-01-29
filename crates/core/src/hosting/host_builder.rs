@@ -152,7 +152,7 @@ impl HostBuilder {
     pub async fn with_test_options(&mut self, test_dir: &TestDirectory) -> &mut Self {
         use crate::utils::TargetFormat::{_320, Flac, V0};
         use rogue_logging::{TimeFormat, Verbosity};
-        use std::path::PathBuf;
+
         use tokio::fs::create_dir_all;
         let output_dir = test_dir.output();
         let cache_dir = test_dir.cache();
@@ -163,7 +163,7 @@ impl HostBuilder {
             .await
             .expect("should be able to create cache dir");
         self.with_options(SharedOptions {
-            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
+            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
             output: Some(output_dir),
             verbosity: Some(Verbosity::Debug),
             log_time: Some(TimeFormat::None),

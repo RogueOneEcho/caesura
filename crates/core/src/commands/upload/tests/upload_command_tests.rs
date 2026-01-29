@@ -54,8 +54,8 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
-            output: Some(PathBuf::from(SAMPLE_TRANSCODES_DIR)),
+            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
+            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
             verbosity: Some(rogue_logging::Verbosity::Debug),
             log_time: Some(rogue_logging::TimeFormat::None),
             indexer: Some("red".to_owned()),
@@ -201,8 +201,8 @@ async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
         .await
         .with_options(SharedOptions {
             // First content dir is for copy destination, second is where source files are found
-            content: Some(vec![copy_target.clone(), PathBuf::from(SAMPLE_SOURCES_DIR)]),
-            output: Some(PathBuf::from(SAMPLE_TRANSCODES_DIR)),
+            content: Some(vec![copy_target.clone(), SAMPLE_SOURCES_DIR.clone()]),
+            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
             verbosity: Some(rogue_logging::Verbosity::Debug),
             log_time: Some(rogue_logging::TimeFormat::None),
             indexer: Some("red".to_owned()),
@@ -257,8 +257,8 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
-            output: Some(PathBuf::from(SAMPLE_TRANSCODES_DIR)),
+            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
+            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
             verbosity: Some(rogue_logging::Verbosity::Debug),
             log_time: Some(rogue_logging::TimeFormat::None),
             indexer: Some("red".to_owned()),
@@ -314,8 +314,8 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
-            output: Some(PathBuf::from(SAMPLE_TRANSCODES_DIR)),
+            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
+            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
             verbosity: Some(rogue_logging::Verbosity::Debug),
             log_time: Some(rogue_logging::TimeFormat::None),
             indexer: Some("red".to_owned()),
@@ -431,8 +431,8 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
-            output: Some(PathBuf::from(SAMPLE_TRANSCODES_DIR)),
+            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
+            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
             verbosity: Some(rogue_logging::Verbosity::Debug),
             log_time: Some(rogue_logging::TimeFormat::None),
             indexer: Some("red".to_owned()),
@@ -545,8 +545,8 @@ async fn build_upload_test_host(transcode: &TranscodeConfig, test_dir: &TestDire
         .with_test_options(test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![PathBuf::from(SAMPLE_SOURCES_DIR)]),
-            output: Some(PathBuf::from(SAMPLE_TRANSCODES_DIR)),
+            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
+            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
             verbosity: Some(rogue_logging::Verbosity::Debug),
             log_time: Some(rogue_logging::TimeFormat::None),
             indexer: Some("red".to_owned()),

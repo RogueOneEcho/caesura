@@ -36,15 +36,18 @@ jobs:
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
       if: steps.release.outputs.version != ''
 
-    - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version ${{ steps.release.outputs.version }}
+    - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version -p caesura ${{ steps.release.outputs.version }}
       if: steps.release.outputs.version != ''
 
     - run: git --no-pager diff --color
 
     - uses: actions/upload-artifact@v4
       with:
-        name: Cargo.toml
-        path: Cargo.toml
+        name: cargo-manifests
+        path: |
+          Cargo.toml
+          Cargo.lock
+          crates/core/Cargo.toml
 
 
   cargo-build:
@@ -90,7 +93,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: Cargo.toml
+        name: cargo-manifests
 
     - run: git --no-pager diff --color
 
@@ -205,7 +208,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: Cargo.toml
+        name: cargo-manifests
 
     - run: git --no-pager diff --color
 

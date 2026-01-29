@@ -60,7 +60,7 @@ cargo test --release -- --ignored live
 
 ## Test Infrastructure
 
-### Sample Generation (`src/utils/testing/samples/`)
+### Sample Generation (`crates/core/src/utils/testing/samples/`)
 
 - **`FlacGenerator`** - Builder for creating FLAC files with specific parameters
 - **`ImageGenerator`** - Creates deterministic PNG images for cover art
@@ -72,7 +72,7 @@ Sample files are cached in `samples/content/` with the following naming conventi
 {Artist} - {Album} ({Year}) [WEB] {bit-depth}-{sample-rate} (FLAC)/
 ```
 
-### Snapshot Testing (`src/utils/testing/snapshots/`)
+### Snapshot Testing (`crates/core/src/utils/testing/snapshots/`)
 
 Uses the `insta` crate for snapshot testing:
 
@@ -81,7 +81,7 @@ Uses the `insta` crate for snapshot testing:
 - **`FileSnapshot`** - File metadata with SHA-256 hash
 - **`DirectorySnapshot`** - Aggregates file snapshots for a directory
 
-### Test Utilities (`src/utils/testing/`)
+### Test Utilities (`crates/core/src/utils/testing/`)
 
 - **`TempDirectory::create(name)`** - Creates isolated temp directories with timestamp-based uniqueness
 - **`TestDirectory::new()`** - Creates test directory structure with `output` and `cache` subdirectories

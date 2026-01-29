@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use crate::commands::*;
 use crate::hosting::*;
 use crate::options::*;
@@ -44,7 +42,7 @@ async fn queue_list_command_lists_items() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(QueueAddArgs {
-            queue_add_path: Some(PathBuf::from(SAMPLE_SOURCES_DIR)),
+            queue_add_path: Some(SAMPLE_SOURCES_DIR.clone()),
         })
         .build();
 

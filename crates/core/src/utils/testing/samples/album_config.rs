@@ -4,7 +4,7 @@ use gazelle_api::{
     UploadResponse,
 };
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 /// Configuration for generating a test album.
 #[derive(Debug, Clone)]
@@ -266,13 +266,13 @@ impl AlbumConfig {
     /// Full path to the cached samples directory.
     #[must_use]
     pub fn source_dir(&self) -> PathBuf {
-        Path::new(SAMPLE_SOURCES_DIR).join(self.dir_name())
+        SAMPLE_SOURCES_DIR.join(self.dir_name())
     }
 
     /// Full path to the torrent file.
     #[must_use]
     pub fn torrent_path(&self) -> PathBuf {
-        Path::new(SAMPLE_SOURCES_DIR).join(self.torrent_filename())
+        SAMPLE_SOURCES_DIR.join(self.torrent_filename())
     }
 
     /// Create a temp directory containing only this album's torrent file.
