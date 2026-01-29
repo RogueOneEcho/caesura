@@ -81,6 +81,13 @@ Uses the `insta` crate for snapshot testing:
 - **`FileSnapshot`** - File metadata with SHA-256 hash
 - **`DirectorySnapshot`** - Aggregates file snapshots for a directory
 
+### Test Utilities (`src/utils/testing/`)
+
+- **`TempDirectory::create(name)`** - Creates isolated temp directories with timestamp-based uniqueness
+- **`TestDirectory::new()`** - Creates test directory structure with `output` and `cache` subdirectories
+- **`AlbumConfig::single_torrent_dir()`** - Copies a single torrent to an isolated temp directory (use this instead of `SAMPLE_SOURCES_DIR` for tests that need a specific torrent)
+- **`AlbumProvider::get(format)`** - Gets or generates sample album configuration
+
 ### Mock API Client
 
 The `gazelle_api` crate provides `MockGazelleClient` for testing without network access. Configure via `HostBuilder`:
