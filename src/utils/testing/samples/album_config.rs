@@ -32,6 +32,8 @@ pub struct TrackConfig {
     pub disc_number: Option<&'static str>,
     /// Sine wave frequency in Hz for the generated audio.
     pub frequency: u32,
+    /// Duration in seconds (default: 65 if None).
+    pub duration_secs: Option<u32>,
 }
 
 impl Default for AlbumConfig {
@@ -47,12 +49,14 @@ impl Default for AlbumConfig {
                     track_number: "1",
                     disc_number: None,
                     frequency: 440,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Track Two",
                     track_number: "2",
                     disc_number: None,
                     frequency: 880,
+                    duration_secs: None,
                 },
             ],
         }
@@ -85,12 +89,14 @@ impl AlbumConfig {
                     track_number: "1",
                     disc_number: None,
                     frequency: 440,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Track Two",
                     track_number: "2",
                     disc_number: None,
                     frequency: 880,
+                    duration_secs: None,
                 },
             ],
         }
@@ -109,24 +115,28 @@ impl AlbumConfig {
                     track_number: "1",
                     disc_number: Some("1"),
                     frequency: 440,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Second Track",
                     track_number: "2",
                     disc_number: Some("1"),
                     frequency: 550,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Third Track",
                     track_number: "1",
                     disc_number: Some("2"),
                     frequency: 660,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Fourth Track",
                     track_number: "2",
                     disc_number: Some("2"),
                     frequency: 770,
+                    duration_secs: None,
                 },
             ],
         }
@@ -159,6 +169,7 @@ impl AlbumConfig {
                         track_number: Box::leak(i.to_string().into_boxed_str()),
                         disc_number: None,
                         frequency: 440 + i * 50,
+                        duration_secs: None,
                     }
                 })
                 .collect(),
@@ -178,26 +189,66 @@ impl AlbumConfig {
                     track_number: "A1",
                     disc_number: None,
                     frequency: 440,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Side A Track Two",
                     track_number: "A2",
                     disc_number: None,
                     frequency: 550,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Side B Track One",
                     track_number: "B1",
                     disc_number: None,
                     frequency: 660,
+                    duration_secs: None,
                 },
                 TrackConfig {
                     title: "Side B Track Two",
                     track_number: "B2",
                     disc_number: None,
                     frequency: 770,
+                    duration_secs: None,
                 },
             ],
+        }
+    }
+
+    /// Create an album with a 30-second track for testing zoom spectrogram behavior
+    /// on tracks shorter than the standard 60-second start position.
+    pub fn track_30s() -> Self {
+        Self {
+            artist: "Short Artist",
+            album: "Short Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            tracks: vec![TrackConfig {
+                title: "Short Track",
+                track_number: "1",
+                disc_number: None,
+                frequency: 440,
+                duration_secs: Some(30),
+            }],
+        }
+    }
+
+    /// Create an album with a 1-second track for testing edge case
+    /// where track is shorter than the 2-second zoom capture window.
+    pub fn track_1s() -> Self {
+        Self {
+            artist: "Very Short Artist",
+            album: "Very Short Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            tracks: vec![TrackConfig {
+                title: "Very Short Track",
+                track_number: "1",
+                disc_number: None,
+                frequency: 440,
+                duration_secs: Some(1),
+            }],
         }
     }
 

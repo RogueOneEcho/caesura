@@ -8,6 +8,12 @@ use crate::commands::*;
 use crate::dependencies::*;
 use crate::utils::*;
 
+/// Duration of the zoom spectrogram capture window in seconds.
+const ZOOM_DURATION: u32 = 2;
+
+/// Standard start position for zoom spectrogram in seconds (1:00).
+const TYPICAL_ZOOM_START: u32 = 60;
+
 /// A command to generate a spectrogram image of a FLAC file using sox.
 ///
 /// A [command design pattern](https://refactoring.guru/design-patterns/command) is used
@@ -24,6 +30,7 @@ pub(crate) struct SpectrogramJob {
     pub image_title: String,
     /// Spectrogram size variant.
     pub size: Size,
+    pub duration_secs: Option<u32>,
 }
 
 impl SpectrogramJob {
@@ -43,6 +50,8 @@ impl SpectrogramJob {
     }
 
     async fn execute_zoom(&self) -> Result<Output, Error> {
+        let start_time = calculate_zoom_start(self.duration_secs);
+        let duration = format!("0:{ZOOM_DURATION:02}");
         let output = Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
@@ -58,9 +67,9 @@ impl SpectrogramJob {
             .arg("-w")
             .arg("Kaiser")
             .arg("-S")
-            .arg("1:00")
+            .arg(&start_time)
             .arg("-d")
-            .arg("0:02")
+            .arg(&duration)
             .arg("-t")
             .arg(&self.image_title)
             .arg("-c")
@@ -98,5 +107,68 @@ impl SpectrogramJob {
             .await
             .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
         OutputHandler::execute(output, "generate spectrogram", "SOX")
+    }
+}
+
+/// Calculate the start time for zoom spectrogram.
+///
+/// For tracks >= [`TYPICAL_ZOOM_START`] + [`ZOOM_DURATION`], uses the standard position (1:00).
+/// For shorter tracks, uses 50% of the duration minus half the capture window to center it.
+#[expect(clippy::integer_division, reason = "sub-second precision not needed")]
+fn calculate_zoom_start(duration_secs: Option<u32>) -> String {
+    match duration_secs {
+        Some(duration) if duration < TYPICAL_ZOOM_START + ZOOM_DURATION => {
+            // Center the capture window at 50% of the track
+            let midpoint = duration / 2;
+            let start = midpoint.saturating_sub(ZOOM_DURATION / 2);
+            format!("0:{start:02}")
+        }
+        _ => format!("{}:{:02}", TYPICAL_ZOOM_START / 60, TYPICAL_ZOOM_START % 60),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn zoom_start_unknown_duration_uses_typical() {
+        assert_eq!(calculate_zoom_start(None), "1:00");
+    }
+
+    #[test]
+    fn zoom_start_longer_than_typical_uses_typical() {
+        assert_eq!(calculate_zoom_start(Some(65)), "1:00");
+        assert_eq!(calculate_zoom_start(Some(120)), "1:00");
+        assert_eq!(calculate_zoom_start(Some(300)), "1:00");
+    }
+
+    #[test]
+    fn zoom_start_at_threshold_uses_typical() {
+        // Exactly at threshold (60 + 2 = 62 seconds)
+        assert_eq!(calculate_zoom_start(Some(62)), "1:00");
+    }
+
+    #[test]
+    fn zoom_start_shorter_than_typical_uses_midpoint() {
+        // 30 second track: midpoint=15, start=15-1=14
+        assert_eq!(calculate_zoom_start(Some(30)), "0:14");
+        // 61 second track (just under threshold): midpoint=30, start=30-1=29
+        assert_eq!(calculate_zoom_start(Some(61)), "0:29");
+    }
+
+    #[test]
+    fn zoom_start_shorter_than_zoom_duration() {
+        // 1 second track: midpoint=0, start=0-1=0 (saturating)
+        assert_eq!(calculate_zoom_start(Some(1)), "0:00");
+        // 2 second track: midpoint=1, start=1-1=0
+        assert_eq!(calculate_zoom_start(Some(2)), "0:00");
+        // 4 second track: midpoint=2, start=2-1=1
+        assert_eq!(calculate_zoom_start(Some(4)), "0:01");
+    }
+
+    #[test]
+    fn zoom_start_zero_duration() {
+        assert_eq!(calculate_zoom_start(Some(0)), "0:00");
     }
 }

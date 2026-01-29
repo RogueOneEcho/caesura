@@ -79,7 +79,7 @@ impl AlbumGenerator {
 
         // Generate FLAC files
         for track in &config.tracks {
-            FlacGenerator::new()
+            let mut generator = FlacGenerator::new()
                 .with_filename(config.track_filename(track))
                 .with_bit_depth(config.format.depth.as_u16())
                 .with_sample_rate(config.format.rate.as_u32())
@@ -90,7 +90,11 @@ impl AlbumGenerator {
                 .with_track_number(track.track_number)
                 .with_date(config.year.to_string())
                 .with_disc_number(track.disc_number)
-                .with_cover_image()
+                .with_cover_image();
+            if let Some(duration) = track.duration_secs {
+                generator = generator.with_duration_secs(duration);
+            }
+            generator
                 .generate(source_dir)
                 .await
                 .expect("should generate FLAC");

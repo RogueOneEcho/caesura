@@ -110,7 +110,6 @@ impl FlacGenerator {
 
     /// Set the duration in seconds (default: 65).
     #[must_use]
-    #[expect(dead_code)]
     pub fn with_duration_secs(mut self, secs: u32) -> Self {
         self.duration_secs = Some(secs);
         self

@@ -1,0 +1,20 @@
+---
+source: src/commands/spectrogram/tests/spectrogram_command_tests.rs
+expression: snapshot
+---
+- directory: "Short Artist - Short Album [2024] [WEB SPECTROGRAMS]"
+  filename: Short Artist - Short Album - 01 Short Track.full.png
+  size: 79383
+  sha256: 7e3212c178795d459749aebfe9eb8c68e0fd4f9e9cd818fe04222e7afd61aeb1
+  image:
+    width: 3137
+    height: 611
+    color_type: Rgb8
+- directory: "Short Artist - Short Album [2024] [WEB SPECTROGRAMS]"
+  filename: Short Artist - Short Album - 01 Short Track.zoom.png
+  size: 23987
+  sha256: 882f9f1ad8ab5912a75177c3b97e1bdd2513ffe6af038c02461127653d303d20
+  image:
+    width: 644
+    height: 1123
+    color_type: Rgb8

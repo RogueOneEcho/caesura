@@ -41,12 +41,17 @@ impl SpectrogramJobFactory {
             .join(&flac.sub_dir)
             .join(out_filename);
         let image_title = flac.file_name.clone();
+        let duration_secs = flac
+            .get_stream_info()
+            .ok()
+            .and_then(|info| get_duration(&info));
         Job::Spectrogram(SpectrogramJob {
             id,
             source_path,
             output_path,
             image_title,
             size,
+            duration_secs,
         })
     }
 }
