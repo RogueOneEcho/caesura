@@ -81,9 +81,10 @@ jobs:
       id: cache-cargo
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        key: cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}-${{ github.run_number }}
         restore-keys: |
-          ${{ runner.os }}-cargo-${{ matrix.target }}-
+          cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}-
+          cargo-${{ matrix.target }}-
         path: |
           ~/.cargo/bin/
           ~/.cargo/registry/index/
