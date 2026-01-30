@@ -105,7 +105,7 @@ jobs:
 
     - run: rustup target add ${{ matrix.target }}
 
-    - run: cargo build --release --target ${{ matrix.target }} ${{ matrix.test && '--tests' || '' }}
+    - run: cargo build --release --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
 
     - name: Save cargo cache
       id: cargo-cache-save

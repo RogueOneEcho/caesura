@@ -38,27 +38,23 @@ RUN case "${TARGETARCH}" in \
       --file - \
       "imdl"
 
-# Build caesura binary
-FROM rust:alpine AS builder
-RUN apk add --no-cache libc-dev cargo-edit
-# Build just the dependencies with version 0.0.0 so they're cached
+# Cargo chef base
+FROM rust:alpine AS chef
+RUN apk add --no-cache libc-dev && cargo install cargo-chef cargo-edit
 WORKDIR /app
-COPY Cargo.toml Cargo.lock /app/
-COPY crates/core/Cargo.toml /app/crates/core/
-COPY crates/core/build.rs /app/crates/core/
-COPY crates/macros/Cargo.toml /app/crates/macros/
-RUN mkdir -p crates/core/src crates/macros/src \
-    && echo 'pub fn stub() {}' > crates/core/src/lib.rs \
-    && echo 'fn main() {}' > crates/core/src/main.rs \
-    && printf 'use proc_macro::TokenStream;\n#[proc_macro_derive(Options, attributes(options, arg, serde))]\npub fn derive_options(_: TokenStream) -> TokenStream { TokenStream::new() }\n' > crates/macros/src/lib.rs
-RUN cargo fetch
-RUN cargo build --release --locked \
-    && rm -rf target/release/.fingerprint/caesura* target/release/deps/caesura* target/release/deps/libcaesura*
-# Set the version
-COPY . /app
+
+# Prepare recipe
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Build caesura binary
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+COPY . .
 ARG VERSION=0.0.0
 RUN cargo set-version -p caesura $VERSION
-# Build the release binary
 RUN cargo build --release
 
 # Build final image with minimal dependencies
