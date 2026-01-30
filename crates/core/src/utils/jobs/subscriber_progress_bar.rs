@@ -57,6 +57,9 @@ impl Subscriber for ProgressBarSubscriber {
 
 fn create_progress_bar() -> ProgressBar {
     let bar = ProgressBar::new(100);
+    #[cfg(test)]
+    bar.set_draw_target(ProgressDrawTarget::hidden());
+    #[cfg(not(test))]
     bar.set_draw_target(ProgressDrawTarget::stderr());
     bar
 }
