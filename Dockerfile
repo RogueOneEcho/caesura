@@ -46,13 +46,14 @@ WORKDIR /app
 COPY Cargo.toml Cargo.lock /app/
 COPY crates/core/Cargo.toml /app/crates/core/
 COPY crates/core/build.rs /app/crates/core/
-COPY crates/markdown_help/Cargo.toml /app/crates/markdown_help/
-RUN mkdir -p crates/core/src crates/markdown_help/src \
+COPY crates/macros/Cargo.toml /app/crates/macros/
+RUN mkdir -p crates/core/src crates/macros/src \
     && echo 'pub fn stub() {}' > crates/core/src/lib.rs \
     && echo 'fn main() {}' > crates/core/src/main.rs \
-    && echo 'fn main() {}' > crates/markdown_help/src/main.rs
+    && printf 'use proc_macro::TokenStream;\n#[proc_macro_derive(Options, attributes(options, arg, serde))]\npub fn derive_options(_: TokenStream) -> TokenStream { TokenStream::new() }\n' > crates/macros/src/lib.rs
 RUN cargo fetch
-RUN cargo build --release --locked
+RUN cargo build --release --locked \
+    && rm -rf target/release/.fingerprint/caesura* target/release/deps/caesura* target/release/deps/libcaesura*
 # Set the version
 COPY . /app
 ARG VERSION=0.0.0
