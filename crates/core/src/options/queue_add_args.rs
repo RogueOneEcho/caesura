@@ -1,14 +1,8 @@
-use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
-
+use crate::prelude::*;
 use CommandArguments::Queue;
 use QueueCommandArguments::Add;
 use clap::Args;
-use di::injectable;
 use serde::{Deserialize, Serialize};
-
-use crate::commands::*;
-use crate::options::*;
 
 /// Options for the [`QueueAddCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
@@ -61,13 +55,12 @@ impl QueueAddArgs {
 }
 
 impl Display for QueueAddArgs {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = if let Ok(yaml) = serde_yaml::to_string(self) {
             yaml
         } else {
             format!("{self:?}")
         };
-        output.fmt(formatter)
+        write!(formatter, "{output}")
     }
 }

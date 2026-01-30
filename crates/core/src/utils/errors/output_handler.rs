@@ -1,8 +1,6 @@
-use rogue_logging::Error;
+use crate::prelude::*;
 use std::os::unix::process::ExitStatusExt;
 use std::process::Output;
-
-use crate::utils::*;
 
 /// Handle command output and convert failures to errors.
 pub struct OutputHandler {}

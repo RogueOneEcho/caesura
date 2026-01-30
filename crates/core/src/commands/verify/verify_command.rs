@@ -1,15 +1,5 @@
-use colored::Colorize;
-use di::{Ref, injectable};
-use log::*;
-
-use crate::commands::*;
-use crate::dependencies::*;
-use crate::options::*;
-use crate::utils::*;
-
-use crate::utils::SourceIssue::*;
+use crate::prelude::*;
 use gazelle_api::GazelleClientTrait;
-use rogue_logging::Error;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
@@ -71,24 +61,24 @@ impl VerifyCommand {
     fn api_checks(&self, source: &Source) -> Vec<SourceIssue> {
         let mut issues: Vec<SourceIssue> = Vec::new();
         if source.group.category_name != "Music" {
-            issues.push(Category {
+            issues.push(SourceIssue::Category {
                 actual: source.group.category_name.clone(),
             });
         }
         if source.torrent.scene {
-            issues.push(Scene);
+            issues.push(SourceIssue::Scene);
         }
         if source.torrent.lossy_master_approved == Some(true) {
-            issues.push(LossyMaster);
+            issues.push(SourceIssue::LossyMaster);
         }
         if source.torrent.lossy_web_approved == Some(true) {
-            issues.push(LossyWeb);
+            issues.push(SourceIssue::LossyWeb);
         }
         if source.torrent.trumpable == Some(true) {
-            issues.push(Trumpable);
+            issues.push(SourceIssue::Trumpable);
         }
         if !source.torrent.remastered {
-            issues.push(Unconfirmed);
+            issues.push(SourceIssue::Unconfirmed);
         }
         let excluded_tags: Vec<String> = self
             .verify_options
@@ -99,13 +89,13 @@ impl VerifyCommand {
             .filter(|x| source.group.tags.contains(x))
             .collect();
         if !excluded_tags.is_empty() {
-            issues.push(Excluded {
+            issues.push(SourceIssue::Excluded {
                 tags: excluded_tags,
             });
         }
         let target_formats = self.targets.get(source.format, &source.existing);
         if target_formats.is_empty() {
-            issues.push(Existing {
+            issues.push(SourceIssue::Existing {
                 formats: source.existing.clone(),
             });
         }
@@ -119,20 +109,20 @@ impl VerifyCommand {
     )]
     fn flac_checks(&self, source: &Source) -> Vec<SourceIssue> {
         if !source.directory.is_dir() {
-            return vec![MissingDirectory {
+            return vec![SourceIssue::MissingDirectory {
                 path: source.directory.clone(),
             }];
         }
         let flacs = Collector::get_flacs_with_context(&source.directory);
         if flacs.is_empty() {
-            return vec![NoFlacs {
+            return vec![SourceIssue::NoFlacs {
                 path: source.directory.clone(),
             }];
         }
         let mut issues: Vec<SourceIssue> = Vec::new();
         let api_flacs = source.torrent.get_flacs();
         if flacs.len() != api_flacs.len() {
-            issues.push(FlacCount {
+            issues.push(SourceIssue::FlacCount {
                 expected: api_flacs.len(),
                 actual: flacs.len(),
             });
@@ -157,7 +147,7 @@ impl VerifyCommand {
                 let excess = length - MAX_PATH_LENGTH;
                 if excess > 0 {
                     let excess = excess as usize;
-                    issues.push(Length { path, excess });
+                    issues.push(SourceIssue::Length { path, excess });
                     Shortener::suggest_track_name(&flac);
                     too_long = true;
                 }
@@ -165,7 +155,7 @@ impl VerifyCommand {
             let tags = TagVerifier::execute(&flac, source)
                 .unwrap_or(vec!["failed to retrieve tags".to_owned()]);
             if !tags.is_empty() {
-                issues.push(MissingTags {
+                issues.push(SourceIssue::MissingTags {
                     path: flac.path.clone(),
                     tags,
                 });
@@ -238,7 +228,7 @@ impl VerifyCommand {
         // creation tool works.
         let flac_sub_dirs: Vec<_> = flacs.iter().map(|x| &x.sub_dir).collect();
         if let Some(prefix) = Shortener::longest_common_prefix(&flac_sub_dirs) {
-            return vec![UnnecessaryDirectory { prefix }];
+            return vec![SourceIssue::UnnecessaryDirectory { prefix }];
         }
         vec![]
     }

@@ -1,4 +1,4 @@
-use crate::utils::*;
+use crate::prelude::*;
 
 /// Generate directory names for sources.
 pub struct SourceName;

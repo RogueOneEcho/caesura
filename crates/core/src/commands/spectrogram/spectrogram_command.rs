@@ -1,12 +1,4 @@
-use colored::Colorize;
-use di::{Ref, injectable};
-use log::{debug, info};
-
-use rogue_logging::Error;
-
-use crate::commands::*;
-use crate::options::*;
-use crate::utils::*;
+use crate::prelude::*;
 
 /// Generate spectrograms for each track of a FLAC source.
 #[injectable]

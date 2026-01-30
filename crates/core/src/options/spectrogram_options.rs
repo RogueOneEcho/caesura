@@ -1,8 +1,7 @@
-use serde::{Deserialize, Serialize};
-
 use crate::Size;
-use crate::options::*;
+use crate::prelude::*;
 use caesura_macros::Options;
+use serde::{Deserialize, Serialize};
 
 /// Options for spectrograms
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

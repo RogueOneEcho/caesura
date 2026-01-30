@@ -1,6 +1,5 @@
+use crate::prelude::*;
 use regex::Regex;
-
-use crate::utils::*;
 
 /// Extract torrent ID from a tracker URL.
 pub fn get_torrent_id_from_url(url: &str) -> Result<u32, IdProviderError> {

@@ -1,14 +1,6 @@
+use crate::prelude::*;
 use std::sync::Arc;
-
-use colored::Colorize;
-use di::injectable;
-use log::trace;
 use tokio::sync::Semaphore;
-
-use crate::options::*;
-use crate::utils::*;
-
-use rogue_logging::Colors;
 
 /// Log all [Command] status updates to the console by subscribing to
 /// [`CommandRunner`] as a [Subscriber].

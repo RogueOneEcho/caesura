@@ -1,9 +1,6 @@
-use rogue_logging::Error;
+use crate::prelude::*;
 use std::os::unix::prelude::MetadataExt;
-use std::path::PathBuf;
 use tokio::fs::File;
-
-use crate::utils::*;
 
 /// A non-FLAC file to include in transcodes.
 pub struct AdditionalFile {

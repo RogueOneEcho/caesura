@@ -1,21 +1,15 @@
-use colored::Colorize;
+use crate::built_info::{PKG_HOMEPAGE, PKG_NAME, PKG_VERSION};
+use crate::hosting::*;
+use crate::prelude::*;
 #[cfg(test)]
 use di::existing_as_self;
-use di::{Injectable, Mut, Ref, RefMut, ServiceCollection, singleton_as_self};
-use log::error;
+use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
+use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
+use rogue_logging::LoggerBuilder;
 use std::process::exit;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
-
-use crate::commands::*;
-use crate::hosting::*;
-use crate::options::*;
-use crate::utils::*;
-
-use crate::built_info::{PKG_HOMEPAGE, PKG_NAME, PKG_VERSION};
-use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
-use rogue_logging::{Error, LoggerBuilder};
 
 /// Builder for configuring and constructing the application host.
 pub struct HostBuilder {

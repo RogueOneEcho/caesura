@@ -1,7 +1,4 @@
-use crate::commands::*;
-use crate::dependencies::*;
-
-use std::path::PathBuf;
+use crate::prelude::*;
 
 /// Information needed to resample a FLAC.
 pub(crate) struct Resample {

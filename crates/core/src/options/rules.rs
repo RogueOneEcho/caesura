@@ -1,9 +1,5 @@
-use colored::Colorize;
-use log::{error, warn};
+use crate::prelude::*;
 use serde::Serialize;
-use std::fmt::{Display, Formatter};
-
-use crate::options::*;
 
 #[derive(Debug, Serialize)]
 pub enum OptionRule {
@@ -19,8 +15,7 @@ pub enum OptionRule {
 }
 
 impl Display for OptionRule {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = match self {
             Changed(name, value, details) => format!("{name} use has changed: {value}\n{details}"),
             Dependent(this, that) => format!("{this} requires {that} to be set"),
@@ -36,7 +31,7 @@ impl Display for OptionRule {
             DurationInvalid(name, value) => format!("{name} could not be parsed: {value}"),
             HashInvalid(name, value) => format!("{name} could not be parsed as a hash: {value}"),
         };
-        output.fmt(formatter)
+        write!(formatter, "{output}")
     }
 }
 

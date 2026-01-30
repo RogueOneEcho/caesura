@@ -1,4 +1,4 @@
-use crate::utils::*;
+use crate::testing_prelude::*;
 
 #[test]
 fn remove_restricted_chars() {

@@ -1,5 +1,4 @@
-use crate::utils::testing::*;
-use insta::assert_yaml_snapshot;
+use crate::testing_prelude::*;
 
 #[tokio::test]
 async fn flac_generator_with_cover_image() {

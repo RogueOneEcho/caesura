@@ -1,8 +1,6 @@
-use html_escape::decode_html_entities;
-
-use crate::utils::*;
+use crate::prelude::*;
 use gazelle_api::{Group, Torrent};
-use log::{debug, warn};
+use html_escape::decode_html_entities;
 
 const MAX_ARTISTS: usize = 2;
 const UNKNOWN_ARTIST: &str = "Unknown Artist";

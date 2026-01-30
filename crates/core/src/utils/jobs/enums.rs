@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use crate::prelude::*;
 
 /// Execution status of a [`Job`].
 #[derive(Clone)]
@@ -14,8 +14,7 @@ pub enum Status {
 }
 
 impl Display for Status {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         match self {
             Status::Created => write!(formatter, "Created"),
             Status::Queued => write!(formatter, "Queued"),

@@ -1,13 +1,6 @@
-use std::fmt::{Display, Formatter};
-use std::path::{Path, PathBuf};
-
-use crate::dependencies::*;
-use crate::options::*;
-use crate::utils::IdProviderError::*;
-use crate::utils::*;
-use di::{Ref, injectable};
-use log::warn;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 /// Retrieve the id of a source.
 #[injectable]
@@ -61,24 +54,24 @@ impl IdProvider {
             if path.exists() {
                 self.get_by_file(&path).await
             } else {
-                Err(TorrentFileNotFound)
+                Err(IdProviderError::TorrentFileNotFound)
             }
         } else {
-            Err(NoMatch)
+            Err(IdProviderError::NoMatch)
         }
     }
 
     async fn get_by_file(&self, path: &Path) -> Result<u32, IdProviderError> {
         let summary = ImdlCommand::show(path).await.map_err(|e| {
             warn!("{e}");
-            TorrentFileInvalid
+            IdProviderError::TorrentFileInvalid
         })?;
         let tracker_id = self.options.indexer.clone().expect("indexer should be set");
         if summary.is_source_equal(&tracker_id) {
             let url = summary.comment.unwrap_or_default();
             get_torrent_id_from_url(&url)
         } else {
-            Err(TorrentFileSource {
+            Err(IdProviderError::TorrentFileSource {
                 actual: summary.source.unwrap_or_default(),
                 expected: tracker_id.to_ascii_uppercase(),
             })
@@ -87,8 +80,8 @@ impl IdProvider {
 }
 
 impl Display for IdProviderError {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
+        use IdProviderError::*;
         let message = match self {
             NoId => "No ID was provided".to_owned(),
             NoMatch => "Input did not match any known types".to_owned(),
@@ -99,6 +92,6 @@ impl Display for IdProviderError {
                 format!("Input was a torrent file with source {actual} not {expected}")
             }
         };
-        message.fmt(formatter)
+        write!(formatter, "{message}")
     }
 }

@@ -1,6 +1,5 @@
-use crate::utils::*;
+use crate::prelude::*;
 use claxon::metadata::StreamInfo;
-use rogue_logging::Error;
 
 /// Check if the FLAC needs resampling to 16-bit/48kHz or below.
 #[must_use]

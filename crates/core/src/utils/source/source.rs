@@ -1,13 +1,6 @@
-use std::collections::BTreeSet;
-use std::fmt;
-use std::path::PathBuf;
-
-use colored::Colorize;
-
+use crate::prelude::*;
 use gazelle_api::{Group, Torrent};
-use rogue_logging::Colors;
 
-use crate::utils::*;
 /// Source to be transcoded
 #[derive(Debug)]
 pub struct Source {
@@ -24,11 +17,12 @@ pub struct Source {
     pub metadata: Metadata,
 }
 
-impl fmt::Display for Source {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        SourceName::get(&self.metadata)
-            .gray()
-            .italic()
-            .fmt(formatter)
+impl Display for Source {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
+        write!(
+            formatter,
+            "{}",
+            SourceName::get(&self.metadata).gray().italic()
+        )
     }
 }

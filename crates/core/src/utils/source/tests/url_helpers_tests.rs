@@ -1,4 +1,4 @@
-use crate::utils::*;
+use crate::testing_prelude::*;
 
 #[test]
 fn with_torrent_and_group_no_hash() {

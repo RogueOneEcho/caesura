@@ -1,5 +1,4 @@
-use crate::utils::testing::*;
-use insta::assert_yaml_snapshot;
+use crate::testing_prelude::*;
 
 async fn test_sample_format_determinism(format: SampleFormat, name: &str) {
     let temp_dir = TempDirectory::create(name);

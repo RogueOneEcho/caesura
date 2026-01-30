@@ -1,12 +1,9 @@
-use std::path::PathBuf;
-
+use crate::prelude::*;
+use crate::utils::{convert_to_id3v2, fix_track_numbering, get_vorbis_tags};
 use claxon::FlacReader;
 use claxon::metadata::StreamInfo;
 use lofty::tag::Tag;
 use once_cell::sync::OnceCell;
-use rogue_logging::Error;
-
-use crate::utils::{DiscContext, convert_to_id3v2, fix_track_numbering, get_vorbis_tags};
 
 /// A representation of a FLAC file.
 pub struct FlacFile {

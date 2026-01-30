@@ -1,14 +1,8 @@
-use std::path::{Path, PathBuf};
-use std::process::{Output, Stdio};
-
 use crate::built_info::{PKG_NAME, PKG_VERSION};
-use crate::dependencies::*;
+use crate::prelude::*;
 use crate::utils::SourceIssue::Imdl;
-use crate::utils::*;
 use bytes::Buf;
-use colored::Colorize;
-use log::trace;
-use rogue_logging::Error;
+use std::process::{Output, Stdio};
 use tokio::fs::copy;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;

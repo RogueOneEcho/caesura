@@ -1,12 +1,8 @@
-use colored::Colorize;
-use di::{Ref, RefMut, injectable};
+use crate::prelude::*;
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
-use rogue_logging::Error;
 use rogue_logging::Verbosity::Info;
 use rogue_logging::*;
 use tokio::task::JoinSet;
-
-use crate::utils::*;
 /// A [Subscriber] that updates a progress bar in the console
 pub struct ProgressBarSubscriber {
     logger: Ref<Logger>,

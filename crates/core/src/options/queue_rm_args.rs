@@ -1,14 +1,9 @@
-use std::fmt::{Display, Formatter};
-
+use crate::commands::QueueCommandArguments::Remove;
+use crate::prelude::*;
 use CommandArguments::Queue;
 use clap::Args;
-use di::injectable;
 use flat_db::Hash;
 use serde::{Deserialize, Serialize};
-
-use crate::commands::QueueCommandArguments::Remove;
-use crate::commands::*;
-use crate::options::*;
 
 /// Options for the [`QueueRemoveCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
@@ -54,13 +49,12 @@ impl QueueRemoveArgs {
 }
 
 impl Display for QueueRemoveArgs {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = if let Ok(yaml) = serde_yaml::to_string(self) {
             yaml
         } else {
             format!("{self:?}")
         };
-        output.fmt(formatter)
+        write!(formatter, "{output}")
     }
 }

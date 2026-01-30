@@ -1,11 +1,8 @@
-use crate::options::*;
-use colored::Colorize;
+use crate::prelude::*;
 use di::{ServiceCollection, existing_as_self};
-use log::*;
 use rogue_logging::Verbosity::Trace;
 use rogue_logging::{Logger, LoggerBuilder};
 use std::fs::read_to_string;
-use std::path::PathBuf;
 use std::sync::Arc;
 
 pub const DEFAULT_CONFIG_PATH: &str = "config.yml";

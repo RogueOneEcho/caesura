@@ -1,8 +1,5 @@
-use crate::options::*;
-use crate::utils::*;
-use insta::assert_yaml_snapshot;
+use crate::testing_prelude::*;
 use rogue_logging::{TimeFormat, Verbosity};
-use std::path::PathBuf;
 
 /// Verify `BatchOptions` default values.
 #[test]

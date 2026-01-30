@@ -1,6 +1,4 @@
-use crate::commands::*;
-use crate::hosting::*;
-use crate::utils::*;
+use crate::testing_prelude::*;
 
 /// Test that `ConfigCommand` serializes all option types to YAML.
 #[test]

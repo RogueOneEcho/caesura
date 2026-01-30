@@ -1,7 +1,5 @@
-use crate::commands::*;
-use rogue_logging::Error;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 /// Result of a [`SpectrogramCommand`] execution.
 #[derive(Clone, Deserialize, Serialize)]

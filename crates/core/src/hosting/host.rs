@@ -1,14 +1,10 @@
-use di::ServiceProvider;
-use log::{error, warn};
-use rogue_logging::Error;
-use rogue_logging::*;
-use std::process::exit;
-
 use crate::commands::CommandArguments::Queue;
 use crate::commands::CommandArguments::*;
 use crate::commands::QueueCommandArguments::*;
-use crate::commands::*;
-use crate::options::OptionsProvider;
+use crate::prelude::*;
+use di::ServiceProvider;
+use rogue_logging::*;
+use std::process::exit;
 
 /// Application host, responsible for executing the application
 ///

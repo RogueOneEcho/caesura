@@ -1,10 +1,8 @@
-use crate::utils::*;
+use crate::prelude::*;
 use TargetFormat::*;
-
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
-use std::fmt::{Display, Formatter};
 
 /// Format to transcode to.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, ValueEnum)]
@@ -58,8 +56,7 @@ impl TargetFormat {
 }
 
 impl Display for TargetFormat {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         write!(formatter, "{}", self.get_name())
     }
 }

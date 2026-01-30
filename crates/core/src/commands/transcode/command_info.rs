@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use crate::prelude::*;
 use tokio::process::Command;
 
 /// Information required to create a [`Command`].
@@ -40,8 +40,7 @@ impl CommandInfo {
 }
 
 impl Display for CommandInfo {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(f, "{}", self.display())
     }
 }

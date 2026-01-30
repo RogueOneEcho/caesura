@@ -1,13 +1,9 @@
+use crate::prelude::*;
 use ExistingFormat::*;
 use clap::ValueEnum;
-use colored::Colorize;
 use gazelle_api::Torrent;
-use log::trace;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
-use std::fmt::{Display, Formatter};
-
-use crate::utils::*;
 /// Format of an existing release.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
@@ -59,8 +55,7 @@ impl ExistingFormat {
 }
 
 impl Display for ExistingFormat {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         write!(formatter, "{}", self.get_name())
     }
 }

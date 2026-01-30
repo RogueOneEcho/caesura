@@ -1,13 +1,6 @@
-use std::fs;
-use std::path::PathBuf;
-
+use crate::testing_prelude::*;
 use gazelle_api::MockGazelleClient;
-use rogue_logging::Error;
-
-use crate::commands::*;
-use crate::hosting::*;
-use crate::options::*;
-use crate::utils::*;
+use std::fs;
 
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
 #[tokio::test]

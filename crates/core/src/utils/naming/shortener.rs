@@ -1,11 +1,6 @@
-use std::path::{Path, PathBuf};
-
-use colored::Colorize;
-use log::info;
+use crate::prelude::*;
 use regex::Regex;
-use rogue_logging::Colors;
-
-use crate::utils::*;
+use std::path::Path;
 
 /// Suggest shorter names for albums and tracks.
 pub struct Shortener;

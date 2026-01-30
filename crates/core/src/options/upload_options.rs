@@ -1,9 +1,6 @@
-use std::path::PathBuf;
-
-use serde::{Deserialize, Serialize};
-
-use crate::options::*;
+use crate::prelude::*;
 use caesura_macros::Options;
+use serde::{Deserialize, Serialize};
 
 /// Options for upload
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

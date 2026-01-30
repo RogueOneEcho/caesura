@@ -1,9 +1,5 @@
-use rogue_logging::Error;
-use std::path::Path;
+use crate::prelude::*;
 use tokio::process::Command;
-
-use crate::dependencies::*;
-use crate::utils::*;
 
 /// Facade for the `eyeD3` CLI binary.
 ///

@@ -1,12 +1,7 @@
-use rogue_logging::Error;
+use crate::prelude::*;
 use std::fs::create_dir_all;
-use std::path::PathBuf;
 use std::process::Output;
 use tokio::process::Command;
-
-use crate::commands::*;
-use crate::dependencies::*;
-use crate::utils::*;
 
 /// Duration of the zoom spectrogram capture window in seconds.
 const ZOOM_DURATION: u32 = 2;

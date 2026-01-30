@@ -1,10 +1,4 @@
-use crate::commands::*;
-use crate::dependencies::*;
-use crate::utils::*;
-
-use colored::Colorize;
-use log::trace;
-use rogue_logging::Error;
+use crate::prelude::*;
 
 /// Job to resize and copy an additional file to the transcode directory.
 pub(crate) struct AdditionalJob {

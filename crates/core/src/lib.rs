@@ -8,6 +8,9 @@ pub mod options;
 mod commands;
 mod dependencies;
 mod hosting;
+mod prelude;
+#[cfg(test)]
+mod testing_prelude;
 mod utils;
 
 #[allow(clippy::needless_raw_strings, clippy::doc_markdown)]

@@ -1,9 +1,6 @@
-use std::collections::BTreeSet;
-
+use crate::prelude::*;
 use gazelle_api::Torrent;
 use regex::Regex;
-
-use crate::utils::*;
 pub struct ExistingFormatProvider;
 
 impl ExistingFormatProvider {

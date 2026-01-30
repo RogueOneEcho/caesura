@@ -1,4 +1,4 @@
-use crate::utils::*;
+use crate::prelude::*;
 
 /// A generic trait for subscribing to the status of a [Job].
 ///

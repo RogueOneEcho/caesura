@@ -1,13 +1,6 @@
-use crate::commands::*;
-use crate::options::*;
-use crate::utils::*;
-use std::time::Duration;
-
-use colored::Colorize;
-use di::{Ref, injectable};
+use crate::prelude::*;
 use gazelle_api::GazelleError;
-use log::{debug, error, info, trace, warn};
-use rogue_logging::Error;
+use std::time::Duration;
 use tokio::time::sleep;
 
 const PAUSE_DURATION: u64 = 10;

@@ -1,7 +1,4 @@
-use crate::commands::*;
-use crate::dependencies::*;
-
-use std::path::PathBuf;
+use crate::prelude::*;
 
 /// Information needed to resize an image
 pub(crate) struct Resize {

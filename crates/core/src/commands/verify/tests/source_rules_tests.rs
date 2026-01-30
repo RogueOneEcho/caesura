@@ -1,8 +1,5 @@
-use std::collections::BTreeSet;
-use std::path::PathBuf;
-
+use crate::testing_prelude::*;
 use crate::utils::SourceIssue::*;
-use crate::utils::*;
 
 #[test]
 fn test_serialize_source_rules_vec() {

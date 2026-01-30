@@ -1,8 +1,5 @@
+use crate::testing_prelude::*;
 use flat_db::Hash;
-use std::path::PathBuf;
-
-use crate::commands::*;
-use crate::dependencies::*;
 
 #[test]
 fn from_torrent_with_valid_data() {

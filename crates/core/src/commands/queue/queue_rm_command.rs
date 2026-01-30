@@ -1,11 +1,5 @@
-use crate::commands::*;
-use crate::options::*;
-
-use colored::Colorize;
-use di::{Ref, injectable};
+use crate::prelude::*;
 use flat_db::Hash;
-use log::{debug, info, warn};
-use rogue_logging::Error;
 
 /// Remove an item from the queue
 #[injectable]

@@ -1,4 +1,4 @@
-use crate::commands::*;
+use crate::testing_prelude::*;
 
 #[test]
 fn test_serialize_timestamp() {

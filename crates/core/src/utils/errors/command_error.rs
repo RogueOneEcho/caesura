@@ -1,5 +1,5 @@
-use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
+use crate::prelude::*;
+use std::error::Error as StdError;
 
 #[allow(dead_code)]
 pub struct CommandError {
@@ -11,8 +11,7 @@ pub struct CommandError {
 }
 
 impl Debug for CommandError {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         if !self.stderr.is_empty() {
             write!(formatter, "{}", self.stderr)
         } else if !self.stdout.is_empty() {
@@ -24,8 +23,7 @@ impl Debug for CommandError {
 }
 
 impl Display for CommandError {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         if !self.stderr.is_empty() {
             write!(formatter, "{}", self.stderr)
         } else if !self.stdout.is_empty() {
@@ -36,4 +34,4 @@ impl Display for CommandError {
     }
 }
 
-impl Error for CommandError {}
+impl StdError for CommandError {}

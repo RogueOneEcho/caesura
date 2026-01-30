@@ -1,12 +1,6 @@
-use crate::options::*;
-use crate::utils::*;
-
-use colored::Colorize;
-use di::{Ref, injectable};
+use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, Torrent};
 use html_escape::decode_html_entities;
-use log::{trace, warn};
-use std::path::PathBuf;
 
 /// Retrieve [`Source`] from the API.
 #[injectable]

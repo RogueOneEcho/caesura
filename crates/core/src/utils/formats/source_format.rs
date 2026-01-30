@@ -1,7 +1,5 @@
+use crate::prelude::*;
 use SourceFormat::*;
-use std::fmt::{Display, Formatter};
-
-use crate::utils::*;
 /// Format of a [Source].
 #[derive(Clone, Copy, Debug)]
 pub enum SourceFormat {
@@ -39,8 +37,7 @@ impl SourceFormat {
 }
 
 impl Display for SourceFormat {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         write!(formatter, "{}", self.get_name())
     }
 }

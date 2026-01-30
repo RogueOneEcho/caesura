@@ -1,9 +1,4 @@
-use crate::commands::*;
-use crate::utils::*;
-
-use colored::Colorize;
-use log::trace;
-use std::path::PathBuf;
+use crate::prelude::*;
 
 /// A collection of [`FlacFile`].
 pub struct Collector;

@@ -1,7 +1,4 @@
-use crate::commands::*;
-use crate::dependencies::*;
-
-use std::path::PathBuf;
+use crate::prelude::*;
 
 /// Information needed to decode a FLAC file to raw audio.
 pub(crate) struct Decode {

@@ -1,13 +1,7 @@
-use std::fmt::{Display, Formatter};
-
-use clap::Args;
-use di::injectable;
-use serde::{Deserialize, Serialize};
-
-use crate::commands::*;
-use crate::options::*;
-
 use crate::commands::CommandArguments::*;
+use crate::prelude::*;
+use clap::Args;
+use serde::{Deserialize, Serialize};
 
 /// Source argument used by Verify, Spectrogram, Transcode, and Upload commands
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
@@ -56,13 +50,12 @@ impl SourceArg {
 }
 
 impl Display for SourceArg {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = if let Ok(yaml) = serde_yaml::to_string(self) {
             yaml
         } else {
             format!("{self:?}")
         };
-        output.fmt(formatter)
+        write!(formatter, "{output}")
     }
 }

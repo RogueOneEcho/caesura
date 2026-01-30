@@ -1,8 +1,6 @@
+use crate::prelude::*;
 use clap::{CommandFactory, Parser};
-use log::debug;
 use std::process::exit;
-
-use crate::commands::*;
 /// Command line argument parser.
 #[derive(Parser)]
 #[command(

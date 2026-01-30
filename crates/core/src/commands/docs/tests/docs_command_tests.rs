@@ -1,6 +1,5 @@
+use crate::testing_prelude::*;
 use insta::assert_snapshot;
-
-use crate::commands::DocsCommand;
 
 /// Test that `DocsCommand::render` produces valid markdown documentation.
 #[test]

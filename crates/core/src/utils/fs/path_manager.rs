@@ -1,12 +1,5 @@
+use crate::prelude::*;
 use std::fs::create_dir;
-use std::path::PathBuf;
-
-use di::{Ref, injectable};
-use rogue_logging::Error;
-
-use crate::dependencies::*;
-use crate::options::*;
-use crate::utils::*;
 #[injectable]
 pub struct PathManager {
     shared_options: Ref<SharedOptions>,

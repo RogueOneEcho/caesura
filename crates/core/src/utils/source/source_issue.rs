@@ -1,13 +1,7 @@
-use crate::utils::*;
-use SourceIssue::*;
-
+use crate::prelude::*;
 use gazelle_api::GazelleError;
 use reqwest::StatusCode;
-use rogue_logging::Colors;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
-use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
 
 /// Maximum allowed path length for transcodes.
 pub const MAX_PATH_LENGTH: isize = 180;
@@ -112,13 +106,14 @@ pub enum SourceIssue {
 
 impl SourceIssue {
     pub(crate) fn api(error: GazelleError) -> Self {
-        Api { response: error }
+        Self::Api { response: error }
     }
 }
 
 impl Display for SourceIssue {
-    #[allow(deprecated, clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    #[allow(deprecated)]
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
+        use SourceIssue::*;
         let message = match self {
             Id(error) => error.to_string(),
             IdError { details } => format!("Invalid source id: {details}"),
@@ -201,6 +196,6 @@ impl Display for SourceIssue {
             Error { domain, details } => format!("A {domain} error occured:\n{details}"),
             Other(details) => details.clone(),
         };
-        message.fmt(formatter)
+        write!(formatter, "{message}")
     }
 }

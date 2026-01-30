@@ -1,16 +1,7 @@
-use crate::commands::*;
-use crate::options::*;
-use crate::utils::*;
-
-use colored::Colorize;
-use di::{Ref, injectable};
+use crate::prelude::*;
 use flat_db::Hash;
-use log::{info, trace};
-use rogue_logging::Error;
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::BufReader;
-use std::path::PathBuf;
 
 /// Add a directory of `.torrent` files to the queue
 #[injectable]

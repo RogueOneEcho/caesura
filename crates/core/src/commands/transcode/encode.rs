@@ -1,9 +1,5 @@
-use crate::commands::*;
-use crate::dependencies::*;
+use crate::prelude::*;
 use crate::utils::TargetFormat::*;
-use crate::utils::*;
-
-use std::path::PathBuf;
 
 /// Information required to create an encode command [`Command`].
 pub(crate) struct Encode {

@@ -1,13 +1,8 @@
 #![allow(clippy::indexing_slicing)] // Indexing is safe in tests after length checks
 
 use super::super::Queue;
-
-use crate::commands::*;
-use crate::utils::*;
+use crate::testing_prelude::*;
 use flat_db::Hash;
-use rogue_logging::Error;
-use std::collections::BTreeMap;
-use std::path::PathBuf;
 
 /// Test that `Queue::set` adds an item successfully.
 #[tokio::test]

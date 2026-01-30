@@ -1,12 +1,9 @@
+use crate::prelude::*;
 use lofty::file::TaggedFileExt;
 use lofty::probe::Probe;
 use lofty::tag::ItemKey::TrackNumber;
 use lofty::tag::{Accessor, Tag, TagType};
-use log::trace;
 use regex::Regex;
-use rogue_logging::Error;
-
-use crate::utils::*;
 pub(crate) fn get_vorbis_tags(flac: &FlacFile) -> Result<Tag, Error> {
     let file = Probe::open(flac.path.clone())
         .map_err(|e| error("get tags", e.to_string()))?

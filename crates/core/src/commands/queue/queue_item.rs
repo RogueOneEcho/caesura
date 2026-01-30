@@ -1,11 +1,6 @@
-use crate::commands::*;
-use crate::dependencies::*;
-use crate::utils::*;
-
+use crate::prelude::*;
 use flat_db::Hash;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
 
 /// A source in the batch processing queue.
 #[derive(Clone, Deserialize, Serialize, Default)]
@@ -56,8 +51,7 @@ impl QueueItem {
 }
 
 impl Display for QueueItem {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         write!(formatter, "{}", self.name)
     }
 }

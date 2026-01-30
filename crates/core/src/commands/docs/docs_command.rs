@@ -1,12 +1,4 @@
-use std::fmt::Write;
-
-use di::injectable;
-use rogue_logging::Error;
-
-use crate::options::{
-    BatchOptions, CacheOptions, CopyOptions, Documented, FileOptions, OptionsDoc, RunnerOptions,
-    SharedOptions, SpectrogramOptions, TargetOptions, UploadOptions, VerifyOptions,
-};
+use crate::prelude::*;
 
 /// Generate documentation for configuration options.
 #[injectable]
