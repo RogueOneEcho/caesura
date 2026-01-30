@@ -1,0 +1,5 @@
+---
+source: crates/core/src/options/tests/options_tests.rs
+expression: errors
+---
+[]

@@ -1,0 +1,8 @@
+---
+source: src/options/tests/options_tests.rs
+expression: result
+---
+copy_transcode_to_content_dir: false
+copy_transcode_to: ~
+copy_torrent_to: ~
+dry_run: false

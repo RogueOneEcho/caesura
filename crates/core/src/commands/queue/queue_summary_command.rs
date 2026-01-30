@@ -1,5 +1,4 @@
 use crate::commands::*;
-use crate::options::*;
 use crate::utils::*;
 
 use di::{Ref, injectable};
@@ -8,15 +7,11 @@ use rogue_logging::Error;
 /// List the sources in the queue
 #[injectable]
 pub(crate) struct QueueSummaryCommand {
-    cache_options: Ref<CacheOptions>,
     queue: Ref<Queue>,
 }
 
 impl QueueSummaryCommand {
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.cache_options.validate() {
-            return Ok(false);
-        }
         let summary = self.execute().await?;
         let yaml = serde_yaml::to_string(&summary)
             .map_err(|e| yaml_error(e, "serialize queue summary"))?;

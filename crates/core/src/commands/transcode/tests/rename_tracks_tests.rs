@@ -66,17 +66,17 @@ async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
         .with_test_options(&test_dir)
         .await
         .with_options(TargetOptions {
-            allow_existing: None,
-            target: Some(vec![_320, V0]),
-            sox_random_dither: Some(false),
+            allow_existing: false,
+            target: vec![_320, V0],
+            sox_random_dither: false,
         })
         .with_options(FileOptions {
-            rename_tracks: Some(true),
-            no_image_compression: Some(true),
-            no_png_to_jpg: Some(true),
-            max_file_size: Some(750_000),
-            max_pixel_size: Some(1280),
-            jpg_quality: Some(80),
+            rename_tracks: true,
+            no_image_compression: true,
+            no_png_to_jpg: true,
+            max_file_size: 750_000,
+            max_pixel_size: 1280,
+            jpg_quality: 80,
         })
         .build();
 

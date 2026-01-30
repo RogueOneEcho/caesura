@@ -1,11 +1,11 @@
 [package]
 name = "caesura"
-edition = "2024"
+edition.workspace = true
 build = "build.rs"
-authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
-description = "An all-in-one command line tool to **transcode FLAC** audio files and **upload to gazelle** based indexers/trackers. "
-repository = "https://github.com/RogueOneEcho/caesura"
-license = "AGPL-3.0-only"
+authors.workspace = true
+description = "An all-in-one command line tool to transcode FLAC audio files and upload to gazelle based indexers/trackers"
+repository.workspace = true
+license.workspace = true
 include = [
     "src/**/*",
     "build.rs",
@@ -19,7 +19,12 @@ publish = true
 name = "caesura"
 path = "src/main.rs"
 
+[lib]
+name = "caesura"
+path = "src/lib.rs"
+
 [dependencies]
+caesura_macros = { workspace = true }
 bytes = { workspace = true }
 chrono = { workspace = true }
 clap = { workspace = true }

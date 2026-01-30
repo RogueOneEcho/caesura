@@ -1,0 +1,6 @@
+---
+source: src/options/tests/options_tests.rs
+expression: result
+---
+no_hash_check: false
+exclude_tags: ~

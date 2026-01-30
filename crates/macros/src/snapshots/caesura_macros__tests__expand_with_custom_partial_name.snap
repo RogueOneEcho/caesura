@@ -1,0 +1,105 @@
+---
+source: crates/macros/src/lib.rs
+expression: output
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct CustomPartial {
+    #[arg(long = "value")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub value: Option<u32>,
+}
+impl CustomPartial {
+    /// Merge another partial into self (other fills in None values)
+    pub fn merge(&mut self, other: &Self) {
+        if self.value.is_none() {
+            self.value.clone_from(&other.value);
+        }
+    }
+    /// Resolve partial into final options, applying defaults.
+    pub fn resolve(mut self) -> CustomOptions {
+        let value = self.value.take().unwrap_or_default();
+        CustomOptions { value }
+    }
+    /// Deserialize from YAML string
+    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        ::serde_yaml::from_str(yaml)
+    }
+    /// Get from command line arguments
+    pub fn from_args() -> ::std::option::Option<Self> {
+        ::std::option::Option::None
+    }
+}
+impl crate::options::OptionsPartial for CustomPartial {
+    type Resolved = CustomOptions;
+    fn merge(&mut self, other: &Self) {
+        CustomPartial::merge(self, other)
+    }
+    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        CustomPartial::from_yaml(yaml)
+    }
+    fn from_args() -> ::std::option::Option<Self> {
+        CustomPartial::from_args()
+    }
+    fn resolve(self) -> Self::Resolved {
+        CustomPartial::resolve(self)
+    }
+    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
+        CustomOptions::validate_partial(self, errors)
+    }
+}
+impl CustomOptions {
+    /// Commands that use this options struct
+    pub fn applicable_commands() -> &'static [crate::options::Command] {
+        &[]
+    }
+}
+impl ::std::fmt::Display for CustomOptions {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl ::std::fmt::Display for CustomPartial {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl crate::options::ApplicableCommands for CustomOptions {
+    fn applicable_commands() -> &'static [crate::options::Command] {
+        &[]
+    }
+}
+impl crate::options::Documented for CustomOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static FIELDS: &[crate::options::FieldDoc] = &[
+            crate::options::FieldDoc {
+                config_key: "value",
+                cli_flag: "--value",
+                field_type: "u32",
+                default: ::std::option::Option::None,
+                description: "",
+            },
+        ];
+        static COMMANDS: &[&str] = &[];
+        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+            name: "CustomOptions",
+            description: "",
+            fields: FIELDS,
+            commands: COMMANDS,
+        };
+        &DOC
+    }
+}

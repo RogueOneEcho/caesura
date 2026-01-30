@@ -1,8 +1,6 @@
 use crate::hosting::*;
-use crate::options::*;
+use crate::options::SourceArg;
 use crate::utils::*;
-use rogue_logging::{TimeFormat, Verbosity};
-use std::path::PathBuf;
 
 const TEST_TORRENT_ID: u32 = 12345;
 const TEST_TORRENT_ID_LARGE: u32 = 123_456_789;
@@ -152,19 +150,8 @@ async fn id_provider_missing_torrent_file_returns_not_found() {
 /// Helper function to create a host with a specific source argument.
 fn create_host_with_source(source: &str) -> Host {
     HostBuilder::new()
-        .with_options(SharedOptions {
-            verbosity: Some(Verbosity::Silent),
-            log_time: Some(TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            api_key: Some("test_key".to_owned()),
-            content: Some(vec![PathBuf::from("/content")]),
-            output: Some(PathBuf::from("/output")),
-            ..SharedOptions::default()
-        })
         .with_options(SourceArg {
             source: Some(source.to_owned()),
         })
-        .with_options(RunnerOptions { cpus: Some(4) })
         .build()
 }

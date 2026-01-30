@@ -1,41 +1,42 @@
-use clap::{ArgAction, Args};
-use di::{Ref, injectable};
-use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
 use std::time::Duration;
 
+use serde::{Deserialize, Serialize};
+
 use crate::commands::CommandArguments::{Batch, Queue};
+use crate::commands::QueueCommandArguments::*;
 use crate::commands::*;
 use crate::options::*;
+use caesura_macros::Options;
 
-use crate::commands::QueueCommandArguments::*;
-
-/// Options for [`BatchCommand`]
-#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
+/// Options for batch processing
+#[derive(Options, Clone, Debug, Deserialize, Serialize)]
+#[options(commands(Batch, Queue))]
+#[options(from_args_fn = "Self::partial_from_args")]
+#[allow(clippy::struct_excessive_bools)]
 pub struct BatchOptions {
     /// Should the spectrogram command be executed?
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub spectrogram: Option<bool>,
+    #[arg(long)]
+    pub spectrogram: bool,
 
     /// Should the transcode command be executed?
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub transcode: Option<bool>,
+    #[arg(long)]
+    pub transcode: bool,
 
     /// Should failed transcodes be retried?
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub retry_transcode: Option<bool>,
+    #[arg(long)]
+    pub retry_transcode: bool,
 
     /// Should the upload command be executed?
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub upload: Option<bool>,
+    #[arg(long)]
+    pub upload: bool,
 
     /// Limit the number of torrents to batch process.
     ///
@@ -43,13 +44,14 @@ pub struct BatchOptions {
     ///
     /// Default: `3`
     #[arg(long)]
-    pub limit: Option<usize>,
+    #[options(default = 3)]
+    pub limit: usize,
 
     /// Should the `limit` option be ignored?
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub no_limit: Option<bool>,
+    #[arg(long)]
+    pub no_limit: bool,
 
     /// Wait for a duration before uploading the torrent.
     ///
@@ -60,12 +62,7 @@ pub struct BatchOptions {
     pub wait_before_upload: Option<String>,
 }
 
-#[injectable]
 impl BatchOptions {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
-    }
-
     #[must_use]
     pub fn get_wait_before_upload(&self) -> Option<Duration> {
         let wait_before_upload = self.wait_before_upload.clone()?;
@@ -74,121 +71,59 @@ impl BatchOptions {
 
     #[must_use]
     pub fn get_limit(&self) -> Option<usize> {
-        if self.no_limit == Some(true) {
+        if self.no_limit {
             None
         } else {
-            self.limit
+            Some(self.limit)
+        }
+    }
+
+    /// Custom `from_args` implementation for complex Queue subcommand matching
+    #[allow(clippy::manual_let_else)]
+    #[must_use]
+    pub fn partial_from_args() -> Option<BatchOptionsPartial> {
+        match ArgumentsParser::get() {
+            Some(
+                Batch { batch, .. }
+                | Queue {
+                    command: List { batch, .. },
+                },
+            ) => Some(batch),
+            _ => None,
         }
     }
 }
 
-impl Options for BatchOptions {
-    fn merge(&mut self, alternative: &Self) {
-        if self.spectrogram.is_none() {
-            self.spectrogram = alternative.spectrogram;
-        }
-        if self.transcode.is_none() {
-            self.transcode = alternative.transcode;
-        }
-        if self.retry_transcode.is_none() {
-            self.retry_transcode = alternative.retry_transcode;
-        }
-        if self.upload.is_none() {
-            self.upload = alternative.upload;
-        }
-        if self.limit.is_none() {
-            self.limit = alternative.limit;
-        }
-        if self.no_limit.is_none() {
-            self.no_limit = alternative.no_limit;
-        }
-        if self.wait_before_upload.is_none() {
-            self.wait_before_upload
-                .clone_from(&alternative.wait_before_upload);
+impl Default for BatchOptions {
+    fn default() -> Self {
+        Self {
+            spectrogram: false,
+            transcode: false,
+            retry_transcode: false,
+            upload: false,
+            limit: 3,
+            no_limit: false,
+            wait_before_upload: None,
         }
     }
+}
 
-    fn apply_defaults(&mut self) {
-        if self.spectrogram.is_none() {
-            self.spectrogram = Some(false);
-        }
-        if self.transcode.is_none() {
-            self.transcode = Some(false);
-        }
-        if self.retry_transcode.is_none() {
-            self.retry_transcode = Some(false);
-        }
-        if self.upload.is_none() {
-            self.upload = Some(false);
-        }
-        if self.limit.is_none() {
-            self.limit = Some(3);
-        }
-        if self.no_limit.is_none() {
-            self.no_limit = Some(false);
-        }
-    }
-
-    fn validate(&self) -> bool {
-        let mut errors: Vec<OptionRule> = Vec::new();
-        if let Some(wait_before_upload) = &self.wait_before_upload
-            && self.get_wait_before_upload().is_none()
+impl BatchOptions {
+    /// Validate the partial options.
+    pub fn validate_partial(partial: &BatchOptionsPartial, errors: &mut Vec<OptionRule>) {
+        if let Some(wait_before_upload) = &partial.wait_before_upload
+            && humantime::parse_duration(wait_before_upload.as_str()).is_err()
         {
             errors.push(OptionRule::DurationInvalid(
                 "Wait Before Upload".to_owned(),
                 wait_before_upload.clone(),
             ));
         }
-        if self.upload == Some(true) && self.transcode != Some(true) {
+        if partial.upload == Some(true) && partial.transcode != Some(true) {
             errors.push(OptionRule::Dependent(
                 "Upload".to_owned(),
                 "Transcode".to_owned(),
             ));
         }
-        OptionRule::show(&errors);
-        errors.is_empty()
-    }
-
-    #[allow(clippy::manual_let_else)]
-    fn from_args() -> Option<Self> {
-        let options = match ArgumentsParser::get() {
-            Some(
-                Batch { batch, .. }
-                | Queue {
-                    command: List { batch, .. },
-                },
-            ) => batch,
-            _ => return None,
-        };
-        let mut options = options;
-        if options.spectrogram == Some(false) {
-            options.spectrogram = None;
-        }
-        if options.transcode == Some(false) {
-            options.transcode = None;
-        }
-        if options.retry_transcode == Some(false) {
-            options.retry_transcode = None;
-        }
-        if options.upload == Some(false) {
-            options.upload = None;
-        }
-        Some(options)
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
-    }
-}
-
-impl Display for BatchOptions {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
-            yaml
-        } else {
-            format!("{self:?}")
-        };
-        output.fmt(formatter)
     }
 }

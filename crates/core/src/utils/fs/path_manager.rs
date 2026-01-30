@@ -17,10 +17,7 @@ pub struct PathManager {
 impl PathManager {
     #[must_use]
     pub fn get_cache_dir(&self) -> PathBuf {
-        self.cache_options
-            .cache
-            .clone()
-            .expect("cache should be set")
+        self.cache_options.cache.clone()
     }
 
     #[must_use]
@@ -40,10 +37,7 @@ impl PathManager {
 
     #[must_use]
     pub fn get_output_dir(&self) -> PathBuf {
-        self.shared_options
-            .output
-            .clone()
-            .expect("output should be set")
+        self.shared_options.output.clone()
     }
 
     #[must_use]
@@ -66,10 +60,7 @@ impl PathManager {
         flac: &FlacFile,
     ) -> PathBuf {
         let extension = target.get_file_extension();
-        let rename_tracks = self
-            .file_options
-            .rename_tracks
-            .expect("rename_tracks should be set");
+        let rename_tracks = self.file_options.rename_tracks;
         // If rename_tracks enabled and disc context is set on flac, use renamed paths
         let (base_name, sub_dir) = if rename_tracks && flac.disc_context.is_some() {
             (

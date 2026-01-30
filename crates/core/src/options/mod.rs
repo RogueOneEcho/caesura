@@ -1,11 +1,13 @@
 //! Configuration structs loaded from CLI args and YAML config.
 
-pub(crate) use batch_options::*;
-pub(crate) use cache_options::*;
-pub(crate) use copy_options::*;
-pub(crate) use file_options::*;
+pub use batch_options::*;
+pub use cache_options::*;
+pub(crate) use command::*;
+pub use copy_options::*;
+pub use doc_metadata::*;
+pub use file_options::*;
 pub(crate) use options_provider::*;
-pub(crate) use options_trait::*;
+pub(crate) use options_trait::{ApplicableCommands, OptionsPartial};
 pub(crate) use queue_add_args::*;
 pub(crate) use queue_rm_args::*;
 pub(crate) use rules::OptionRule::*;
@@ -13,14 +15,16 @@ pub(crate) use rules::*;
 pub(crate) use runner_options::*;
 pub(crate) use shared_options::*;
 pub(crate) use source_arg::*;
-pub(crate) use spectrogram_options::*;
-pub(crate) use target_options::*;
-pub(crate) use upload_options::*;
-pub(crate) use verify_options::*;
+pub use spectrogram_options::*;
+pub use target_options::*;
+pub use upload_options::*;
+pub use verify_options::*;
 
 mod batch_options;
 mod cache_options;
+mod command;
 mod copy_options;
+mod doc_metadata;
 mod file_options;
 mod options_provider;
 mod options_trait;

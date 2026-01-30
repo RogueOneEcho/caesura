@@ -1,0 +1,105 @@
+---
+source: crates/macros/src/lib.rs
+expression: output
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct NoCommandOptionsPartial {
+    #[arg(long = "limit")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub limit: Option<u32>,
+}
+impl NoCommandOptionsPartial {
+    /// Merge another partial into self (other fills in None values)
+    pub fn merge(&mut self, other: &Self) {
+        if self.limit.is_none() {
+            self.limit.clone_from(&other.limit);
+        }
+    }
+    /// Resolve partial into final options, applying defaults.
+    pub fn resolve(mut self) -> NoCommandOptions {
+        let limit = self.limit.take().unwrap_or_else(|| 100);
+        NoCommandOptions { limit }
+    }
+    /// Deserialize from YAML string
+    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        ::serde_yaml::from_str(yaml)
+    }
+    /// Get from command line arguments
+    pub fn from_args() -> ::std::option::Option<Self> {
+        ::std::option::Option::None
+    }
+}
+impl crate::options::OptionsPartial for NoCommandOptionsPartial {
+    type Resolved = NoCommandOptions;
+    fn merge(&mut self, other: &Self) {
+        NoCommandOptionsPartial::merge(self, other)
+    }
+    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        NoCommandOptionsPartial::from_yaml(yaml)
+    }
+    fn from_args() -> ::std::option::Option<Self> {
+        NoCommandOptionsPartial::from_args()
+    }
+    fn resolve(self) -> Self::Resolved {
+        NoCommandOptionsPartial::resolve(self)
+    }
+    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
+        NoCommandOptions::validate_partial(self, errors)
+    }
+}
+impl NoCommandOptions {
+    /// Commands that use this options struct
+    pub fn applicable_commands() -> &'static [crate::options::Command] {
+        &[]
+    }
+}
+impl ::std::fmt::Display for NoCommandOptions {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl ::std::fmt::Display for NoCommandOptionsPartial {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl crate::options::ApplicableCommands for NoCommandOptions {
+    fn applicable_commands() -> &'static [crate::options::Command] {
+        &[]
+    }
+}
+impl crate::options::Documented for NoCommandOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static FIELDS: &[crate::options::FieldDoc] = &[
+            crate::options::FieldDoc {
+                config_key: "limit",
+                cli_flag: "--limit",
+                field_type: "u32",
+                default: ::std::option::Option::Some("100"),
+                description: "",
+            },
+        ];
+        static COMMANDS: &[&str] = &[];
+        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+            name: "NoCommandOptions",
+            description: "",
+            fields: FIELDS,
+            commands: COMMANDS,
+        };
+        &DOC
+    }
+}

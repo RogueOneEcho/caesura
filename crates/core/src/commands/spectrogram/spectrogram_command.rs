@@ -12,8 +12,6 @@ use crate::utils::*;
 #[injectable]
 pub(crate) struct SpectrogramCommand {
     arg: Ref<SourceArg>,
-    shared_options: Ref<SharedOptions>,
-    spectrogram_options: Ref<SpectrogramOptions>,
     source_provider: Ref<SourceProvider>,
     paths: Ref<PathManager>,
     factory: Ref<SpectrogramJobFactory>,
@@ -27,10 +25,7 @@ impl SpectrogramCommand {
     ///
     /// Returns `true` if the spectrogram generation succeeds.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.arg.validate()
-            || !self.shared_options.validate()
-            || !self.spectrogram_options.validate()
-        {
+        if !self.arg.validate() {
             return Ok(false);
         }
         let source = self

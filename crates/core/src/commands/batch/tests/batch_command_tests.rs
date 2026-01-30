@@ -136,11 +136,7 @@ async fn batch_command_respects_limit() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(BatchOptions {
-            spectrogram: Some(false),
-            transcode: Some(false),
-            retry_transcode: Some(false),
-            upload: Some(false),
-            limit: Some(1),
+            limit: 1,
             ..BatchOptions::default()
         })
         .build();
@@ -291,10 +287,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
         .with_test_options(&test_dir)
         .await
         .with_options(BatchOptions {
-            spectrogram: Some(false),
-            transcode: Some(true),
-            retry_transcode: Some(false),
-            upload: Some(false),
+            transcode: true,
             ..BatchOptions::default()
         })
         .with_options(QueueAddArgs {
@@ -332,37 +325,6 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
     Ok(())
 }
 
-/// Test that `BatchCommand` returns false when options validation fails.
-#[tokio::test]
-async fn batch_command_validation_failure_returns_false() -> Result<(), Error> {
-    // Arrange
-    let _ = init_logger();
-    let album = AlbumProvider::get(SampleFormat::default()).await;
-    let test_dir = TestDirectory::new();
-
-    let host = HostBuilder::new()
-        .with_mock_api(album)
-        .with_test_options(&test_dir)
-        .await
-        .with_options(BatchOptions {
-            spectrogram: Some(false),
-            transcode: Some(false),
-            retry_transcode: Some(false),
-            upload: Some(true), // Invalid: upload without transcode
-            ..BatchOptions::default()
-        })
-        .build();
-
-    let command = host.services.get_required::<BatchCommand>();
-
-    // Act
-    let result = command.execute_cli().await;
-
-    // Assert
-    assert!(matches!(result, Ok(false)));
-    Ok(())
-}
-
 /// Test that `BatchCommand` with `dry_run` does NOT save upload status.
 #[tokio::test]
 async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error> {
@@ -376,15 +338,12 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
         .with_test_options(&test_dir)
         .await
         .with_options(BatchOptions {
-            spectrogram: Some(false),
-            transcode: Some(true),
-            retry_transcode: Some(false),
-            upload: Some(true),
+            transcode: true,
+            upload: true,
             ..BatchOptions::default()
         })
         .with_options(UploadOptions {
-            dry_run: Some(true),
-            copy_transcode_to_content_dir: Some(false),
+            dry_run: true,
             ..UploadOptions::default()
         })
         .with_options(QueueAddArgs {
@@ -435,16 +394,9 @@ async fn batch_command_upload_saves_status() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(BatchOptions {
-            spectrogram: Some(false),
-            transcode: Some(true),
-            retry_transcode: Some(false),
-            upload: Some(true),
+            transcode: true,
+            upload: true,
             ..BatchOptions::default()
-        })
-        .with_options(UploadOptions {
-            dry_run: Some(false),
-            copy_transcode_to_content_dir: Some(false),
-            ..UploadOptions::default()
         })
         .with_options(QueueAddArgs {
             queue_add_path: Some(album.single_torrent_dir()),

@@ -42,10 +42,7 @@ impl TranscodeJobFactory {
             .map_err(|e| claxon_error(e, "read FLAC"))?;
         let id = format!("Transcode {:<4}{index:>3}", format.to_string());
         let output_path = self.paths.get_transcode_path(source, format, flac);
-        let repeatable = !self
-            .target_options
-            .sox_random_dither
-            .expect("sox_random_dither should be set");
+        let repeatable = !self.target_options.sox_random_dither;
         let variant = match format {
             TargetFormat::Flac => {
                 if is_resample_required(&info) {
@@ -59,10 +56,7 @@ impl TranscodeJobFactory {
                     Variant::Include(Include {
                         input: flac.path.clone(),
                         output: output_path.clone(),
-                        hard_link: self
-                            .copy_options
-                            .hard_link
-                            .expect("hard_link should be set"),
+                        hard_link: self.copy_options.hard_link,
                     })
                 }
             }

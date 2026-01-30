@@ -21,9 +21,7 @@ impl Publisher {
         progress_bar_subscriber: Ref<ProgressBarSubscriber>,
     ) -> Self {
         let subscriber: Ref<dyn Subscriber + Send + Sync> =
-            if options.verbosity.expect("verbosity should be set").as_num()
-                >= Verbosity::Trace.as_num()
-            {
+            if options.verbosity.as_num() >= Verbosity::Trace.as_num() {
                 debug_subscriber
             } else {
                 progress_bar_subscriber

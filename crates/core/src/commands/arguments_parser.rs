@@ -5,7 +5,10 @@ use std::process::exit;
 use crate::commands::*;
 /// Command line argument parser.
 #[derive(Parser)]
-#[command(version, about)]
+#[command(
+    version,
+    about = "An all-in-one command line tool to transcode FLAC audio files and upload to gazelle based indexers/trackers"
+)]
 pub struct ArgumentsParser {
     /// The command to run
     #[command(subcommand)]

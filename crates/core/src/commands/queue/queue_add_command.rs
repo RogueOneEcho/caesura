@@ -15,18 +15,13 @@ use std::path::PathBuf;
 /// Add a directory of `.torrent` files to the queue
 #[injectable]
 pub(crate) struct QueueAddCommand {
-    shared_options: Ref<SharedOptions>,
-    cache_options: Ref<CacheOptions>,
     args: Ref<QueueAddArgs>,
     queue: Ref<Queue>,
 }
 
 impl QueueAddCommand {
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.shared_options.validate()
-            || !self.cache_options.validate()
-            || !self.args.validate()
-        {
+        if !self.args.validate() {
             return Ok(false);
         }
         let path = self

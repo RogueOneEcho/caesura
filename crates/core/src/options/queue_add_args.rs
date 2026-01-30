@@ -4,11 +4,12 @@ use std::path::PathBuf;
 use CommandArguments::Queue;
 use QueueCommandArguments::Add;
 use clap::Args;
-use di::{Ref, injectable};
+use di::injectable;
 use serde::{Deserialize, Serialize};
 
 use crate::commands::*;
 use crate::options::*;
+
 /// Options for the [`QueueAddCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct QueueAddArgs {
@@ -23,21 +24,26 @@ pub struct QueueAddArgs {
 
 #[injectable]
 impl QueueAddArgs {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
+    fn new() -> Self {
+        Self::from_args().unwrap_or_default()
     }
-}
 
-impl Options for QueueAddArgs {
-    fn merge(&mut self, alternative: &Self) {
-        if self.queue_add_path.is_none() {
-            self.queue_add_path.clone_from(&alternative.queue_add_path);
+    /// Get from command line arguments.
+    #[allow(clippy::match_wildcard_for_single_variants)]
+    #[must_use]
+    pub fn from_args() -> Option<Self> {
+        match ArgumentsParser::get() {
+            Some(Queue {
+                command: Add { args, .. },
+                ..
+            }) => Some(args),
+            _ => None,
         }
     }
 
-    fn apply_defaults(&mut self) {}
-
-    fn validate(&self) -> bool {
+    /// Validate the queue add arguments.
+    #[must_use]
+    pub fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(path) = &self.queue_add_path {
             if !path.exists() {
@@ -51,21 +57,6 @@ impl Options for QueueAddArgs {
         }
         OptionRule::show(&errors);
         errors.is_empty()
-    }
-
-    #[allow(clippy::match_wildcard_for_single_variants)]
-    fn from_args() -> Option<Self> {
-        match ArgumentsParser::get() {
-            Some(Queue {
-                command: Add { args, .. },
-                ..
-            }) => Some(args),
-            _ => None,
-        }
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
     }
 }
 

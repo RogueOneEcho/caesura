@@ -1,15 +1,13 @@
-use std::fmt::{Display, Formatter};
-
-use clap::Args;
-use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::*;
-use crate::commands::*;
-use crate::options::*;
+use crate::options::OptionRule;
+use caesura_macros::Options;
 
-/// Options for [`JobRunner`]
-#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
+/// Options for concurrency
+#[derive(Options, Clone, Debug, Deserialize, Serialize)]
+#[options(commands(Batch, Spectrogram, Transcode))]
+#[options(field_name = "runner")]
+#[options(defaults_fn = "Self::apply_calculated_defaults")]
 pub struct RunnerOptions {
     /// Number of cpus to use for processing.
     ///
@@ -18,53 +16,24 @@ pub struct RunnerOptions {
     pub cpus: Option<u16>,
 }
 
-#[injectable]
 impl RunnerOptions {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
-    }
-}
-
-impl Options for RunnerOptions {
-    fn merge(&mut self, alternative: &Self) {
-        if self.cpus.is_none() {
-            self.cpus.clone_from(&alternative.cpus);
-        }
-    }
-
+    /// Apply calculated defaults that depend on runtime values.
     #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
-    fn apply_defaults(&mut self) {
-        if self.cpus.is_none() {
-            self.cpus = Some(num_cpus::get() as u16);
+    pub fn apply_calculated_defaults(partial: &mut RunnerOptionsPartial) {
+        if partial.cpus.is_none() {
+            partial.cpus = Some(num_cpus::get() as u16);
         }
     }
 
-    fn validate(&self) -> bool {
-        true
-    }
-
-    fn from_args() -> Option<Self> {
-        match ArgumentsParser::get() {
-            Some(Batch { runner, .. } | Spectrogram { runner, .. } | Transcode { runner, .. }) => {
-                Some(runner)
-            }
-            _ => None,
-        }
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
-    }
+    /// Validate the partial options.
+    pub fn validate_partial(_: &RunnerOptionsPartial, _: &mut Vec<OptionRule>) {}
 }
 
-impl Display for RunnerOptions {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
-            yaml
-        } else {
-            format!("{self:?}")
-        };
-        output.fmt(formatter)
+impl Default for RunnerOptions {
+    #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
+    fn default() -> Self {
+        Self {
+            cpus: Some(num_cpus::get() as u16),
+        }
     }
 }

@@ -1,24 +1,19 @@
-use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 
-use clap::Args;
-use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::*;
-use crate::commands::QueueCommandArguments::*;
-
-use rogue_logging::{TimeFormat, Verbosity};
-
-use crate::commands::CommandArguments::{Batch, Queue};
+use crate::commands::CommandArguments::{Batch, Queue, Spectrogram, Transcode, Upload, Verify};
+use crate::commands::QueueCommandArguments::{Add, List, Remove, Summary};
 use crate::commands::*;
 use crate::options::*;
-pub const DEFAULT_CONFIG_PATH: &str = "config.yml";
-const DEFAULT_CONTENT_PATH: &str = "./content";
-const DEFAULT_OUTPUT_PATH: &str = "./output";
+use caesura_macros::Options;
+use rogue_logging::{TimeFormat, Verbosity};
 
 /// Options shared by all commands
-#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Options, Clone, Debug, Deserialize, Serialize)]
+#[options(commands(Batch, Queue, Spectrogram, Transcode, Verify, Upload))]
+#[options(from_args_fn = "Self::partial_from_args")]
+#[options(defaults_fn = "Self::apply_calculated_defaults")]
 pub struct SharedOptions {
     /// Announce URL including passkey
     ///
@@ -52,13 +47,14 @@ pub struct SharedOptions {
     ///
     /// Default: `./content`
     #[arg(long)]
-    pub content: Option<Vec<PathBuf>>,
+    #[options(default = vec![PathBuf::from("./content")])]
+    pub content: Vec<PathBuf>,
 
     /// Level of logs to display.
     ///
     /// Default: `info`
     #[arg(long, value_enum)]
-    pub verbosity: Option<Verbosity>,
+    pub verbosity: Verbosity,
 
     /// Path to the configuration file.
     ///
@@ -68,58 +64,24 @@ pub struct SharedOptions {
 
     /// Time format to use in logs.
     ///
-    /// Default: `datetime`
+    /// Default: `Local`
     #[arg(long)]
-    pub log_time: Option<TimeFormat>,
+    pub log_time: TimeFormat,
 
     /// Directory where transcodes and spectrograms will be written.
     ///
     /// Default: `./output`
     #[arg(long)]
-    pub output: Option<PathBuf>,
+    #[options(default = PathBuf::from("./output"))]
+    pub output: PathBuf,
 }
 
-#[injectable]
 impl SharedOptions {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
-    }
-}
-
-impl Options for SharedOptions {
-    fn merge(&mut self, alternative: &Self) {
-        if self.announce_url.is_none() {
-            self.announce_url.clone_from(&alternative.announce_url);
-        }
-        if self.api_key.is_none() {
-            self.api_key.clone_from(&alternative.api_key);
-        }
-        if self.indexer.is_none() {
-            self.indexer.clone_from(&alternative.indexer);
-        }
-        if self.indexer_url.is_none() {
-            self.indexer_url.clone_from(&alternative.indexer_url);
-        }
-        if self.content.is_none() {
-            self.content.clone_from(&alternative.content);
-        }
-        if self.verbosity.is_none() {
-            self.verbosity = alternative.verbosity;
-        }
-        if self.config.is_none() {
-            self.config.clone_from(&alternative.config);
-        }
-        if self.log_time.is_none() {
-            self.log_time.clone_from(&alternative.log_time);
-        }
-        if self.output.is_none() {
-            self.output.clone_from(&alternative.output);
-        }
-    }
-
-    fn apply_defaults(&mut self) {
-        if self.indexer.is_none() {
-            self.indexer = match self.announce_url.as_deref() {
+    /// Apply calculated defaults that depend on runtime values.
+    pub fn apply_calculated_defaults(partial: &mut SharedOptionsPartial) {
+        // indexer is calculated from announce_url
+        if partial.indexer.is_none() {
+            partial.indexer = match partial.announce_url.as_deref() {
                 Some(url) => {
                     if url.starts_with("https://flacsfor.me") {
                         Some("red".to_owned())
@@ -132,30 +94,72 @@ impl Options for SharedOptions {
                 _ => None,
             };
         }
-        if self.indexer_url.is_none() {
-            self.indexer_url = match self.indexer.as_deref() {
+        // indexer_url is calculated from indexer
+        if partial.indexer_url.is_none() {
+            partial.indexer_url = match partial.indexer.as_deref() {
                 Some("red") => Some("https://redacted.sh".to_owned()),
                 Some("ops") => Some("https://orpheus.network".to_owned()),
                 _ => None,
             }
         }
-        if self.verbosity.is_none() {
-            self.verbosity = Some(Verbosity::default());
+    }
+
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        Self {
+            indexer: Some("red".to_owned()),
+            indexer_url: Some("https://redacted.sh".to_owned()),
+            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
+            api_key: Some("test_api_key".to_owned()),
+            ..SharedOptions::default()
         }
-        if self.log_time.is_none() {
-            self.log_time = Some(TimeFormat::default());
+    }
+}
+
+/// Manual `Default` impl with values matching the `#[options(default = ...)]` attributes.
+/// Using `#[derive(Default)]` would give empty values for `content` and `output`.
+impl Default for SharedOptions {
+    fn default() -> Self {
+        Self {
+            announce_url: None,
+            api_key: None,
+            indexer: None,
+            indexer_url: None,
+            content: vec![PathBuf::from("./content")],
+            verbosity: Verbosity::default(),
+            config: None,
+            log_time: TimeFormat::default(),
+            output: PathBuf::from("./output"),
         }
-        if self.content.is_none() {
-            self.content = Some(vec![PathBuf::from(DEFAULT_CONTENT_PATH)]);
-        }
-        if self.output.is_none() {
-            self.output = Some(PathBuf::from(DEFAULT_OUTPUT_PATH));
+    }
+}
+
+impl SharedOptions {
+    /// Custom `from_args` implementation for complex Queue subcommand matching
+    pub fn partial_from_args() -> Option<SharedOptionsPartial> {
+        match ArgumentsParser::get() {
+            Some(
+                Batch { shared, .. }
+                | Queue {
+                    command:
+                        Add { shared, .. }
+                        | List { shared, .. }
+                        | Summary { shared, .. }
+                        | Remove { shared, .. },
+                    ..
+                }
+                | Spectrogram { shared, .. }
+                | Transcode { shared, .. }
+                | Verify { shared, .. }
+                | Upload { shared, .. },
+            ) => Some(shared),
+            _ => None,
         }
     }
 
-    fn validate(&self) -> bool {
-        let mut errors: Vec<OptionRule> = Vec::new();
-        if let Some(config) = &self.config {
+    /// Validate the partial options.
+    pub fn validate_partial(partial: &SharedOptionsPartial, errors: &mut Vec<OptionRule>) {
+        if let Some(config) = &partial.config {
             if config.ends_with(".json")
                 || (config.eq(&PathBuf::from(DEFAULT_CONFIG_PATH)) && !config.is_file())
             {
@@ -175,16 +179,13 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
                 ));
             }
         }
-        if self.api_key.is_none() {
+        if partial.api_key.is_none() {
             errors.push(NotSet("API Key".to_owned()));
         }
-        if self.indexer.is_none() {
+        if partial.indexer.is_none() {
             errors.push(NotSet("Indexer".to_owned()));
         }
-        if self.indexer_url.is_none() {
-            errors.push(NotSet("Indexer URL".to_owned()));
-        } else {
-            let indexer_url = self.indexer_url.clone().expect("indexer_url should be set");
+        if let Some(indexer_url) = &partial.indexer_url {
             if !indexer_url.starts_with("https://") && !indexer_url.starts_with("http://") {
                 errors.push(UrlNotHttp("Indexer URL".to_owned(), indexer_url.clone()));
             }
@@ -194,14 +195,10 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
                     indexer_url.clone(),
                 ));
             }
-        }
-        if self.announce_url.is_none() {
-            errors.push(NotSet("Announce URL".to_owned()));
         } else {
-            let announce_url = self
-                .announce_url
-                .clone()
-                .expect("announce_url should be set");
+            errors.push(NotSet("Indexer URL".to_owned()));
+        }
+        if let Some(announce_url) = &partial.announce_url {
             if !announce_url.starts_with("https://") && !announce_url.starts_with("http://") {
                 errors.push(UrlNotHttp("Announce URL".to_owned(), announce_url.clone()));
             }
@@ -211,8 +208,13 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
                     announce_url.clone(),
                 ));
             }
+        } else {
+            errors.push(NotSet("Announce URL".to_owned()));
         }
-        if let Some(directories) = &self.content {
+        if let Some(directories) = &partial.content {
+            if directories.is_empty() {
+                errors.push(IsEmpty("Content Directory".to_owned()));
+            }
             for dir in directories {
                 if !dir.exists() || !dir.is_dir() {
                     errors.push(DoesNotExist(
@@ -221,53 +223,14 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
                     ));
                 }
             }
-        } else {
-            errors.push(NotSet("Content Directory".to_owned()));
         }
-        if let Some(output_directory) = &self.output {
-            if !output_directory.exists() || !output_directory.is_dir() {
-                errors.push(DoesNotExist(
-                    "Output Directory".to_owned(),
-                    output_directory.to_string_lossy().to_string(),
-                ));
-            }
-        } else {
-            errors.push(NotSet("Output Directory".to_owned()));
+        if let Some(output_directory) = &partial.output
+            && (!output_directory.exists() || !output_directory.is_dir())
+        {
+            errors.push(DoesNotExist(
+                "Output Directory".to_owned(),
+                output_directory.to_string_lossy().to_string(),
+            ));
         }
-        OptionRule::show(&errors);
-        errors.is_empty()
-    }
-
-    fn from_args() -> Option<Self> {
-        match ArgumentsParser::get() {
-            Some(
-                Batch { shared, .. }
-                | Queue {
-                    command: Add { shared, .. } | List { shared, .. } | Summary { shared, .. },
-                    ..
-                }
-                | Spectrogram { shared, .. }
-                | Transcode { shared, .. }
-                | Verify { shared, .. }
-                | Upload { shared, .. },
-            ) => Some(shared),
-            _ => None,
-        }
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
-    }
-}
-
-impl Display for SharedOptions {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
-            yaml
-        } else {
-            format!("{self:?}")
-        };
-        output.fmt(formatter)
     }
 }

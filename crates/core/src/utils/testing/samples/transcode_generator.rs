@@ -13,7 +13,6 @@ use crate::commands::TranscodeCommand;
 use crate::hosting::HostBuilder;
 use crate::options::{CacheOptions, SharedOptions, TargetOptions};
 use crate::utils::{AlbumConfig, SourceProvider, TempDirectory};
-use rogue_logging::{TimeFormat, Verbosity};
 use tokio::fs::create_dir_all;
 
 /// Generates cached transcode outputs for testing.
@@ -96,24 +95,15 @@ impl TranscodeGenerator {
         let host = HostBuilder::new()
             .with_mock_api(config.album.clone())
             .with_options(SharedOptions {
-                content: Some(vec![content_dir]),
-                output: Some(output_dir.to_path_buf()),
-                verbosity: Some(Verbosity::Debug),
-                log_time: Some(TimeFormat::None),
-                indexer: Some("red".to_owned()),
-                indexer_url: Some("https://redacted.sh".to_owned()),
-                announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-                api_key: Some("test_api_key".to_owned()),
-                ..SharedOptions::default()
+                content: vec![content_dir],
+                output: output_dir.to_path_buf(),
+                ..SharedOptions::mock()
             })
             .with_options(TargetOptions {
-                allow_existing: None,
-                target: Some(vec![config.target]),
-                sox_random_dither: Some(false),
+                target: vec![config.target],
+                ..TargetOptions::default()
             })
-            .with_options(CacheOptions {
-                cache: Some(cache_dir),
-            })
+            .with_options(CacheOptions { cache: cache_dir })
             .build();
         let provider = host.services.get_required::<SourceProvider>();
         let transcoder = host.services.get_required::<TranscodeCommand>();

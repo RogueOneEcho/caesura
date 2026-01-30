@@ -1,0 +1,164 @@
+---
+source: crates/macros/src/lib.rs
+expression: output
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct TestOptionsPartial {
+    /// A string field.
+    #[arg(long = "name")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub name: Option<String>,
+    /// A field with a default value.
+    #[arg(long = "count")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub count: Option<u32>,
+    /// A boolean flag.
+    #[arg(long = "enabled", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub enabled: Option<bool>,
+    /// An optional field.
+    #[arg(long = "description")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub description: Option<String>,
+}
+impl TestOptionsPartial {
+    /// Merge another partial into self (other fills in None values)
+    pub fn merge(&mut self, other: &Self) {
+        if self.name.is_none() {
+            self.name.clone_from(&other.name);
+        }
+        if self.count.is_none() {
+            self.count.clone_from(&other.count);
+        }
+        if self.enabled.is_none() {
+            self.enabled.clone_from(&other.enabled);
+        }
+        if self.description.is_none() {
+            self.description.clone_from(&other.description);
+        }
+    }
+    /// Resolve partial into final options, applying defaults.
+    pub fn resolve(mut self) -> TestOptions {
+        let name = self.name.take().unwrap_or_default();
+        let count = self.count.take().unwrap_or_else(|| 42);
+        let enabled = self.enabled.take().unwrap_or_default();
+        let description = self.description.clone();
+        TestOptions {
+            name,
+            count,
+            enabled,
+            description,
+        }
+    }
+    /// Deserialize from YAML string
+    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        ::serde_yaml::from_str(yaml)
+    }
+    /// Get from command line arguments
+    pub fn from_args() -> ::std::option::Option<Self> {
+        let mut options = match crate::commands::ArgumentsParser::get()? {
+            crate::commands::CommandArguments::Batch { opts, .. }
+            | crate::commands::CommandArguments::Transcode { opts, .. } => opts,
+            _ => return ::std::option::Option::None,
+        };
+        if options.enabled == ::std::option::Option::Some(false) {
+            options.enabled = ::std::option::Option::None;
+        }
+        ::std::option::Option::Some(options)
+    }
+}
+impl crate::options::OptionsPartial for TestOptionsPartial {
+    type Resolved = TestOptions;
+    fn merge(&mut self, other: &Self) {
+        TestOptionsPartial::merge(self, other)
+    }
+    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        TestOptionsPartial::from_yaml(yaml)
+    }
+    fn from_args() -> ::std::option::Option<Self> {
+        TestOptionsPartial::from_args()
+    }
+    fn resolve(self) -> Self::Resolved {
+        TestOptionsPartial::resolve(self)
+    }
+    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
+        TestOptions::validate_partial(self, errors)
+    }
+}
+impl TestOptions {
+    /// Commands that use this options struct
+    pub fn applicable_commands() -> &'static [crate::options::Command] {
+        &[crate::options::Command::Batch, crate::options::Command::Transcode]
+    }
+}
+impl ::std::fmt::Display for TestOptions {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl ::std::fmt::Display for TestOptionsPartial {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl crate::options::ApplicableCommands for TestOptions {
+    fn applicable_commands() -> &'static [crate::options::Command] {
+        &[crate::options::Command::Batch, crate::options::Command::Transcode]
+    }
+}
+impl crate::options::Documented for TestOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static FIELDS: &[crate::options::FieldDoc] = &[
+            crate::options::FieldDoc {
+                config_key: "name",
+                cli_flag: "--name",
+                field_type: "String",
+                default: ::std::option::Option::None,
+                description: "A string field.",
+            },
+            crate::options::FieldDoc {
+                config_key: "count",
+                cli_flag: "--count",
+                field_type: "u32",
+                default: ::std::option::Option::Some("42"),
+                description: "A field with a default value.",
+            },
+            crate::options::FieldDoc {
+                config_key: "enabled",
+                cli_flag: "--enabled",
+                field_type: "bool",
+                default: ::std::option::Option::Some("false"),
+                description: "A boolean flag.",
+            },
+            crate::options::FieldDoc {
+                config_key: "description",
+                cli_flag: "--description",
+                field_type: "Option<String>",
+                default: ::std::option::Option::None,
+                description: "An optional field.",
+            },
+        ];
+        static COMMANDS: &[&str] = &["Batch", "Transcode"];
+        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+            name: "TestOptions",
+            description: "",
+            fields: FIELDS,
+            commands: COMMANDS,
+        };
+        &DOC
+    }
+}

@@ -1,0 +1,10 @@
+---
+source: crates/core/src/options/tests/options_tests.rs
+expression: errors
+---
+- UrlNotHttp:
+    - Indexer URL
+    - not-a-url
+- UrlInvalidSuffix:
+    - Announce URL
+    - "https://example.com/announce/"

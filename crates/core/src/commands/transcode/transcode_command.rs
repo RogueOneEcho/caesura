@@ -17,7 +17,6 @@ use tokio::fs::{copy, hard_link};
 pub(crate) struct TranscodeCommand {
     arg: Ref<SourceArg>,
     shared_options: Ref<SharedOptions>,
-    target_options: Ref<TargetOptions>,
     source_provider: Ref<SourceProvider>,
     copy_options: Ref<CopyOptions>,
     file_options: Ref<FileOptions>,
@@ -35,11 +34,7 @@ impl TranscodeCommand {
     ///
     /// Returns `true` if all the transcodes succeeds.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.arg.validate()
-            || !self.shared_options.validate()
-            || !self.target_options.validate()
-            || !self.file_options.validate()
-        {
+        if !self.arg.validate() {
             return Ok(false);
         }
         let source = self
@@ -132,10 +127,7 @@ impl TranscodeCommand {
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
     ) -> Result<(), Error> {
-        let rename_tracks = self
-            .file_options
-            .rename_tracks
-            .expect("rename_tracks should be set");
+        let rename_tracks = self.file_options.rename_tracks;
         let flacs = if rename_tracks {
             Collector::get_flacs_with_context(&source.directory)
         } else {
@@ -177,10 +169,6 @@ impl TranscodeCommand {
         let from_prefix = self.paths.get_transcode_target_dir(source, *first_target);
         self.runner.add_without_publish(jobs);
         self.runner.execute_without_publish().await?;
-        let hard_link_option = self
-            .copy_options
-            .hard_link
-            .expect("hard_link should be set");
         for target in targets.iter().skip(1) {
             let jobs = self
                 .additional_job_factory
@@ -195,7 +183,7 @@ impl TranscodeCommand {
                             .strip_prefix(&output)
                             .expect("should have prefix"),
                     );
-                    let verb = if hard_link_option {
+                    let verb = if self.copy_options.hard_link {
                         hard_link(&from, &resize.output)
                             .await
                             .map_err(|e| io_error(e, "hard link additional file"))?;

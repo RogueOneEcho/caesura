@@ -44,8 +44,7 @@ impl Queue {
     /// DI constructor for [`Queue`]
     #[inject]
     pub(crate) fn from_options(options: Ref<CacheOptions>) -> Self {
-        let path = options.cache.clone().expect("queue path should be set");
-        let path = path.join("queue");
+        let path = options.cache.join("queue");
         if !path.exists() {
             create_dir(&path)
                 .expect("should be able to create queue directory if it does not exist");

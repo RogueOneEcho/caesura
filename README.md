@@ -59,7 +59,7 @@ Docker is the recommended way to run the application across all platforms.
 - Runs in an isolated environment reducing risks to your system
 
 > [!TIP]
-> **[Configuration options and the commands they apply to are documented in COMMANDS.md](COMMANDS.md)**
+> **[Configuration options and the commands they apply to are documented in CONFIG.md](CONFIG.md)**
 
 ### 0. Install Docker
 
@@ -87,7 +87,7 @@ Create a `config.yml` file with the following content:
 - `announce_url` Your personal announce URL. Find it on upload page.
 - `api_key` Create an API key with `Torrents` permission `Settings > Access Settings > Create an API Key`
 
-Refer to [COMMANDS.md](COMMANDS.md) for full documentation of options.
+Refer to [CONFIG.md](CONFIG.md) for full documentation of options.
 
 ```yaml
 announce_url: https://flacsfor.me/YOUR_ANNOUNCE_KEY/announce
@@ -209,7 +209,7 @@ Inspect the transcodes in the output directory.
 > - Tags
 > - Audio quality
 > - Image size and compression quality
- 
+
 Two `.torrent` files are created for each transcode, one with the indexer as a suffix (`*.red.torrent` or `*.ops.torrent`) and one without. For now these files are identical but if you subsequently transcode the same source for a different indexer they may differ.
 
 ### 8. Upload transcodes
@@ -235,19 +235,19 @@ If you haven't already then add the `*.red.torrent` or `*.ops.torrent` file to y
 
 > [!TIP]
 > `caesura` can automatically add the `.torrent` to your torrent client if it supports an autoadd directory.
-> 
-> Either use the `--copy-torrent-to path/to/autoadd/directory` CLI option or add the following to `config.yml` 
+>
+> Either use the `--copy-torrent-to path/to/autoadd/directory` CLI option or add the following to `config.yml`
 >
 > ```yaml
 > copy_torrent_to: path/to/autoadd/directory
 > ```
-> 
+>
 > Don't forget to ensure the path is mounted as a volume in `docker-compose.yml`.
-> 
+>
 > In qBittorrent you can configure auto add under: Options > Downloads > Automatically add torrents from
-> 
+>
 > Monitored Folder: `path/to/autoadd/directory`
-> 
+>
 > Override save location: `path/to/caesura/output`
 
 Go to your indexer and check your uploads to make sure everything has gone to plan.
@@ -330,7 +330,7 @@ docker compose run --rm caesura batch --upload --limit 10 --wait-before-upload 3
 
 ### 10. Next steps
 
-Check out the [full documentation of configuration options in COMMANDS.md](COMMANDS.md), in particular you may want to use `--copy-transcode-to-content-dir` and `--copy-torrent-to` to suit your preferred setup.
+Check out the [full documentation of configuration options in CONFIG.md](CONFIG.md), in particular you may want to use `--copy-transcode-to-content-dir` and `--copy-torrent-to` to suit your preferred setup.
 
 ### 11. Upload to both RED and OPS
 
@@ -454,7 +454,7 @@ Then `transcode` will create two `.torrent` files:
 ## Commands and Configuration
 
 > [!TIP]
-> **[Configuration options and the commands they apply to are documented in COMMANDS.md](COMMANDS.md)**
+> **[Configuration options and the commands they apply to are documented in CONFIG.md](CONFIG.md)**
 
 Configuration options are sourced first from the command line arguments, then from a configuration file.
 

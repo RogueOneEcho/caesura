@@ -14,7 +14,7 @@ async fn source_provider_mocked() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(TargetOptions {
-            allow_existing: Some(true),
+            allow_existing: true,
             ..TargetOptions::default()
         })
         .build();

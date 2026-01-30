@@ -1,9 +1,11 @@
 use colored::Colorize;
-use log::error;
+use log::{error, warn};
+use serde::Serialize;
 use std::fmt::{Display, Formatter};
 
 use crate::options::*;
-#[derive(Debug)]
+
+#[derive(Debug, Serialize)]
 pub enum OptionRule {
     Changed(String, String, String),
     NotSet(String),
@@ -43,7 +45,7 @@ impl OptionRule {
         if !errors.is_empty() {
             error!("{} configuration", "Invalid".bold());
             for error in errors {
-                error!("{error}");
+                warn!("{error}");
             }
         }
     }

@@ -1,0 +1,109 @@
+---
+source: crates/macros/src/lib.rs
+expression: output
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct CustomArgOptionsPartial {
+    #[arg(long = "custom-name", value_name = "PATH")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub file_path: Option<String>,
+}
+impl CustomArgOptionsPartial {
+    /// Merge another partial into self (other fills in None values)
+    pub fn merge(&mut self, other: &Self) {
+        if self.file_path.is_none() {
+            self.file_path.clone_from(&other.file_path);
+        }
+    }
+    /// Resolve partial into final options, applying defaults.
+    pub fn resolve(mut self) -> CustomArgOptions {
+        let file_path = self.file_path.take().unwrap_or_default();
+        CustomArgOptions { file_path }
+    }
+    /// Deserialize from YAML string
+    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        ::serde_yaml::from_str(yaml)
+    }
+    /// Get from command line arguments
+    pub fn from_args() -> ::std::option::Option<Self> {
+        let mut options = match crate::commands::ArgumentsParser::get()? {
+            crate::commands::CommandArguments::Verify { opts, .. } => opts,
+            _ => return ::std::option::Option::None,
+        };
+        ::std::option::Option::Some(options)
+    }
+}
+impl crate::options::OptionsPartial for CustomArgOptionsPartial {
+    type Resolved = CustomArgOptions;
+    fn merge(&mut self, other: &Self) {
+        CustomArgOptionsPartial::merge(self, other)
+    }
+    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        CustomArgOptionsPartial::from_yaml(yaml)
+    }
+    fn from_args() -> ::std::option::Option<Self> {
+        CustomArgOptionsPartial::from_args()
+    }
+    fn resolve(self) -> Self::Resolved {
+        CustomArgOptionsPartial::resolve(self)
+    }
+    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
+        CustomArgOptions::validate_partial(self, errors)
+    }
+}
+impl CustomArgOptions {
+    /// Commands that use this options struct
+    pub fn applicable_commands() -> &'static [crate::options::Command] {
+        &[crate::options::Command::Verify]
+    }
+}
+impl ::std::fmt::Display for CustomArgOptions {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl ::std::fmt::Display for CustomArgOptionsPartial {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl crate::options::ApplicableCommands for CustomArgOptions {
+    fn applicable_commands() -> &'static [crate::options::Command] {
+        &[crate::options::Command::Verify]
+    }
+}
+impl crate::options::Documented for CustomArgOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static FIELDS: &[crate::options::FieldDoc] = &[
+            crate::options::FieldDoc {
+                config_key: "file_path",
+                cli_flag: "--file-path",
+                field_type: "String",
+                default: ::std::option::Option::None,
+                description: "",
+            },
+        ];
+        static COMMANDS: &[&str] = &["Verify"];
+        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+            name: "CustomArgOptions",
+            description: "",
+            fields: FIELDS,
+            commands: COMMANDS,
+        };
+        &DOC
+    }
+}

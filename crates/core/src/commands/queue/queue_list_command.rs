@@ -10,28 +10,15 @@ use rogue_logging::Error;
 #[injectable]
 pub(crate) struct QueueListCommand {
     shared_options: Ref<SharedOptions>,
-    cache_options: Ref<CacheOptions>,
     batch_options: Ref<BatchOptions>,
     queue: Ref<Queue>,
 }
 
 impl QueueListCommand {
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.shared_options.validate()
-            || !self.cache_options.validate()
-            || !self.batch_options.validate()
-        {
-            return Ok(false);
-        }
-        let transcode_enabled = self
-            .batch_options
-            .transcode
-            .expect("transcode should be set");
-        let retry_failed_transcodes = self
-            .batch_options
-            .retry_transcode
-            .expect("retry_transcode should be set");
-        let upload_enabled = self.batch_options.upload.expect("upload should be set");
+        let transcode_enabled = self.batch_options.transcode;
+        let retry_failed_transcodes = self.batch_options.retry_transcode;
+        let upload_enabled = self.batch_options.upload;
         let indexer = self
             .shared_options
             .indexer

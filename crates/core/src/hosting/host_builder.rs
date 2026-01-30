@@ -1,4 +1,6 @@
 use colored::Colorize;
+#[cfg(test)]
+use di::existing_as_self;
 use di::{Injectable, Mut, Ref, RefMut, ServiceCollection, singleton_as_self};
 use log::error;
 use std::process::exit;
@@ -35,22 +37,12 @@ impl HostBuilder {
         let mut this = HostBuilder {
             services: ServiceCollection::new(),
         };
+
         this.services
-            // Add options
-            .add(OptionsProvider::singleton())
-            .add(BatchOptions::singleton())
-            .add(CacheOptions::singleton())
-            .add(CopyOptions::singleton())
-            .add(FileOptions::singleton())
-            .add(RunnerOptions::singleton())
-            .add(SharedOptions::singleton())
+            .register_options()
             .add(SourceArg::singleton())
-            .add(SpectrogramOptions::singleton())
-            .add(TargetOptions::singleton())
             .add(QueueAddArgs::singleton())
             .add(QueueRemoveArgs::singleton())
-            .add(UploadOptions::singleton())
-            .add(VerifyOptions::singleton())
             // Add main services
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();
@@ -58,8 +50,8 @@ impl HostBuilder {
                     .with_exclude_filter("reqwest".to_owned())
                     .with_exclude_filter("cookie".to_owned())
                     .with_exclude_filter("lofty".to_owned())
-                    .with_verbosity(options.verbosity.expect("verbosity should be set"))
-                    .with_time_format(options.log_time.expect("log_time should be set"))
+                    .with_verbosity(options.verbosity)
+                    .with_time_format(options.log_time)
                     .create()
             }))
             .add(PathManager::transient())
@@ -88,6 +80,8 @@ impl HostBuilder {
             .add(TargetFormatProvider::transient())
             // Add config services
             .add(ConfigCommand::transient())
+            // Add docs services
+            .add(DocsCommand::transient())
             // Add batch services
             .add(BatchCommand::transient())
             // Add queue services
@@ -125,9 +119,8 @@ impl HostBuilder {
     /// Register custom options for testing.
     #[must_use]
     #[cfg(test)]
-    pub fn with_options<T: Options + 'static>(&mut self, options: T) -> &mut Self {
-        self.services
-            .add(singleton_as_self().from(move |_| Ref::new(options.clone())));
+    pub fn with_options<T: Send + Sync + 'static>(&mut self, options: T) -> &mut Self {
+        self.services.add(existing_as_self(options));
         self
     }
 
@@ -147,12 +140,8 @@ impl HostBuilder {
     /// Configure test options for the builder.
     ///
     /// - Sets up content, output, and cache directories
-    /// - Configures target formats (FLAC, 320, V0)
     #[cfg(test)]
     pub async fn with_test_options(&mut self, test_dir: &TestDirectory) -> &mut Self {
-        use crate::utils::TargetFormat::{_320, Flac, V0};
-        use rogue_logging::{TimeFormat, Verbosity};
-
         use tokio::fs::create_dir_all;
         let output_dir = test_dir.output();
         let cache_dir = test_dir.cache();
@@ -163,31 +152,11 @@ impl HostBuilder {
             .await
             .expect("should be able to create cache dir");
         self.with_options(SharedOptions {
-            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(output_dir),
-            verbosity: Some(Verbosity::Debug),
-            log_time: Some(TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: output_dir,
+            ..SharedOptions::mock()
         })
-        .with_options(TargetOptions {
-            allow_existing: None,
-            target: Some(vec![Flac, _320, V0]),
-            sox_random_dither: Some(false),
-        })
-        .with_options(CacheOptions {
-            cache: Some(cache_dir),
-        })
-        .with_options(BatchOptions {
-            spectrogram: Some(false),
-            transcode: Some(false),
-            retry_transcode: Some(false),
-            upload: Some(false),
-            ..BatchOptions::default()
-        })
+        .with_options(CacheOptions { cache: cache_dir })
     }
 
     /// Build the [`Host`] from the configured services.

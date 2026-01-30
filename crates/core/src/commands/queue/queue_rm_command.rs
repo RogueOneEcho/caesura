@@ -10,18 +10,13 @@ use rogue_logging::Error;
 /// Remove an item from the queue
 #[injectable]
 pub(crate) struct QueueRemoveCommand {
-    shared_options: Ref<SharedOptions>,
-    cache_options: Ref<CacheOptions>,
     args: Ref<QueueRemoveArgs>,
     queue: Ref<Queue>,
 }
 
 impl QueueRemoveCommand {
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.shared_options.validate()
-            || !self.cache_options.validate()
-            || !self.args.validate()
-        {
+        if !self.args.validate() {
             return Ok(false);
         }
         let hash = self

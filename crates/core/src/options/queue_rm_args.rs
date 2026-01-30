@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use CommandArguments::Queue;
 use clap::Args;
-use di::{Ref, injectable};
+use di::injectable;
 use flat_db::Hash;
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +10,7 @@ use crate::commands::QueueCommandArguments::Remove;
 use crate::commands::*;
 use crate::options::*;
 
-/// Options for the [`QueueAddCommand`]
+/// Options for the [`QueueRemoveCommand`]
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct QueueRemoveArgs {
     /// A torrent hash
@@ -20,17 +20,26 @@ pub struct QueueRemoveArgs {
 
 #[injectable]
 impl QueueRemoveArgs {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
+    fn new() -> Self {
+        Self::from_args().unwrap_or_default()
     }
-}
 
-impl Options for QueueRemoveArgs {
-    fn merge(&mut self, _alternative: &Self) {}
+    /// Get from command line arguments.
+    #[allow(clippy::match_wildcard_for_single_variants)]
+    #[must_use]
+    pub fn from_args() -> Option<Self> {
+        match ArgumentsParser::get() {
+            Some(Queue {
+                command: Remove { args, .. },
+                ..
+            }) => Some(args),
+            _ => None,
+        }
+    }
 
-    fn apply_defaults(&mut self) {}
-
-    fn validate(&self) -> bool {
+    /// Validate the queue remove arguments.
+    #[must_use]
+    pub fn validate(&self) -> bool {
         let mut errors: Vec<OptionRule> = Vec::new();
         if let Some(hash) = &self.queue_rm_hash {
             if Hash::<20>::from_string(hash).is_err() {
@@ -41,21 +50,6 @@ impl Options for QueueRemoveArgs {
         }
         OptionRule::show(&errors);
         errors.is_empty()
-    }
-
-    #[allow(clippy::match_wildcard_for_single_variants)]
-    fn from_args() -> Option<Self> {
-        match ArgumentsParser::get() {
-            Some(Queue {
-                command: Remove { args, .. },
-                ..
-            }) => Some(args),
-            _ => None,
-        }
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
     }
 }
 

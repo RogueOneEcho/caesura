@@ -8,28 +8,31 @@ pub enum CommandArguments {
     /// Read the config file if it exists and concatenate default values.
     Config,
 
+    /// Generate markdown documentation for configuration options.
+    Docs,
+
     /// Verify, transcode, and upload from multiple FLAC sources in one command.
     Batch {
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        target: TargetOptions,
+        target: TargetOptionsPartial,
         #[command(flatten)]
-        verify: VerifyOptions,
+        verify: VerifyOptionsPartial,
         #[command(flatten)]
-        runner: RunnerOptions,
+        runner: RunnerOptionsPartial,
         #[command(flatten)]
-        spectrogram: SpectrogramOptions,
+        spectrogram: SpectrogramOptionsPartial,
         #[command(flatten)]
-        copy: CopyOptions,
+        copy: CopyOptionsPartial,
         #[command(flatten)]
-        file: FileOptions,
+        file: FileOptionsPartial,
         #[command(flatten)]
-        batch: BatchOptions,
+        batch: BatchOptionsPartial,
         #[command(flatten)]
-        cache: CacheOptions,
+        cache: CacheOptionsPartial,
         #[command(flatten)]
-        upload: UploadOptions,
+        upload: UploadOptionsPartial,
     },
 
     /// Add FLAC sources to the queue without transcoding
@@ -43,11 +46,11 @@ pub enum CommandArguments {
         #[command(flatten)]
         source: SourceArg,
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        spectrogram: SpectrogramOptions,
+        spectrogram: SpectrogramOptionsPartial,
         #[command(flatten)]
-        runner: RunnerOptions,
+        runner: RunnerOptionsPartial,
     },
 
     /// Transcode each track of a FLAC source to the target formats.
@@ -55,15 +58,15 @@ pub enum CommandArguments {
         #[command(flatten)]
         source: SourceArg,
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        target: TargetOptions,
+        target: TargetOptionsPartial,
         #[command(flatten)]
-        copy: CopyOptions,
+        copy: CopyOptionsPartial,
         #[command(flatten)]
-        file: FileOptions,
+        file: FileOptionsPartial,
         #[command(flatten)]
-        runner: RunnerOptions,
+        runner: RunnerOptionsPartial,
     },
 
     /// Upload transcodes of a FLAC source.
@@ -71,13 +74,13 @@ pub enum CommandArguments {
         #[command(flatten)]
         source: SourceArg,
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        target: TargetOptions,
+        target: TargetOptionsPartial,
         #[command(flatten)]
-        upload: UploadOptions,
+        upload: UploadOptionsPartial,
         #[command(flatten)]
-        copy: CopyOptions,
+        copy: CopyOptionsPartial,
     },
 
     /// Verify a FLAC source is suitable for transcoding.
@@ -85,11 +88,11 @@ pub enum CommandArguments {
         #[command(flatten)]
         source: SourceArg,
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        target: TargetOptions,
+        target: TargetOptionsPartial,
         #[command(flatten)]
-        verify: VerifyOptions,
+        verify: VerifyOptionsPartial,
     },
 }
 
@@ -98,9 +101,9 @@ pub enum QueueCommandArguments {
     /// Add a directory of `.torrent` files to the queue
     Add {
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        cache: CacheOptions,
+        cache: CacheOptionsPartial,
         #[command(flatten)]
         args: QueueAddArgs,
     },
@@ -108,20 +111,20 @@ pub enum QueueCommandArguments {
     /// List the sources in the queue
     List {
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        cache: CacheOptions,
+        cache: CacheOptionsPartial,
         #[command(flatten)]
-        batch: BatchOptions,
+        batch: BatchOptionsPartial,
     },
 
     /// Remove an item from the queue
     #[command(name = "rm")]
     Remove {
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        cache: CacheOptions,
+        cache: CacheOptionsPartial,
         #[command(flatten)]
         args: QueueRemoveArgs,
     },
@@ -129,8 +132,8 @@ pub enum QueueCommandArguments {
     /// Summarize the sources in the queue
     Summary {
         #[command(flatten)]
-        shared: SharedOptions,
+        shared: SharedOptionsPartial,
         #[command(flatten)]
-        cache: CacheOptions,
+        cache: CacheOptionsPartial,
     },
 }

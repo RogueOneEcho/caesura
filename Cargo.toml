@@ -2,7 +2,7 @@
 resolver = "3"
 members = [
     "crates/core",
-    "crates/markdown_help",
+    "crates/macros",
 ]
 default-members = ["crates/core"]
 
@@ -15,12 +15,12 @@ license = "AGPL-3.0-only"
 [workspace.dependencies]
 # Internal crates
 caesura = { path = "crates/core" }
+caesura_macros = { version = "0.0.0", path = "crates/macros" }
 
 # External dependencies
 bytes = "1.11.0"
 chrono = "0.4.43"
 clap = { version = "4.5.54", features = ["derive"] }
-clap-markdown = "0.1.5"
 claxon = "0.4.3"
 colored = "3.1.1"
 flat_db = "0.3.0"
@@ -52,7 +52,6 @@ built = "0.8.0"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
-#restriction = { level = "warn", priority = -2 }
 
 absolute_paths = "warn"
 arithmetic_side_effects = "allow"
@@ -106,3 +105,4 @@ wildcard_imports = "allow"
 wrong_self_convention = "allow"
 result_large_err = "allow"
 await_holding_lock = "allow"
+default_trait_access = "warn"

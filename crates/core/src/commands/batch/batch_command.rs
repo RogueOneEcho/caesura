@@ -15,13 +15,8 @@ const PAUSE_DURATION: u64 = 10;
 /// Process multiple sources from the queue.
 #[injectable]
 pub(crate) struct BatchCommand {
-    cache_options: Ref<CacheOptions>,
     shared_options: Ref<SharedOptions>,
-    verify_options: Ref<VerifyOptions>,
-    target_options: Ref<TargetOptions>,
     upload_options: Ref<UploadOptions>,
-    spectrogram_options: Ref<SpectrogramOptions>,
-    file_options: Ref<FileOptions>,
     batch_options: Ref<BatchOptions>,
     source_provider: Ref<SourceProvider>,
     verify: Ref<VerifyCommand>,
@@ -37,30 +32,10 @@ impl BatchCommand {
     /// Returns `true` if the batch process succeeds.
     #[allow(clippy::too_many_lines)]
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.cache_options.validate()
-            || !self.shared_options.validate()
-            || !self.verify_options.validate()
-            || !self.target_options.validate()
-            || !self.spectrogram_options.validate()
-            || !self.file_options.validate()
-            || !self.batch_options.validate()
-            || !self.upload_options.validate()
-        {
-            return Ok(false);
-        }
-        let spectrogram_enabled = self
-            .batch_options
-            .spectrogram
-            .expect("spectrogram should be set");
-        let transcode_enabled = self
-            .batch_options
-            .transcode
-            .expect("transcode should be set");
-        let retry_failed_transcodes = self
-            .batch_options
-            .retry_transcode
-            .expect("retry_transcode should be set");
-        let upload_enabled = self.batch_options.upload.expect("upload should be set");
+        let spectrogram_enabled = self.batch_options.spectrogram;
+        let transcode_enabled = self.batch_options.transcode;
+        let retry_failed_transcodes = self.batch_options.retry_transcode;
+        let upload_enabled = self.batch_options.upload;
         let indexer = self
             .shared_options
             .indexer
@@ -190,7 +165,7 @@ impl BatchCommand {
                         sleep(wait_before_upload).await;
                     }
                     let status = self.upload.execute(&source).await;
-                    if self.upload_options.dry_run != Some(true) {
+                    if !self.upload_options.dry_run {
                         item.upload = Some(status);
                     }
                     // Errors were already logged in UploadCommand::Execute()

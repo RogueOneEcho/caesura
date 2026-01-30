@@ -60,8 +60,6 @@ impl SourceProvider {
         let directories: Vec<PathBuf> = self
             .options
             .content
-            .clone()
-            .expect("content should be set")
             .iter()
             .map(|x| x.join(path.clone()))
             .filter(|x| x.exists() && x.is_dir())

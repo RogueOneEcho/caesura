@@ -39,10 +39,7 @@ impl UploadCommand {
     ///
     /// Returns `true` if all the uploads succeed.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.arg.validate()
-            || !self.shared_options.validate()
-            || !self.upload_options.validate()
-        {
+        if !self.arg.validate() {
             return Ok(false);
         }
         let source = self
@@ -100,18 +97,11 @@ impl UploadCommand {
                 status.success = false;
                 continue;
             }
-            if self
-                .upload_options
-                .copy_transcode_to_content_dir
-                .expect("copy_transcode_to_content_dir should be set")
-            {
+            if self.upload_options.copy_transcode_to_content_dir {
                 trace!("{} transcode to content directory", "Copying".bold());
                 let destination = self
                     .shared_options
                     .content
-                    .clone()
-                    .expect("content should be set");
-                let destination = destination
                     .first()
                     .expect("content should contain at least one directory");
                 if let Err(error) = self.copy_transcode(&target_dir, destination).await {
@@ -152,7 +142,7 @@ impl UploadCommand {
                 release_desc: self.create_description(source, target).await,
                 group_id: source.group.id,
             };
-            if self.upload_options.dry_run.expect("dry_run should be set") {
+            if self.upload_options.dry_run {
                 warn!("{} upload as this is a dry run", "Skipping".bold());
                 info!("{} data of {target} for {source}:", "Upload".bold());
                 info!("\n{form}");
@@ -197,11 +187,7 @@ impl UploadCommand {
             );
             return Ok(());
         }
-        let verb = if self
-            .copy_options
-            .hard_link
-            .expect("hard_link should be set")
-        {
+        let verb = if self.copy_options.hard_link {
             copy_dir(source_path, &target_dir, true).await?;
             "Hard Linked"
         } else {
@@ -228,11 +214,7 @@ impl UploadCommand {
             .file_name()
             .expect("torrent path should have a name");
         let target_path = target_dir.join(source_file_name);
-        let verb = if self
-            .copy_options
-            .hard_link
-            .expect("hard_link should be set")
-        {
+        let verb = if self.copy_options.hard_link {
             hard_link(&source_path, &target_path)
                 .await
                 .map_err(|e| io_error(e, "hard link torrent file"))?;

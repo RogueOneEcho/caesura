@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use clap::Args;
-use di::{Ref, injectable};
+use di::injectable;
 use serde::{Deserialize, Serialize};
 
 use crate::commands::*;
@@ -25,30 +25,13 @@ pub struct SourceArg {
 
 #[injectable]
 impl SourceArg {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
-    }
-}
-
-impl Options for SourceArg {
-    fn merge(&mut self, alternative: &Self) {
-        if self.source.is_none() {
-            self.source.clone_from(&alternative.source);
-        }
+    fn new() -> Self {
+        Self::from_args().unwrap_or_default()
     }
 
-    fn apply_defaults(&mut self) {}
-
-    fn validate(&self) -> bool {
-        let mut errors: Vec<OptionRule> = Vec::new();
-        if self.source.is_none() {
-            errors.push(NotSet("Source".to_owned()));
-        }
-        OptionRule::show(&errors);
-        errors.is_empty()
-    }
-
-    fn from_args() -> Option<Self> {
+    /// Get from command line arguments.
+    #[must_use]
+    pub fn from_args() -> Option<Self> {
         match ArgumentsParser::get() {
             Some(
                 Spectrogram { source, .. }
@@ -60,8 +43,15 @@ impl Options for SourceArg {
         }
     }
 
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
+    /// Validate the source argument.
+    #[must_use]
+    pub fn validate(&self) -> bool {
+        let mut errors: Vec<OptionRule> = Vec::new();
+        if self.source.is_none() {
+            errors.push(NotSet("Source".to_owned()));
+        }
+        OptionRule::show(&errors);
+        errors.is_empty()
     }
 }
 

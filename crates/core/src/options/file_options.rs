@@ -1,21 +1,18 @@
-use std::fmt::{Display, Formatter};
-
-use clap::{ArgAction, Args};
-use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::*;
-use crate::commands::*;
-use crate::options::*;
+use crate::options::OptionRule;
+use caesura_macros::Options;
 
-/// Options for including additional files during [`TranscodeCommand`]
-#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
+/// Options for image resizing
+#[derive(Options, Clone, Debug, Deserialize, Serialize)]
+#[options(commands(Batch, Transcode))]
+#[options(field_name = "file")]
 pub struct FileOptions {
     /// Should compression of images be disabled?
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub no_image_compression: Option<bool>,
+    #[arg(long)]
+    pub no_image_compression: bool,
 
     /// Should transcoded files be renamed from source filenames to a
     /// standardized format: `{track:0>N} {title}.{ext}`?
@@ -23,8 +20,8 @@ pub struct FileOptions {
     /// Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.
     ///
     /// Default: `false`
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub rename_tracks: Option<bool>,
+    #[arg(long)]
+    pub rename_tracks: bool,
 
     /// Maximum file size in bytes beyond which images are compressed.
     ///
@@ -32,7 +29,8 @@ pub struct FileOptions {
     ///
     /// Only applies to image files.
     #[arg(long)]
-    pub max_file_size: Option<u64>,
+    #[options(default = 750_000)]
+    pub max_file_size: u64,
 
     /// Maximum size in pixels for images
     ///
@@ -40,7 +38,8 @@ pub struct FileOptions {
     ///
     /// Only applied if the image is greater than `max_file_size`.
     #[arg(long)]
-    pub max_pixel_size: Option<u32>,
+    #[options(default = 1280)]
+    pub max_pixel_size: u32,
 
     /// Quality percentage to apply for jpg compression.
     ///
@@ -48,101 +47,32 @@ pub struct FileOptions {
     ///
     /// Only applied if the image is greated than `max_file_size`.
     #[arg(long)]
-    pub jpg_quality: Option<u8>,
+    #[options(default = 80)]
+    pub jpg_quality: u8,
 
     /// Should conversion of png images to jpg be disabled?
     ///
     /// Default: `false`
     ///
     /// Only applied if the image is greater than `max_file_size`.
-    #[arg(long, default_value = None, action = ArgAction::SetTrue)]
-    pub no_png_to_jpg: Option<bool>,
+    #[arg(long)]
+    pub no_png_to_jpg: bool,
 }
 
-#[injectable]
+impl Default for FileOptions {
+    fn default() -> Self {
+        Self {
+            no_image_compression: false,
+            rename_tracks: false,
+            max_file_size: 750_000,
+            max_pixel_size: 1280,
+            jpg_quality: 80,
+            no_png_to_jpg: false,
+        }
+    }
+}
+
 impl FileOptions {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
-    }
-}
-
-impl Options for FileOptions {
-    fn merge(&mut self, alternative: &Self) {
-        if self.no_image_compression.is_none() {
-            self.no_image_compression = alternative.no_image_compression;
-        }
-        if self.no_png_to_jpg.is_none() {
-            self.no_png_to_jpg = alternative.no_png_to_jpg;
-        }
-        if self.rename_tracks.is_none() {
-            self.rename_tracks = alternative.rename_tracks;
-        }
-        if self.max_file_size.is_none() {
-            self.max_file_size = alternative.max_file_size;
-        }
-        if self.max_pixel_size.is_none() {
-            self.max_pixel_size = alternative.max_pixel_size;
-        }
-        if self.jpg_quality.is_none() {
-            self.jpg_quality = alternative.jpg_quality;
-        }
-    }
-
-    fn apply_defaults(&mut self) {
-        if self.no_image_compression.is_none() {
-            self.no_image_compression = Some(false);
-        }
-        if self.no_png_to_jpg.is_none() {
-            self.no_png_to_jpg = Some(false);
-        }
-        if self.rename_tracks.is_none() {
-            self.rename_tracks = Some(false);
-        }
-        if self.max_file_size.is_none() {
-            self.max_file_size = Some(750_000);
-        }
-        if self.max_pixel_size.is_none() {
-            self.max_pixel_size = Some(1280);
-        }
-        if self.jpg_quality.is_none() {
-            self.jpg_quality = Some(80);
-        }
-    }
-
-    fn validate(&self) -> bool {
-        true
-    }
-
-    fn from_args() -> Option<Self> {
-        let Some(Batch { file, .. } | Transcode { file, .. }) = ArgumentsParser::get() else {
-            return None;
-        };
-        let mut options = file;
-        if options.no_image_compression == Some(false) {
-            options.no_image_compression = None;
-        }
-        if options.no_png_to_jpg == Some(false) {
-            options.no_png_to_jpg = None;
-        }
-        if options.rename_tracks == Some(false) {
-            options.rename_tracks = None;
-        }
-        Some(options)
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
-    }
-}
-
-impl Display for FileOptions {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
-            yaml
-        } else {
-            format!("{self:?}")
-        };
-        output.fmt(formatter)
-    }
+    /// Validate the partial options.
+    pub fn validate_partial(_: &FileOptionsPartial, _: &mut Vec<OptionRule>) {}
 }

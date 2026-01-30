@@ -1,0 +1,24 @@
+[package]
+name = "caesura_macros"
+version = "0.0.0"
+description = "Procedural macros for caesura"
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full", "extra-traits"] }
+
+[dev-dependencies]
+insta.workspace = true
+prettyplease = "0.2"
+
+[lints]
+workspace = true

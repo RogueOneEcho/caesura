@@ -17,16 +17,8 @@ async fn upload_command_succeeds_with_valid_source() -> Result<(), Error> {
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
-
     let host = build_upload_test_host(&transcode, &test_dir).await;
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -48,41 +40,25 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), Error> {
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
-
     let host = HostBuilder::new()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
-            verbosity: Some(rogue_logging::Verbosity::Debug),
-            log_time: Some(rogue_logging::TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
-            target: Some(vec![transcode.target]),
-            sox_random_dither: Some(false),
+            target: vec![transcode.target],
             ..TargetOptions::default()
         })
         .with_options(UploadOptions {
-            dry_run: Some(true),
-            copy_transcode_to_content_dir: Some(false),
+            dry_run: true,
             ..UploadOptions::default()
         })
         .build();
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -194,42 +170,27 @@ async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let copy_target = TempDirectory::create("content_copy_target");
-
     let host = HostBuilder::new()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
             // First content dir is for copy destination, second is where source files are found
-            content: Some(vec![copy_target.clone(), SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
-            verbosity: Some(rogue_logging::Verbosity::Debug),
-            log_time: Some(rogue_logging::TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![copy_target.clone(), SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
-            target: Some(vec![transcode.target]),
-            sox_random_dither: Some(false),
-            allow_existing: Some(true), // Allow existing since we're using pre-generated transcodes
+            target: vec![transcode.target],
+            allow_existing: true, // Allow existing since we're using pre-generated transcodes
+            ..TargetOptions::default()
         })
         .with_options(UploadOptions {
-            copy_transcode_to_content_dir: Some(true),
-            dry_run: Some(false),
+            copy_transcode_to_content_dir: true,
             ..UploadOptions::default()
         })
         .build();
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -251,42 +212,25 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let copy_target = TempDirectory::create("custom_copy_target");
-
     let host = HostBuilder::new()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
-            verbosity: Some(rogue_logging::Verbosity::Debug),
-            log_time: Some(rogue_logging::TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
-            target: Some(vec![transcode.target]),
-            sox_random_dither: Some(false),
+            target: vec![transcode.target],
             ..TargetOptions::default()
         })
         .with_options(UploadOptions {
             copy_transcode_to: Some(copy_target.clone()),
-            copy_transcode_to_content_dir: Some(false),
-            dry_run: Some(false),
             ..UploadOptions::default()
         })
         .build();
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -308,42 +252,25 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let torrent_target = TempDirectory::create("torrent_copy_target");
-
     let host = HostBuilder::new()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
-            verbosity: Some(rogue_logging::Verbosity::Debug),
-            log_time: Some(rogue_logging::TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
-            target: Some(vec![transcode.target]),
-            sox_random_dither: Some(false),
+            target: vec![transcode.target],
             ..TargetOptions::default()
         })
         .with_options(UploadOptions {
             copy_torrent_to: Some(torrent_target.clone()),
-            copy_transcode_to_content_dir: Some(false),
-            dry_run: Some(false),
             ..UploadOptions::default()
         })
         .build();
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -431,36 +358,16 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
-            verbosity: Some(rogue_logging::Verbosity::Debug),
-            log_time: Some(rogue_logging::TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
-            target: Some(vec![transcode.target]),
-            sox_random_dither: Some(false),
+            target: vec![transcode.target],
             ..TargetOptions::default()
-        })
-        .with_options(UploadOptions {
-            dry_run: Some(false),
-            copy_transcode_to_content_dir: Some(false),
-            ..UploadOptions::default()
         });
-
     let host = builder.build();
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -480,16 +387,8 @@ async fn upload_command_captures_response_ids() -> Result<(), Error> {
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
-
     let host = build_upload_test_host(&transcode, &test_dir).await;
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let source = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act
     let status = command.execute(&source).await;
@@ -512,25 +411,14 @@ async fn upload_command_skip_existing_copy_succeeds() -> Result<(), Error> {
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
-
     let host = build_upload_test_host(&transcode, &test_dir).await;
-
-    let provider = host.services.get_required::<SourceProvider>();
-    let command = host.services.get_required::<UploadCommand>();
+    let (source, command) = get_source_and_command(&host).await;
 
     // Act - run twice
-    let source1 = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-    let status1 = command.execute(&source1).await;
+    let status1 = command.execute(&source).await;
     assert!(status1.success, "first upload should succeed");
 
-    let source2 = provider
-        .get(AlbumConfig::TORRENT_ID)
-        .await
-        .expect("should get source");
-    let status2 = command.execute(&source2).await;
+    let status2 = command.execute(&source).await;
 
     // Assert
     assert!(status2.success, "second upload should succeed");
@@ -545,25 +433,24 @@ async fn build_upload_test_host(transcode: &TranscodeConfig, test_dir: &TestDire
         .with_test_options(test_dir)
         .await
         .with_options(SharedOptions {
-            content: Some(vec![SAMPLE_SOURCES_DIR.clone()]),
-            output: Some(SAMPLE_TRANSCODES_DIR.clone()),
-            verbosity: Some(rogue_logging::Verbosity::Debug),
-            log_time: Some(rogue_logging::TimeFormat::None),
-            indexer: Some("red".to_owned()),
-            indexer_url: Some("https://redacted.sh".to_owned()),
-            announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
-            api_key: Some("test_api_key".to_owned()),
-            ..SharedOptions::default()
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
-            target: Some(vec![transcode.target]),
-            sox_random_dither: Some(false),
+            target: vec![transcode.target],
             ..TargetOptions::default()
         })
-        .with_options(UploadOptions {
-            dry_run: Some(false),
-            copy_transcode_to_content_dir: Some(false),
-            ..UploadOptions::default()
-        })
         .build()
+}
+
+/// Helper to get source and upload command from a host.
+async fn get_source_and_command(host: &Host) -> (Source, di::Ref<UploadCommand>) {
+    let provider = host.services.get_required::<SourceProvider>();
+    let source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should get source");
+    let command = host.services.get_required::<UploadCommand>();
+    (source, command)
 }

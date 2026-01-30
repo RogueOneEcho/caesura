@@ -1,0 +1,10 @@
+---
+source: src/options/tests/options_tests.rs
+expression: result
+---
+target:
+  - flac
+  - "320"
+  - v0
+allow_existing: false
+sox_random_dither: false

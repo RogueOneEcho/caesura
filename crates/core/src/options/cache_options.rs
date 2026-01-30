@@ -1,54 +1,50 @@
-use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 
-use clap::Args;
-use di::{Ref, injectable};
 use serde::{Deserialize, Serialize};
 
 use crate::commands::CommandArguments::{Batch, Queue};
 use crate::commands::QueueCommandArguments::*;
-
 use crate::commands::*;
 use crate::options::*;
+use caesura_macros::Options;
 
-const DEFAULT_CACHE_PATH: &str = "./cache";
-
-/// Options for [`Queue`]
-#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
+/// Options for queue cache
+#[derive(Options, Clone, Debug, Deserialize, Serialize)]
+#[options(commands(Batch, Queue))]
+#[options(from_args_fn = "Self::partial_from_args")]
 pub struct CacheOptions {
     /// Path to cache directory.
     ///
     /// Default: `./cache`
     #[arg(long)]
-    pub cache: Option<PathBuf>,
+    #[options(default = PathBuf::from("./cache"))]
+    pub cache: PathBuf,
 }
 
-#[injectable]
 impl CacheOptions {
-    fn new(provider: Ref<OptionsProvider>) -> Self {
-        provider.get()
-    }
-}
-
-impl Options for CacheOptions {
-    fn merge(&mut self, alternative: &Self) {
-        if self.cache.is_none() {
-            self.cache.clone_from(&alternative.cache);
+    /// Custom `from_args` implementation for complex Queue subcommand matching
+    #[must_use]
+    pub fn partial_from_args() -> Option<CacheOptionsPartial> {
+        match ArgumentsParser::get() {
+            Some(
+                Batch { cache, .. }
+                | Queue {
+                    command:
+                        Add { cache, .. }
+                        | List { cache, .. }
+                        | Summary { cache, .. }
+                        | Remove { cache, .. },
+                },
+            ) => Some(cache),
+            _ => None,
         }
     }
 
-    fn apply_defaults(&mut self) {
-        if self.cache.is_none() {
-            self.cache = Some(PathBuf::from(DEFAULT_CACHE_PATH));
-        }
-    }
-
-    fn validate(&self) -> bool {
-        let mut errors: Vec<OptionRule> = Vec::new();
-        if let Some(cache) = &self.cache {
-            if cache.ends_with(".json")
-                || (cache.eq(&PathBuf::from(DEFAULT_CACHE_PATH)) && !cache.is_dir())
-            {
+    /// Validate the partial options.
+    pub fn validate_partial(partial: &CacheOptionsPartial, errors: &mut Vec<OptionRule>) {
+        let default_cache = PathBuf::from("./cache");
+        if let Some(cache) = &partial.cache {
+            if cache.ends_with(".json") || (cache.eq(&default_cache) && !cache.is_dir()) {
                 errors.push(Changed(
                     "Cache Directory".to_owned(),
                     cache.to_string_lossy().to_string(),
@@ -66,36 +62,13 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
                 ));
             }
         }
-        OptionRule::show(&errors);
-        errors.is_empty()
-    }
-
-    #[allow(clippy::manual_let_else)]
-    fn from_args() -> Option<Self> {
-        match ArgumentsParser::get() {
-            Some(
-                Batch { cache, .. }
-                | Queue {
-                    command: Add { cache, .. } | List { cache, .. } | Summary { cache, .. },
-                },
-            ) => Some(cache),
-            _ => None,
-        }
-    }
-
-    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str(yaml)
     }
 }
 
-impl Display for CacheOptions {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
-            yaml
-        } else {
-            format!("{self:?}")
-        };
-        output.fmt(formatter)
+impl Default for CacheOptions {
+    fn default() -> Self {
+        Self {
+            cache: PathBuf::from("./cache"),
+        }
     }
 }

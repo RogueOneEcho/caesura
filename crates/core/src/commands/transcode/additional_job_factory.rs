@@ -51,10 +51,7 @@ impl AdditionalJobFactory {
             .join(&file.sub_dir);
         let mut output_path = output_dir.join(&file.file_name);
         let size = file.get_size().await?;
-        let max_file_size = self
-            .file_options
-            .max_file_size
-            .expect("max_file_size should be set");
+        let max_file_size = self.file_options.max_file_size;
         let extension = source_path
             .extension()
             .expect("Source has extension")
@@ -63,10 +60,7 @@ impl AdditionalJobFactory {
             .to_lowercase();
         let is_image = IMAGE_EXTENSIONS.contains(&extension.as_str());
         let is_large = size > max_file_size;
-        let no_image_compression = self
-            .file_options
-            .no_image_compression
-            .expect("no_image_compression should be set");
+        let no_image_compression = self.file_options.no_image_compression;
         create_dir_all(&output_dir)
             .await
             .map_err(|e| io_error(e, "create directories for additional file"))?;
@@ -79,11 +73,7 @@ impl AdditionalJobFactory {
                     source_path.display()
                 );
             }
-            let hard_link_option = self
-                .copy_options
-                .hard_link
-                .expect("hard_link should be set");
-            let verb = if hard_link_option {
+            let verb = if self.copy_options.hard_link {
                 hard_link(&source_path, &output_path)
                     .await
                     .map_err(|e| io_error(e, "hard link additional file"))?;
@@ -102,10 +92,7 @@ impl AdditionalJobFactory {
             );
             return Ok(None);
         }
-        let no_png_to_jpg = self
-            .file_options
-            .no_png_to_jpg
-            .expect("no_png_to_jpg should be set");
+        let no_png_to_jpg = self.file_options.no_png_to_jpg;
         if !no_png_to_jpg && extension == "png" {
             let mut temp_source = source_path.clone();
             temp_source.set_extension("jpg");
@@ -116,14 +103,8 @@ impl AdditionalJobFactory {
             }
         }
         let id = format!("Additional {target:<7?}{index:>3}");
-        let max_pixel_size = self
-            .file_options
-            .max_pixel_size
-            .expect("max_pixel_size should be set");
-        let quality = self
-            .file_options
-            .jpg_quality
-            .expect("jpg_quality should be set");
+        let max_pixel_size = self.file_options.max_pixel_size;
+        let quality = self.file_options.jpg_quality;
         let job = Job::Additional(AdditionalJob {
             id,
             resize: Resize {

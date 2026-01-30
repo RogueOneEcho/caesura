@@ -17,7 +17,6 @@ use tokio::io::AsyncWriteExt;
 #[injectable]
 pub(crate) struct VerifyCommand {
     arg: Ref<SourceArg>,
-    shared_options: Ref<SharedOptions>,
     verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
@@ -34,10 +33,7 @@ impl VerifyCommand {
     ///
     /// Returns `true` if the source is verified.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
-        if !self.arg.validate()
-            || !self.shared_options.validate()
-            || !self.verify_options.validate()
-        {
+        if !self.arg.validate() {
             return Ok(false);
         }
         let source = self.source_provider.get_from_options().await;
@@ -185,11 +181,7 @@ impl VerifyCommand {
     }
 
     async fn hash_check(&self, source: &Source) -> Vec<SourceIssue> {
-        if self
-            .verify_options
-            .no_hash_check
-            .expect("no_hash_check should be set")
-        {
+        if self.verify_options.no_hash_check {
             debug!("{} hash check due to settings", "Skipped".bold());
             return Vec::new();
         }

@@ -1,0 +1,127 @@
+---
+source: crates/macros/src/lib.rs
+expression: output
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct OptionsWithDefaultsPartial {
+    #[arg(long = "indexer")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub indexer: Option<String>,
+    #[arg(long = "url")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub url: Option<String>,
+}
+impl OptionsWithDefaultsPartial {
+    /// Merge another partial into self (other fills in None values)
+    pub fn merge(&mut self, other: &Self) {
+        if self.indexer.is_none() {
+            self.indexer.clone_from(&other.indexer);
+        }
+        if self.url.is_none() {
+            self.url.clone_from(&other.url);
+        }
+    }
+    /// Resolve partial into final options, applying defaults.
+    pub fn resolve(mut self) -> OptionsWithDefaults {
+        OptionsWithDefaults::apply_calculated_defaults(&mut self);
+        let indexer = self.indexer.clone();
+        let url = self.url.clone();
+        OptionsWithDefaults {
+            indexer,
+            url,
+        }
+    }
+    /// Deserialize from YAML string
+    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        ::serde_yaml::from_str(yaml)
+    }
+    /// Get from command line arguments
+    pub fn from_args() -> ::std::option::Option<Self> {
+        let mut options = match crate::commands::ArgumentsParser::get()? {
+            crate::commands::CommandArguments::Upload { opts, .. } => opts,
+            _ => return ::std::option::Option::None,
+        };
+        ::std::option::Option::Some(options)
+    }
+}
+impl crate::options::OptionsPartial for OptionsWithDefaultsPartial {
+    type Resolved = OptionsWithDefaults;
+    fn merge(&mut self, other: &Self) {
+        OptionsWithDefaultsPartial::merge(self, other)
+    }
+    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
+        OptionsWithDefaultsPartial::from_yaml(yaml)
+    }
+    fn from_args() -> ::std::option::Option<Self> {
+        OptionsWithDefaultsPartial::from_args()
+    }
+    fn resolve(self) -> Self::Resolved {
+        OptionsWithDefaultsPartial::resolve(self)
+    }
+    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
+        OptionsWithDefaults::validate_partial(self, errors)
+    }
+}
+impl OptionsWithDefaults {
+    /// Commands that use this options struct
+    pub fn applicable_commands() -> &'static [crate::options::Command] {
+        &[crate::options::Command::Upload]
+    }
+}
+impl ::std::fmt::Display for OptionsWithDefaults {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl ::std::fmt::Display for OptionsWithDefaultsPartial {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match ::serde_yaml::to_string(self) {
+            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
+            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+        }
+    }
+}
+impl crate::options::ApplicableCommands for OptionsWithDefaults {
+    fn applicable_commands() -> &'static [crate::options::Command] {
+        &[crate::options::Command::Upload]
+    }
+}
+impl crate::options::Documented for OptionsWithDefaults {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static FIELDS: &[crate::options::FieldDoc] = &[
+            crate::options::FieldDoc {
+                config_key: "indexer",
+                cli_flag: "--indexer",
+                field_type: "Option<String>",
+                default: ::std::option::Option::None,
+                description: "",
+            },
+            crate::options::FieldDoc {
+                config_key: "url",
+                cli_flag: "--url",
+                field_type: "Option<String>",
+                default: ::std::option::Option::None,
+                description: "",
+            },
+        ];
+        static COMMANDS: &[&str] = &["Upload"];
+        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+            name: "OptionsWithDefaults",
+            description: "",
+            fields: FIELDS,
+            commands: COMMANDS,
+        };
+        &DOC
+    }
+}

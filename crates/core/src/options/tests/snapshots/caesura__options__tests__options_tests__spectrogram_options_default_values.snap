@@ -1,0 +1,7 @@
+---
+source: src/options/tests/options_tests.rs
+expression: result
+---
+spectrogram_size:
+  - full
+  - zoom

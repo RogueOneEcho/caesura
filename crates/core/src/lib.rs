@@ -3,11 +3,11 @@
 #[allow(unused_imports)]
 pub use commands::*;
 pub use hosting::*;
+pub mod options;
 
 mod commands;
 mod dependencies;
 mod hosting;
-mod options;
 mod utils;
 
 #[allow(clippy::needless_raw_strings, clippy::doc_markdown)]

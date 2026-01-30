@@ -20,7 +20,7 @@ impl TargetFormatProvider {
         source: SourceFormat,
         existing: &BTreeSet<ExistingFormat>,
     ) -> BTreeSet<TargetFormat> {
-        if self.options.allow_existing == Some(true) {
+        if self.options.allow_existing {
             self.get_with_existing(source)
         } else {
             self.get_without_existing(existing)
@@ -57,10 +57,8 @@ impl TargetFormatProvider {
     ) -> BTreeSet<TargetFormat> {
         self.options
             .target
-            .clone()
-            .unwrap_or_default()
             .iter()
-            .filter(|&target| !exclude.contains(&target.to_existing()))
+            .filter(|target| !exclude.contains(&target.to_existing()))
             .copied()
             .collect()
     }
