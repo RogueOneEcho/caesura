@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::io::ErrorKind;
 use tokio::task::JoinError;
 
 #[allow(clippy::absolute_paths)]
@@ -19,19 +20,6 @@ pub fn claxon_error(error: claxon::Error, action: &str) -> Error {
     }
 }
 
-#[allow(clippy::wildcard_enum_match_arm)]
-#[allow(clippy::absolute_paths)]
-pub fn command_error(error: std::io::Error, action: &str, program: &str) -> Error {
-    match error.kind() {
-        std::io::ErrorKind::NotFound => Error {
-            action: action.to_owned(),
-            message: format!("Could not find dependency: {program}"),
-            ..Error::default()
-        },
-        _ => io_error(error, action),
-    }
-}
-
 #[allow(clippy::absolute_paths)]
 pub fn io_error(error: std::io::Error, action: &str) -> Error {
     Error {
@@ -42,12 +30,20 @@ pub fn io_error(error: std::io::Error, action: &str) -> Error {
     }
 }
 
-pub fn output_error(error: CommandError, action: &str, domain: &str) -> Error {
-    Error {
-        action: action.to_owned(),
-        message: error.to_string(),
-        domain: Some(domain.to_owned()),
-        ..Error::default()
+#[allow(clippy::wildcard_enum_match_arm)]
+pub fn process_error(error: ProcessError, action: &str, domain: &str) -> Error {
+    match &error {
+        ProcessError::Spawn(io_err) if io_err.kind() == ErrorKind::NotFound => Error {
+            action: action.to_owned(),
+            message: format!("Could not find dependency: {domain}"),
+            ..Error::default()
+        },
+        _ => Error {
+            action: action.to_owned(),
+            message: error.to_string(),
+            domain: Some(domain.to_owned()),
+            ..Error::default()
+        },
     }
 }
 

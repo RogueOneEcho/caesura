@@ -5,6 +5,7 @@ pub(crate) use formats::*;
 pub(crate) use fs::*;
 pub(crate) use jobs::*;
 pub(crate) use naming::*;
+pub(crate) use process::*;
 pub(crate) use source::*;
 #[cfg(test)]
 pub(crate) use testing::*;
@@ -14,6 +15,7 @@ mod formats;
 mod fs;
 mod jobs;
 mod naming;
+mod process;
 mod source;
 #[cfg(test)]
 mod testing;

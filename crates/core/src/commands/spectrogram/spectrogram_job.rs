@@ -47,7 +47,7 @@ impl SpectrogramJob {
     async fn execute_zoom(&self) -> Result<Output, Error> {
         let start_time = calculate_zoom_start(self.duration_secs);
         let duration = format!("0:{ZOOM_DURATION:02}");
-        let output = Command::new(SOX)
+        Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
             .arg("remix")
@@ -71,14 +71,13 @@ impl SpectrogramJob {
             .arg("caesura")
             .arg("-o")
             .arg(&self.output_path)
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
-        OutputHandler::execute(output, "generate spectrogram", "SOX")
+            .map_err(|e| process_error(e, "generate spectrogram", SOX))
     }
 
     async fn execute_full(&self) -> Result<Output, Error> {
-        let output = Command::new(SOX)
+        Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
             .arg("remix")
@@ -98,10 +97,9 @@ impl SpectrogramJob {
             .arg("caesura")
             .arg("-o")
             .arg(&self.output_path)
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "execute generate spectrogram", SOX))?;
-        OutputHandler::execute(output, "generate spectrogram", "SOX")
+            .map_err(|e| process_error(e, "generate spectrogram", SOX))
     }
 }
 

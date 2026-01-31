@@ -3,8 +3,9 @@ use std::path::{Path, PathBuf};
 
 use tokio::process::Command;
 
-use super::{CommandExt, ImageGenerator, SampleError};
+use super::{ImageGenerator, SampleError};
 use crate::dependencies::{METAFLAC, SOX};
+use crate::utils::ProcessExt;
 
 /// Builder for generating sample FLAC files.
 ///

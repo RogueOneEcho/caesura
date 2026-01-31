@@ -20,12 +20,10 @@ impl AdditionalJob {
         );
         let info = self.resize.to_info();
         trace!("{info}");
-        let output = info
-            .to_command()
-            .output()
+        info.to_command()
+            .run()
             .await
-            .map_err(|e| command_error(e, "execute resize image", CONVERT))?;
-        OutputHandler::execute(output, "resize image", "convert")?;
+            .map_err(|e| process_error(e, "resize image", CONVERT))?;
         Ok(())
     }
 }
