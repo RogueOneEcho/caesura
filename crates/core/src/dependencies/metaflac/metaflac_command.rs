@@ -43,6 +43,7 @@ impl MetaflacCommand {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::SAMPLE_SOURCES_DIR;
     use insta::assert_snapshot;
     use rogue_logging::Error;
 
@@ -52,7 +53,7 @@ mod tests {
         let album = AlbumProvider::get(SampleFormat::default()).await;
         let mut paths = DirectoryReader::new()
             .with_extension("flac")
-            .read(&album.source_dir())
+            .read(&SAMPLE_SOURCES_DIR.join(album.dir_name()))
             .expect("Directory should exist");
         paths.sort();
         let path = paths.first().expect("Should be at least one sample");

@@ -263,30 +263,19 @@ impl AlbumConfig {
         )
     }
 
-    /// Full path to the cached samples directory.
-    #[must_use]
-    pub fn source_dir(&self) -> PathBuf {
-        SAMPLE_SOURCES_DIR.join(self.dir_name())
-    }
-
-    /// Full path to the torrent file.
-    #[must_use]
-    pub fn torrent_path(&self) -> PathBuf {
-        SAMPLE_SOURCES_DIR.join(self.torrent_filename())
-    }
-
     /// Create a temp directory containing only this album's torrent file.
     #[must_use]
     pub fn single_torrent_dir(&self) -> PathBuf {
         let dir = TempDirectory::create("single_torrent");
         let dest = dir.join(self.torrent_filename());
-        fs::copy(self.torrent_path(), &dest).expect("should copy torrent file");
+        let src = SAMPLE_SOURCES_DIR.join(self.torrent_filename());
+        fs::copy(src, &dest).expect("should copy torrent file");
         dir
     }
 
     /// Torrent filename for this sample set.
     #[must_use]
-    fn torrent_filename(&self) -> String {
+    pub fn torrent_filename(&self) -> String {
         format!("{}.torrent", self.dir_name())
     }
 
@@ -318,7 +307,8 @@ impl AlbumConfig {
     /// - Panics if torrent doesn't exist (call [`AlbumProvider::get`] first)
     #[must_use]
     pub fn api(&self) -> MockGazelleClient {
-        let torrent_bytes = fs::read(self.torrent_path())
+        let torrent_path = SAMPLE_SOURCES_DIR.join(self.torrent_filename());
+        let torrent_bytes = fs::read(torrent_path)
             .expect("torrent file should exist - ensure AlbumProvider::get() was called first");
         build_mock_client(self, torrent_bytes, Self::TORRENT_ID, 123)
     }

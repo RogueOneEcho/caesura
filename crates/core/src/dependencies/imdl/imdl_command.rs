@@ -128,12 +128,13 @@ mod tests {
     use rogue_logging::Error;
 
     use super::*;
+    use crate::utils::SAMPLE_SOURCES_DIR;
 
     #[tokio::test]
     async fn imdl_show() -> Result<(), Error> {
         // Arrange
         let album = AlbumProvider::get(SampleFormat::default()).await;
-        let path = album.torrent_path();
+        let path = SAMPLE_SOURCES_DIR.join(album.torrent_filename());
 
         // Act
         let summary = ImdlCommand::show(&path).await?;

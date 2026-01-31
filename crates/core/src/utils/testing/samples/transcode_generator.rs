@@ -12,7 +12,7 @@ use super::{SampleError, TranscodeConfig};
 use crate::commands::TranscodeCommand;
 use crate::hosting::HostBuilder;
 use crate::options::{CacheOptions, SharedOptions, TargetOptions};
-use crate::utils::{AlbumConfig, SourceProvider, TempDirectory};
+use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR, SourceProvider, TempDirectory};
 use tokio::fs::create_dir_all;
 
 /// Generates cached transcode outputs for testing.
@@ -84,12 +84,7 @@ impl TranscodeGenerator {
 
         // Create a temporary cache directory in /tmp
         let cache_dir = TempDirectory::create("transcode_cache");
-        let content_dir = config
-            .album
-            .source_dir()
-            .parent()
-            .expect("has parent")
-            .to_path_buf();
+        let content_dir = SAMPLE_SOURCES_DIR.clone();
 
         // Build a minimal DI host for transcoding
         let host = HostBuilder::new()

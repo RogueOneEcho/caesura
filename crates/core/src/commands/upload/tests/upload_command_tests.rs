@@ -290,8 +290,8 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
     let test_dir = TestDirectory::new();
 
     // Create a mock client that fails on upload
-    let torrent_bytes =
-        fs::read(transcode.album.torrent_path()).expect("torrent file should exist");
+    let torrent_path = SAMPLE_SOURCES_DIR.join(transcode.album.torrent_filename());
+    let torrent_bytes = fs::read(torrent_path).expect("torrent file should exist");
 
     let mock = MockGazelleClient::new()
         .with_get_torrent(Ok(gazelle_api::TorrentResponse {

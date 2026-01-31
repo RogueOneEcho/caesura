@@ -10,14 +10,14 @@
 //! vinyl-style numbering) and audio format (bit depth, sample rate).
 
 use std::fs::{self, File};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use super::SampleError;
 use crate::dependencies::ImdlCommand;
-use crate::utils::AlbumConfig;
 use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
+use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR};
 
 /// Generates a complete test album (FLAC files, cover image, torrent) and mock client.
 pub struct AlbumGenerator;
@@ -32,7 +32,7 @@ impl AlbumGenerator {
     /// - If `.generated` marker exists, skips generation
     /// - Otherwise acquires `.lock` file, generates, creates marker
     pub async fn generate(config: &AlbumConfig) -> Result<(), SampleError> {
-        let source_dir = config.source_dir();
+        let source_dir = SAMPLE_SOURCES_DIR.join(config.dir_name());
         Self::generate_in_dir(config, &source_dir).await
     }
 
@@ -106,8 +106,8 @@ impl AlbumGenerator {
             .generate(source_dir)
             .expect("should generate cover");
 
-        // Generate torrent
-        let torrent_path = config.torrent_path();
+        // Generate torrent as sibling of source_dir
+        let torrent_path = append_extension(source_dir, "torrent");
         ImdlCommand::create(
             source_dir,
             &torrent_path,
@@ -117,6 +117,17 @@ impl AlbumGenerator {
         .await
         .expect("should create torrent");
     }
+}
+
+/// Append an extension to a path.
+///
+/// Unlike [`Path::with_extension`], this appends rather than replaces.
+/// Needed for paths containing dots like `{16-44.1} (FLAC)`.
+fn append_extension(path: &Path, ext: &str) -> PathBuf {
+    let mut result = path.as_os_str().to_os_string();
+    result.push(".");
+    result.push(ext);
+    PathBuf::from(result)
 }
 
 fn wait_for_generation(marker: &Path, lock: &Path) {
