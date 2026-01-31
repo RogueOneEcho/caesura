@@ -2,9 +2,8 @@ use crate::built_info::{PKG_NAME, PKG_VERSION};
 use crate::prelude::*;
 use crate::utils::SourceIssue::Imdl;
 use bytes::Buf;
-use std::process::{Output, Stdio};
+use std::process::Output;
 use tokio::fs::copy;
-use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
 /// Facade for the `imdl` CLI binary.
@@ -21,7 +20,7 @@ impl ImdlCommand {
         announce_url: String,
         source: String,
     ) -> Result<Output, Error> {
-        let output = Command::new(IMDL)
+        Command::new(IMDL)
             .arg("torrent")
             .arg("create")
             .arg(content_dir.to_string_lossy().to_string())
@@ -36,10 +35,9 @@ impl ImdlCommand {
             .arg(output_path.to_string_lossy().to_string())
             .arg("--no-created-by")
             .arg("--force")
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "execute create torrent", IMDL))?;
-        OutputHandler::execute(output, "create torrent", "IMDL")
+            .map_err(|e| process_error(e, "create torrent", IMDL))
     }
 
     /// Get a summary of the torrent file.
@@ -49,10 +47,9 @@ impl ImdlCommand {
             .arg("show")
             .arg("--json")
             .arg(path)
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "execute read torrent", IMDL))?;
-        let output = OutputHandler::execute(output, "read torrent", "IMDL")?;
+            .map_err(|e| process_error(e, "read torrent", IMDL))?;
         let reader = output.stdout.reader();
         serde_json::from_reader(reader).map_err(|e| json_error(e, "deserialize torrent"))
     }
@@ -62,58 +59,21 @@ impl ImdlCommand {
         torrent_file: &Path,
         directory: &Path,
     ) -> Result<Option<SourceIssue>, Error> {
-        let output = Command::new(IMDL)
+        match Command::new(IMDL)
             .arg("torrent")
             .arg("verify")
             .arg("--content")
             .arg(directory)
             .arg(torrent_file)
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "execute verify torrent", IMDL))?;
-        if output.status.success() {
-            Ok(None)
-        } else {
-            let details = String::from_utf8(output.stderr).unwrap_or_default();
-            Ok(Some(Imdl { details }))
-        }
-    }
-
-    /// Verify files match the torrent metadata.
-    #[allow(dead_code)]
-    pub async fn verify_from_buffer(
-        buffer: &[u8],
-        directory: &PathBuf,
-    ) -> Result<Vec<SourceIssue>, Error> {
-        let mut child = Command::new(IMDL)
-            .arg("torrent")
-            .arg("verify")
-            .arg("--content")
-            .arg(directory)
-            .arg("-")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|e| command_error(e, "execute verify torrent", IMDL))?;
-        let mut stdin = child.stdin.take().expect("stdin should be available");
-        stdin
-            .write_all(buffer)
-            .await
-            .map_err(|e| command_error(e, "writing buffer to verify torrent", IMDL))?;
-        drop(stdin);
-        let output = child
-            .wait_with_output()
-            .await
-            .map_err(|e| command_error(e, "get output of verify torrent", IMDL))?;
-        if output.status.success() {
-            Ok(Vec::new())
-        } else {
-            let details = String::from_utf8(output.stderr).unwrap_or_default();
-            Ok(vec![Imdl { details }])
+        {
+            Ok(_) => Ok(None),
+            Err(ProcessError::Failed(output)) => {
+                let details = output.stderr.unwrap_or_default();
+                Ok(Some(Imdl { details }))
+            }
+            Err(e) => Err(process_error(e, "verify torrent", IMDL)),
         }
     }
 

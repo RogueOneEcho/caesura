@@ -60,7 +60,7 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> 
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
-        .map_err(|e| command_error(e, "spawn decode", &decode_program))?;
+        .map_err(|e| process_error(ProcessError::Spawn(e), "spawn decode", &decode_program))?;
     let pipe: Stdio = decode_command
         .stdout
         .take()
@@ -74,15 +74,17 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> 
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
-        .map_err(|e| command_error(e, "spawn decode", &encode_program))?;
+        .map_err(|e| process_error(ProcessError::Spawn(e), "spawn encode", &encode_program))?;
     let (decode_result, encode_output) =
         join!(decode_command.wait(), encode_command.wait_with_output());
-    let decode_exit = decode_result.map_err(|e| io_error(e, "wait for decode"))?;
-    let encode_output = encode_output.map_err(|e| io_error(e, "wait for encode"))?;
+    let decode_exit =
+        decode_result.map_err(|e| process_error(ProcessError::Wait(e), "wait", "decode"))?;
+    let encode_output =
+        encode_output.map_err(|e| process_error(ProcessError::Wait(e), "wait", "encode"))?;
     if !decode_exit.success() {
         warn!("Decode was not successful: {decode_exit}");
     }
-    OutputHandler::execute(encode_output, "execute resample job", "transcode")?;
+    require_success(encode_output).map_err(|e| process_error(e, "transcode", "transcode"))?;
     Ok(())
 }
 
@@ -90,12 +92,10 @@ async fn execute_resample(resample: Resample) -> Result<(), Error> {
     let info = resample.to_info();
     trace!("Executing resample: {info}");
     let program = info.program.clone();
-    let output = info
-        .to_command()
-        .output()
+    info.to_command()
+        .run()
         .await
-        .map_err(|e| command_error(e, "execute resample job", &program))?;
-    OutputHandler::execute(output, "execute resample job", "transcode")?;
+        .map_err(|e| process_error(e, "resample", &program))?;
     Ok(())
 }
 

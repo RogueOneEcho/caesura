@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io::{Error as IoError, ErrorKind};
 
-use super::CommandError;
+use crate::utils::ProcessError;
 
 /// Errors that can occur during sample generation.
 #[derive(Debug)]
@@ -13,12 +13,12 @@ pub enum SampleError {
     RemoveFile(IoError),
 
     /// SOX command failed.
-    Sox(CommandError),
+    Sox(ProcessError),
 
     /// metaflac failed to set tags.
-    MetaflacTags(CommandError),
+    MetaflacTags(ProcessError),
     /// metaflac failed to import picture.
-    MetaflacPicture(CommandError),
+    MetaflacPicture(ProcessError),
 
     /// Failed to save image.
     ImageSave(image::ImageError),
@@ -74,15 +74,17 @@ impl From<rogue_logging::Error> for SampleError {
 /// Format a command error with a custom message, handling "not found" specially.
 fn fmt_command_error(
     f: &mut Formatter<'_>,
-    error: &CommandError,
+    error: &ProcessError,
     command: &str,
     action: &str,
 ) -> FmtResult {
     match error {
-        CommandError::Spawn(e) if e.kind() == ErrorKind::NotFound => {
+        ProcessError::Spawn(e) if e.kind() == ErrorKind::NotFound => {
             write!(f, "`{command}` not found\nIs it installed and in PATH?")
         }
-        CommandError::Spawn(e) => write!(f, "Failed to spawn `{command}`\n{e}"),
-        CommandError::Failed(output) => write!(f, "{action} with `{command}`\n{output}"),
+        ProcessError::Spawn(e) | ProcessError::Wait(e) => {
+            write!(f, "Failed to run `{command}`\n{e}")
+        }
+        ProcessError::Failed(output) => write!(f, "{action} with `{command}`\n{output}"),
     }
 }

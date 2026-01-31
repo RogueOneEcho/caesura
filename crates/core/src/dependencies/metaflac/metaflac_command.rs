@@ -14,10 +14,9 @@ impl MetaflacCommand {
             .arg("--block-type=VORBIS_COMMENT")
             .arg("--block-type=STREAMINFO")
             .arg(path.to_string_lossy().to_string())
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "get details", METAFLAC))?;
-        let output = OutputHandler::execute(output, "get details", "metaflac")?;
+            .map_err(|e| process_error(e, "get details", METAFLAC))?;
         Ok(String::from_utf8(output.stdout).unwrap_or_default())
     }
 

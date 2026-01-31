@@ -13,10 +13,9 @@ impl EyeD3Command {
             .arg(path.to_string_lossy().to_string())
             .arg("--no-color")
             .arg("-r")
-            .output()
+            .run()
             .await
-            .map_err(|e| command_error(e, "get details", EYED3))?;
-        let output = OutputHandler::execute(output, "get details", "eyeD3")?;
+            .map_err(|e| process_error(e, "get details", EYED3))?;
         Ok(String::from_utf8(output.stdout).unwrap_or_default())
     }
 }
