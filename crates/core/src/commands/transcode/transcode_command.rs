@@ -206,7 +206,7 @@ impl TranscodeCommand {
         debug!("{} torrents {}", "Creating".bold(), source);
         for target in targets {
             let content_dir = self.paths.get_transcode_target_dir(source, *target);
-            let path_without_indexer = self.paths.get_torrent_path(source, *target, false);
+            let torrent_path = self.paths.get_torrent_path(source, *target);
             let announce_url = self
                 .shared_options
                 .announce_url
@@ -217,21 +217,8 @@ impl TranscodeCommand {
                 .indexer
                 .clone()
                 .expect("indexer should be set");
-            ImdlCommand::create(&content_dir, &path_without_indexer, announce_url, indexer).await?;
-            trace!(
-                "{} torrent {}",
-                "Created".bold(),
-                path_without_indexer.display()
-            );
-            let path_with_indexer = self.paths.get_torrent_path(source, *target, true);
-            copy(&path_without_indexer, &path_with_indexer)
-                .await
-                .map_err(|e| io_error(e, "copy torrent file"))?;
-            trace!(
-                "{} torrent {}",
-                "Created".bold(),
-                path_with_indexer.display()
-            );
+            ImdlCommand::create(&content_dir, &torrent_path, announce_url, indexer).await?;
+            trace!("{} torrent {}", "Created".bold(), torrent_path.display());
         }
         debug!("{} torrents {}", "Created".bold(), source);
         Ok(())

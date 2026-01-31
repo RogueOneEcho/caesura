@@ -1,5 +1,6 @@
 //! Configuration for cached transcodes in tests.
 
+use crate::options::SharedOptions;
 use crate::utils::{AlbumConfig, SAMPLE_TRANSCODES_DIR, TargetFormat};
 use std::path::PathBuf;
 
@@ -42,8 +43,14 @@ impl TranscodeConfig {
     }
 
     /// Full path to the torrent file.
+    ///
+    /// Note: Uses indexer suffix from [`SharedOptions::MOCK_INDEXER`].
     #[must_use]
     pub fn torrent_path(&self) -> PathBuf {
-        SAMPLE_TRANSCODES_DIR.join(format!("{}.torrent", self.dir_name()))
+        SAMPLE_TRANSCODES_DIR.join(format!(
+            "{}.{}.torrent",
+            self.dir_name(),
+            SharedOptions::MOCK_INDEXER
+        ))
     }
 }

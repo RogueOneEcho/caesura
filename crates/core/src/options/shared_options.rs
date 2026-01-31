@@ -73,6 +73,19 @@ pub struct SharedOptions {
 }
 
 impl SharedOptions {
+    /// Default indexer used by [`Self::mock()`] for testing.
+    #[cfg(test)]
+    pub const MOCK_INDEXER: &'static str = "red";
+
+    /// Returns the indexer name, normalized to lowercase.
+    #[must_use]
+    pub fn indexer_lowercase(&self) -> String {
+        self.indexer
+            .clone()
+            .expect("indexer should be set")
+            .to_lowercase()
+    }
+
     /// Apply calculated defaults that depend on runtime values.
     pub fn apply_calculated_defaults(partial: &mut SharedOptionsPartial) {
         // indexer is calculated from announce_url
@@ -103,7 +116,7 @@ impl SharedOptions {
     #[cfg(test)]
     pub fn mock() -> Self {
         Self {
-            indexer: Some("red".to_owned()),
+            indexer: Some(Self::MOCK_INDEXER.to_owned()),
             indexer_url: Some("https://redacted.sh".to_owned()),
             announce_url: Some("https://flacsfor.me/test/announce".to_owned()),
             api_key: Some("test_api_key".to_owned()),

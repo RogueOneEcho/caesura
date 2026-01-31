@@ -60,7 +60,7 @@ impl UploadCommand {
         let mut errors = Vec::new();
         let mut formats = Vec::new();
         for target in targets {
-            let torrent_path = self.paths.get_torrent_path(source, target, true);
+            let torrent_path = self.paths.get_torrent_path(source, target);
             if !torrent_path.exists() {
                 warn!("In v0.19.0 the torrent file name format changed.");
                 warn!(
@@ -199,7 +199,7 @@ impl UploadCommand {
         target: &TargetFormat,
         target_dir: &Path,
     ) -> Result<(), Error> {
-        let source_path = self.paths.get_torrent_path(source, *target, true);
+        let source_path = self.paths.get_torrent_path(source, *target);
         let source_file_name = source_path
             .file_name()
             .expect("torrent path should have a name");
