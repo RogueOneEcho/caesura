@@ -6,7 +6,7 @@ fn job_runner_created_with_correct_concurrency() {
     // Arrange
     let host = HostBuilder::new()
         .with_options(RunnerOptions { cpus: Some(4) })
-        .build();
+        .expect_build();
 
     // Act - Get the JobRunner which has the semaphore
     let runner = host.services.get_required::<JobRunner>();
@@ -19,7 +19,7 @@ fn job_runner_created_with_correct_concurrency() {
 #[tokio::test]
 async fn job_runner_execute_empty_succeeds() -> Result<(), Error> {
     // Arrange
-    let host = HostBuilder::new().build();
+    let host = HostBuilder::new().expect_build();
     let runner = host.services.get_required::<JobRunner>();
 
     // Act
@@ -34,7 +34,7 @@ async fn job_runner_execute_empty_succeeds() -> Result<(), Error> {
 #[tokio::test]
 async fn job_runner_execute_without_publish_empty_succeeds() -> Result<(), Error> {
     // Arrange
-    let host = HostBuilder::new().build();
+    let host = HostBuilder::new().expect_build();
     let runner = host.services.get_required::<JobRunner>();
 
     // Act

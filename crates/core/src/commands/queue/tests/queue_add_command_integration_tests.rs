@@ -67,7 +67,7 @@ async fn queue_add_test_helper(queue_add_path: PathBuf) -> (Ref<QueueAddCommand>
         .with_options(QueueAddArgs {
             queue_add_path: Some(queue_add_path),
         })
-        .build();
+        .expect_build();
     let command = host.services.get_required::<QueueAddCommand>();
     let queue = host.services.get_required::<Queue>();
     (command, queue)

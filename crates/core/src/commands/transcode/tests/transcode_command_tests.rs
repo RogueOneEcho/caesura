@@ -44,7 +44,7 @@ async fn transcode_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let source = provider

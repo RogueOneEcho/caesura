@@ -3,8 +3,7 @@ use crate::commands::CommandArguments::*;
 use crate::commands::QueueCommandArguments::*;
 use crate::prelude::*;
 use di::ServiceProvider;
-use rogue_logging::*;
-use std::process::exit;
+use rogue_logging::Logger;
 
 /// Application host, responsible for executing the application
 ///
@@ -28,14 +27,6 @@ impl Host {
     /// 3. Execute the command
     pub async fn execute(&self) -> Result<bool, Error> {
         let _ = self.services.get_required::<Logger>();
-        let provider = self.services.get_required::<OptionsProvider>();
-        if !provider.errors.is_empty() {
-            error!("Configuration is invalid:");
-            for error in &provider.errors {
-                warn!("{error}");
-            }
-            exit(1);
-        }
         match ArgumentsParser::get_or_show_help() {
             Config => self.services.get_required::<ConfigCommand>().execute(),
             Docs => self.services.get_required::<DocsCommand>().execute(),

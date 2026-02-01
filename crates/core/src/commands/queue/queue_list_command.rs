@@ -13,11 +13,7 @@ impl QueueListCommand {
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;
         let upload_enabled = self.batch_options.upload;
-        let indexer = self
-            .shared_options
-            .indexer
-            .clone()
-            .expect("indexer should be set");
+        let indexer = self.shared_options.indexer.clone();
         let items = self
             .queue
             .get_unprocessed(

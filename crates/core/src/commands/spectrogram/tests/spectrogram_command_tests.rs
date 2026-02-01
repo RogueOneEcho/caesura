@@ -43,7 +43,7 @@ async fn spectrogram_command_helper(album: AlbumConfig) -> Vec<FileSnapshot> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let generator = host.services.get_required::<SpectrogramCommand>();
     let source = provider

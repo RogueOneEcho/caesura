@@ -2,12 +2,11 @@
 
 pub use batch_options::*;
 pub use cache_options::*;
-pub(crate) use command::*;
 pub use copy_options::*;
 pub use doc_metadata::*;
 pub use file_options::*;
 pub(crate) use options_provider::*;
-pub(crate) use options_trait::{ApplicableCommands, OptionsPartial};
+pub(crate) use options_trait::{FromArgs, OptionsContract, OptionsPartialContract};
 pub(crate) use queue_add_args::*;
 pub(crate) use queue_rm_args::*;
 pub(crate) use rules::OptionRule::*;
@@ -22,7 +21,6 @@ pub use verify_options::*;
 
 mod batch_options;
 mod cache_options;
-mod command;
 mod copy_options;
 mod doc_metadata;
 mod file_options;

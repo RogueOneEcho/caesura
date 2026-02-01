@@ -14,7 +14,7 @@ async fn source_provider_mocked() -> Result<(), Error> {
             allow_existing: true,
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
 
     // Act

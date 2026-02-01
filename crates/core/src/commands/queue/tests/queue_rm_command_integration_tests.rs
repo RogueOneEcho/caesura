@@ -15,7 +15,7 @@ async fn queue_rm_command_removes_item() -> Result<(), Error> {
         .with_options(QueueAddArgs {
             queue_add_path: Some(SAMPLE_SOURCES_DIR.clone()),
         })
-        .build();
+        .expect_build();
 
     // First add items
     let add_command = host.services.get_required::<QueueAddCommand>();
@@ -36,7 +36,7 @@ async fn queue_rm_command_removes_item() -> Result<(), Error> {
         .with_options(QueueRemoveArgs {
             queue_rm_hash: Some(hash.to_string()),
         })
-        .build();
+        .expect_build();
 
     // Act
     let rm_command = host.services.get_required::<QueueRemoveCommand>();
@@ -67,7 +67,7 @@ async fn queue_rm_command_nonexistent_hash() -> Result<(), Error> {
         .with_options(QueueRemoveArgs {
             queue_rm_hash: Some("0000000000000000000000000000000000000000".to_owned()),
         })
-        .build();
+        .expect_build();
 
     let command = host.services.get_required::<QueueRemoveCommand>();
 
@@ -95,7 +95,7 @@ async fn queue_rm_command_invalid_hash_format() -> Result<(), Error> {
         .with_options(QueueRemoveArgs {
             queue_rm_hash: Some("invalid-hash".to_owned()),
         })
-        .build();
+        .expect_build();
 
     let command = host.services.get_required::<QueueRemoveCommand>();
 

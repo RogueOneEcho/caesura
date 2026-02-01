@@ -1,0 +1,139 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct TargetOptionsPartial {
+    /// Formats to attempt to transcode to.
+    ///
+    /// Default: `vec![TargetFormat::Flac , TargetFormat::_320 , TargetFormat::V0]`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub target: Option<Vec<TargetFormat>>,
+    /// Allow transcoding to existing formats.
+    ///
+    /// Note: This is only useful for development and should probably not be used.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "allow-existing",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub allow_existing: Option<bool>,
+    /// Use random dithering when resampling with `SoX`.
+    ///
+    /// By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither
+    /// random number generator with a fixed value, producing deterministic output.
+    /// Set this to `true` to use random dithering instead.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "sox-random-dither",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub sox_random_dither: Option<bool>,
+}
+impl TargetOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        TargetOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let target = self.target;
+        let allow_existing = self.allow_existing;
+        let sox_random_dither = self.sox_random_dither;
+        let resolved = TargetOptions {
+            target: target
+                .unwrap_or_else(|| {
+                    vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0]
+                }),
+            allow_existing: allow_existing.unwrap_or_default(),
+            sox_random_dither: sox_random_dither.unwrap_or_default(),
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for TargetOptionsPartial {
+    type Resolved = TargetOptions;
+    fn merge(&mut self, other: Self) {
+        if self.target.is_none() {
+            self.target = other.target;
+        }
+        if self.allow_existing.is_none() {
+            self.allow_existing = other.allow_existing;
+        }
+        if self.sox_random_dither.is_none() {
+            self.sox_random_dither = other.sox_random_dither;
+        }
+    }
+    fn resolve_without_validation(self) -> TargetOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        TargetOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for TargetOptions {
+    fn default() -> Self {
+        Self {
+            target: vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0],
+            allow_existing: ::std::default::Default::default(),
+            sox_random_dither: ::std::default::Default::default(),
+        }
+    }
+}
+impl crate::options::Documented for TargetOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "TargetOptions",
+            description: "Options for transcoding",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "target", cli_flag : "--target",
+                field_type : "Vec<TargetFormat>", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(&
+                (vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0]))
+                .unwrap()), default_doc : ::std::option::Option::None, description :
+                "Formats to attempt to transcode to.", }, crate ::options::FieldDoc {
+                config_key : "allow_existing", cli_flag : "--allow-existing", field_type
+                : "bool", default_value : ::std::option::Option::Some("false"
+                .to_owned()), default_doc : ::std::option::Option::None, description :
+                "Allow transcoding to existing formats.<br>Note: This is only useful for development and should probably not be used.",
+                }, crate ::options::FieldDoc { config_key : "sox_random_dither", cli_flag
+                : "--sox-random-dither", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Use random dithering when resampling with `SoX`.<br>By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither<br>random number generator with a fixed value, producing deterministic output.<br>Set this to `true` to use random dithering instead.",
+                }
+            ],
+        });
+        &DOC
+    }
+}

@@ -13,7 +13,7 @@ async fn batch_command_empty_queue_succeeds() -> Result<(), Error> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
 
     let command = host.services.get_required::<BatchCommand>();
 
@@ -40,7 +40,7 @@ async fn batch_command_verifies_item() -> Result<(), Error> {
         .with_options(QueueAddArgs {
             queue_add_path: Some(album.single_torrent_dir()),
         })
-        .build();
+        .expect_build();
 
     // Add item to queue
     let add_command = host.services.get_required::<QueueAddCommand>();
@@ -84,7 +84,7 @@ async fn batch_command_skips_item_without_id() -> Result<(), Error> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
 
     // Add an item without an ID
     let queue = host.services.get_required::<Queue>();
@@ -134,7 +134,7 @@ async fn batch_command_respects_limit() -> Result<(), Error> {
             limit: 1,
             ..BatchOptions::default()
         })
-        .build();
+        .expect_build();
 
     // Add multiple items with IDs
     let queue = host.services.get_required::<Queue>();
@@ -179,7 +179,7 @@ async fn batch_command_filters_by_indexer() -> Result<(), Error> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
 
     let queue = host.services.get_required::<Queue>();
 
@@ -239,7 +239,7 @@ async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Er
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
 
     let queue = host.services.get_required::<Queue>();
     let hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
@@ -288,7 +288,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
         .with_options(QueueAddArgs {
             queue_add_path: Some(album.single_torrent_dir()),
         })
-        .build();
+        .expect_build();
 
     // Add item to queue
     let add_command = host.services.get_required::<QueueAddCommand>();
@@ -344,7 +344,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
         .with_options(QueueAddArgs {
             queue_add_path: Some(album.single_torrent_dir()),
         })
-        .build();
+        .expect_build();
 
     // Add item and set up for processing
     let add_command = host.services.get_required::<QueueAddCommand>();
@@ -396,7 +396,7 @@ async fn batch_command_upload_saves_status() -> Result<(), Error> {
         .with_options(QueueAddArgs {
             queue_add_path: Some(album.single_torrent_dir()),
         })
-        .build();
+        .expect_build();
 
     // Add item and set up for processing
     let add_command = host.services.get_required::<QueueAddCommand>();

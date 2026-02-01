@@ -66,7 +66,7 @@ impl IdProvider {
             warn!("{e}");
             IdProviderError::TorrentFileInvalid
         })?;
-        let tracker_id = self.options.indexer.clone().expect("indexer should be set");
+        let tracker_id = self.options.indexer.clone();
         if summary.is_source_equal(&tracker_id) {
             let url = summary.comment.unwrap_or_default();
             get_torrent_id_from_url(&url)

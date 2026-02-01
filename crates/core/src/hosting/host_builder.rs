@@ -6,7 +6,6 @@ use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
 use rogue_logging::LoggerBuilder;
-use std::process::exit;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
@@ -15,6 +14,8 @@ use tokio::task::JoinSet;
 pub struct HostBuilder {
     /// Service collection for dependency injection registration.
     pub services: ServiceCollection,
+    /// Options provider for validation and registration.
+    options: OptionsProvider,
 }
 
 impl Default for HostBuilder {
@@ -28,12 +29,10 @@ impl HostBuilder {
     #[must_use]
     #[allow(clippy::as_conversions)]
     pub fn new() -> HostBuilder {
-        let mut this = HostBuilder {
-            services: ServiceCollection::new(),
-        };
-
-        this.services
-            .register_options()
+        let mut options = OptionsProvider::new();
+        let mut services = ServiceCollection::new();
+        services
+            .register_options(&mut options)
             .add(SourceArg::singleton())
             .add(QueueAddArgs::singleton())
             .add(QueueRemoveArgs::singleton())
@@ -55,11 +54,8 @@ impl HostBuilder {
                 let options = provider.get_required::<SharedOptions>();
                 let factory = GazelleClientFactory {
                     options: GazelleClientOptions {
-                        url: options
-                            .indexer_url
-                            .clone()
-                            .expect("indexer_url should be set"),
-                        key: options.api_key.clone().expect("api_key should be set"),
+                        url: options.indexer_url.clone(),
+                        key: options.api_key.clone(),
                         user_agent: format!("{PKG_NAME}/{PKG_VERSION} ({PKG_HOMEPAGE})"),
                         requests_allowed_per_duration: None,
                         request_limit_duration: None,
@@ -107,7 +103,7 @@ impl HostBuilder {
             .add(UploadCommand::transient())
             // Add verify services
             .add(VerifyCommand::transient());
-        this
+        HostBuilder { services, options }
     }
 
     /// Register custom options for testing.
@@ -154,16 +150,26 @@ impl HostBuilder {
     }
 
     /// Build the [`Host`] from the configured services.
+    ///
+    /// Returns an error if options validation or DI container building fails.
+    pub fn build(&self) -> Result<Host, BuildError> {
+        if self.options.has_errors() {
+            return Err(BuildError::Options(self.options.errors.clone()));
+        }
+        let services = self.services.build_provider()?;
+        Ok(Host::new(services))
+    }
+
+    /// Build the [`Host`], panicking on error.
+    ///
+    /// Intended for tests where build errors indicate a test setup bug.
+    #[cfg(test)]
     #[must_use]
-    pub fn build(&self) -> Host {
-        match self.services.build_provider() {
-            Ok(services) => Host::new(services),
-            Err(error) => {
-                let _ = LoggerBuilder::new().create();
-                error!("{} to build the application:", "Failed".bold());
-                error!("{error}");
-                exit(1)
-            }
+    #[expect(clippy::panic, reason = "intentional panic for test failures")]
+    pub fn expect_build(&self) -> Host {
+        match self.build() {
+            Ok(host) => host,
+            Err(error) => panic!("{error}"),
         }
     }
 }

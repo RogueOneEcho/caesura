@@ -1,0 +1,88 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct SpectrogramOptionsPartial {
+    /// Sizes of spectrograms to generate.
+    ///
+    /// Default: `vec![Size::Full , Size::Zoom]`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub spectrogram_size: Option<Vec<Size>>,
+}
+impl SpectrogramOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        SpectrogramOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let spectrogram_size = self.spectrogram_size;
+        let resolved = SpectrogramOptions {
+            spectrogram_size: spectrogram_size
+                .unwrap_or_else(|| vec![Size::Full, Size::Zoom]),
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for SpectrogramOptionsPartial {
+    type Resolved = SpectrogramOptions;
+    fn merge(&mut self, other: Self) {
+        if self.spectrogram_size.is_none() {
+            self.spectrogram_size = other.spectrogram_size;
+        }
+    }
+    fn resolve_without_validation(self) -> SpectrogramOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        SpectrogramOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for SpectrogramOptions {
+    fn default() -> Self {
+        Self {
+            spectrogram_size: vec![Size::Full, Size::Zoom],
+        }
+    }
+}
+impl crate::options::Documented for SpectrogramOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "SpectrogramOptions",
+            description: "Options for spectrograms",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "spectrogram_size", cli_flag :
+                "--spectrogram-size", field_type : "Vec<Size>", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& (vec![Size::Full,
+                Size::Zoom])).unwrap()), default_doc : ::std::option::Option::None,
+                description : "Sizes of spectrograms to generate.", }
+            ],
+        });
+        &DOC
+    }
+}

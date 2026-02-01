@@ -1,7 +1,9 @@
 //! Dependency injection container setup and CLI host.
 
-pub(crate) use host::*;
-pub use host_builder::*;
-
+mod build_error;
 mod host;
 mod host_builder;
+
+pub(crate) use host::*;
+pub use build_error::*;
+pub use host_builder::*;

@@ -151,5 +151,5 @@ fn create_host_with_source(source: &str) -> Host {
         .with_options(SourceArg {
             source: Some(source.to_owned()),
         })
-        .build()
+        .expect_build()
 }

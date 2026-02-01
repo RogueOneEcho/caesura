@@ -114,11 +114,7 @@ impl PathManager {
             return Ok(None);
         };
         let transcode_dir = self.get_transcode_target_dir(source, target);
-        let announce_url = self
-            .shared_options
-            .announce_url
-            .clone()
-            .expect("announce should be set");
+        let announce_url = self.shared_options.announce_url.clone();
         let indexer = self.shared_options.indexer_lowercase();
         let success = ImdlCommand::duplicate_torrent(
             &fallback_path,

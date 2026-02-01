@@ -99,7 +99,7 @@ impl TranscodeGenerator {
                 ..TargetOptions::default()
             })
             .with_options(CacheOptions { cache: cache_dir })
-            .build();
+            .expect_build();
         let provider = host.services.get_required::<SourceProvider>();
         let transcoder = host.services.get_required::<TranscodeCommand>();
 

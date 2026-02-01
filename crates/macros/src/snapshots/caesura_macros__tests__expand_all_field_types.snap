@@ -12,153 +12,183 @@ expression: output
     ::serde::Serialize
 )]
 pub struct TestOptionsPartial {
-    /// A string field.
-    #[arg(long = "name")]
+    /// non-Option, no defaults
+    #[arg(long = "a")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub name: Option<String>,
-    /// A field with a default value.
-    #[arg(long = "count")]
+    pub a: Option<String>,
+    /// non-Option, static default
+    ///
+    /// Default: `42`
+    #[arg(long = "b")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub count: Option<u32>,
-    /// A boolean flag.
-    #[arg(long = "enabled", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    pub b: Option<u32>,
+    /// non-Option, default_fn with doc
+    ///
+    /// Default: `computed at runtime`
+    #[arg(long = "c")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub enabled: Option<bool>,
-    /// An optional field.
-    #[arg(long = "description")]
+    pub c: Option<u32>,
+    /// non-Option, both
+    ///
+    /// Default: `99`
+    #[arg(long = "d")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub description: Option<String>,
+    pub d: Option<u32>,
+    /// Option, no defaults
+    #[arg(long = "e")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub e: Option<String>,
+    /// Option, static default
+    ///
+    /// Default: `Some("fallback" . to_owned())`
+    #[arg(long = "f")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub f: Option<String>,
+    /// Option, default_fn
+    #[arg(long = "g")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub g: Option<String>,
+    /// Option, both
+    ///
+    /// Default: `Some("final" . to_owned())`
+    #[arg(long = "h")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub h: Option<String>,
 }
 impl TestOptionsPartial {
-    /// Merge another partial into self (other fills in None values)
-    pub fn merge(&mut self, other: &Self) {
-        if self.name.is_none() {
-            self.name.clone_from(&other.name);
-        }
-        if self.count.is_none() {
-            self.count.clone_from(&other.count);
-        }
-        if self.enabled.is_none() {
-            self.enabled.clone_from(&other.enabled);
-        }
-        if self.description.is_none() {
-            self.description.clone_from(&other.description);
-        }
-    }
-    /// Resolve partial into final options, applying defaults.
-    pub fn resolve(mut self) -> TestOptions {
-        let name = self.name.take().unwrap_or_default();
-        let count = self.count.take().unwrap_or_else(|| 42);
-        let enabled = self.enabled.take().unwrap_or_default();
-        let description = self.description.clone();
-        TestOptions {
-            name,
-            count,
-            enabled,
-            description,
-        }
-    }
-    /// Deserialize from YAML string
-    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
-        ::serde_yaml::from_str(yaml)
-    }
-    /// Get from command line arguments
-    pub fn from_args() -> ::std::option::Option<Self> {
-        let mut options = match crate::commands::ArgumentsParser::get()? {
-            crate::commands::CommandArguments::Batch { opts, .. }
-            | crate::commands::CommandArguments::Transcode { opts, .. } => opts,
-            _ => return ::std::option::Option::None,
+    fn resolve_internal(
+        mut self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        TestOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let defaults = self.clone();
+        let a = self.a;
+        let b = self.b;
+        let c = self.c.or_else(|| compute_c(&defaults));
+        let d = self.d.or_else(|| compute_d(&defaults));
+        let e = self.e;
+        let f = self.f;
+        let g = self.g.or_else(|| compute_g(&defaults));
+        let h = self.h.or_else(|| compute_h(&defaults));
+        let resolved = TestOptions {
+            a: a.unwrap_or_default(),
+            b: b.unwrap_or_else(|| 42),
+            c: c.unwrap_or_default(),
+            d: d.unwrap_or_else(|| 99),
+            e,
+            f: f.or_else(|| Some("fallback".to_owned())),
+            g,
+            h: h.or_else(|| Some("final".to_owned())),
         };
-        if options.enabled == ::std::option::Option::Some(false) {
-            options.enabled = ::std::option::Option::None;
+        if validate {
+            resolved.validate(&mut errors);
         }
-        ::std::option::Option::Some(options)
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
     }
 }
-impl crate::options::OptionsPartial for TestOptionsPartial {
+impl crate::options::OptionsPartialContract for TestOptionsPartial {
     type Resolved = TestOptions;
-    fn merge(&mut self, other: &Self) {
-        TestOptionsPartial::merge(self, other)
-    }
-    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
-        TestOptionsPartial::from_yaml(yaml)
-    }
-    fn from_args() -> ::std::option::Option<Self> {
-        TestOptionsPartial::from_args()
-    }
-    fn resolve(self) -> Self::Resolved {
-        TestOptionsPartial::resolve(self)
-    }
-    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
-        TestOptions::validate_partial(self, errors)
-    }
-}
-impl TestOptions {
-    /// Commands that use this options struct
-    pub fn applicable_commands() -> &'static [crate::options::Command] {
-        &[crate::options::Command::Batch, crate::options::Command::Transcode]
-    }
-}
-impl ::std::fmt::Display for TestOptions {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match ::serde_yaml::to_string(self) {
-            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
-            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+    fn merge(&mut self, other: Self) {
+        if self.a.is_none() {
+            self.a = other.a;
+        }
+        if self.b.is_none() {
+            self.b = other.b;
+        }
+        if self.c.is_none() {
+            self.c = other.c;
+        }
+        if self.d.is_none() {
+            self.d = other.d;
+        }
+        if self.e.is_none() {
+            self.e = other.e;
+        }
+        if self.f.is_none() {
+            self.f = other.f;
+        }
+        if self.g.is_none() {
+            self.g = other.g;
+        }
+        if self.h.is_none() {
+            self.h = other.h;
         }
     }
-}
-impl ::std::fmt::Display for TestOptionsPartial {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match ::serde_yaml::to_string(self) {
-            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
-            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
-        }
+    fn resolve_without_validation(self) -> TestOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        TestOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
     }
 }
-impl crate::options::ApplicableCommands for TestOptions {
-    fn applicable_commands() -> &'static [crate::options::Command] {
-        &[crate::options::Command::Batch, crate::options::Command::Transcode]
+impl ::std::default::Default for TestOptions {
+    fn default() -> Self {
+        Self {
+            a: ::std::default::Default::default(),
+            b: 42,
+            c: ::std::default::Default::default(),
+            d: 99,
+            e: ::std::option::Option::None,
+            f: ::std::option::Option::None,
+            g: ::std::option::Option::None,
+            h: ::std::option::Option::None,
+        }
     }
 }
 impl crate::options::Documented for TestOptions {
     fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static FIELDS: &[crate::options::FieldDoc] = &[
-            crate::options::FieldDoc {
-                config_key: "name",
-                cli_flag: "--name",
-                field_type: "String",
-                default: ::std::option::Option::None,
-                description: "A string field.",
-            },
-            crate::options::FieldDoc {
-                config_key: "count",
-                cli_flag: "--count",
-                field_type: "u32",
-                default: ::std::option::Option::Some("42"),
-                description: "A field with a default value.",
-            },
-            crate::options::FieldDoc {
-                config_key: "enabled",
-                cli_flag: "--enabled",
-                field_type: "bool",
-                default: ::std::option::Option::Some("false"),
-                description: "A boolean flag.",
-            },
-            crate::options::FieldDoc {
-                config_key: "description",
-                cli_flag: "--description",
-                field_type: "Option<String>",
-                default: ::std::option::Option::None,
-                description: "An optional field.",
-            },
-        ];
-        static COMMANDS: &[&str] = &["Batch", "Transcode"];
-        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
             name: "TestOptions",
             description: "",
-            fields: FIELDS,
-            commands: COMMANDS,
-        };
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "a", cli_flag : "--a",
+                field_type : "String", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& < String >
+                ::default()).unwrap()), default_doc : ::std::option::Option::None,
+                description : "non-Option, no defaults", }, crate ::options::FieldDoc {
+                config_key : "b", cli_flag : "--b", field_type : "u32", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& (42)).unwrap()),
+                default_doc : ::std::option::Option::None, description :
+                "non-Option, static default", }, crate ::options::FieldDoc { config_key :
+                "c", cli_flag : "--c", field_type : "u32", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& < u32 >
+                ::default()).unwrap()), default_doc :
+                ::std::option::Option::Some("computed at runtime"), description :
+                "non-Option, default_fn with doc", }, crate ::options::FieldDoc {
+                config_key : "d", cli_flag : "--d", field_type : "u32", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& (99)).unwrap()),
+                default_doc : ::std::option::Option::None, description :
+                "non-Option, both", }, crate ::options::FieldDoc { config_key : "e",
+                cli_flag : "--e", field_type : "Option<String>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description : "Option, no defaults", }, crate ::options::FieldDoc {
+                config_key : "f", cli_flag : "--f", field_type : "Option<String>",
+                default_value : ::std::option::Option::Some(::serde_json::to_string(&
+                (Some("fallback".to_owned()))).unwrap()), default_doc :
+                ::std::option::Option::None, description : "Option, static default", },
+                crate ::options::FieldDoc { config_key : "g", cli_flag : "--g",
+                field_type : "Option<String>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description : "Option, default_fn", }, crate ::options::FieldDoc {
+                config_key : "h", cli_flag : "--h", field_type : "Option<String>",
+                default_value : ::std::option::Option::Some(::serde_json::to_string(&
+                (Some("final".to_owned()))).unwrap()), default_doc :
+                ::std::option::Option::None, description : "Option, both", }
+            ],
+        });
         &DOC
     }
 }

@@ -50,7 +50,7 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), Error> {
             dry_run: true,
             ..UploadOptions::default()
         })
-        .build();
+        .expect_build();
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
@@ -86,7 +86,7 @@ async fn upload_command_validation_failure_returns_false() -> Result<(), Error> 
         .with_options(SourceArg {
             source: Some(AlbumConfig::TORRENT_ID.to_string()),
         })
-        .build();
+        .expect_build();
 
     let command = host.services.get_required::<UploadCommand>();
 
@@ -112,7 +112,7 @@ async fn upload_command_missing_torrent_fails() -> Result<(), Error> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
 
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
@@ -182,7 +182,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
             copy_transcode_to_content_dir: true,
             ..UploadOptions::default()
         })
-        .build();
+        .expect_build();
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
@@ -222,7 +222,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
             copy_transcode_to: Some(copy_target.clone()),
             ..UploadOptions::default()
         })
-        .build();
+        .expect_build();
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
@@ -262,7 +262,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
             copy_torrent_to: Some(torrent_target.clone()),
             ..UploadOptions::default()
         })
-        .build();
+        .expect_build();
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
@@ -359,7 +359,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
             target: vec![transcode.target],
             ..TargetOptions::default()
         });
-    let host = builder.build();
+    let host = builder.expect_build();
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
@@ -434,7 +434,7 @@ async fn build_upload_test_host(transcode: &TranscodeConfig, test_dir: &TestDire
             target: vec![transcode.target],
             ..TargetOptions::default()
         })
-        .build()
+        .expect_build()
 }
 
 /// Helper to get source and upload command from a host.

@@ -4,42 +4,42 @@ use rogue_logging::{TimeFormat, Verbosity};
 /// Verify `BatchOptions` default values.
 #[test]
 fn batch_options_default_values() {
-    let result = BatchOptionsPartial::default().resolve();
+    let result = BatchOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
 /// Verify `FileOptions` default values.
 #[test]
 fn file_options_default_values() {
-    let result = FileOptionsPartial::default().resolve();
+    let result = FileOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
 /// Verify `TargetOptions` default values.
 #[test]
 fn target_options_default_values() {
-    let result = TargetOptionsPartial::default().resolve();
+    let result = TargetOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
 /// Verify `SpectrogramOptions` default values.
 #[test]
 fn spectrogram_options_default_values() {
-    let result = SpectrogramOptionsPartial::default().resolve();
+    let result = SpectrogramOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
 /// Verify `UploadOptions` default values.
 #[test]
 fn upload_options_default_values() {
-    let result = UploadOptionsPartial::default().resolve();
+    let result = UploadOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
 /// Verify `VerifyOptions` default values.
 #[test]
 fn verify_options_default_values() {
-    let result = VerifyOptionsPartial::default().resolve();
+    let result = VerifyOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
@@ -53,113 +53,106 @@ fn cache_options_default_values() {
 /// Verify `CopyOptions` default values.
 #[test]
 fn copy_options_default_values() {
-    let result = CopyOptionsPartial::default().resolve();
+    let result = CopyOptionsPartial::default().resolve_without_validation();
     assert_yaml_snapshot!(result);
 }
 
 /// Verify `indexer` and `indexer_url` are calculated from RED `announce_url`.
 #[test]
 fn shared_options_calculates_indexer_from_red_announce_url() {
-    // Arrange
-    let mut partial = SharedOptionsPartial {
+    let resolved = SharedOptionsPartial {
         announce_url: Some("https://flacsfor.me/abc123/announce".to_owned()),
         ..SharedOptionsPartial::default()
-    };
-
-    // Act
-    SharedOptions::apply_calculated_defaults(&mut partial);
-
-    // Assert
-    assert_eq!(partial.indexer, Some("red".to_owned()));
-    assert_eq!(partial.indexer_url, Some("https://redacted.sh".to_owned()));
+    }
+    .resolve_without_validation();
+    assert_eq!(resolved.indexer, "red");
+    assert_eq!(resolved.indexer_url, "https://redacted.sh");
 }
 
 /// Verify `indexer` and `indexer_url` are calculated from OPS `announce_url`.
 #[test]
 fn shared_options_calculates_indexer_from_ops_announce_url() {
-    // Arrange
-    let mut partial = SharedOptionsPartial {
+    let resolved = SharedOptionsPartial {
         announce_url: Some("https://home.opsfet.ch/abc123/announce".to_owned()),
         ..SharedOptionsPartial::default()
-    };
-
-    // Act
-    SharedOptions::apply_calculated_defaults(&mut partial);
-
-    // Assert
-    assert_eq!(partial.indexer, Some("ops".to_owned()));
-    assert_eq!(
-        partial.indexer_url,
-        Some("https://orpheus.network".to_owned())
-    );
+    }
+    .resolve_without_validation();
+    assert_eq!(resolved.indexer, "ops");
+    assert_eq!(resolved.indexer_url, "https://orpheus.network");
 }
 
 /// Verify explicit `indexer` is not overridden by calculated default.
 #[test]
 fn shared_options_does_not_override_explicit_indexer() {
-    // Arrange
-    let mut partial = SharedOptionsPartial {
+    let resolved = SharedOptionsPartial {
         announce_url: Some("https://flacsfor.me/abc123/announce".to_owned()),
         indexer: Some("custom".to_owned()),
         ..SharedOptionsPartial::default()
-    };
-
-    // Act
-    SharedOptions::apply_calculated_defaults(&mut partial);
-
-    // Assert
-    assert_eq!(partial.indexer, Some("custom".to_owned()));
-    assert_eq!(partial.indexer_url, None);
+    }
+    .resolve_without_validation();
+    assert_eq!(resolved.indexer, "custom");
+    // indexer_url uses the custom indexer which doesn't match red/ops, so defaults to empty
+    assert_eq!(resolved.indexer_url, "");
 }
 
 /// Verify explicit `indexer_url` is not overridden by calculated default.
 #[test]
 fn shared_options_does_not_override_explicit_indexer_url() {
-    // Arrange
-    let mut partial = SharedOptionsPartial {
+    let resolved = SharedOptionsPartial {
         announce_url: Some("https://flacsfor.me/abc123/announce".to_owned()),
         indexer_url: Some("https://custom.example.com".to_owned()),
         ..SharedOptionsPartial::default()
-    };
-
-    // Act
-    SharedOptions::apply_calculated_defaults(&mut partial);
-
-    // Assert
-    assert_eq!(partial.indexer, Some("red".to_owned()));
-    assert_eq!(
-        partial.indexer_url,
-        Some("https://custom.example.com".to_owned())
-    );
+    }
+    .resolve_without_validation();
+    assert_eq!(resolved.indexer, "red");
+    assert_eq!(resolved.indexer_url, "https://custom.example.com");
 }
 
-/// Verify unknown `announce_url` leaves `indexer` and `indexer_url` as None.
+/// Verify unknown `announce_url` leaves `indexer` and `indexer_url` as empty (fails validation).
 #[test]
-fn shared_options_unknown_announce_url_leaves_indexer_none() {
-    // Arrange
-    let mut partial = SharedOptionsPartial {
+fn shared_options_unknown_announce_url_leaves_indexer_empty() {
+    let resolved = SharedOptionsPartial {
         announce_url: Some("https://unknown.tracker.com/announce".to_owned()),
         ..SharedOptionsPartial::default()
-    };
+    }
+    .resolve_without_validation();
+    // With resolve_without_validation, required fields default to empty string
+    assert_eq!(resolved.indexer, "");
+    assert_eq!(resolved.indexer_url, "");
+}
 
-    // Act
-    SharedOptions::apply_calculated_defaults(&mut partial);
-
-    // Assert
-    assert_eq!(partial.indexer, None);
-    assert_eq!(partial.indexer_url, None);
+/// Edge case: explicit empty string for `indexer` bypasses `required` check.
+///
+/// The `required` attribute checks if the Option is None after default_fn runs.
+/// An explicit `Some("")` is not None, so it passes the required check.
+/// However, `indexer_url` still fails because its default_fn can't derive from "".
+#[test]
+fn shared_options_explicit_empty_indexer_bypasses_required() {
+    let result = SharedOptionsPartial {
+        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        api_key: Some("key".to_owned()),
+        indexer: Some(String::new()), // Explicit empty string
+        content: Some(vec![PathBuf::from(".")]),
+        output: Some(PathBuf::from(".")),
+        ..SharedOptionsPartial::default()
+    }
+    .resolve();
+    // indexer passes required check (Some("") is not None)
+    // but indexer_url fails because default_fn can't derive from empty indexer
+    let errors = result.expect_err("should fail due to indexer_url");
+    assert!(errors.iter().any(|e| matches!(e, OptionRule::NotSet(name) if name == "Indexer url")));
 }
 
 /// Verify `upload` without `transcode` is rejected.
 #[test]
 fn batch_options_rejects_upload_without_transcode() {
-    let partial = BatchOptionsPartial {
+    let result = BatchOptionsPartial {
         upload: Some(true),
         transcode: None,
         ..BatchOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    BatchOptions::validate_partial(&partial, &mut errors);
+    }
+    .resolve();
+    let errors = result.expect_err("should reject upload without transcode");
     assert!(
         errors
             .iter()
@@ -170,25 +163,24 @@ fn batch_options_rejects_upload_without_transcode() {
 /// Verify `upload` with `transcode` is accepted.
 #[test]
 fn batch_options_accepts_upload_with_transcode() {
-    let partial = BatchOptionsPartial {
+    let result = BatchOptionsPartial {
         upload: Some(true),
         transcode: Some(true),
         ..BatchOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    BatchOptions::validate_partial(&partial, &mut errors);
-    assert!(errors.is_empty());
+    }
+    .resolve();
+    assert!(result.is_ok());
 }
 
 /// Verify invalid `wait_before_upload` duration is rejected.
 #[test]
 fn batch_options_rejects_invalid_wait_duration() {
-    let partial = BatchOptionsPartial {
+    let result = BatchOptionsPartial {
         wait_before_upload: Some("invalid".to_owned()),
         ..BatchOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    BatchOptions::validate_partial(&partial, &mut errors);
+    }
+    .resolve();
+    let errors = result.expect_err("should reject invalid duration");
     assert!(
         errors
             .iter()
@@ -199,35 +191,34 @@ fn batch_options_rejects_invalid_wait_duration() {
 /// Verify valid `wait_before_upload` duration is accepted.
 #[test]
 fn batch_options_accepts_valid_wait_duration() {
-    let partial = BatchOptionsPartial {
+    let result = BatchOptionsPartial {
         wait_before_upload: Some("5m30s".to_owned()),
         ..BatchOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    BatchOptions::validate_partial(&partial, &mut errors);
-    assert!(errors.is_empty());
+    }
+    .resolve();
+    assert!(result.is_ok());
 }
 
 /// Verify explicitly empty `target` list is rejected.
 #[test]
 fn target_options_rejects_empty_target_list() {
-    let partial = TargetOptionsPartial {
+    let result = TargetOptionsPartial {
         target: Some(vec![]),
         ..TargetOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    TargetOptions::validate_partial(&partial, &mut errors);
+    }
+    .resolve();
+    let errors = result.expect_err("should reject empty target list");
     assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
 }
 
 /// Verify explicitly empty `spectrogram_size` list is rejected.
 #[test]
 fn spectrogram_options_rejects_empty_size_list() {
-    let partial = SpectrogramOptionsPartial {
+    let result = SpectrogramOptionsPartial {
         spectrogram_size: Some(vec![]),
-    };
-    let mut errors = Vec::new();
-    SpectrogramOptions::validate_partial(&partial, &mut errors);
+    }
+    .resolve();
+    let errors = result.expect_err("should reject empty size list");
     assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
 }
 
@@ -321,7 +312,7 @@ fn merge_cli_overrides_yaml() {
     };
 
     // Act
-    cli.merge(&yaml);
+    cli.merge(yaml);
 
     // Assert
     assert_eq!(cli.limit, Some(10));
@@ -341,7 +332,7 @@ fn merge_yaml_fills_none_values() {
     };
 
     // Act
-    cli.merge(&yaml);
+    cli.merge(yaml);
 
     // Assert
     assert_eq!(cli.limit, Some(5));
@@ -365,7 +356,7 @@ fn merge_does_not_override_set_values() {
     };
 
     // Act
-    cli.merge(&yaml);
+    cli.merge(yaml);
 
     // Assert
     assert_eq!(cli.indexer, Some("custom".to_owned()));
@@ -388,71 +379,25 @@ fn with_options_overrides_default_registration() {
             output: custom_output.clone(),
             ..SharedOptions::default()
         })
-        .build();
+        .expect_build();
 
     // Assert: Retrieved options should have the overridden value
     let options = host.services.get_required::<SharedOptions>();
     assert_eq!(options.output, custom_output);
 }
 
-/// Verify `SharedOptions::applicable_commands` returns all main commands.
-#[test]
-fn shared_options_applicable_commands() {
-    let commands = SharedOptions::applicable_commands();
-    assert!(commands.contains(&Command::Batch));
-    assert!(commands.contains(&Command::Queue));
-    assert!(commands.contains(&Command::Spectrogram));
-    assert!(commands.contains(&Command::Transcode));
-    assert!(commands.contains(&Command::Verify));
-    assert!(commands.contains(&Command::Upload));
-    assert!(!commands.contains(&Command::Config));
-    assert!(!commands.contains(&Command::Docs));
-}
-
-/// Verify `VerifyOptions::applicable_commands` returns Batch and Verify.
-#[test]
-fn verify_options_applicable_commands() {
-    let commands = VerifyOptions::applicable_commands();
-    assert!(commands.contains(&Command::Batch));
-    assert!(commands.contains(&Command::Verify));
-    assert!(!commands.contains(&Command::Upload));
-    assert!(!commands.contains(&Command::Transcode));
-}
-
-/// Verify `UploadOptions::applicable_commands` returns Batch and Upload.
-#[test]
-fn upload_options_applicable_commands() {
-    let commands = UploadOptions::applicable_commands();
-    assert!(commands.contains(&Command::Batch));
-    assert!(commands.contains(&Command::Upload));
-    assert!(!commands.contains(&Command::Verify));
-    assert!(!commands.contains(&Command::Spectrogram));
-}
-
-/// Verify `TargetOptions::applicable_commands` returns transcoding-related commands.
-#[test]
-fn target_options_applicable_commands() {
-    let commands = TargetOptions::applicable_commands();
-    assert!(commands.contains(&Command::Batch));
-    assert!(commands.contains(&Command::Transcode));
-    assert!(commands.contains(&Command::Upload));
-    assert!(commands.contains(&Command::Verify));
-    assert!(!commands.contains(&Command::Spectrogram));
-}
-
 /// Verify validation errors for missing required fields.
 #[test]
 fn shared_options_validate_missing_fields() {
-    let partial = SharedOptionsPartial::default();
-    let mut errors = Vec::new();
-    partial.validate(&mut errors);
+    let result = SharedOptionsPartial::default().resolve();
+    let errors = result.expect_err("should reject missing required fields");
     assert_yaml_snapshot!(errors);
 }
 
 /// Verify validation errors for invalid URLs.
 #[test]
 fn shared_options_validate_invalid_urls() {
-    let partial = SharedOptionsPartial {
+    let result = SharedOptionsPartial {
         api_key: Some("key".to_owned()),
         indexer: Some("red".to_owned()),
         indexer_url: Some("not-a-url".to_owned()),
@@ -460,16 +405,16 @@ fn shared_options_validate_invalid_urls() {
         content: Some(vec![PathBuf::from(".")]),
         output: Some(PathBuf::from(".")),
         ..SharedOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    partial.validate(&mut errors);
+    }
+    .resolve();
+    let errors = result.expect_err("should reject invalid URLs");
     assert_yaml_snapshot!(errors);
 }
 
 /// Verify valid options produce no validation errors.
 #[test]
 fn shared_options_validate_no_errors_when_valid() {
-    let partial = SharedOptionsPartial {
+    let result = SharedOptionsPartial {
         api_key: Some("key".to_owned()),
         indexer: Some("red".to_owned()),
         indexer_url: Some("https://redacted.sh".to_owned()),
@@ -477,8 +422,7 @@ fn shared_options_validate_no_errors_when_valid() {
         content: Some(vec![PathBuf::from(".")]),
         output: Some(PathBuf::from(".")),
         ..SharedOptionsPartial::default()
-    };
-    let mut errors = Vec::new();
-    partial.validate(&mut errors);
-    assert_yaml_snapshot!(errors);
+    }
+    .resolve();
+    assert!(result.is_ok());
 }

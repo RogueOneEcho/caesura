@@ -48,28 +48,20 @@ fn render_options_table(doc: &OptionsDoc) -> String {
         doc.description
     };
     let _ = writeln!(out, "## {header}\n");
-    if !doc.commands.is_empty() {
-        let _ = writeln!(
-            out,
-            "**Applies to:** {}",
-            doc.commands
-                .iter()
-                .map(|c| format!("`{c}`"))
-                .collect::<Vec<_>>()
-                .join(", ")
-        );
-        out.push('\n');
-    }
 
     // Prepare rows data
-    let headers = ["Config Key", "CLI Flag", "Type", "Default", "Description"];
+    let headers = ["YAML Key", "CLI Flag", "Type", "Default", "Description"];
     let rows: Vec<[String; 5]> = doc
         .fields
         .iter()
         .map(|field| {
-            let default = field
-                .default
-                .map_or_else(|| "-".to_owned(), |d| format!("`{d}`"));
+            let default = if let Some(doc) = field.default_doc {
+                doc.to_owned()
+            } else if let Some(value) = &field.default_value {
+                format!("`{value}`")
+            } else {
+                "~".to_owned()
+            };
             let description = escape_markdown_table(field.description);
             [
                 format!("`{}`", field.config_key),

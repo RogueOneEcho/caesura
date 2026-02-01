@@ -17,93 +17,68 @@ pub struct CustomArgOptionsPartial {
     pub file_path: Option<String>,
 }
 impl CustomArgOptionsPartial {
-    /// Merge another partial into self (other fills in None values)
-    pub fn merge(&mut self, other: &Self) {
-        if self.file_path.is_none() {
-            self.file_path.clone_from(&other.file_path);
-        }
-    }
-    /// Resolve partial into final options, applying defaults.
-    pub fn resolve(mut self) -> CustomArgOptions {
-        let file_path = self.file_path.take().unwrap_or_default();
-        CustomArgOptions { file_path }
-    }
-    /// Deserialize from YAML string
-    pub fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
-        ::serde_yaml::from_str(yaml)
-    }
-    /// Get from command line arguments
-    pub fn from_args() -> ::std::option::Option<Self> {
-        let mut options = match crate::commands::ArgumentsParser::get()? {
-            crate::commands::CommandArguments::Verify { opts, .. } => opts,
-            _ => return ::std::option::Option::None,
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        CustomArgOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let file_path = self.file_path;
+        let resolved = CustomArgOptions {
+            file_path: file_path.unwrap_or_default(),
         };
-        ::std::option::Option::Some(options)
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
     }
 }
-impl crate::options::OptionsPartial for CustomArgOptionsPartial {
+impl crate::options::OptionsPartialContract for CustomArgOptionsPartial {
     type Resolved = CustomArgOptions;
-    fn merge(&mut self, other: &Self) {
-        CustomArgOptionsPartial::merge(self, other)
-    }
-    fn from_yaml(yaml: &str) -> ::std::result::Result<Self, ::serde_yaml::Error> {
-        CustomArgOptionsPartial::from_yaml(yaml)
-    }
-    fn from_args() -> ::std::option::Option<Self> {
-        CustomArgOptionsPartial::from_args()
-    }
-    fn resolve(self) -> Self::Resolved {
-        CustomArgOptionsPartial::resolve(self)
-    }
-    fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
-        CustomArgOptions::validate_partial(self, errors)
-    }
-}
-impl CustomArgOptions {
-    /// Commands that use this options struct
-    pub fn applicable_commands() -> &'static [crate::options::Command] {
-        &[crate::options::Command::Verify]
-    }
-}
-impl ::std::fmt::Display for CustomArgOptions {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match ::serde_yaml::to_string(self) {
-            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
-            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
+    fn merge(&mut self, other: Self) {
+        if self.file_path.is_none() {
+            self.file_path = other.file_path;
         }
     }
-}
-impl ::std::fmt::Display for CustomArgOptionsPartial {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match ::serde_yaml::to_string(self) {
-            ::std::result::Result::Ok(yaml) => write!(f, "{}", yaml),
-            ::std::result::Result::Err(_) => write!(f, "{:?}", self),
-        }
+    fn resolve_without_validation(self) -> CustomArgOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        CustomArgOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
     }
 }
-impl crate::options::ApplicableCommands for CustomArgOptions {
-    fn applicable_commands() -> &'static [crate::options::Command] {
-        &[crate::options::Command::Verify]
+impl ::std::default::Default for CustomArgOptions {
+    fn default() -> Self {
+        Self {
+            file_path: ::std::default::Default::default(),
+        }
     }
 }
 impl crate::options::Documented for CustomArgOptions {
     fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static FIELDS: &[crate::options::FieldDoc] = &[
-            crate::options::FieldDoc {
-                config_key: "file_path",
-                cli_flag: "--file-path",
-                field_type: "String",
-                default: ::std::option::Option::None,
-                description: "",
-            },
-        ];
-        static COMMANDS: &[&str] = &["Verify"];
-        static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
             name: "CustomArgOptions",
             description: "",
-            fields: FIELDS,
-            commands: COMMANDS,
-        };
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "file_path", cli_flag :
+                "--file-path", field_type : "String", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& < String >
+                ::default()).unwrap()), default_doc : ::std::option::Option::None,
+                description : "", }
+            ],
+        });
         &DOC
     }
 }
