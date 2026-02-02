@@ -1,0 +1,196 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct BatchOptionsPartial {
+    /// Should the spectrogram command be executed?
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "spectrogram",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub spectrogram: Option<bool>,
+    /// Should the transcode command be executed?
+    ///
+    /// Default: `false`
+    #[arg(long = "transcode", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub transcode: Option<bool>,
+    /// Should failed transcodes be retried?
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "retry-transcode",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub retry_transcode: Option<bool>,
+    /// Should the upload command be executed?
+    ///
+    /// Default: `false`
+    #[arg(long = "upload", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub upload: Option<bool>,
+    /// Limit the number of torrents to batch process.
+    ///
+    /// If `no_limit` is set, this option is ignored.
+    ///
+    /// Default: `3`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub limit: Option<usize>,
+    /// Should the `limit` option be ignored?
+    ///
+    /// Default: `false`
+    #[arg(long = "no-limit", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub no_limit: Option<bool>,
+    /// Wait for a duration before uploading the torrent.
+    ///
+    /// The duration is a string that can be parsed such as `500ms`, `5m`, `1h30m15s`.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub wait_before_upload: Option<String>,
+}
+impl BatchOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        BatchOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let spectrogram = self.spectrogram;
+        let transcode = self.transcode;
+        let retry_transcode = self.retry_transcode;
+        let upload = self.upload;
+        let limit = self.limit;
+        let no_limit = self.no_limit;
+        let wait_before_upload = self.wait_before_upload;
+        let resolved = BatchOptions {
+            spectrogram: spectrogram.unwrap_or_default(),
+            transcode: transcode.unwrap_or_default(),
+            retry_transcode: retry_transcode.unwrap_or_default(),
+            upload: upload.unwrap_or_default(),
+            limit: limit.unwrap_or_else(|| 3),
+            no_limit: no_limit.unwrap_or_default(),
+            wait_before_upload,
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for BatchOptionsPartial {
+    type Resolved = BatchOptions;
+    fn merge(&mut self, other: Self) {
+        if self.spectrogram.is_none() {
+            self.spectrogram = other.spectrogram;
+        }
+        if self.transcode.is_none() {
+            self.transcode = other.transcode;
+        }
+        if self.retry_transcode.is_none() {
+            self.retry_transcode = other.retry_transcode;
+        }
+        if self.upload.is_none() {
+            self.upload = other.upload;
+        }
+        if self.limit.is_none() {
+            self.limit = other.limit;
+        }
+        if self.no_limit.is_none() {
+            self.no_limit = other.no_limit;
+        }
+        if self.wait_before_upload.is_none() {
+            self.wait_before_upload = other.wait_before_upload;
+        }
+    }
+    fn resolve_without_validation(self) -> BatchOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        BatchOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for BatchOptions {
+    fn default() -> Self {
+        Self {
+            spectrogram: ::std::default::Default::default(),
+            transcode: ::std::default::Default::default(),
+            retry_transcode: ::std::default::Default::default(),
+            upload: ::std::default::Default::default(),
+            limit: 3,
+            no_limit: ::std::default::Default::default(),
+            wait_before_upload: ::std::option::Option::None,
+        }
+    }
+}
+impl crate::options::Documented for BatchOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "BatchOptions",
+            description: "Options for batch processing",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "spectrogram", cli_flag :
+                "--spectrogram", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should the spectrogram command be executed?", }, crate
+                ::options::FieldDoc { config_key : "transcode", cli_flag : "--transcode",
+                field_type : "bool", default_value : ::std::option::Option::Some("false"
+                .to_owned()), default_doc : ::std::option::Option::None, description :
+                "Should the transcode command be executed?", }, crate ::options::FieldDoc
+                { config_key : "retry_transcode", cli_flag : "--retry-transcode",
+                field_type : "bool", default_value : ::std::option::Option::Some("false"
+                .to_owned()), default_doc : ::std::option::Option::None, description :
+                "Should failed transcodes be retried?", }, crate ::options::FieldDoc {
+                config_key : "upload", cli_flag : "--upload", field_type : "bool",
+                default_value : ::std::option::Option::Some("false".to_owned()),
+                default_doc : ::std::option::Option::None, description :
+                "Should the upload command be executed?", }, crate ::options::FieldDoc {
+                config_key : "limit", cli_flag : "--limit", field_type : "usize",
+                default_value : ::std::option::Option::Some(::serde_json::to_string(&
+                (3)).unwrap()), default_doc : ::std::option::Option::None, description :
+                "Limit the number of torrents to batch process.<br>If `no_limit` is set, this option is ignored.",
+                }, crate ::options::FieldDoc { config_key : "no_limit", cli_flag :
+                "--no-limit", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should the `limit` option be ignored?", }, crate ::options::FieldDoc {
+                config_key : "wait_before_upload", cli_flag : "--wait-before-upload",
+                field_type : "Option<String>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description :
+                "Wait for a duration before uploading the torrent.<br>The duration is a string that can be parsed such as `500ms`, `5m`, `1h30m15s`.",
+                }
+            ],
+        });
+        &DOC
+    }
+}

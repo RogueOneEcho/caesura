@@ -1,0 +1,195 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct FileOptionsPartial {
+    /// Should compression of images be disabled?
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "no-image-compression",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub no_image_compression: Option<bool>,
+    /// Should transcoded files be renamed from source filenames to a
+    /// standardized format: `{track:0>N} {title}.{ext}`?
+    ///
+    /// Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "rename-tracks",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub rename_tracks: Option<bool>,
+    /// Maximum file size in bytes beyond which images are compressed.
+    ///
+    /// Only applies to image files.
+    ///
+    /// Default: `750_000`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub max_file_size: Option<u64>,
+    /// Maximum size in pixels for images.
+    ///
+    /// Only applied if the image is greater than `max_file_size`.
+    ///
+    /// Default: `1280`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub max_pixel_size: Option<u32>,
+    /// Quality percentage to apply for jpg compression.
+    ///
+    /// Only applied if the image is greater than `max_file_size`.
+    ///
+    /// Default: `80`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub jpg_quality: Option<u8>,
+    /// Should conversion of png images to jpg be disabled?
+    ///
+    /// Only applied if the image is greater than `max_file_size`.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "no-png-to-jpg",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub no_png_to_jpg: Option<bool>,
+}
+impl FileOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        FileOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let no_image_compression = self.no_image_compression;
+        let rename_tracks = self.rename_tracks;
+        let max_file_size = self.max_file_size;
+        let max_pixel_size = self.max_pixel_size;
+        let jpg_quality = self.jpg_quality;
+        let no_png_to_jpg = self.no_png_to_jpg;
+        let resolved = FileOptions {
+            no_image_compression: no_image_compression.unwrap_or_default(),
+            rename_tracks: rename_tracks.unwrap_or_default(),
+            max_file_size: max_file_size.unwrap_or_else(|| 750_000),
+            max_pixel_size: max_pixel_size.unwrap_or_else(|| 1280),
+            jpg_quality: jpg_quality.unwrap_or_else(|| 80),
+            no_png_to_jpg: no_png_to_jpg.unwrap_or_default(),
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for FileOptionsPartial {
+    type Resolved = FileOptions;
+    fn merge(&mut self, other: Self) {
+        if self.no_image_compression.is_none() {
+            self.no_image_compression = other.no_image_compression;
+        }
+        if self.rename_tracks.is_none() {
+            self.rename_tracks = other.rename_tracks;
+        }
+        if self.max_file_size.is_none() {
+            self.max_file_size = other.max_file_size;
+        }
+        if self.max_pixel_size.is_none() {
+            self.max_pixel_size = other.max_pixel_size;
+        }
+        if self.jpg_quality.is_none() {
+            self.jpg_quality = other.jpg_quality;
+        }
+        if self.no_png_to_jpg.is_none() {
+            self.no_png_to_jpg = other.no_png_to_jpg;
+        }
+    }
+    fn resolve_without_validation(self) -> FileOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        FileOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for FileOptions {
+    fn default() -> Self {
+        Self {
+            no_image_compression: ::std::default::Default::default(),
+            rename_tracks: ::std::default::Default::default(),
+            max_file_size: 750_000,
+            max_pixel_size: 1280,
+            jpg_quality: 80,
+            no_png_to_jpg: ::std::default::Default::default(),
+        }
+    }
+}
+impl crate::options::Documented for FileOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "FileOptions",
+            description: "Options for image resizing",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "no_image_compression", cli_flag
+                : "--no-image-compression", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should compression of images be disabled?", }, crate ::options::FieldDoc
+                { config_key : "rename_tracks", cli_flag : "--rename-tracks", field_type
+                : "bool", default_value : ::std::option::Option::Some("false"
+                .to_owned()), default_doc : ::std::option::Option::None, description :
+                "Should transcoded files be renamed from source filenames to a<br>standardized format: `{track:0>N} {title}.{ext}`?<br>Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.",
+                }, crate ::options::FieldDoc { config_key : "max_file_size", cli_flag :
+                "--max-file-size", field_type : "u64", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& (750_000))
+                .unwrap()), default_doc : ::std::option::Option::None, description :
+                "Maximum file size in bytes beyond which images are compressed.<br>Only applies to image files.",
+                }, crate ::options::FieldDoc { config_key : "max_pixel_size", cli_flag :
+                "--max-pixel-size", field_type : "u32", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& (1280)).unwrap()),
+                default_doc : ::std::option::Option::None, description :
+                "Maximum size in pixels for images.<br>Only applied if the image is greater than `max_file_size`.",
+                }, crate ::options::FieldDoc { config_key : "jpg_quality", cli_flag :
+                "--jpg-quality", field_type : "u8", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(& (80)).unwrap()),
+                default_doc : ::std::option::Option::None, description :
+                "Quality percentage to apply for jpg compression.<br>Only applied if the image is greater than `max_file_size`.",
+                }, crate ::options::FieldDoc { config_key : "no_png_to_jpg", cli_flag :
+                "--no-png-to-jpg", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should conversion of png images to jpg be disabled?<br>Only applied if the image is greater than `max_file_size`.",
+                }
+            ],
+        });
+        &DOC
+    }
+}

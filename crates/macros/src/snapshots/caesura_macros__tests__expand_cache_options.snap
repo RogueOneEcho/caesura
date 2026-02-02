@@ -1,6 +1,6 @@
 ---
 source: crates/macros/src/lib.rs
-expression: output
+expression: expand_options_from_file(source)
 ---
 /// Partial options struct with optional fields for CLI/YAML parsing.
 #[derive(
@@ -11,25 +11,26 @@ expression: output
     ::serde::Deserialize,
     ::serde::Serialize
 )]
-pub struct NoCommandOptionsPartial {
+pub struct CacheOptionsPartial {
+    /// Path to cache directory.
     ///
-    /// Default: `100`
-    #[arg(long = "limit")]
+    /// Default: `PathBuf::from("./cache")`
+    #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub limit: Option<u32>,
+    pub cache: Option<PathBuf>,
 }
-impl NoCommandOptionsPartial {
+impl CacheOptionsPartial {
     fn resolve_internal(
         self,
         validate: bool,
     ) -> ::std::result::Result<
-        NoCommandOptions,
+        CacheOptions,
         ::std::vec::Vec<crate::options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
-        let limit = self.limit;
-        let resolved = NoCommandOptions {
-            limit: limit.unwrap_or_else(|| 100),
+        let cache = self.cache;
+        let resolved = CacheOptions {
+            cache: cache.unwrap_or_else(|| PathBuf::from("./cache")),
         };
         if validate {
             resolved.validate(&mut errors);
@@ -41,41 +42,44 @@ impl NoCommandOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for NoCommandOptionsPartial {
-    type Resolved = NoCommandOptions;
+impl crate::options::OptionsPartialContract for CacheOptionsPartial {
+    type Resolved = CacheOptions;
     fn merge(&mut self, other: Self) {
-        if self.limit.is_none() {
-            self.limit = other.limit;
+        if self.cache.is_none() {
+            self.cache = other.cache;
         }
     }
-    fn resolve_without_validation(self) -> NoCommandOptions {
+    fn resolve_without_validation(self) -> CacheOptions {
         self.resolve_internal(false).expect("validation disabled")
     }
     fn resolve(
         self,
     ) -> ::std::result::Result<
-        NoCommandOptions,
+        CacheOptions,
         ::std::vec::Vec<crate::options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
 }
-impl ::std::default::Default for NoCommandOptions {
+impl ::std::default::Default for CacheOptions {
     fn default() -> Self {
-        Self { limit: 100 }
+        Self {
+            cache: PathBuf::from("./cache"),
+        }
     }
 }
-impl crate::options::Documented for NoCommandOptions {
+impl crate::options::Documented for CacheOptions {
     fn doc_metadata() -> &'static crate::options::OptionsDoc {
         static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
         crate::options::OptionsDoc {
-            name: "NoCommandOptions",
-            description: "",
+            name: "CacheOptions",
+            description: "Options for queue cache",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "limit", cli_flag : "--limit",
-                field_type : "u32", default_value :
-                ::std::option::Option::Some(::serde_json::to_string(& (100)).unwrap()),
-                default_doc : ::std::option::Option::None, description : "", }
+                crate ::options::FieldDoc { config_key : "cache", cli_flag : "--cache",
+                field_type : "PathBuf", default_value :
+                ::std::option::Option::Some(::serde_json::to_string(&
+                (PathBuf::from("./cache"))).unwrap()), default_doc :
+                ::std::option::Option::None, description : "Path to cache directory.", }
             ],
         });
         &DOC

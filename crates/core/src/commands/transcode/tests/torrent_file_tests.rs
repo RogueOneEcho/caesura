@@ -26,7 +26,7 @@ async fn transcode_creates_only_indexed_torrent() {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let paths = host.services.get_required::<PathManager>();
@@ -71,7 +71,7 @@ async fn get_or_duplicate_returns_path_when_exists() -> Result<(), Error> {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let paths = host.services.get_required::<PathManager>();
@@ -119,7 +119,7 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), Error> {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host_red.services.get_required::<SourceProvider>();
     let transcoder = host_red.services.get_required::<TranscodeCommand>();
     let source = provider
@@ -138,14 +138,14 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), Error> {
         .with_options(SharedOptions {
             content: vec![SAMPLE_SOURCES_DIR.clone()],
             output: test_dir.output(),
-            indexer: Some("ops".to_owned()),
+            indexer: "ops".to_owned(),
             ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let paths_ops = host_ops.services.get_required::<PathManager>();
 
     // Act - should find .red.torrent and duplicate to .ops.torrent
@@ -180,7 +180,7 @@ async fn get_or_duplicate_returns_none_when_missing() -> Result<(), Error> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let paths = host.services.get_required::<PathManager>();
     let source = provider
@@ -217,7 +217,7 @@ async fn torrent_filename_includes_format_and_indexer() {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let paths = host.services.get_required::<PathManager>();
@@ -265,7 +265,7 @@ async fn transcode_creates_torrents_for_each_format() {
             target: vec![TargetFormat::_320, TargetFormat::V0],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let paths = host.services.get_required::<PathManager>();
@@ -305,7 +305,7 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host_red.services.get_required::<SourceProvider>();
     let transcoder_red = host_red.services.get_required::<TranscodeCommand>();
     let paths_red = host_red.services.get_required::<PathManager>();
@@ -341,14 +341,14 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
         .with_options(SharedOptions {
             content: vec![SAMPLE_SOURCES_DIR.clone()],
             output: test_dir.output(),
-            indexer: Some("ops".to_owned()),
+            indexer: "ops".to_owned(),
             ..SharedOptions::mock()
         })
         .with_options(TargetOptions {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let transcoder_ops = host_ops.services.get_required::<TranscodeCommand>();
     let paths_ops = host_ops.services.get_required::<PathManager>();
 
@@ -391,7 +391,7 @@ async fn transcode_skips_when_torrent_exists() {
             target: vec![TargetFormat::_320],
             ..TargetOptions::default()
         })
-        .build();
+        .expect_build();
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();
     let paths = host.services.get_required::<PathManager>();

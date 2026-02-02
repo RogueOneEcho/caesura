@@ -11,46 +11,46 @@ expression: output
     ::serde::Deserialize,
     ::serde::Serialize
 )]
-pub struct OptionsWithDefaultsPartial {
+pub struct OptionsWithDefaultFnPartial {
     #[arg(long = "indexer")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub indexer: Option<String>,
-    #[arg(long = "url")]
+    #[arg(long = "indexer-url")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub url: Option<String>,
+    pub indexer_url: Option<String>,
 }
-impl crate::options::OptionsPartial for OptionsWithDefaultsPartial {
-    type Resolved = OptionsWithDefaults;
+impl crate::options::OptionsPartial for OptionsWithDefaultFnPartial {
+    type Resolved = OptionsWithDefaultFn;
     fn merge(&mut self, other: Self) {
         if self.indexer.is_none() {
             self.indexer = other.indexer;
         }
-        if self.url.is_none() {
-            self.url = other.url;
+        if self.indexer_url.is_none() {
+            self.indexer_url = other.indexer_url;
         }
     }
-    fn resolve(mut self) -> OptionsWithDefaults {
-        OptionsWithDefaults::apply_calculated_defaults(&mut self);
-        OptionsWithDefaults {
-            indexer: self.indexer.take(),
-            url: self.url.take(),
+    fn resolve(mut self) -> OptionsWithDefaultFn {
+        let defaults = self.clone();
+        OptionsWithDefaultFn {
+            indexer: self.indexer.or_else(|| default_indexer(&defaults)),
+            indexer_url: self.indexer_url.or_else(|| default_indexer_url(&defaults)),
         }
     }
 }
-impl crate::options::Validate for OptionsWithDefaults {
+impl crate::options::Validate for OptionsWithDefaultFn {
     fn validate(&self, errors: &mut ::std::vec::Vec<crate::options::OptionRule>) {
         self.validate_partial(errors)
     }
 }
-impl ::std::default::Default for OptionsWithDefaults {
+impl ::std::default::Default for OptionsWithDefaultFn {
     fn default() -> Self {
         Self {
             indexer: ::std::option::Option::None,
-            url: ::std::option::Option::None,
+            indexer_url: ::std::option::Option::None,
         }
     }
 }
-impl crate::options::Documented for OptionsWithDefaults {
+impl crate::options::Documented for OptionsWithDefaultFn {
     fn doc_metadata() -> &'static crate::options::OptionsDoc {
         static FIELDS: &[crate::options::FieldDoc] = &[
             crate::options::FieldDoc {
@@ -61,15 +61,15 @@ impl crate::options::Documented for OptionsWithDefaults {
                 description: "",
             },
             crate::options::FieldDoc {
-                config_key: "url",
-                cli_flag: "--url",
+                config_key: "indexer_url",
+                cli_flag: "--indexer-url",
                 field_type: "Option<String>",
                 default: ::std::option::Option::None,
                 description: "",
             },
         ];
         static DOC: crate::options::OptionsDoc = crate::options::OptionsDoc {
-            name: "OptionsWithDefaults",
+            name: "OptionsWithDefaultFn",
             description: "",
             fields: FIELDS,
         };

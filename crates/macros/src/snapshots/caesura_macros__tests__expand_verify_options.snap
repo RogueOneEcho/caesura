@@ -1,0 +1,107 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct VerifyOptionsPartial {
+    /// Should the hash check of source files be skipped?
+    ///
+    /// Note: This is only useful for development and should probably not be used.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "no-hash-check",
+        default_value = None,
+        action = ::clap::ArgAction::SetTrue
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub no_hash_check: Option<bool>,
+    /// Should sources with specific tags be excluded?
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub exclude_tags: Option<Vec<String>>,
+}
+impl VerifyOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        VerifyOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let no_hash_check = self.no_hash_check;
+        let exclude_tags = self.exclude_tags;
+        let resolved = VerifyOptions {
+            no_hash_check: no_hash_check.unwrap_or_default(),
+            exclude_tags,
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for VerifyOptionsPartial {
+    type Resolved = VerifyOptions;
+    fn merge(&mut self, other: Self) {
+        if self.no_hash_check.is_none() {
+            self.no_hash_check = other.no_hash_check;
+        }
+        if self.exclude_tags.is_none() {
+            self.exclude_tags = other.exclude_tags;
+        }
+    }
+    fn resolve_without_validation(self) -> VerifyOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        VerifyOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for VerifyOptions {
+    fn default() -> Self {
+        Self {
+            no_hash_check: ::std::default::Default::default(),
+            exclude_tags: ::std::option::Option::None,
+        }
+    }
+}
+impl crate::options::Documented for VerifyOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "VerifyOptions",
+            description: "Options for verify",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "no_hash_check", cli_flag :
+                "--no-hash-check", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should the hash check of source files be skipped?<br>Note: This is only useful for development and should probably not be used.",
+                }, crate ::options::FieldDoc { config_key : "exclude_tags", cli_flag :
+                "--exclude-tags", field_type : "Option<Vec<String>>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description : "Should sources with specific tags be excluded?", }
+            ],
+        });
+        &DOC
+    }
+}

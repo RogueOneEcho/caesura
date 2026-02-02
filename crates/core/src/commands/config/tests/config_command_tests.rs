@@ -5,7 +5,7 @@ use crate::testing_prelude::*;
 fn config_command_serializes_default_options() {
     // Arrange
     let _ = init_logger();
-    let host = HostBuilder::new().build();
+    let host = HostBuilder::new().expect_build();
     let config_command = host.services.get_required::<ConfigCommand>();
 
     // Act

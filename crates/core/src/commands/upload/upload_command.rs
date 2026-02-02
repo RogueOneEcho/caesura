@@ -141,11 +141,7 @@ impl UploadCommand {
             match self.api.upload_torrent(form).await {
                 Ok(response) => {
                     info!("{} {target} for {source}", "Uploaded".bold());
-                    let base = &self
-                        .shared_options
-                        .indexer_url
-                        .clone()
-                        .expect("indexer_url should be set");
+                    let base = &self.shared_options.indexer_url;
                     let id = response.torrent_id.expect("torrent_id should be set");
                     let link =
                         get_permalink(base, response.group_id.expect("group_id should be set"), id);
@@ -226,11 +222,7 @@ impl UploadCommand {
 
     #[allow(clippy::uninlined_format_args)]
     async fn create_description(&self, source: &Source, target: TargetFormat) -> String {
-        let base = &self
-            .shared_options
-            .indexer_url
-            .clone()
-            .expect("indexer_url should be set");
+        let base = &self.shared_options.indexer_url;
         let source_url = get_permalink(base, source.group.id, source.torrent.id);
         let source_title = source.format.get_title();
         let mut lines: Vec<String> = vec![

@@ -74,7 +74,7 @@ async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
             max_pixel_size: 1280,
             jpg_quality: 80,
         })
-        .build();
+        .expect_build();
 
     let provider = host.services.get_required::<SourceProvider>();
     let transcoder = host.services.get_required::<TranscodeCommand>();

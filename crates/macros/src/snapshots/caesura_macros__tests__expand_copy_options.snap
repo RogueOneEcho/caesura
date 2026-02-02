@@ -1,0 +1,90 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct CopyOptionsPartial {
+    /// Should files be hard linked instead of copied?
+    ///
+    /// Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
+    ///
+    /// Default: `false`
+    #[arg(long = "hard-link", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub hard_link: Option<bool>,
+}
+impl CopyOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        CopyOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let hard_link = self.hard_link;
+        let resolved = CopyOptions {
+            hard_link: hard_link.unwrap_or_default(),
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for CopyOptionsPartial {
+    type Resolved = CopyOptions;
+    fn merge(&mut self, other: Self) {
+        if self.hard_link.is_none() {
+            self.hard_link = other.hard_link;
+        }
+    }
+    fn resolve_without_validation(self) -> CopyOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        CopyOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for CopyOptions {
+    fn default() -> Self {
+        Self {
+            hard_link: ::std::default::Default::default(),
+        }
+    }
+}
+impl crate::options::Documented for CopyOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "CopyOptions",
+            description: "Options for copying files",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "hard_link", cli_flag :
+                "--hard-link", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should files be hard linked instead of copied?<br>Enabling this option requires the source and destination to be on the same filesystem or mounted volume.",
+                }
+            ],
+        });
+        &DOC
+    }
+}

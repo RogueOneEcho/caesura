@@ -7,8 +7,10 @@ pub struct FieldDoc {
     pub cli_flag: &'static str,
     /// Type display string (e.g., "bool", "u32", "Option<String>")
     pub field_type: &'static str,
-    /// Default value as string, if any
-    pub default: Option<&'static str>,
+    /// Default value serialized with `serde_json` (displayed with backticks)
+    pub default_value: Option<String>,
+    /// Description of how default is computed (displayed without backticks)
+    pub default_doc: Option<&'static str>,
     /// Description extracted from doc comments
     pub description: &'static str,
 }
@@ -21,9 +23,7 @@ pub struct OptionsDoc {
     /// Description extracted from struct doc comments
     pub description: &'static str,
     /// Documentation for each field
-    pub fields: &'static [FieldDoc],
-    /// Commands that use this options struct
-    pub commands: &'static [&'static str],
+    pub fields: Vec<FieldDoc>,
 }
 
 /// Trait for options structs to provide documentation metadata.

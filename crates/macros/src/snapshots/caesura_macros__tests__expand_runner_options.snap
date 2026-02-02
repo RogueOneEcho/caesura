@@ -1,6 +1,6 @@
 ---
 source: crates/macros/src/lib.rs
-expression: output
+expression: expand_options_from_file(source)
 ---
 /// Partial options struct with optional fields for CLI/YAML parsing.
 #[derive(
@@ -11,26 +11,26 @@ expression: output
     ::serde::Deserialize,
     ::serde::Serialize
 )]
-pub struct NoCommandOptionsPartial {
+pub struct RunnerOptionsPartial {
+    /// Number of cpus to use for processing.
     ///
-    /// Default: `100`
-    #[arg(long = "limit")]
+    /// Default: `Total CPUs`
+    #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub limit: Option<u32>,
+    pub cpus: Option<u16>,
 }
-impl NoCommandOptionsPartial {
+impl RunnerOptionsPartial {
     fn resolve_internal(
-        self,
+        mut self,
         validate: bool,
     ) -> ::std::result::Result<
-        NoCommandOptions,
+        RunnerOptions,
         ::std::vec::Vec<crate::options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
-        let limit = self.limit;
-        let resolved = NoCommandOptions {
-            limit: limit.unwrap_or_else(|| 100),
-        };
+        let defaults = self.clone();
+        let cpus = self.cpus.or_else(|| default_cpus(&defaults));
+        let resolved = RunnerOptions { cpus };
         if validate {
             resolved.validate(&mut errors);
         }
@@ -41,41 +41,43 @@ impl NoCommandOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for NoCommandOptionsPartial {
-    type Resolved = NoCommandOptions;
+impl crate::options::OptionsPartialContract for RunnerOptionsPartial {
+    type Resolved = RunnerOptions;
     fn merge(&mut self, other: Self) {
-        if self.limit.is_none() {
-            self.limit = other.limit;
+        if self.cpus.is_none() {
+            self.cpus = other.cpus;
         }
     }
-    fn resolve_without_validation(self) -> NoCommandOptions {
+    fn resolve_without_validation(self) -> RunnerOptions {
         self.resolve_internal(false).expect("validation disabled")
     }
     fn resolve(
         self,
     ) -> ::std::result::Result<
-        NoCommandOptions,
+        RunnerOptions,
         ::std::vec::Vec<crate::options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
 }
-impl ::std::default::Default for NoCommandOptions {
+impl ::std::default::Default for RunnerOptions {
     fn default() -> Self {
-        Self { limit: 100 }
+        Self {
+            cpus: ::std::option::Option::None,
+        }
     }
 }
-impl crate::options::Documented for NoCommandOptions {
+impl crate::options::Documented for RunnerOptions {
     fn doc_metadata() -> &'static crate::options::OptionsDoc {
         static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
         crate::options::OptionsDoc {
-            name: "NoCommandOptions",
-            description: "",
+            name: "RunnerOptions",
+            description: "Options for concurrency",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "limit", cli_flag : "--limit",
-                field_type : "u32", default_value :
-                ::std::option::Option::Some(::serde_json::to_string(& (100)).unwrap()),
-                default_doc : ::std::option::Option::None, description : "", }
+                crate ::options::FieldDoc { config_key : "cpus", cli_flag : "--cpus",
+                field_type : "Option<u16>", default_value : ::std::option::Option::None,
+                default_doc : ::std::option::Option::Some("Total CPUs"), description :
+                "Number of cpus to use for processing.", }
             ],
         });
         &DOC

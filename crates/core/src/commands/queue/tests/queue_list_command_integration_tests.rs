@@ -12,7 +12,7 @@ async fn queue_list_command_empty_queue() -> Result<(), Error> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .build();
+        .expect_build();
 
     let command = host.services.get_required::<QueueListCommand>();
 
@@ -40,7 +40,7 @@ async fn queue_list_command_lists_items() -> Result<(), Error> {
         .with_options(QueueAddArgs {
             queue_add_path: Some(SAMPLE_SOURCES_DIR.clone()),
         })
-        .build();
+        .expect_build();
 
     // Add items first
     let add_command = host.services.get_required::<QueueAddCommand>();

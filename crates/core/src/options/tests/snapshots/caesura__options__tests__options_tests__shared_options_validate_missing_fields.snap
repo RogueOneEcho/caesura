@@ -2,7 +2,19 @@
 source: crates/core/src/options/tests/options_tests.rs
 expression: errors
 ---
-- NotSet: API Key
+- NotSet: Announce url
+- NotSet: Api key
 - NotSet: Indexer
-- NotSet: Indexer URL
-- NotSet: Announce URL
+- NotSet: Indexer url
+- UrlNotHttp:
+    - Indexer URL
+    - ""
+- UrlNotHttp:
+    - Announce URL
+    - ""
+- DoesNotExist:
+    - Content Directory
+    - "./content"
+- DoesNotExist:
+    - Output Directory
+    - "./output"

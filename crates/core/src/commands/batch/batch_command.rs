@@ -29,11 +29,7 @@ impl BatchCommand {
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;
         let upload_enabled = self.batch_options.upload;
-        let indexer = self
-            .shared_options
-            .indexer
-            .clone()
-            .expect("indexer should be set");
+        let indexer = self.shared_options.indexer.clone();
         let limit = self.batch_options.get_limit();
         let items = self
             .queue

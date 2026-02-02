@@ -62,16 +62,16 @@ async fn queue_add_command_empty_directory() -> Result<(), Error> {
 
 /// Create a host configured for `QueueAddCommand` testing.
 ///
-/// Returns `TestDirectory` to keep it alive for the test duration. 
-/// 
+/// Returns `TestDirectory` to keep it alive for the test duration.
+///
 /// Callers must bind it to a named variable like `_test_dir`, not a bare `_`:
 ///
 /// ```ignore
 /// let (_test_dir, command, queue) = queue_add_test_helper(...).await;
 /// ```
-/// 
+///
 /// NOT a bare `_` as this discards immediately, deleting the directory mid-test:
-/// 
+///
 /// ```ignore
 /// let (_, command, queue) = queue_add_test_helper(...).await;
 /// ```
@@ -88,7 +88,7 @@ async fn queue_add_test_helper(
         .with_options(QueueAddArgs {
             queue_add_path: Some(queue_add_path),
         })
-        .build();
+        .expect_build();
     let command = host.services.get_required::<QueueAddCommand>();
     let queue = host.services.get_required::<Queue>();
     (test_dir, command, queue)

@@ -96,7 +96,7 @@ impl TranscodeGenerator {
                 target: vec![config.target],
                 ..TargetOptions::default()
             })
-            .build();
+            .expect_build();
         let provider = host.services.get_required::<SourceProvider>();
         let transcoder = host.services.get_required::<TranscodeCommand>();
 
