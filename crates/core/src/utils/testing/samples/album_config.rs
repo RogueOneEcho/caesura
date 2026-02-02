@@ -4,7 +4,6 @@ use gazelle_api::{
     UploadResponse,
 };
 use std::fs;
-use std::path::PathBuf;
 
 /// Configuration for generating a test album.
 #[derive(Debug, Clone)]
@@ -264,8 +263,10 @@ impl AlbumConfig {
     }
 
     /// Create a temp directory containing only this album's torrent file.
+    ///
+    /// - Returns [`TempDirectory`] to ensure cleanup when the caller drops it
     #[must_use]
-    pub fn single_torrent_dir(&self) -> PathBuf {
+    pub fn single_torrent_dir(&self) -> TempDirectory {
         let dir = TempDirectory::create("single_torrent");
         let dest = dir.join(self.torrent_filename());
         let src = SAMPLE_SOURCES_DIR.join(self.torrent_filename());

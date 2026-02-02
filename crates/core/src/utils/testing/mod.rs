@@ -5,6 +5,7 @@ pub(crate) use logging::*;
 pub(crate) use samples::*;
 #[cfg(test)]
 pub(crate) use snapshots::*;
+pub(crate) use temp_directory::*;
 #[cfg(test)]
 pub(crate) use test_directory::*;
 
@@ -13,6 +14,7 @@ mod logging;
 mod samples;
 #[cfg(test)]
 mod snapshots;
+mod temp_directory;
 mod test_directory;
 #[cfg(test)]
 mod tests;

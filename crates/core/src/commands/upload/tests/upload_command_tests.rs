@@ -169,7 +169,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
         .await
         .with_options(SharedOptions {
             // First content dir is for copy destination, second is where source files are found
-            content: vec![copy_target.clone(), SAMPLE_SOURCES_DIR.clone()],
+            content: vec![copy_target.to_path_buf(), SAMPLE_SOURCES_DIR.clone()],
             output: SAMPLE_TRANSCODES_DIR.clone(),
             ..SharedOptions::mock()
         })
@@ -219,7 +219,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
             ..TargetOptions::default()
         })
         .with_options(UploadOptions {
-            copy_transcode_to: Some(copy_target.clone()),
+            copy_transcode_to: Some(copy_target.to_path_buf()),
             ..UploadOptions::default()
         })
         .build();
@@ -259,7 +259,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
             ..TargetOptions::default()
         })
         .with_options(UploadOptions {
-            copy_torrent_to: Some(torrent_target.clone()),
+            copy_torrent_to: Some(torrent_target.to_path_buf()),
             ..UploadOptions::default()
         })
         .build();
@@ -270,7 +270,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
 
     // Assert
     assert!(status.success, "upload should succeed");
-    let torrent_files: Vec<_> = fs::read_dir(&torrent_target)
+    let torrent_files: Vec<_> = fs::read_dir(&*torrent_target)
         .expect("read dir")
         .filter_map(Result::ok)
         .filter(|e| e.path().extension().is_some_and(|ext| ext == "torrent"))

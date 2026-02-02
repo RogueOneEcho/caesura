@@ -11,8 +11,8 @@ use std::time::{Duration, Instant};
 use super::{SampleError, TranscodeConfig};
 use crate::commands::TranscodeCommand;
 use crate::hosting::HostBuilder;
-use crate::options::{CacheOptions, SharedOptions, TargetOptions};
-use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR, SourceProvider, TempDirectory};
+use crate::options::{SharedOptions, TargetOptions};
+use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR, SourceProvider};
 use tokio::fs::create_dir_all;
 
 /// Generates cached transcode outputs for testing.
@@ -82,8 +82,6 @@ impl TranscodeGenerator {
             .await
             .map_err(SampleError::CreateDirectory)?;
 
-        // Create a temporary cache directory in /tmp
-        let cache_dir = TempDirectory::create("transcode_cache");
         let content_dir = SAMPLE_SOURCES_DIR.clone();
 
         // Build a minimal DI host for transcoding
@@ -98,7 +96,6 @@ impl TranscodeGenerator {
                 target: vec![config.target],
                 ..TargetOptions::default()
             })
-            .with_options(CacheOptions { cache: cache_dir })
             .build();
         let provider = host.services.get_required::<SourceProvider>();
         let transcoder = host.services.get_required::<TranscodeCommand>();

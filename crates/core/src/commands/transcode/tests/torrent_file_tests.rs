@@ -91,7 +91,10 @@ async fn get_or_duplicate_returns_path_when_exists() -> Result<(), Error> {
     // Assert
     assert!(result.is_some(), "Should find indexed torrent");
     let path = result.expect("checked above");
-    let filename = path.file_name().expect("should have name").to_string_lossy();
+    let filename = path
+        .file_name()
+        .expect("should have name")
+        .to_string_lossy();
     assert!(
         filename.ends_with(".red.torrent"),
         "Should return indexed path: {filename}"
@@ -153,7 +156,10 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), Error> {
     // Assert
     assert!(result.is_some(), "Should create from RED torrent");
     let path = result.expect("checked above");
-    let filename = path.file_name().expect("should have name").to_string_lossy();
+    let filename = path
+        .file_name()
+        .expect("should have name")
+        .to_string_lossy();
     assert!(
         filename.ends_with(".ops.torrent"),
         "Should create OPS torrent: {filename}"
@@ -188,7 +194,10 @@ async fn get_or_duplicate_returns_none_when_missing() -> Result<(), Error> {
         .await?;
 
     // Assert
-    assert!(result.is_none(), "Should return None when no torrent exists");
+    assert!(
+        result.is_none(),
+        "Should return None when no torrent exists"
+    );
 
     Ok(())
 }

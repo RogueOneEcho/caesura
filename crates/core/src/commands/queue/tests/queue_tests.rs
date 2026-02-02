@@ -8,7 +8,8 @@ use flat_db::Hash;
 #[tokio::test]
 async fn queue_set_adds_item() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_set_adds_item"));
+    let temp = TempDirectory::create("queue_set_adds_item");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let item = QueueItem {
         name: "Test Item".to_owned(),
@@ -34,7 +35,8 @@ async fn queue_set_adds_item() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_set_many_adds_items() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_set_many_adds_items"));
+    let temp = TempDirectory::create("queue_set_many_adds_items");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash1 = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let hash2 = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
 
@@ -75,7 +77,8 @@ async fn queue_set_many_adds_items() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_set_many_no_replace_skips_existing() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_set_many_no_replace"));
+    let temp = TempDirectory::create("queue_set_many_no_replace");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
 
     let original = QueueItem {
@@ -112,7 +115,8 @@ async fn queue_set_many_no_replace_skips_existing() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_set_many_with_replace_overwrites() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_set_many_with_replace"));
+    let temp = TempDirectory::create("queue_set_many_with_replace");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
 
     let original = QueueItem {
@@ -149,7 +153,8 @@ async fn queue_set_many_with_replace_overwrites() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_get_all_returns_all_items() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_get_all"));
+    let temp = TempDirectory::create("queue_get_all");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash1 = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let hash2 = Hash::<20>::from_string("ff00000000000000000000000000000000000000")?;
 
@@ -184,7 +189,8 @@ async fn queue_get_all_returns_all_items() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_remove_removes_existing_item() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_remove_existing"));
+    let temp = TempDirectory::create("queue_remove_existing");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let item = QueueItem {
         name: "Test Item".to_owned(),
@@ -215,7 +221,8 @@ async fn queue_remove_removes_existing_item() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_remove_nonexistent_returns_none() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_remove_nonexistent"));
+    let temp = TempDirectory::create("queue_remove_nonexistent");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
 
     // Act
@@ -230,7 +237,8 @@ async fn queue_remove_nonexistent_returns_none() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_remove_only_affects_specified_item() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_remove_specific"));
+    let temp = TempDirectory::create("queue_remove_specific");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash1 = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let hash2 = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
 
@@ -275,8 +283,8 @@ async fn queue_get_unprocessed() -> Result<(), Error> {
     let not_transcoded = Hash::<20>::from_string("0500000000000000000000000000000000000000")?;
     let uploaded = Hash::<20>::from_string("0600000000000000000000000000000000000000")?;
     let not_uploaded = Hash::<20>::from_string("0700000000000000000000000000000000000000")?;
-
-    let queue = Queue::from_path(TempDirectory::create("queue_get_unprocessed"));
+    let temp = TempDirectory::create("queue_get_unprocessed");
+    let queue = Queue::from_path(temp.to_path_buf());
     queue
         .set(QueueItem {
             name: "NEW".to_owned(),
@@ -409,7 +417,8 @@ async fn queue_get_unprocessed() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_filter_indexer"));
+    let temp = TempDirectory::create("queue_filter_indexer");
+    let queue = Queue::from_path(temp.to_path_buf());
     let red_hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let ops_hash = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
 
@@ -452,7 +461,8 @@ async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_get_unprocessed_red_includes_pth() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_red_includes_pth"));
+    let temp = TempDirectory::create("queue_red_includes_pth");
+    let queue = Queue::from_path(temp.to_path_buf());
     let red_hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let pth_hash = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
 
@@ -489,7 +499,8 @@ async fn queue_get_unprocessed_red_includes_pth() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_get_unprocessed_sorts_by_name() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_sorts_by_name"));
+    let temp = TempDirectory::create("queue_sorts_by_name");
+    let queue = Queue::from_path(temp.to_path_buf());
     let hash_z = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let hash_a = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
     let hash_m = Hash::<20>::from_string("0300000000000000000000000000000000000000")?;
@@ -540,7 +551,8 @@ async fn queue_get_unprocessed_sorts_by_name() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_excludes_uploaded"));
+    let temp = TempDirectory::create("queue_excludes_uploaded");
+    let queue = Queue::from_path(temp.to_path_buf());
     let uploaded_hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let pending_hash = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
 
@@ -584,7 +596,8 @@ async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_get_unprocessed_empty_queue() -> Result<(), Error> {
     // Arrange
-    let queue = Queue::from_path(TempDirectory::create("queue_empty"));
+    let temp = TempDirectory::create("queue_empty");
+    let queue = Queue::from_path(temp.to_path_buf());
 
     // Act
     let items = queue

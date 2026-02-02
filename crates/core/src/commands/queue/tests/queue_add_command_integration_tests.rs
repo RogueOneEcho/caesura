@@ -4,7 +4,8 @@ use crate::testing_prelude::*;
 #[tokio::test]
 async fn queue_add_command_adds_torrent_from_directory() -> Result<(), Error> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let (command, queue) = queue_add_test_helper(album.single_torrent_dir()).await;
+    let torrent_dir = album.single_torrent_dir();
+    let (_test_dir, command, queue) = queue_add_test_helper(torrent_dir.to_path_buf()).await;
 
     let result = command.execute_cli().await;
 
@@ -18,7 +19,8 @@ async fn queue_add_command_adds_torrent_from_directory() -> Result<(), Error> {
 #[tokio::test]
 async fn queue_add_command_skips_duplicate() -> Result<(), Error> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let (command, queue) = queue_add_test_helper(album.single_torrent_dir()).await;
+    let torrent_dir = album.single_torrent_dir();
+    let (_test_dir, command, queue) = queue_add_test_helper(torrent_dir.to_path_buf()).await;
 
     command.execute_cli().await?;
     let items = get_items(queue.clone()).await;
@@ -33,7 +35,8 @@ async fn queue_add_command_skips_duplicate() -> Result<(), Error> {
 /// Test that `QueueAddCommand` returns false for non-existent path.
 #[tokio::test]
 async fn queue_add_command_nonexistent_path_fails() -> Result<(), Error> {
-    let (command, queue) = queue_add_test_helper(PathBuf::from("/nonexistent/path")).await;
+    let (_test_dir, command, queue) =
+        queue_add_test_helper(PathBuf::from("/nonexistent/path")).await;
 
     let result = command.execute_cli().await;
 
@@ -46,7 +49,8 @@ async fn queue_add_command_nonexistent_path_fails() -> Result<(), Error> {
 /// Test that `QueueAddCommand` handles empty directory.
 #[tokio::test]
 async fn queue_add_command_empty_directory() -> Result<(), Error> {
-    let (command, queue) = queue_add_test_helper(TempDirectory::create("empty_torrents")).await;
+    let temp = TempDirectory::create("empty_torrents");
+    let (_test_dir, command, queue) = queue_add_test_helper(temp.to_path_buf()).await;
 
     let result = command.execute_cli().await;
 
@@ -55,8 +59,25 @@ async fn queue_add_command_empty_directory() -> Result<(), Error> {
     assert_yaml_snapshot!(items);
     Ok(())
 }
+
 /// Create a host configured for `QueueAddCommand` testing.
-async fn queue_add_test_helper(queue_add_path: PathBuf) -> (Ref<QueueAddCommand>, Ref<Queue>) {
+///
+/// Returns `TestDirectory` to keep it alive for the test duration. 
+/// 
+/// Callers must bind it to a named variable like `_test_dir`, not a bare `_`:
+///
+/// ```ignore
+/// let (_test_dir, command, queue) = queue_add_test_helper(...).await;
+/// ```
+/// 
+/// NOT a bare `_` as this discards immediately, deleting the directory mid-test:
+/// 
+/// ```ignore
+/// let (_, command, queue) = queue_add_test_helper(...).await;
+/// ```
+async fn queue_add_test_helper(
+    queue_add_path: PathBuf,
+) -> (TestDirectory, Ref<QueueAddCommand>, Ref<Queue>) {
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
@@ -70,7 +91,7 @@ async fn queue_add_test_helper(queue_add_path: PathBuf) -> (Ref<QueueAddCommand>
         .build();
     let command = host.services.get_required::<QueueAddCommand>();
     let queue = host.services.get_required::<Queue>();
-    (command, queue)
+    (test_dir, command, queue)
 }
 
 async fn get_items(queue: Ref<Queue>) -> Vec<String> {

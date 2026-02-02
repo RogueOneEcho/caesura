@@ -32,13 +32,14 @@ async fn batch_command_verifies_item() -> Result<(), Error> {
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
 
     let host = HostBuilder::new()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(QueueAddArgs {
-            queue_add_path: Some(album.single_torrent_dir()),
+            queue_add_path: Some(torrent_dir.to_path_buf()),
         })
         .build();
 
@@ -276,6 +277,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
 
     let host = HostBuilder::new()
         .with_mock_api(album.clone())
@@ -286,7 +288,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
             ..BatchOptions::default()
         })
         .with_options(QueueAddArgs {
-            queue_add_path: Some(album.single_torrent_dir()),
+            queue_add_path: Some(torrent_dir.to_path_buf()),
         })
         .build();
 
@@ -327,6 +329,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
 
     let host = HostBuilder::new()
         .with_mock_api(album.clone())
@@ -342,7 +345,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
             ..UploadOptions::default()
         })
         .with_options(QueueAddArgs {
-            queue_add_path: Some(album.single_torrent_dir()),
+            queue_add_path: Some(torrent_dir.to_path_buf()),
         })
         .build();
 
@@ -383,6 +386,7 @@ async fn batch_command_upload_saves_status() -> Result<(), Error> {
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
 
     let host = HostBuilder::new()
         .with_mock_api(album.clone())
@@ -394,7 +398,7 @@ async fn batch_command_upload_saves_status() -> Result<(), Error> {
             ..BatchOptions::default()
         })
         .with_options(QueueAddArgs {
-            queue_add_path: Some(album.single_torrent_dir()),
+            queue_add_path: Some(torrent_dir.to_path_buf()),
         })
         .build();
 

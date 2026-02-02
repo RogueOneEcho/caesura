@@ -5,7 +5,8 @@ async fn test_copy_dir() -> Result<(), Error> {
     // Arrange
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let source_dir = SAMPLE_SOURCES_DIR.join(album.dir_name());
-    let target_dir = TempDirectory::create("test_copy_dir").join("target");
+    let temp = TempDirectory::create("test_copy_dir");
+    let target_dir = temp.join("target");
     assert!(
         source_dir.is_dir(),
         "Sample directory should exist: {}",
