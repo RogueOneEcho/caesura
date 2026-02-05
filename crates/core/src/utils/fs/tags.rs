@@ -79,10 +79,12 @@ fn replace_total_track_numbering(tags: &mut Tag) -> Result<(), Error> {
 }
 
 pub(crate) fn get_numeric_from_vinyl_format(input: &str) -> Option<(u32, u32)> {
-    let re = Regex::new(r"^([A-Z])(\d+)$").ok()?;
+    // Vinyl format is typically "A1", "B2", etc., where the letter represents the disc and the number represents the track.
+    // It might also be just a letter without a number when there's a single track on a side, like "A" or "B".
+    let re = Regex::new(r"^([A-Z])(\d+)?$").ok()?;
     let captures = re.captures(input)?;
     let disc_letter = captures.get(1)?.as_str().chars().next()?;
-    let track_number: u32 = captures.get(2)?.as_str().parse().ok()?;
+    let track_number: u32 = captures.get(2).map_or(Ok(1), |m| m.as_str().parse()).ok()?;
     let disc_number = letter_to_number(disc_letter)?;
     Some((disc_number, track_number))
 }
