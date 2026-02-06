@@ -114,12 +114,21 @@ impl HostBuilder {
         self
     }
 
-    /// Register a mock API client for testing.
+    /// Register a mock API client built from an [`AlbumConfig`].
     #[must_use]
     #[cfg(test)]
-    #[allow(clippy::as_conversions)]
     pub fn with_mock_api(&mut self, album_config: AlbumConfig) -> &mut Self {
-        let client = album_config.api();
+        self.with_mock_client(album_config.api())
+    }
+
+    /// Register a pre-configured mock API client for testing.
+    #[must_use]
+    #[cfg(test)]
+    #[expect(
+        clippy::as_conversions,
+        reason = "required for DI trait object registration"
+    )]
+    pub fn with_mock_client(&mut self, client: gazelle_api::MockGazelleClient) -> &mut Self {
         let client: Ref<Box<dyn GazelleClientTrait + Send + Sync>> =
             Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
         self.services
