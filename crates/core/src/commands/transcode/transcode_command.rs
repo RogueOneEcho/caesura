@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::utils::Job::Additional;
+use rogue_logging::Colors;
 use tokio::fs::{copy, hard_link};
 
 /// Transcode each track of a FLAC source to the target formats.
@@ -22,8 +23,8 @@ impl TranscodeCommand {
     ///
     /// [`Source`] is retrieved from the CLI arguments.
     ///
-    /// Returns `true` if all the transcodes succeeds.
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    /// Returns `true` if all the transcodes succeed.
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<TranscodeAction>> {
         if !self.arg.validate() {
             return Ok(false);
         }
@@ -31,31 +32,25 @@ impl TranscodeCommand {
             .source_provider
             .get_from_options()
             .await
-            .map_err(|e| error("get source from options", e.to_string()))?;
-        let status = self.execute(&source).await;
-        if let Some(error) = &status.error {
-            error.log();
-        }
-        Ok(status.success)
+            .map_err(Failure::wrap(TranscodeAction::GetSource))?
+            .map_err(Failure::wrap(TranscodeAction::GetSource))?;
+        self.execute(&source).await?;
+        Ok(true)
     }
 
     /// Execute [`TranscodeCommand`] on a [`Source`].
     ///
-    /// Returns a [`TranscodeStatus`] indicating the success of the operation and any errors.
-    ///
-    /// Errors are not logged so should be handled by the caller.
-    #[must_use]
-    pub(crate) async fn execute(&self, source: &Source) -> TranscodeStatus {
+    /// Returns a [`TranscodeSuccess`] on success, or a [`Failure`] on error.
+    pub(crate) async fn execute(
+        &self,
+        source: &Source,
+    ) -> Result<TranscodeSuccess, Failure<TranscodeAction>> {
         let targets = self.targets.get(source.format, &source.existing);
-        let mut status = TranscodeStatus {
-            success: false,
-            formats: None,
-            completed: TimeStamp::now(),
-            error: None,
-        };
         if targets.is_empty() {
-            status.error = Some(error("transcode", "No transcodes to perform".to_owned()));
-            return status;
+            return Err(Failure::new(
+                TranscodeAction::Transcode,
+                TranscodeError::NoTranscodes,
+            ));
         }
         let formats: Vec<TranscodeFormatStatus> = targets
             .iter()
@@ -64,29 +59,16 @@ impl TranscodeCommand {
                 path: self.paths.get_transcode_target_dir(source, format),
             })
             .collect();
-        status.formats = Some(formats);
         let targets = self.skip_completed(source, &targets).await;
         if targets.is_empty() {
-            status.success = true;
-            return status;
+            return Ok(TranscodeSuccess { formats });
         }
-        if let Err(error) = self.execute_transcode(source, &targets).await {
-            status.error = Some(error);
-            status.completed = TimeStamp::now();
-            return status;
-        }
-        if let Err(error) = self.execute_additional(source, &targets).await {
-            status.error = Some(error);
-            status.completed = TimeStamp::now();
-            return status;
-        }
-        if let Err(error) = self.execute_torrent(source, &targets).await {
-            status.error = Some(error);
-            status.completed = TimeStamp::now();
-            return status;
-        }
-        status.success = true;
-        status
+        self.execute_transcode(source, &targets).await?;
+        self.execute_additional(source, &targets).await?;
+        self.execute_torrent(source, &targets)
+            .await
+            .map_err(Failure::wrap(TranscodeAction::CreateTorrent))?;
+        Ok(TranscodeSuccess { formats })
     }
 
     #[must_use]
@@ -116,7 +98,7 @@ impl TranscodeCommand {
         &self,
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Failure<TranscodeAction>> {
         let rename_tracks = self.file_options.rename_tracks;
         let flacs = if rename_tracks {
             Collector::get_flacs_with_context(&source.directory)
@@ -135,7 +117,10 @@ impl TranscodeCommand {
             let jobs = self.transcode_job_factory.create(&flacs, source, *target)?;
             self.runner.add(jobs);
         }
-        self.runner.execute().await?;
+        self.runner
+            .execute()
+            .await
+            .map_err(Failure::wrap(TranscodeAction::ExecuteRunner))?;
         info!("{} {}", "Transcoded".bold(), source);
         Ok(())
     }
@@ -144,7 +129,7 @@ impl TranscodeCommand {
         &self,
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Failure<TranscodeAction>> {
         let files = Collector::get_additional(&source.directory);
         debug!(
             "{} {} additional files",
@@ -158,7 +143,10 @@ impl TranscodeCommand {
             .await?;
         let from_prefix = self.paths.get_transcode_target_dir(source, *first_target);
         self.runner.add_without_publish(jobs);
-        self.runner.execute_without_publish().await?;
+        self.runner
+            .execute_without_publish()
+            .await
+            .map_err(Failure::wrap(TranscodeAction::ExecuteRunner))?;
         for target in targets.iter().skip(1) {
             let jobs = self
                 .additional_job_factory
@@ -176,12 +164,18 @@ impl TranscodeCommand {
                     let verb = if self.copy_options.hard_link {
                         hard_link(&from, &resize.output)
                             .await
-                            .map_err(|e| io_error(e, "hard link additional file"))?;
+                            .map_err(Failure::wrap_with_path(
+                                TranscodeAction::HardLinkAdditional,
+                                &resize.output,
+                            ))?;
                         "Hard Linked"
                     } else {
                         copy(&from, &resize.output)
                             .await
-                            .map_err(|e| io_error(e, "copy additional file"))?;
+                            .map_err(Failure::wrap_with_path(
+                                TranscodeAction::CopyAdditional,
+                                &resize.output,
+                            ))?;
                         "Copied"
                     };
                     trace!(
@@ -202,7 +196,7 @@ impl TranscodeCommand {
         &self,
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Failure<ImdlAction>> {
         debug!("{} torrents {}", "Creating".bold(), source);
         for target in targets {
             let content_dir = self.paths.get_transcode_target_dir(source, *target);

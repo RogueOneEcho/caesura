@@ -12,7 +12,9 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use super::SampleError;
+use rogue_logging::Failure;
+
+use super::SampleAction;
 use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
 use crate::dependencies::ImdlCommand;
 use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
@@ -27,7 +29,7 @@ impl AlbumGenerator {
     /// Uses file-based locking for cross-process coordination:
     /// - If `.generated` marker exists, skips generation
     /// - Otherwise acquires `.lock` file, generates, creates marker
-    pub async fn generate(config: &AlbumConfig) -> Result<(), SampleError> {
+    pub async fn generate(config: &AlbumConfig) -> Result<(), Failure<SampleAction>> {
         let source_dir = SAMPLE_SOURCES_DIR.join(config.dir_name());
         Self::generate_in_dir(config, &source_dir).await
     }
@@ -39,19 +41,20 @@ impl AlbumGenerator {
     pub async fn generate_in_dir(
         config: &AlbumConfig,
         source_dir: &Path,
-    ) -> Result<(), SampleError> {
+    ) -> Result<(), Failure<SampleAction>> {
         if let LockOutcome::Acquired(_guard) = acquire_generation_lock(source_dir) {
-            Self::generate_files(config, source_dir).await;
+            Self::generate_files(config, source_dir).await?;
             mark_generated(source_dir);
         }
         Ok(())
     }
 
     /// Generate album files in the specified directory (shared implementation).
-    async fn generate_files(config: &AlbumConfig, source_dir: &Path) {
-        fs::create_dir_all(source_dir).expect("should create source directory");
-
-        // Generate FLAC files
+    async fn generate_files(
+        config: &AlbumConfig,
+        source_dir: &Path,
+    ) -> Result<(), Failure<SampleAction>> {
+        fs::create_dir_all(source_dir).map_err(Failure::wrap(SampleAction::CreateDirectory))?;
         for track in &config.tracks {
             let mut generator = FlacGenerator::new()
                 .with_filename(config.track_filename(track))
@@ -68,19 +71,11 @@ impl AlbumGenerator {
             if let Some(duration) = track.duration_secs {
                 generator = generator.with_duration_secs(duration);
             }
-            generator
-                .generate(source_dir)
-                .await
-                .expect("should generate FLAC");
+            generator.generate(source_dir).await?;
         }
-
-        // Generate cover image
         ImageGenerator::new()
             .with_filename("cover.png")
-            .generate(source_dir)
-            .expect("should generate cover");
-
-        // Generate torrent as sibling of source_dir
+            .generate(source_dir)?;
         let torrent_path = append_extension(source_dir, "torrent");
         ImdlCommand::create(
             source_dir,
@@ -89,7 +84,8 @@ impl AlbumGenerator {
             "RED".to_owned(),
         )
         .await
-        .expect("should create torrent");
+        .map_err(Failure::wrap(SampleAction::CreateTorrent))?;
+        Ok(())
     }
 }
 

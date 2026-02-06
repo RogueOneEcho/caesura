@@ -37,11 +37,20 @@ impl Job {
     }
 
     /// Execute the wrapped command.
-    pub async fn execute(self) -> Result<(), Error> {
+    pub async fn execute(self) -> Result<(), Failure<JobAction>> {
         match self {
-            Job::Additional(job) => job.execute().await,
-            Job::Spectrogram(job) => job.execute().await,
-            Job::Transcode(job) => job.execute().await,
+            Job::Additional(job) => job
+                .execute()
+                .await
+                .map_err(Failure::wrap(JobAction::Additional)),
+            Job::Spectrogram(job) => job
+                .execute()
+                .await
+                .map_err(Failure::wrap(JobAction::Spectrogram)),
+            Job::Transcode(job) => job
+                .execute()
+                .await
+                .map_err(Failure::wrap(JobAction::Transcode)),
         }
     }
 }

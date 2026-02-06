@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 
 /// Test that `QueueRemoveCommand` removes an existing item.
 #[tokio::test]
-async fn queue_rm_command_removes_item() -> Result<(), Error> {
+async fn queue_rm_command_removes_item() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -54,7 +54,7 @@ async fn queue_rm_command_removes_item() -> Result<(), Error> {
 
 /// Test that `QueueRemoveCommand` handles non-existent hash.
 #[tokio::test]
-async fn queue_rm_command_nonexistent_hash() -> Result<(), Error> {
+async fn queue_rm_command_nonexistent_hash() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -82,7 +82,7 @@ async fn queue_rm_command_nonexistent_hash() -> Result<(), Error> {
 
 /// Test that `QueueRemoveCommand` rejects invalid hash format.
 #[tokio::test]
-async fn queue_rm_command_invalid_hash_format() -> Result<(), Error> {
+async fn queue_rm_command_invalid_hash_format() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;

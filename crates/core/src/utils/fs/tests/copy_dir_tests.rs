@@ -1,7 +1,7 @@
 use crate::testing_prelude::*;
 
 #[tokio::test]
-async fn test_copy_dir() -> Result<(), Error> {
+async fn test_copy_dir() -> Result<(), TestError> {
     // Arrange
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let source_dir = SAMPLE_SOURCES_DIR.join(album.dir_name());

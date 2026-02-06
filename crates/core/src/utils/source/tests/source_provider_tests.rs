@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 use gazelle_api::{Group, GroupResponse, MockGazelleClient, Torrent, TorrentResponse};
 
 #[tokio::test]
-async fn get_finds_directory_with_exact_path() -> Result<(), Error> {
+async fn get_finds_directory_with_exact_path() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
@@ -12,16 +12,16 @@ async fn get_finds_directory_with_exact_path() -> Result<(), Error> {
     let provider = host.services.get_required::<SourceProvider>();
 
     // Act
-    let source = provider.get(AlbumConfig::TORRENT_ID).await;
+    let result = provider.get(AlbumConfig::TORRENT_ID).await;
 
     // Assert
-    let source = source.expect("should find source with exact path");
+    let source = result?.expect("should find source with exact path");
     assert_eq!(source.directory, SAMPLE_SOURCES_DIR.join(&dir_name));
     Ok(())
 }
 
 #[tokio::test]
-async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), Error> {
+async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
@@ -35,13 +35,13 @@ async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), E
     let source = provider.get(AlbumConfig::TORRENT_ID).await;
 
     // Assert
-    let source = source.expect("should find source via safe path fallback");
+    let source = source?.expect("should find source via safe path fallback");
     assert_eq!(source.directory, SAMPLE_SOURCES_DIR.join(&dir_name));
     Ok(())
 }
 
 #[tokio::test]
-async fn get_returns_missing_directory_when_path_not_found() -> Result<(), Error> {
+async fn get_returns_missing_directory_when_path_not_found() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
@@ -53,7 +53,8 @@ async fn get_returns_missing_directory_when_path_not_found() -> Result<(), Error
     let result = provider.get(AlbumConfig::TORRENT_ID).await;
 
     // Assert
-    assert!(matches!(result, Err(SourceIssue::MissingDirectory { .. })));
+    let inner = result?;
+    assert!(matches!(inner, Err(SourceIssue::MissingDirectory { .. })));
     Ok(())
 }
 

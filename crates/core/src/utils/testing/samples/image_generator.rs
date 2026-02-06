@@ -1,8 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use image::{Rgb, RgbImage};
+use rogue_logging::Failure;
 
-use super::SampleError;
+use super::SampleAction;
 
 /// Builder for generating sample PNG images with a gradient pattern.
 ///
@@ -60,11 +61,9 @@ impl ImageGenerator {
     /// Generate the image in the specified output directory.
     ///
     /// Returns the full path to the generated file.
-    pub fn generate(&self, output_dir: &Path) -> Result<PathBuf, SampleError> {
+    pub fn generate(&self, output_dir: &Path) -> Result<PathBuf, Failure<SampleAction>> {
         let path = output_dir.join(&self.filename);
-
         let mut img = RgbImage::new(self.width, self.height);
-
         #[allow(
             clippy::as_conversions,
             clippy::cast_possible_truncation,
@@ -78,8 +77,8 @@ impl ImageGenerator {
                 img.put_pixel(x, y, Rgb([r, 0, b]));
             }
         }
-
-        img.save(&path)?;
+        img.save(&path)
+            .map_err(Failure::wrap(SampleAction::SaveImage))?;
         Ok(path)
     }
 }

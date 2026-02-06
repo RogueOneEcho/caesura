@@ -19,7 +19,7 @@ impl ImdlCommand {
         output_path: &Path,
         announce_url: String,
         source: String,
-    ) -> Result<Output, Error> {
+    ) -> Result<Output, Failure<ImdlAction>> {
         Command::new(IMDL)
             .arg("torrent")
             .arg("create")
@@ -37,11 +37,14 @@ impl ImdlCommand {
             .arg("--force")
             .run()
             .await
-            .map_err(|e| process_error(e, "create torrent", IMDL))
+            .map_err(Failure::wrap_with_path(
+                ImdlAction::CreateTorrent,
+                output_path,
+            ))
     }
 
     /// Get a summary of the torrent file.
-    pub async fn show(path: &Path) -> Result<TorrentSummary, Error> {
+    pub async fn show(path: &Path) -> Result<TorrentSummary, Failure<ImdlAction>> {
         let output = Command::new(IMDL)
             .arg("torrent")
             .arg("show")
@@ -49,31 +52,34 @@ impl ImdlCommand {
             .arg(path)
             .run()
             .await
-            .map_err(|e| process_error(e, "read torrent", IMDL))?;
+            .map_err(Failure::wrap_with_path(ImdlAction::ReadTorrent, path))?;
         let reader = output.stdout.reader();
-        serde_json::from_reader(reader).map_err(|e| json_error(e, "deserialize torrent"))
+        serde_json::from_reader(reader)
+            .map_err(Failure::wrap_with_path(ImdlAction::Deserialize, path))
     }
 
     /// Verify files match the torrent metadata.
     pub async fn verify(
         torrent_file: &Path,
         directory: &Path,
-    ) -> Result<Option<SourceIssue>, Error> {
-        match Command::new(IMDL)
+    ) -> Result<Option<SourceIssue>, Failure<ImdlAction>> {
+        let output = Command::new(IMDL)
             .arg("torrent")
             .arg("verify")
             .arg("--content")
             .arg(directory)
             .arg(torrent_file)
-            .run()
+            .output()
             .await
-        {
-            Ok(_) => Ok(None),
-            Err(ProcessError::Failed(output)) => {
-                let details = output.stderr.unwrap_or_default();
-                Ok(Some(Imdl { details }))
-            }
-            Err(e) => Err(process_error(e, "verify torrent", IMDL)),
+            .map_err(Failure::wrap_with_path(
+                ImdlAction::VerifyTorrent,
+                torrent_file,
+            ))?;
+        if output.status.success() {
+            Ok(None)
+        } else {
+            let details = ProcessOutput::from(output).stderr.unwrap_or_default();
+            Ok(Some(Imdl { details }))
         }
     }
 
@@ -88,7 +94,7 @@ impl ImdlCommand {
         content_dir: &Path,
         announce_url: String,
         source: String,
-    ) -> Result<bool, Error> {
+    ) -> Result<bool, Failure<ImdlAction>> {
         let torrent = ImdlCommand::show(from).await?;
         let torrent_announce = torrent.announce_list.first().and_then(|x| x.first());
         if torrent.is_source_equal(&source) && torrent_announce == Some(&announce_url) {
@@ -100,7 +106,7 @@ impl ImdlCommand {
             );
             copy(&from, &to)
                 .await
-                .map_err(|e| io_error(e, "duplicate torrent"))?;
+                .map_err(Failure::wrap_with_path(ImdlAction::DuplicateTorrent, to))?;
             return Ok(true);
         }
         if !content_dir.is_dir() {
@@ -125,13 +131,11 @@ impl ImdlCommand {
 
 #[cfg(test)]
 mod tests {
-    use rogue_logging::Error;
-
     use super::*;
     use crate::utils::SAMPLE_SOURCES_DIR;
 
     #[tokio::test]
-    async fn imdl_show() -> Result<(), Error> {
+    async fn imdl_show() -> Result<(), Failure<ImdlAction>> {
         // Arrange
         let album = AlbumProvider::get(SampleFormat::default()).await;
         let path = SAMPLE_SOURCES_DIR.join(album.torrent_filename());

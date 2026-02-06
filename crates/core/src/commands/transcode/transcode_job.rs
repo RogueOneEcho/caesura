@@ -19,7 +19,7 @@ pub(crate) struct TranscodeJob {
 }
 
 impl TranscodeJob {
-    pub(crate) async fn execute(self) -> Result<(), Error> {
+    pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         let output_path = match &self.variant {
             Variant::Transcode(_, encode) => encode.output.clone(),
             Variant::Resample(resample) => resample.output.clone(),
@@ -28,7 +28,10 @@ impl TranscodeJob {
         let output_dir = output_path
             .parent()
             .expect("output path should have a parent");
-        create_dir_all(output_dir).map_err(|e| io_error(e, "create transcode output directory"))?;
+        create_dir_all(output_dir).map_err(Failure::wrap_with_path(
+            TranscodeAction::CreateOutputDirectory,
+            output_dir,
+        ))?;
         match self.variant {
             Variant::Transcode(decode, encode) => execute_transcode(decode, encode).await?,
             Variant::Resample(resample) => execute_resample(resample).await?,
@@ -43,14 +46,17 @@ impl TranscodeJob {
                 }
             }
             tags.save_to_path(&output_path, WriteOptions::default())
-                .map_err(|e| error("write tags", e.to_string()))?;
+                .map_err(Failure::wrap_with_path(
+                    TranscodeAction::WriteTags,
+                    &output_path,
+                ))?;
         }
         Ok(())
     }
 }
 
 /// Pipe decode output directly to encode input.
-async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> {
+async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure<TranscodeAction>> {
     let decode_info = decode.to_info();
     let encode_info = encode.to_info();
     trace!("Executing transcode: {decode_info} | {encode_info}");
@@ -60,7 +66,9 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> 
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
-        .map_err(|e| process_error(ProcessError::Spawn(e), "spawn decode", &decode_program))?;
+        .map_err(Failure::wrap_with(TranscodeAction::SpawnDecode, |f| {
+            f.with("program", &decode_program)
+        }))?;
     let pipe: Stdio = decode_command
         .stdout
         .take()
@@ -74,41 +82,50 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Error> 
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
-        .map_err(|e| process_error(ProcessError::Spawn(e), "spawn encode", &encode_program))?;
+        .map_err(Failure::wrap_with(TranscodeAction::SpawnEncode, |f| {
+            f.with("program", &encode_program)
+        }))?;
     let (decode_result, encode_output) =
         join!(decode_command.wait(), encode_command.wait_with_output());
-    let decode_exit =
-        decode_result.map_err(|e| process_error(ProcessError::Wait(e), "wait", "decode"))?;
-    let encode_output =
-        encode_output.map_err(|e| process_error(ProcessError::Wait(e), "wait", "encode"))?;
+    let decode_exit = decode_result.map_err(Failure::wrap(TranscodeAction::WaitDecode))?;
+    let encode_output = encode_output.map_err(Failure::wrap(TranscodeAction::WaitEncode))?;
     if !decode_exit.success() {
-        warn!("Decode was not successful: {decode_exit}");
+        warn!("Decode ({decode_program}) was not successful: {decode_exit}");
     }
-    require_success(encode_output).map_err(|e| process_error(e, "transcode", "transcode"))?;
+    require_success(encode_output, &encode_program).map_err(Failure::wrap_with_path(
+        TranscodeAction::Transcode,
+        encode_program,
+    ))?;
     Ok(())
 }
 
-async fn execute_resample(resample: Resample) -> Result<(), Error> {
+async fn execute_resample(resample: Resample) -> Result<(), Failure<TranscodeAction>> {
+    let output = resample.output.clone();
     let info = resample.to_info();
     trace!("Executing resample: {info}");
-    let program = info.program.clone();
     info.to_command()
         .run()
         .await
-        .map_err(|e| process_error(e, "resample", &program))?;
+        .map_err(Failure::wrap_with_path(TranscodeAction::Resample, &output))?;
     Ok(())
 }
 
-async fn execute_include(include: Include) -> Result<(), Error> {
+async fn execute_include(include: Include) -> Result<(), Failure<TranscodeAction>> {
     let verb = if include.hard_link {
         hard_link(&include.input, &include.output)
             .await
-            .map_err(|e| io_error(e, "hard link flac file"))?;
+            .map_err(Failure::wrap_with_path(
+                TranscodeAction::HardLinkFlac,
+                &include.output,
+            ))?;
         "Hard Linked"
     } else {
         copy(&include.input, &include.output)
             .await
-            .map_err(|e| io_error(e, "copy flac file"))?;
+            .map_err(Failure::wrap_with_path(
+                TranscodeAction::CopyFlac,
+                &include.output,
+            ))?;
         "Copied"
     };
     trace!(

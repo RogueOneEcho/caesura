@@ -49,13 +49,14 @@ async fn spectrogram_command_helper(album: AlbumConfig) -> Vec<FileSnapshot> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // Act
-    let status = generator.execute(&source).await;
+    let result = generator.execute(&source).await;
 
     // Assert
-    assert!(status.success);
+    assert!(result.is_ok());
     DirectorySnapshot::new()
         .with_directory(test_dir.output())
         .create()

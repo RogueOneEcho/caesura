@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::process::Output;
 
@@ -29,6 +30,8 @@ impl Display for ProcessOutput {
         }
     }
 }
+
+impl Error for ProcessOutput {}
 
 fn to_option_string(buffer: &[u8]) -> Option<String> {
     let s = String::from_utf8_lossy(buffer).trim().to_owned();

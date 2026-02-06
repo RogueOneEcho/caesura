@@ -10,13 +10,13 @@ pub(crate) fn is_resample_required(info: &StreamInfo) -> bool {
 /// Determine the target sample rate for resampling.
 ///
 /// Returns 44100 or 48000 based on which the source rate is a multiple of.
-pub(crate) fn get_resample_rate(info: &StreamInfo) -> Result<u32, Error> {
+pub(crate) fn get_resample_rate(info: &StreamInfo) -> Result<u32, TranscodeError> {
     if info.sample_rate.is_multiple_of(44100) {
         Ok(44100)
     } else if info.sample_rate.is_multiple_of(48000) {
         Ok(48000)
     } else {
-        Err(error("get sample rate", "invalid sample rate".to_owned()))
+        Err(TranscodeError::UnsupportedSampleRate(info.sample_rate))
     }
 }
 

@@ -16,12 +16,12 @@ pub struct ConfigCommand {
 }
 
 impl ConfigCommand {
-    pub fn execute(&self) -> Result<bool, Error> {
+    pub fn execute(&self) -> Result<bool, Failure<ConfigAction>> {
         let options = self
             .get_options_hashmap()
-            .map_err(|e| json_error(e, "collate config"))?;
-        let yaml =
-            serde_yaml::to_string(&options).map_err(|e| yaml_error(e, "serialize config"))?;
+            .map_err(Failure::wrap(ConfigAction::CollateConfig))?;
+        let yaml = serde_yaml::to_string(&options)
+            .map_err(Failure::wrap(ConfigAction::SerializeConfig))?;
         println!("{yaml}");
         Ok(true)
     }

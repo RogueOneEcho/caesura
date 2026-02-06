@@ -38,8 +38,9 @@ humantime = { workspace = true }
 indicatif = { workspace = true }
 lofty = { workspace = true }
 log = { workspace = true }
-once_cell = { workspace = true }
+miette = { workspace = true }
 more-di = { workspace = true }
+once_cell = { workspace = true }
 num_cpus = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
@@ -47,6 +48,7 @@ rogue_logging = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
+thiserror = { workspace = true }
 tokio = { workspace = true }
 
 [dev-dependencies]

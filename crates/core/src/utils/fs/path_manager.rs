@@ -104,7 +104,7 @@ impl PathManager {
         &self,
         source: &Source,
         target: TargetFormat,
-    ) -> Result<Option<PathBuf>, Error> {
+    ) -> Result<Option<PathBuf>, Failure<ImdlAction>> {
         let target_path = self.get_torrent_path(source, target);
         if target_path.is_file() {
             return Ok(Some(target_path));

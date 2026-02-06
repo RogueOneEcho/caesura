@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 use tokio::sync::{Mutex, OnceCell};
 
 use super::{AlbumProvider, SampleFormat, TranscodeConfig, TranscodeGenerator};
-use crate::utils::{AlbumConfig, TargetFormat};
+use crate::utils::{AlbumConfig, DiagnosticExt, TargetFormat};
 
 /// Cache key combining source format and target format.
 type TranscodeCacheKey = (SampleFormat, TargetFormat);
@@ -47,7 +47,7 @@ impl TranscodeProvider {
             let config = TranscodeConfig::new(album.clone(), target);
             TranscodeGenerator::generate(&config)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| e.render())?;
             Ok(config)
         })
         .await
@@ -67,7 +67,7 @@ impl TranscodeProvider {
         let config = TranscodeConfig::new(album.clone(), target);
         TranscodeGenerator::generate(&config)
             .await
-            .unwrap_or_else(|e| panic!("Transcode generation failed\n{e}"));
+            .unwrap_or_else(|e| panic!("Transcode generation failed\n{}", e.render()));
         config
     }
 }

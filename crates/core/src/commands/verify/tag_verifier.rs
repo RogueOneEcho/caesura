@@ -6,7 +6,10 @@ use lofty::prelude::ItemKey::Composer;
 pub(crate) struct TagVerifier;
 
 impl TagVerifier {
-    pub(crate) fn execute(flac: &FlacFile, source: &Source) -> Result<Vec<String>, Error> {
+    pub(crate) fn execute(
+        flac: &FlacFile,
+        source: &Source,
+    ) -> Result<Vec<String>, Failure<TranscodeAction>> {
         let tags = flac.id3_tags()?;
         let mut missing: Vec<String> = Vec::new();
         if tags.artist().is_none() {

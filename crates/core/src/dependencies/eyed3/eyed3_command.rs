@@ -8,14 +8,14 @@ pub struct EyeD3Command;
 
 impl EyeD3Command {
     /// Display tags and metadata for an audio file.
-    pub async fn display(path: &Path) -> Result<String, Error> {
+    pub async fn display(path: &Path) -> Result<String, Failure<Eyed3Action>> {
         let output = Command::new(EYED3)
             .arg(path.to_string_lossy().to_string())
             .arg("--no-color")
             .arg("-r")
             .run()
             .await
-            .map_err(|e| process_error(e, "get details", EYED3))?;
+            .map_err(Failure::wrap_with_path(Eyed3Action::GetDetails, path))?;
         Ok(String::from_utf8(output.stdout).unwrap_or_default())
     }
 }
@@ -24,11 +24,10 @@ impl EyeD3Command {
 mod tests {
     use super::*;
     use insta::assert_snapshot;
-    use rogue_logging::Error;
 
     #[tokio::test]
     #[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
-    async fn eyed3_display() -> Result<(), Error> {
+    async fn eyed3_display() -> Result<(), Failure<Eyed3Action>> {
         // Arrange
         let transcode_config =
             TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;

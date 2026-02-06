@@ -14,7 +14,7 @@ pub struct JobRunner {
     /// Semaphore to limit concurrent job execution.
     pub semaphore: Arc<Semaphore>,
     /// Set of spawned job tasks.
-    pub set: RefMut<JoinSet<Result<(), Error>>>,
+    pub set: RefMut<JoinSet<Result<(), Failure<JobAction>>>>,
     /// Publisher for job status updates.
     pub publisher: Ref<Publisher>,
 }
@@ -24,7 +24,7 @@ impl JobRunner {
     /// Create a new [`JobRunner`].
     pub fn new(
         semaphore: Arc<Semaphore>,
-        set: RefMut<JoinSet<Result<(), Error>>>,
+        set: RefMut<JoinSet<Result<(), Failure<JobAction>>>>,
         publisher: Ref<Publisher>,
     ) -> Self {
         Self {
@@ -49,7 +49,7 @@ impl JobRunner {
                     .await
                     .expect("Semaphore should be available");
                 publisher.update(&id, Started);
-                job.execute().await?;
+                job.execute().await.map_err(|f| f.with("job", &id))?;
                 publisher.update(&id, Completed);
                 Ok(())
             });
@@ -59,6 +59,7 @@ impl JobRunner {
     /// Add jobs to be run without publishing status updates.
     pub fn add_without_publish(&self, jobs: Vec<Job>) {
         for job in jobs {
+            let id = job.get_id();
             let semaphore = self.semaphore.clone();
             let mut set = self.set.write().expect("join set to be writeable");
             set.spawn(async move {
@@ -66,23 +67,23 @@ impl JobRunner {
                     .acquire()
                     .await
                     .expect("Semaphore should be available");
-                job.execute().await?;
+                job.execute().await.map_err(|f| f.with("job", &id))?;
                 Ok(())
             });
         }
     }
 
     /// Execute all queued jobs and wait for completion.
-    pub async fn execute(&self) -> Result<(), Error> {
+    pub async fn execute(&self) -> Result<(), Failure<JobAction>> {
         self.execute_internal(true).await
     }
 
     /// Execute all queued jobs without publishing status updates.
-    pub async fn execute_without_publish(&self) -> Result<(), Error> {
+    pub async fn execute_without_publish(&self) -> Result<(), Failure<JobAction>> {
         self.execute_internal(false).await
     }
 
-    async fn execute_internal(&self, publish: bool) -> Result<(), Error> {
+    async fn execute_internal(&self, publish: bool) -> Result<(), Failure<JobAction>> {
         if publish {
             self.publisher.start("");
         }
@@ -93,7 +94,7 @@ impl JobRunner {
                 Err(e) => {
                     set.abort_all();
                     set.detach_all();
-                    return Err(task_error(e, "executing task"));
+                    return Err(Failure::new(JobAction::ExecuteTask, e));
                 }
             };
             if let Err(e) = result {

@@ -3,7 +3,7 @@ use flat_db::Hash;
 
 /// Test that `BatchCommand` succeeds with an empty queue.
 #[tokio::test]
-async fn batch_command_empty_queue_succeeds() -> Result<(), Error> {
+async fn batch_command_empty_queue_succeeds() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -27,7 +27,7 @@ async fn batch_command_empty_queue_succeeds() -> Result<(), Error> {
 
 /// Test that `BatchCommand` verifies items and updates queue status.
 #[tokio::test]
-async fn batch_command_verifies_item() -> Result<(), Error> {
+async fn batch_command_verifies_item() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -51,7 +51,7 @@ async fn batch_command_verifies_item() -> Result<(), Error> {
     let queue = host.services.get_required::<Queue>();
     let items = queue.get_all().await?;
     let (hash, _) = items.iter().next().expect("should have item");
-    let mut item = queue.get(*hash)?.expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
     item.id = Some(AlbumConfig::TORRENT_ID);
     queue.set(item).await?;
 
@@ -63,7 +63,7 @@ async fn batch_command_verifies_item() -> Result<(), Error> {
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let item = queue.get(*hash)?.expect("should have item");
+    let item = queue.get(*hash).await?.expect("should have item");
     assert!(item.verify.is_some(), "verify status should be set");
     assert!(
         item.verify.as_ref().expect("checked").verified,
@@ -75,7 +75,7 @@ async fn batch_command_verifies_item() -> Result<(), Error> {
 
 /// Test that `BatchCommand` skips items without an ID.
 #[tokio::test]
-async fn batch_command_skips_item_without_id() -> Result<(), Error> {
+async fn batch_command_skips_item_without_id() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -109,7 +109,7 @@ async fn batch_command_skips_item_without_id() -> Result<(), Error> {
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let updated = queue.get(hash)?.expect("should have item");
+    let updated = queue.get(hash).await?.expect("should have item");
     assert!(updated.verify.is_some(), "verify status should be set");
     assert!(
         !updated.verify.as_ref().expect("checked").verified,
@@ -121,7 +121,7 @@ async fn batch_command_skips_item_without_id() -> Result<(), Error> {
 
 /// Test that `BatchCommand` respects the limit option.
 #[tokio::test]
-async fn batch_command_respects_limit() -> Result<(), Error> {
+async fn batch_command_respects_limit() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -170,7 +170,7 @@ async fn batch_command_respects_limit() -> Result<(), Error> {
 
 /// Test that `BatchCommand` filters by indexer.
 #[tokio::test]
-async fn batch_command_filters_by_indexer() -> Result<(), Error> {
+async fn batch_command_filters_by_indexer() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -216,8 +216,8 @@ async fn batch_command_filters_by_indexer() -> Result<(), Error> {
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let red_item = queue.get(red_hash)?.expect("should have RED item");
-    let ops_item = queue.get(ops_hash)?.expect("should have OPS item");
+    let red_item = queue.get(red_hash).await?.expect("should have RED item");
+    let ops_item = queue.get(ops_hash).await?.expect("should have OPS item");
 
     assert!(red_item.verify.is_some(), "RED item should be processed");
     assert!(
@@ -230,7 +230,7 @@ async fn batch_command_filters_by_indexer() -> Result<(), Error> {
 
 /// Test that `BatchCommand` skips already verified items when transcode is disabled.
 #[tokio::test]
-async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Error> {
+async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -264,7 +264,7 @@ async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Er
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let item = queue.get(hash)?.expect("should have item");
+    let item = queue.get(hash).await?.expect("should have item");
     assert!(item.verify.as_ref().expect("checked").verified);
 
     Ok(())
@@ -272,7 +272,7 @@ async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Er
 
 /// Test that `BatchCommand` processes verified items when transcode is enabled.
 #[tokio::test]
-async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(), Error> {
+async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -300,7 +300,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
     let queue = host.services.get_required::<Queue>();
     let items = queue.get_all().await?;
     let (hash, _) = items.iter().next().expect("should have item");
-    let mut item = queue.get(*hash)?.expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
     item.id = Some(AlbumConfig::TORRENT_ID);
     item.verify = Some(VerifyStatus::verified());
     queue.set(item).await?;
@@ -313,7 +313,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let updated = queue.get(*hash)?.expect("should have item");
+    let updated = queue.get(*hash).await?.expect("should have item");
     assert!(
         updated.transcode.is_some(),
         "transcode status should be set"
@@ -324,7 +324,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
 
 /// Test that `BatchCommand` with `dry_run` does NOT save upload status.
 #[tokio::test]
-async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error> {
+async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -356,7 +356,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
     let queue = host.services.get_required::<Queue>();
     let items = queue.get_all().await?;
     let (hash, _) = items.iter().next().expect("should have item");
-    let mut item = queue.get(*hash)?.expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
     item.id = Some(AlbumConfig::TORRENT_ID);
     item.verify = Some(VerifyStatus::verified());
     queue.set(item).await?;
@@ -369,7 +369,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let updated = queue.get(*hash)?.expect("should have item");
+    let updated = queue.get(*hash).await?.expect("should have item");
     assert!(updated.transcode.is_some());
     assert!(
         updated.upload.is_none(),
@@ -381,7 +381,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), Error
 
 /// Test that `BatchCommand` with upload saves status.
 #[tokio::test]
-async fn batch_command_upload_saves_status() -> Result<(), Error> {
+async fn batch_command_upload_saves_status() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -409,7 +409,7 @@ async fn batch_command_upload_saves_status() -> Result<(), Error> {
     let queue = host.services.get_required::<Queue>();
     let items = queue.get_all().await?;
     let (hash, _) = items.iter().next().expect("should have item");
-    let mut item = queue.get(*hash)?.expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
     item.id = Some(AlbumConfig::TORRENT_ID);
     item.verify = Some(VerifyStatus::verified());
     queue.set(item).await?;
@@ -422,7 +422,7 @@ async fn batch_command_upload_saves_status() -> Result<(), Error> {
     // Assert
     assert!(matches!(result, Ok(true)));
 
-    let updated = queue.get(*hash)?.expect("should have item");
+    let updated = queue.get(*hash).await?.expect("should have item");
     assert!(updated.transcode.is_some());
     assert!(updated.upload.is_some(), "upload status should be saved");
     assert!(updated.upload.as_ref().expect("checked").success);

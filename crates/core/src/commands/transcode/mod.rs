@@ -9,6 +9,7 @@ pub(crate) use include::*;
 pub(crate) use resample::*;
 pub(crate) use resize::*;
 pub(crate) use streaminfo_helpers::*;
+pub(crate) use transcode_action::*;
 pub(crate) use transcode_command::*;
 pub(crate) use transcode_job::*;
 pub(crate) use transcode_job_factory::*;
@@ -26,6 +27,7 @@ mod resize;
 mod streaminfo_helpers;
 #[cfg(test)]
 mod tests;
+mod transcode_action;
 mod transcode_command;
 mod transcode_job;
 mod transcode_job_factory;

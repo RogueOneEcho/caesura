@@ -33,13 +33,14 @@ async fn transcode_creates_only_indexed_torrent() {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // Act
-    let status = transcoder.execute(&source).await;
+    let result = transcoder.execute(&source).await;
 
     // Assert
-    assert!(status.success);
+    assert!(result.is_ok(), "transcode should succeed");
     let indexed_torrent = paths.get_torrent_path(&source, TargetFormat::_320);
     assert!(
         indexed_torrent.exists(),
@@ -58,7 +59,7 @@ async fn transcode_creates_only_indexed_torrent() {
 
 /// Test that `get_or_duplicate_existing_torrent_path` returns path when it exists.
 #[tokio::test]
-async fn get_or_duplicate_returns_path_when_exists() -> Result<(), Error> {
+async fn get_or_duplicate_returns_path_when_exists() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let test_dir = TestDirectory::new();
@@ -78,10 +79,13 @@ async fn get_or_duplicate_returns_path_when_exists() -> Result<(), Error> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
-    let status = transcoder.execute(&source).await;
-    assert!(status.success);
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
 
     // Act
     let result = paths
@@ -105,7 +109,7 @@ async fn get_or_duplicate_returns_path_when_exists() -> Result<(), Error> {
 
 /// Test that `get_or_duplicate` creates torrent from another tracker's torrent.
 #[tokio::test]
-async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), Error> {
+async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let test_dir = TestDirectory::new();
@@ -125,10 +129,13 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), Error> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
-    let status = transcoder.execute(&source).await;
-    assert!(status.success);
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
 
     // Now create a new host with OPS indexer, using same output directory
     let host_ops = HostBuilder::new()
@@ -171,7 +178,7 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), Error> {
 
 /// Test that `get_or_duplicate` returns None when no torrent exists.
 #[tokio::test]
-async fn get_or_duplicate_returns_none_when_missing() -> Result<(), Error> {
+async fn get_or_duplicate_returns_none_when_missing() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let test_dir = TestDirectory::new();
@@ -186,7 +193,8 @@ async fn get_or_duplicate_returns_none_when_missing() -> Result<(), Error> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // Act - no transcode performed, no torrent files exist
     let result = paths
@@ -224,11 +232,14 @@ async fn torrent_filename_includes_format_and_indexer() {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // Act
-    let status = transcoder.execute(&source).await;
-    assert!(status.success);
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
 
     // Assert
     let torrent_path = paths.get_torrent_path(&source, TargetFormat::_320);
@@ -272,13 +283,14 @@ async fn transcode_creates_torrents_for_each_format() {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // Act
-    let status = transcoder.execute(&source).await;
+    let result = transcoder.execute(&source).await;
 
     // Assert
-    assert!(status.success);
+    assert!(result.is_ok(), "transcode should succeed");
     for target in [TargetFormat::_320, TargetFormat::V0] {
         let torrent_path = paths.get_torrent_path(&source, target);
         assert!(
@@ -312,10 +324,13 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
-    let status = transcoder_red.execute(&source).await;
-    assert!(status.success);
+    transcoder_red
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
 
     let red_torrent = paths_red.get_torrent_path(&source, TargetFormat::_320);
     assert!(red_torrent.exists(), "RED torrent should exist");
@@ -353,10 +368,10 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
     let paths_ops = host_ops.services.get_required::<PathManager>();
 
     // Act - transcode with OPS should find RED torrent and skip
-    let status = transcoder_ops.execute(&source).await;
-
-    // Assert
-    assert!(status.success);
+    transcoder_ops
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
     let ops_torrent = paths_ops.get_torrent_path(&source, TargetFormat::_320);
     assert!(
         ops_torrent.exists(),
@@ -398,11 +413,14 @@ async fn transcode_skips_when_torrent_exists() {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // First transcode
-    let status1 = transcoder.execute(&source).await;
-    assert!(status1.success);
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
 
     let torrent_path = paths.get_torrent_path(&source, TargetFormat::_320);
     let modified_before = fs::metadata(&torrent_path)
@@ -412,10 +430,10 @@ async fn transcode_skips_when_torrent_exists() {
     sleep(MODIFICATION_TIME_WAIT).await;
 
     // Act - second transcode should skip
-    let status2 = transcoder.execute(&source).await;
-
-    // Assert
-    assert!(status2.success);
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
     let modified_after = fs::metadata(&torrent_path)
         .expect("torrent should exist")
         .modified()

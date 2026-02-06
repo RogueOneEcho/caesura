@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 
 /// Test that `QueueListCommand` returns empty list for empty queue.
 #[tokio::test]
-async fn queue_list_command_empty_queue() -> Result<(), Error> {
+async fn queue_list_command_empty_queue() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -27,7 +27,7 @@ async fn queue_list_command_empty_queue() -> Result<(), Error> {
 
 /// Test that `QueueListCommand` lists added items.
 #[tokio::test]
-async fn queue_list_command_lists_items() -> Result<(), Error> {
+async fn queue_list_command_lists_items() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;

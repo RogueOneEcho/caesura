@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 
 /// Test that `QueueAddCommand` adds torrent files from a directory.
 #[tokio::test]
-async fn queue_add_command_adds_torrent_from_directory() -> Result<(), Error> {
+async fn queue_add_command_adds_torrent_from_directory() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let torrent_dir = album.single_torrent_dir();
     let (_test_dir, command, queue) = queue_add_test_helper(torrent_dir.to_path_buf()).await;
@@ -17,7 +17,7 @@ async fn queue_add_command_adds_torrent_from_directory() -> Result<(), Error> {
 
 /// Test that `QueueAddCommand` skips duplicate torrents.
 #[tokio::test]
-async fn queue_add_command_skips_duplicate() -> Result<(), Error> {
+async fn queue_add_command_skips_duplicate() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let torrent_dir = album.single_torrent_dir();
     let (_test_dir, command, queue) = queue_add_test_helper(torrent_dir.to_path_buf()).await;
@@ -34,7 +34,7 @@ async fn queue_add_command_skips_duplicate() -> Result<(), Error> {
 
 /// Test that `QueueAddCommand` returns false for non-existent path.
 #[tokio::test]
-async fn queue_add_command_nonexistent_path_fails() -> Result<(), Error> {
+async fn queue_add_command_nonexistent_path_fails() -> Result<(), TestError> {
     let (_test_dir, command, queue) =
         queue_add_test_helper(PathBuf::from("/nonexistent/path")).await;
 
@@ -48,7 +48,7 @@ async fn queue_add_command_nonexistent_path_fails() -> Result<(), Error> {
 
 /// Test that `QueueAddCommand` handles empty directory.
 #[tokio::test]
-async fn queue_add_command_empty_directory() -> Result<(), Error> {
+async fn queue_add_command_empty_directory() -> Result<(), TestError> {
     let temp = TempDirectory::create("empty_torrents");
     let (_test_dir, command, queue) = queue_add_test_helper(temp.to_path_buf()).await;
 

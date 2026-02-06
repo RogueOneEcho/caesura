@@ -9,7 +9,7 @@ pub(crate) struct QueueRemoveCommand {
 }
 
 impl QueueRemoveCommand {
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         if !self.args.validate() {
             return Ok(false);
         }
@@ -23,7 +23,7 @@ impl QueueRemoveCommand {
         Ok(status)
     }
 
-    async fn execute(&self, hash: Hash<20>) -> Result<bool, Error> {
+    async fn execute(&self, hash: Hash<20>) -> Result<bool, Failure<QueueAction>> {
         debug!("{} item {hash} from queue", "Removing".bold());
         match self.queue.remove(hash).await? {
             None => {

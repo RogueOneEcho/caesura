@@ -8,7 +8,7 @@ pub struct MetaflacCommand;
 
 impl MetaflacCommand {
     /// List tags and stream info for a flac file.
-    async fn list(path: &Path) -> Result<String, Error> {
+    async fn list(path: &Path) -> Result<String, Failure<MetaflacAction>> {
         let output = Command::new(METAFLAC)
             .arg("--list")
             .arg("--block-type=VORBIS_COMMENT")
@@ -16,14 +16,18 @@ impl MetaflacCommand {
             .arg(path.to_string_lossy().to_string())
             .run()
             .await
-            .map_err(|e| process_error(e, "get details", METAFLAC))?;
+            .map_err(Failure::wrap_with_path(MetaflacAction::GetDetails, path))?;
         Ok(String::from_utf8(output.stdout).unwrap_or_default())
     }
 
     /// List tags and stream info for a directory of flac files.
-    pub async fn list_dir(path: &Path) -> Result<String, Error> {
+    pub async fn list_dir(path: &Path) -> Result<String, Failure<MetaflacAction>> {
         if !path.is_dir() {
-            return Err(error("get details", "path is not a directory".to_owned()));
+            return Err(Failure::new(
+                MetaflacAction::GetDetails,
+                IoError::new(ErrorKind::NotADirectory, "path is not a directory"),
+            )
+            .with_path(path));
         }
         let mut output = String::new();
         let mut flacs = Collector::get_flacs(&path.to_path_buf());
@@ -45,10 +49,9 @@ mod tests {
     use super::*;
     use crate::utils::SAMPLE_SOURCES_DIR;
     use insta::assert_snapshot;
-    use rogue_logging::Error;
 
     #[tokio::test]
-    async fn metaflac_list() -> Result<(), Error> {
+    async fn metaflac_list() -> Result<(), Failure<MetaflacAction>> {
         // Arrange
         let album = AlbumProvider::get(SampleFormat::default()).await;
         let mut paths = DirectoryReader::new()

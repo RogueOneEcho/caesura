@@ -16,7 +16,7 @@ impl SpectrogramCommand {
     /// [`Source`] is retrieved from the CLI arguments.
     ///
     /// Returns `true` if the spectrogram generation succeeds.
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<SpectrogramAction>> {
         if !self.arg.validate() {
             return Ok(false);
         }
@@ -24,57 +24,36 @@ impl SpectrogramCommand {
             .source_provider
             .get_from_options()
             .await
-            .map_err(|e| error("get source from options", e.to_string()))?;
-        let status = self.execute(&source).await;
-        if let Some(error) = &status.error {
-            error.log();
-        }
-        Ok(status.success)
+            .map_err(Failure::wrap(SpectrogramAction::GetSource))?
+            .map_err(Failure::wrap(SpectrogramAction::GetSource))?;
+        self.execute(&source).await?;
+        Ok(true)
     }
 
     /// Execute [`SpectrogramCommand`] on a [`Source`].
     ///
-    /// Returns a [`SpectrogramStatus`] indicating the success of the operation and any errors.
-    ///
-    /// Errors are not logged so should be handled by the caller.
-    #[must_use]
-    pub(crate) async fn execute(&self, source: &Source) -> SpectrogramStatus {
+    /// Returns a [`SpectrogramSuccess`] on success, or a [`Failure`] on error.
+    pub(crate) async fn execute(
+        &self,
+        source: &Source,
+    ) -> Result<SpectrogramSuccess, Failure<SpectrogramAction>> {
         let path = self.paths.get_spectrogram_dir(source);
         if path.is_dir() {
             info!("{} existing spectrograms {source}", "Found".bold());
             debug!("in {}", path.display());
-            return SpectrogramStatus {
-                success: true,
-                path: Some(path),
-                count: 0,
-                completed: TimeStamp::now(),
-                error: None,
-            };
+            return Ok(SpectrogramSuccess { path, count: 0 });
         }
         info!("{} spectrograms for {}", "Creating".bold(), source);
         let collection = Collector::get_flacs(&source.directory);
         let jobs = self.factory.create(&collection, source);
         let count = jobs.len();
         self.runner.add(jobs);
-        match self.runner.execute().await {
-            Ok(()) => {
-                info!("{} {count} spectrograms for {source}", "Created".bold());
-                debug!("in {}", path.display());
-                SpectrogramStatus {
-                    success: true,
-                    path: Some(path),
-                    count,
-                    completed: TimeStamp::now(),
-                    error: None,
-                }
-            }
-            Err(error) => SpectrogramStatus {
-                success: false,
-                path: None,
-                count,
-                completed: TimeStamp::now(),
-                error: Some(error),
-            },
-        }
+        self.runner
+            .execute()
+            .await
+            .map_err(Failure::wrap(SpectrogramAction::ExecuteRunner))?;
+        info!("{} {count} spectrograms for {source}", "Created".bold());
+        debug!("in {}", path.display());
+        Ok(SpectrogramSuccess { path, count })
     }
 }

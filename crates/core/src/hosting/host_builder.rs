@@ -92,7 +92,7 @@ impl HostBuilder {
                 Arc::new(Semaphore::new(cpus))
             }))
             .add(singleton_as_self().from(|_| {
-                let set: JoinSet<Result<(), Error>> = JoinSet::new();
+                let set: JoinSet<Result<(), Failure<JobAction>>> = JoinSet::new();
                 RefMut::new(Mut::new(set))
             }))
             // Add transcode services

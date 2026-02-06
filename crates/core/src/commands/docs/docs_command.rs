@@ -5,10 +5,10 @@ use crate::prelude::*;
 pub struct DocsCommand;
 
 impl DocsCommand {
-    #[allow(clippy::unnecessary_wraps, clippy::unused_self)]
-    pub fn execute(&self) -> Result<bool, Error> {
+    #[allow(clippy::unused_self)]
+    pub fn execute(&self) -> bool {
         print!("{}", Self::render());
-        Ok(true)
+        true
     }
 
     /// Render all options documentation as markdown.

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use gazelle_api::{GazelleClientTrait, Torrent};
+use gazelle_api::{ApiResponseKind, GazelleClientTrait, GazelleOperation, Torrent};
 use html_escape::decode_html_entities;
 
 /// Retrieve [`Source`] from the API.
@@ -12,41 +12,59 @@ pub struct SourceProvider {
 
 impl SourceProvider {
     /// Retrieve a [`Source`] by torrent ID.
-    pub async fn get(&self, id: u32) -> Result<Source, SourceIssue> {
-        let response = self.api.get_torrent(id).await.map_err(SourceIssue::api)?;
+    ///
+    /// Returns:
+    /// - `Ok(Ok(source))` - Source retrieved successfully
+    /// - `Ok(Err(issue))` - Source not available (not found, missing directory, etc.)
+    /// - `Err(failure)` - Operation failed (unauthorized, rate limited, network error)
+    pub async fn get(&self, id: u32) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
+        let not_found = GazelleOperation::ApiResponse(ApiResponseKind::NotFound);
+        let bad_request = GazelleOperation::ApiResponse(ApiResponseKind::BadRequest);
+        let response = match self.api.get_torrent(id).await {
+            Ok(response) => response,
+            Err(e) if e.operation == not_found || e.operation == bad_request => {
+                return Ok(Err(SourceIssue::NotFound));
+            }
+            Err(e) => return Err(Failure::new(SourceAction::GetTorrent, e)),
+        };
         let torrent = response.torrent;
         let group = response.group;
-        let response = self
-            .api
-            .get_torrent_group(group.id)
-            .await
-            .map_err(SourceIssue::api)?;
+        let response = match self.api.get_torrent_group(group.id).await {
+            Ok(response) => response,
+            Err(e) if e.operation == not_found || e.operation == bad_request => {
+                return Ok(Err(SourceIssue::NotFound));
+            }
+            Err(e) => return Err(Failure::new(SourceAction::GetTorrentGroup, e)),
+        };
         if group.id != response.group.id {
-            return Err(SourceIssue::GroupMismatch {
-                actual: group.id,
-                expected: response.group.id,
-            });
+            return Ok(Err(SourceIssue::GroupMismatch {
+                expected: group.id,
+                actual: response.group.id,
+            }));
         }
         let group_torrents = response.torrents;
         let Some(format) =
             ExistingFormat::from_torrent(&torrent).and_then(ExistingFormat::to_source)
         else {
-            return Err(SourceIssue::NotSource {
+            return Ok(Err(SourceIssue::NotSource {
                 format: torrent.format,
                 encoding: torrent.encoding,
-            });
+            }));
         };
         let existing = ExistingFormatProvider::get(&torrent, &group_torrents);
-        let directory = self.get_source_directory(&torrent)?;
+        let directory = match self.get_source_directory(&torrent) {
+            Ok(dir) => dir,
+            Err(issue) => return Ok(Err(issue)),
+        };
         let metadata = Metadata::new(&group, &torrent);
-        Ok(Source {
+        Ok(Ok(Source {
             torrent,
             group,
             existing,
             format,
             directory,
             metadata,
-        })
+        }))
     }
 
     fn get_source_directory(&self, torrent: &Torrent) -> Result<PathBuf, SourceIssue> {
@@ -80,13 +98,18 @@ impl SourceProvider {
     }
 
     /// Retrieve a [`Source`] using the ID from CLI options.
-    pub async fn get_from_options(&self) -> Result<Source, SourceIssue> {
+    pub async fn get_from_options(
+        &self,
+    ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
         let id = self
             .id_provider
             .get_by_options()
             .await
-            .map_err(SourceIssue::Id)?;
-        self.get(id).await
+            .map_err(SourceIssue::Id);
+        match id {
+            Ok(id) => self.get(id).await,
+            Err(issue) => Ok(Err(issue)),
+        }
     }
 }
 

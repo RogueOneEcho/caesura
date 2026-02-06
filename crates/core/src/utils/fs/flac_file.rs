@@ -55,9 +55,10 @@ impl FlacFile {
     }
 
     /// Get cached ID3 tags, converting from Vorbis and fixing track numbering.
-    pub fn id3_tags(&self) -> Result<&Tag, Error> {
+    pub fn id3_tags(&self) -> Result<&Tag, Failure<TranscodeAction>> {
         self.id3_tags.get_or_try_init(|| {
-            let mut tags = get_vorbis_tags(self)?;
+            let mut tags =
+                get_vorbis_tags(self).map_err(Failure::wrap(TranscodeAction::GetTags))?;
             convert_to_id3v2(&mut tags);
             let _ = fix_track_numbering(&mut tags);
             Ok(tags)

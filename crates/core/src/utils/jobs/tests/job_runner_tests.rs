@@ -17,7 +17,7 @@ fn job_runner_created_with_correct_concurrency() {
 
 /// Test that `JobRunner` execute returns Ok with empty job set.
 #[tokio::test]
-async fn job_runner_execute_empty_succeeds() -> Result<(), Error> {
+async fn job_runner_execute_empty_succeeds() -> Result<(), TestError> {
     // Arrange
     let host = HostBuilder::new().expect_build();
     let runner = host.services.get_required::<JobRunner>();
@@ -32,7 +32,7 @@ async fn job_runner_execute_empty_succeeds() -> Result<(), Error> {
 
 /// Test that `JobRunner` `execute_without_publish` returns Ok with empty job set.
 #[tokio::test]
-async fn job_runner_execute_without_publish_empty_succeeds() -> Result<(), Error> {
+async fn job_runner_execute_without_publish_empty_succeeds() -> Result<(), TestError> {
     // Arrange
     let host = HostBuilder::new().expect_build();
     let runner = host.services.get_required::<JobRunner>();

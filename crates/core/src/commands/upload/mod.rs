@@ -1,8 +1,10 @@
 //! Upload transcodes to Gazelle-based trackers.
 
+pub(crate) use upload_action::*;
 pub(crate) use upload_command::*;
 pub(crate) use upload_status::*;
 
+mod upload_action;
 mod upload_command;
 mod upload_status;
 

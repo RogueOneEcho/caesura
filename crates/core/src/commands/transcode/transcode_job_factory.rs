@@ -15,7 +15,7 @@ impl TranscodeJobFactory {
         flacs: &[FlacFile],
         source: &Source,
         format: TargetFormat,
-    ) -> Result<Vec<Job>, Error> {
+    ) -> Result<Vec<Job>, Failure<TranscodeAction>> {
         let mut jobs = Vec::new();
         for (index, flac) in flacs.iter().enumerate() {
             jobs.push(self.create_single(index, flac, source, format)?);
@@ -30,10 +30,11 @@ impl TranscodeJobFactory {
         flac: &FlacFile,
         source: &Source,
         format: TargetFormat,
-    ) -> Result<Job, Error> {
-        let info = flac
-            .get_stream_info()
-            .map_err(|e| claxon_error(e, "read FLAC"))?;
+    ) -> Result<Job, Failure<TranscodeAction>> {
+        let info = flac.get_stream_info().map_err(Failure::wrap_with_path(
+            TranscodeAction::ReadFlac,
+            &flac.path,
+        ))?;
         let id = format!("Transcode {:<4}{index:>3}", format.to_string());
         let output_path = self.paths.get_transcode_path(source, format, flac);
         let repeatable = !self.target_options.sox_random_dither;
@@ -43,7 +44,9 @@ impl TranscodeJobFactory {
                     Variant::Resample(Resample {
                         input: flac.path.clone(),
                         output: output_path.clone(),
-                        resample_rate: get_resample_rate(&info)?,
+                        resample_rate: get_resample_rate(&info).map_err(
+                            Failure::wrap_with_path(TranscodeAction::GetSampleRate, &flac.path),
+                        )?,
                         repeatable,
                     })
                 } else {
@@ -57,7 +60,11 @@ impl TranscodeJobFactory {
             TargetFormat::_320 | TargetFormat::V0 => {
                 let resample_rate = is_resample_required(&info)
                     .then(|| get_resample_rate(&info))
-                    .transpose()?;
+                    .transpose()
+                    .map_err(Failure::wrap_with_path(
+                        TranscodeAction::GetSampleRate,
+                        &flac.path,
+                    ))?;
                 Variant::Transcode(
                     Decode {
                         input: flac.path.clone(),

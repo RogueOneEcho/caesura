@@ -1,9 +1,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use rogue_logging::Failure;
 use tokio::process::Command;
 
-use super::{ImageGenerator, SampleError};
+use super::{ImageGenerator, SampleAction};
 use crate::dependencies::{METAFLAC, SOX};
 use crate::utils::ProcessExt;
 
@@ -195,27 +196,22 @@ impl FlacGenerator {
     /// Generate the FLAC file in the specified output directory.
     ///
     /// Returns the full path to the generated file.
-    pub async fn generate(&self, output_dir: &Path) -> Result<PathBuf, SampleError> {
+    pub async fn generate(&self, output_dir: &Path) -> Result<PathBuf, Failure<SampleAction>> {
         let dir = match &self.sub_directory {
             Some(sub) => output_dir.join(sub),
             None => output_dir.to_path_buf(),
         };
-        fs::create_dir_all(&dir).map_err(SampleError::CreateDirectory)?;
-
+        fs::create_dir_all(&dir).map_err(Failure::wrap(SampleAction::CreateDirectory))?;
         let filename = self
             .filename
             .clone()
             .unwrap_or_else(|| self.build_filename());
         let path = dir.join(filename);
-
         let sample_rate = self.sample_rate.unwrap_or(Self::DEFAULT_SAMPLE_RATE);
         let bit_depth = self.bit_depth.unwrap_or(Self::DEFAULT_BIT_DEPTH);
         let channels = self.channels.unwrap_or(Self::DEFAULT_CHANNELS);
         let duration_secs = self.duration_secs.unwrap_or(Self::DEFAULT_DURATION_SECS);
         let frequency = self.frequency.unwrap_or(Self::DEFAULT_FREQUENCY);
-
-        // Generate sine wave with SOX
-        // -D disables dithering for deterministic output
         Command::new(SOX)
             .args([
                 "-D",
@@ -236,26 +232,20 @@ impl FlacGenerator {
             ])
             .run()
             .await
-            .map_err(SampleError::Sox)?;
-
-        // Add metadata with metaflac
+            .map_err(Failure::wrap(SampleAction::GenerateFlac))?;
         self.apply_metadata(&path).await?;
-
-        // Add cover image if configured
         if self.embed_cover {
             let image_path = ImageGenerator::new()
                 .with_filename("cover_temp.png")
                 .generate(&dir)?;
             self.apply_picture(&path, &image_path).await?;
-            fs::remove_file(&image_path).map_err(SampleError::RemoveFile)?;
+            fs::remove_file(&image_path).map_err(Failure::wrap(SampleAction::RemoveFile))?;
         }
-
         Ok(path)
     }
 
-    async fn apply_metadata(&self, path: &Path) -> Result<(), SampleError> {
+    async fn apply_metadata(&self, path: &Path) -> Result<(), Failure<SampleAction>> {
         let mut args: Vec<String> = Vec::new();
-
         if let Some(artist) = &self.artist {
             args.push(format!("--set-tag=ARTIST={artist}"));
         }
@@ -274,34 +264,33 @@ impl FlacGenerator {
         if let Some(date) = &self.date {
             args.push(format!("--set-tag=DATE={date}"));
         }
-
         if args.is_empty() {
             return Ok(());
         }
-
         Command::new(METAFLAC)
             .args(&args)
             .arg(path)
             .run()
             .await
-            .map_err(SampleError::MetaflacTags)?;
-
+            .map_err(Failure::wrap(SampleAction::SetTags))?;
         Ok(())
     }
 
-    async fn apply_picture(&self, flac_path: &Path, image_path: &Path) -> Result<(), SampleError> {
+    async fn apply_picture(
+        &self,
+        flac_path: &Path,
+        image_path: &Path,
+    ) -> Result<(), Failure<SampleAction>> {
         // Format: [TYPE]|[MIME-TYPE]|[DESCRIPTION]|[WIDTHxHEIGHTxDEPTH[/COLORS]]|FILE
         // Type 3 = front cover
         // Leave width/height/depth empty for metaflac to auto-detect
         let spec = format!("3|image/png|||{}", image_path.display());
-
         Command::new(METAFLAC)
             .arg(format!("--import-picture-from={spec}"))
             .arg(flac_path)
             .run()
             .await
-            .map_err(SampleError::MetaflacPicture)?;
-
+            .map_err(Failure::wrap(SampleAction::ImportPicture))?;
         Ok(())
     }
 }

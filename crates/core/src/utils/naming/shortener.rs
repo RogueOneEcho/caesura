@@ -3,6 +3,7 @@ use std::sync::LazyLock;
 
 use crate::prelude::*;
 use regex::Regex;
+use rogue_logging::Colors;
 
 /// Match a trailing parenthetical suffix like `"Album Name (Deluxe Edition)"`.
 static PARENTHETICAL_REGEX: LazyLock<Regex> =

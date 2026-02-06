@@ -1,6 +1,7 @@
 //! Queue management for batch processing.
 
 pub(crate) use queue::*;
+pub(crate) use queue_action::*;
 pub(crate) use queue_add_command::*;
 pub(crate) use queue_item::*;
 pub(crate) use queue_list_command::*;
@@ -11,6 +12,7 @@ pub(crate) use queue_summary_command::*;
 pub(crate) use timestamp::*;
 
 mod queue;
+mod queue_action;
 mod queue_add_command;
 mod queue_item;
 mod queue_list_command;

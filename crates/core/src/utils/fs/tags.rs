@@ -22,18 +22,18 @@ static TOTAL_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(\d+)/(\d+)$").expect("regex should compile"));
 
 /// Read Vorbis comment tags from a FLAC file.
-pub(crate) fn get_vorbis_tags(flac: &FlacFile) -> Result<Tag, Error> {
+pub(crate) fn get_vorbis_tags(flac: &FlacFile) -> Result<Tag, Failure<TagsAction>> {
     let file = Probe::open(flac.path.clone())
-        .map_err(|e| error("get tags", e.to_string()))?
+        .map_err(Failure::wrap_with_path(TagsAction::OpenFile, &flac.path))?
         .read()
-        .map_err(|e| error("get tags", e.to_string()))?;
+        .map_err(Failure::wrap_with_path(TagsAction::ReadTags, &flac.path))?;
     if let Some(vorbis) = file.tag(TagType::VorbisComments) {
         Ok(vorbis.clone())
     } else {
-        Err(error(
-            "get tags",
-            format!("No Vobis comments: {}", flac.path.display()),
-        ))
+        Err(
+            Failure::new(TagsAction::GetVorbisComments, TagsError::NoVorbisComments)
+                .with_path(&flac.path),
+        )
     }
 }
 
@@ -59,18 +59,12 @@ pub(crate) fn fix_track_numbering(tags: &mut Tag) -> bool {
     false
 }
 
-fn replace_vinyl_track_numbering(tags: &mut Tag) -> Result<(), Error> {
-    let track = tags.get_string(&TrackNumber).ok_or_else(|| {
-        error(
-            "replace vinyl track numbering",
-            "No track number string".to_owned(),
-        )
-    })?;
+fn replace_vinyl_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
+    let track = tags
+        .get_string(&TrackNumber)
+        .ok_or_else(|| Failure::new(TagsAction::ReadTags, TagsError::NoTrackNumber))?;
     let (disc_number, track_number) = get_numeric_from_vinyl_format(track).ok_or_else(|| {
-        error(
-            "replace vinyl track numbering",
-            "Not vinyl format".to_owned(),
-        )
+        Failure::new(TagsAction::ReadTags, TagsError::InvalidFormat).with("track", track)
     })?;
     trace!(
         "Replacing vinyl track ({track}) with numeric: track {track_number}, disc {disc_number}"
@@ -80,18 +74,12 @@ fn replace_vinyl_track_numbering(tags: &mut Tag) -> Result<(), Error> {
     Ok(())
 }
 
-fn replace_total_track_numbering(tags: &mut Tag) -> Result<(), Error> {
-    let track = tags.get_string(&TrackNumber).ok_or_else(|| {
-        error(
-            "replace total track numbering",
-            "No track number string".to_owned(),
-        )
-    })?;
+fn replace_total_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
+    let track = tags
+        .get_string(&TrackNumber)
+        .ok_or_else(|| Failure::new(TagsAction::ReadTags, TagsError::NoTrackNumber))?;
     let (track_number, track_total) = get_numeric_from_total_format(track).ok_or_else(|| {
-        error(
-            "replace total track numbering",
-            "Not vinyl format".to_owned(),
-        )
+        Failure::new(TagsAction::ReadTags, TagsError::InvalidFormat).with("track", track)
     })?;
     trace!(
         "Replacing total track numbering ({track}) with numeric: track {track_number}, total {track_total}"

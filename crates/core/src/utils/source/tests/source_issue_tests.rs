@@ -2,7 +2,7 @@
 use crate::testing_prelude::*;
 #[allow(deprecated)]
 use crate::utils::SourceIssue::{Api, ApiResponse, Id, IdError, Provider};
-use gazelle_api::GazelleError::*;
+use gazelle_api::GazelleSerializableError::*;
 
 #[test]
 #[allow(deprecated)]

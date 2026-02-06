@@ -50,13 +50,14 @@ async fn transcode_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("Source provider should not fail");
+        .expect("should not fail")
+        .expect("should find source");
 
     // Act
-    let status = transcoder.execute(&source).await;
+    let result = transcoder.execute(&source).await;
 
     // Assert
-    assert!(status.success);
+    assert!(result.is_ok(), "transcode should succeed");
     DirectorySnapshot::new()
         .with_directory(test_dir.output())
         .without_extensions(&["torrent"])

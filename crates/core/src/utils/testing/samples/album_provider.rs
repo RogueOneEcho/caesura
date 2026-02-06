@@ -3,6 +3,7 @@ use std::sync::LazyLock;
 use tokio::sync::{Mutex, OnceCell};
 
 use super::{AlbumConfig, AlbumGenerator, SampleFormat};
+use crate::utils::DiagnosticExt;
 
 /// Per-format cache of album generation results.
 ///
@@ -34,7 +35,7 @@ impl AlbumProvider {
             let config = AlbumConfig::with_format(format);
             AlbumGenerator::generate(&config)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| e.render())?;
             Ok(config)
         })
         .await

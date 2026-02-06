@@ -30,13 +30,15 @@ pub(crate) struct SpectrogramJob {
 
 impl SpectrogramJob {
     /// Execute the command to generate the spectrogram.
-    pub(crate) async fn execute(self) -> Result<(), Error> {
+    pub(crate) async fn execute(self) -> Result<(), Failure<SpectrogramAction>> {
         let output_dir = self
             .output_path
             .parent()
             .expect("output path should have a parent");
-        create_dir_all(output_dir)
-            .map_err(|e| io_error(e, "create spectrogram output directory"))?;
+        create_dir_all(output_dir).map_err(Failure::wrap_with_path(
+            SpectrogramAction::CreateOutputDirectory,
+            output_dir,
+        ))?;
         match self.size {
             Size::Full => self.execute_full().await,
             Size::Zoom => self.execute_zoom().await,
@@ -44,7 +46,7 @@ impl SpectrogramJob {
         Ok(())
     }
 
-    async fn execute_zoom(&self) -> Result<Output, Error> {
+    async fn execute_zoom(&self) -> Result<Output, Failure<SpectrogramAction>> {
         let start_time = calculate_zoom_start(self.duration_secs);
         let duration = format!("0:{ZOOM_DURATION:02}");
         Command::new(SOX)
@@ -73,10 +75,13 @@ impl SpectrogramJob {
             .arg(&self.output_path)
             .run()
             .await
-            .map_err(|e| process_error(e, "generate spectrogram", SOX))
+            .map_err(Failure::wrap_with_path(
+                SpectrogramAction::GenerateSpectrogram,
+                &self.output_path,
+            ))
     }
 
-    async fn execute_full(&self) -> Result<Output, Error> {
+    async fn execute_full(&self) -> Result<Output, Failure<SpectrogramAction>> {
         Command::new(SOX)
             .arg(&self.source_path)
             .arg("-n")
@@ -99,7 +104,10 @@ impl SpectrogramJob {
             .arg(&self.output_path)
             .run()
             .await
-            .map_err(|e| process_error(e, "generate spectrogram", SOX))
+            .map_err(Failure::wrap_with_path(
+                SpectrogramAction::GenerateSpectrogram,
+                &self.output_path,
+            ))
     }
 }
 

@@ -5,7 +5,7 @@ use std::fs;
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_succeeds_with_valid_source() -> Result<(), Error> {
+async fn upload_command_succeeds_with_valid_source() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -14,7 +14,8 @@ async fn upload_command_succeeds_with_valid_source() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(status.success, "upload should succeed");
@@ -28,7 +29,7 @@ async fn upload_command_succeeds_with_valid_source() -> Result<(), Error> {
 /// Test that `UploadCommand` with `dry_run=true` does not call the API.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_dry_run_skips_api_call() -> Result<(), Error> {
+async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -54,12 +55,13 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(status.success, "dry run should succeed");
     assert!(
-        status.formats.is_none(),
+        status.formats.unwrap_or_default().is_empty(),
         "dry run should not record formats"
     );
     assert!(status.errors.is_none(), "dry run should have no errors");
@@ -67,9 +69,9 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), Error> {
     Ok(())
 }
 
-/// Test that `UploadCommand` fails validation with non-existent `copy_torrent_to` path.
+/// Test that `UploadCommand` fails when torrent file is missing (no transcodes).
 #[tokio::test]
-async fn upload_command_validation_failure_returns_false() -> Result<(), Error> {
+async fn upload_command_missing_transcode_returns_error() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -93,8 +95,8 @@ async fn upload_command_validation_failure_returns_false() -> Result<(), Error> 
     // Act
     let result = command.execute_cli().await;
 
-    // Assert
-    assert!(matches!(result, Ok(false)));
+    // Assert - now returns Err since missing torrent is a failure
+    assert!(result.is_err());
 
     Ok(())
 }
@@ -102,7 +104,7 @@ async fn upload_command_validation_failure_returns_false() -> Result<(), Error> 
 /// Test that `UploadCommand` fails when the torrent file is missing.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_missing_torrent_fails() -> Result<(), Error> {
+async fn upload_command_missing_torrent_fails() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -119,10 +121,13 @@ async fn upload_command_missing_torrent_fails() -> Result<(), Error> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("should get source");
+        .expect("should not fail")
+        .expect("should find source");
 
-    let transcode_status = transcoder.execute(&source).await;
-    assert!(transcode_status.success, "transcode should succeed");
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
 
     // Delete torrent files
     let output_dir = test_dir.output();
@@ -131,7 +136,8 @@ async fn upload_command_missing_torrent_fails() -> Result<(), Error> {
     let command = host.services.get_required::<UploadCommand>();
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(!status.success, "upload should fail with missing torrent");
@@ -157,7 +163,7 @@ fn delete_torrent_files(dir: &PathBuf) {
 /// Test that `UploadCommand` copies transcode to content directory when enabled.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
+async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -186,7 +192,8 @@ async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(status.success, "upload should succeed");
@@ -199,7 +206,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), Error> {
 /// Test that `UploadCommand` copies transcode to custom directory.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
+async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -226,7 +233,8 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(status.success, "upload should succeed");
@@ -239,7 +247,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), Error> {
 /// Test that `UploadCommand` copies torrent file to specified directory.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_copies_torrent_file() -> Result<(), Error> {
+async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -266,7 +274,8 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(status.success, "upload should succeed");
@@ -283,7 +292,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), Error> {
 /// Test that `UploadCommand` handles API failure gracefully.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
+async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -334,8 +343,12 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
             }],
         }))
         .with_download_torrent(Ok(torrent_bytes))
-        .with_upload_torrent(Err(gazelle_api::GazelleError::Upload {
-            error: "Upload failed".to_owned(),
+        .with_upload_torrent(Err(gazelle_api::GazelleError {
+            operation: gazelle_api::GazelleOperation::ReadFile,
+            source: gazelle_api::ErrorSource::Io(IoError::new(
+                ErrorKind::NotFound,
+                "Upload failed",
+            )),
         }));
 
     let mut builder = HostBuilder::new();
@@ -363,7 +376,8 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(!status.success, "upload should fail on API error");
@@ -375,7 +389,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), Error> {
 /// Test that `UploadCommand` captures torrent ID from API response.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_captures_response_ids() -> Result<(), Error> {
+async fn upload_command_captures_response_ids() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -384,7 +398,8 @@ async fn upload_command_captures_response_ids() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act
-    let status = command.execute(&source).await;
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
 
     // Assert
     assert!(status.success, "upload should succeed");
@@ -399,7 +414,7 @@ async fn upload_command_captures_response_ids() -> Result<(), Error> {
 /// Test that upload succeeds when copy target already exists.
 #[tokio::test]
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
-async fn upload_command_skip_existing_copy_succeeds() -> Result<(), Error> {
+async fn upload_command_skip_existing_copy_succeeds() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -408,10 +423,12 @@ async fn upload_command_skip_existing_copy_succeeds() -> Result<(), Error> {
     let (source, command) = get_source_and_command(&host).await;
 
     // Act - run twice
-    let status1 = command.execute(&source).await;
+    let result1 = command.execute(&source).await;
+    let status1 = UploadStatus::new(result1);
     assert!(status1.success, "first upload should succeed");
 
-    let status2 = command.execute(&source).await;
+    let result2 = command.execute(&source).await;
+    let status2 = UploadStatus::new(result2);
 
     // Assert
     assert!(status2.success, "second upload should succeed");
@@ -443,7 +460,8 @@ async fn get_source_and_command(host: &Host) -> (Source, di::Ref<UploadCommand>)
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("should get source");
+        .expect("should not fail")
+        .expect("should find source");
     let command = host.services.get_required::<UploadCommand>();
     (source, command)
 }

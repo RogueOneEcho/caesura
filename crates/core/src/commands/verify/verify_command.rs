@@ -22,39 +22,47 @@ impl VerifyCommand {
     /// [`SourceIssue`] issues are logged as warnings.
     ///
     /// Returns `true` if the source is verified.
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<VerifyAction>> {
         if !self.arg.validate() {
             return Ok(false);
         }
-        let source = self.source_provider.get_from_options().await;
-        let (status, id) = match source {
-            Ok(source) => (self.execute(&source).await, source.to_string()),
-            Err(issue) => (VerifyStatus::from_issue(issue), "unknown".to_owned()),
+        let source = match self.source_provider.get_from_options().await {
+            Ok(Ok(source)) => source,
+            Ok(Err(issue)) => {
+                let status = VerifyStatus::from_issue(issue);
+                warn!("{} for transcoding unknown", "Unsuitable".bold());
+                if let Some(issues) = &status.issues {
+                    for issue in issues {
+                        warn!("{issue}");
+                    }
+                }
+                return Ok(false);
+            }
+            Err(e) => return Err(Failure::new(VerifyAction::GetSource, e)),
         };
-        if status.verified {
+        let result = self.execute(&source).await;
+        let id = source.to_string();
+        if result.verified() {
             info!("{} {id}", "Verified".bold());
         } else {
             warn!("{} for transcoding {id}", "Unsuitable".bold());
-            if let Some(issues) = &status.issues {
-                for issue in issues {
-                    warn!("{issue}");
-                }
+            for issue in &result.issues {
+                warn!("{issue}");
             }
         }
-        Ok(status.verified)
+        Ok(result.verified())
     }
 
     /// Execute [`VerifyCommand`] on a [`Source`].
     ///
-    /// [`SourceIssue`] issues are not logged so must be handled by the caller.
-    #[must_use]
-    pub(crate) async fn execute(&self, source: &Source) -> VerifyStatus {
+    /// Returns a [`VerifySuccess`] containing any issues found.
+    pub(crate) async fn execute(&self, source: &Source) -> VerifySuccess {
         debug!("{} {}", "Verifying".bold(), source);
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.append(&mut self.api_checks(source));
         issues.append(&mut self.flac_checks(source));
         issues.append(&mut self.hash_check(source).await);
-        VerifyStatus::from_issues(issues)
+        VerifySuccess { issues }
     }
 
     /// Validate the source against the API.
@@ -193,7 +201,11 @@ impl VerifyCommand {
             };
             let buffer = match self.api.download_torrent(source.torrent.id).await {
                 Ok(buffer) => buffer,
-                Err(e) => return vec![SourceIssue::api(e)],
+                #[expect(
+                    deprecated,
+                    reason = "SourceIssue::Api is kept for deserialization compatibility"
+                )]
+                Err(e) => return vec![SourceIssue::api(e.into())],
             };
             if let Err(e) = file.write_all(&buffer).await {
                 return vec![SourceIssue::Error {

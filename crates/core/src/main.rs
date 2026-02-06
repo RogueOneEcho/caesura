@@ -21,8 +21,8 @@ async fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         }
-        Err(error) => {
-            error.log();
+        Err(report) => {
+            eprintln!("{report:?}");
             ExitCode::FAILURE
         }
     }

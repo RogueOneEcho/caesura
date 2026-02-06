@@ -44,8 +44,14 @@ impl Queue {
     }
 
     /// Get an item from the queue
-    pub(crate) fn get(&self, hash: Hash<20>) -> Result<Option<QueueItem>, Error> {
-        self.table.get(hash)
+    pub(crate) async fn get(
+        &self,
+        hash: Hash<20>,
+    ) -> Result<Option<QueueItem>, Failure<QueueAction>> {
+        self.table
+            .get(hash)
+            .await
+            .map_err(Failure::wrap(QueueAction::Get))
     }
 
     /// Get the keys of the items that have not been processed.
@@ -65,7 +71,7 @@ impl Queue {
         transcode_enabled: bool,
         upload_enabled: bool,
         retry_failed_transcodes: bool,
-    ) -> Result<Vec<Hash<20>>, Error> {
+    ) -> Result<Vec<Hash<20>>, Failure<QueueAction>> {
         let is_red = indexer == "red";
         let mut items = self
             .get_unprocessed_internal(
@@ -106,8 +112,12 @@ impl Queue {
         transcode_enabled: bool,
         upload_enabled: bool,
         retry_failed_transcodes: bool,
-    ) -> Result<Vec<Hash<20>>, Error> {
-        let items = self.table.get_all().await?;
+    ) -> Result<Vec<Hash<20>>, Failure<QueueAction>> {
+        let items = self
+            .table
+            .get_all()
+            .await
+            .map_err(Failure::wrap(QueueAction::GetAll))?;
         let mut items: Vec<&QueueItem> = items
             .values()
             .filter(|item| {
@@ -127,13 +137,21 @@ impl Queue {
     /// Get all items.
     ///
     /// Items are unsorted.
-    pub(crate) async fn get_all(&self) -> Result<BTreeMap<Hash<20>, QueueItem>, Error> {
-        self.table.get_all().await
+    pub(crate) async fn get_all(
+        &self,
+    ) -> Result<BTreeMap<Hash<20>, QueueItem>, Failure<QueueAction>> {
+        self.table
+            .get_all()
+            .await
+            .map_err(Failure::wrap(QueueAction::GetAll))
     }
 
     /// Update an item into the queue
-    pub(crate) async fn set(&self, item: QueueItem) -> Result<(), Error> {
-        self.table.set(item.hash, item).await
+    pub(crate) async fn set(&self, item: QueueItem) -> Result<(), Failure<QueueAction>> {
+        self.table
+            .set(item.hash, item)
+            .await
+            .map_err(Failure::wrap(QueueAction::Set))
     }
 
     /// Add many items.
@@ -147,13 +165,22 @@ impl Queue {
         &self,
         items: BTreeMap<Hash<20>, QueueItem>,
         replace: bool,
-    ) -> Result<usize, Error> {
-        self.table.set_many(items, replace).await
+    ) -> Result<usize, Failure<QueueAction>> {
+        self.table
+            .set_many(items, replace)
+            .await
+            .map_err(Failure::wrap(QueueAction::SetMany))
     }
 
     /// Remove an item from the queue
-    pub(crate) async fn remove(&self, hash: Hash<20>) -> Result<Option<QueueItem>, Error> {
-        self.table.remove(hash).await
+    pub(crate) async fn remove(
+        &self,
+        hash: Hash<20>,
+    ) -> Result<Option<QueueItem>, Failure<QueueAction>> {
+        self.table
+            .remove(hash)
+            .await
+            .map_err(Failure::wrap(QueueAction::Remove))
     }
 
     /// Insert torrent files into the queue if they are not already present
@@ -161,7 +188,7 @@ impl Queue {
     pub(crate) async fn insert_new_torrent_files(
         &self,
         paths: Vec<PathBuf>,
-    ) -> Result<usize, Error> {
+    ) -> Result<usize, Failure<QueueAction>> {
         let stream = iter(paths.into_iter());
         let items: BTreeMap<_, _> = stream
             .filter_map(|path| async {
@@ -177,7 +204,10 @@ impl Queue {
             })
             .collect()
             .await;
-        self.table.set_many(items, false).await
+        self.table
+            .set_many(items, false)
+            .await
+            .map_err(Failure::wrap(QueueAction::SetMany))
     }
 }
 

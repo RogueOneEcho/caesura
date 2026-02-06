@@ -38,14 +38,14 @@ impl AdditionalFile {
     }
 
     /// File size in bytes.
-    pub async fn get_size(&self) -> Result<u64, Error> {
+    pub async fn get_size(&self) -> Result<u64, Failure<FsAction>> {
         let file = File::open(&self.path)
             .await
-            .map_err(|e| io_error(e, "open additional file"))?;
+            .map_err(Failure::wrap_with_path(FsAction::OpenFile, &self.path))?;
         let metadata = file
             .metadata()
             .await
-            .map_err(|e| io_error(e, "read metadata of additional file"))?;
+            .map_err(Failure::wrap_with_path(FsAction::ReadMetadata, &self.path))?;
         Ok(metadata.size())
     }
 }

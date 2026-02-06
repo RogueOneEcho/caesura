@@ -5,13 +5,15 @@
 
 use std::path::Path;
 
+use rogue_logging::Failure;
+use tokio::fs::create_dir_all;
+
 use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
-use super::{SampleError, TranscodeConfig};
+use super::{SampleAction, TranscodeConfig};
 use crate::commands::TranscodeCommand;
 use crate::hosting::HostBuilder;
 use crate::options::{SharedOptions, TargetOptions};
 use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR, SourceProvider};
-use tokio::fs::create_dir_all;
 
 /// Generates cached transcode outputs for testing.
 pub struct TranscodeGenerator;
@@ -22,7 +24,7 @@ impl TranscodeGenerator {
     /// Uses file-based locking for cross-process coordination:
     /// - If `.generated` marker exists, skips generation
     /// - Otherwise acquires `.lock` file, generates, creates marker
-    pub async fn generate(config: &TranscodeConfig) -> Result<(), SampleError> {
+    pub async fn generate(config: &TranscodeConfig) -> Result<(), Failure<SampleAction>> {
         let transcode_dir = config.transcode_dir();
         Self::generate_in_dir(config, &transcode_dir).await
     }
@@ -34,7 +36,7 @@ impl TranscodeGenerator {
     pub async fn generate_in_dir(
         config: &TranscodeConfig,
         transcode_dir: &Path,
-    ) -> Result<(), SampleError> {
+    ) -> Result<(), Failure<SampleAction>> {
         if let LockOutcome::Acquired(_guard) = acquire_generation_lock(transcode_dir) {
             Self::generate_files(config, transcode_dir).await?;
             mark_generated(transcode_dir);
@@ -46,18 +48,14 @@ impl TranscodeGenerator {
     async fn generate_files(
         config: &TranscodeConfig,
         transcode_dir: &Path,
-    ) -> Result<(), SampleError> {
-        // Create output directory
+    ) -> Result<(), Failure<SampleAction>> {
         let output_dir = transcode_dir
             .parent()
             .expect("transcode_dir should have parent");
         create_dir_all(output_dir)
             .await
-            .map_err(SampleError::CreateDirectory)?;
-
+            .map_err(Failure::wrap(SampleAction::CreateDirectory))?;
         let content_dir = SAMPLE_SOURCES_DIR.clone();
-
-        // Build a minimal DI host for transcoding
         let host = HostBuilder::new()
             .with_mock_api(config.album.clone())
             .with_options(SharedOptions {
@@ -72,22 +70,15 @@ impl TranscodeGenerator {
             .expect_build();
         let provider = host.services.get_required::<SourceProvider>();
         let transcoder = host.services.get_required::<TranscodeCommand>();
-
-        // Get the source
         let source = provider
             .get(AlbumConfig::TORRENT_ID)
             .await
-            .map_err(|e| SampleError::Transcode(e.to_string()))?;
-
-        // Execute the transcode
-        let status = transcoder.execute(&source).await;
-        if !status.success {
-            let error_msg = status
-                .error
-                .map_or_else(|| "Unknown transcode error".to_owned(), |e| e.to_string());
-            return Err(SampleError::Transcode(error_msg));
-        }
-
+            .map_err(Failure::wrap(SampleAction::Transcode))?
+            .map_err(Failure::wrap(SampleAction::Transcode))?;
+        transcoder
+            .execute(&source)
+            .await
+            .map_err(Failure::wrap(SampleAction::Transcode))?;
         Ok(())
     }
 }

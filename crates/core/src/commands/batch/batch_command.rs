@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use gazelle_api::GazelleError;
+use gazelle_api::{ApiResponseKind, GazelleError, GazelleOperation};
+use std::error::Error;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -24,7 +25,7 @@ impl BatchCommand {
     ///
     /// Returns `true` if the batch process succeeds.
     #[allow(clippy::too_many_lines)]
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<BatchAction>> {
         let spectrogram_enabled = self.batch_options.spectrogram;
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;
@@ -39,7 +40,8 @@ impl BatchCommand {
                 upload_enabled,
                 retry_failed_transcodes,
             )
-            .await?;
+            .await
+            .map_err(Failure::wrap(BatchAction::GetUnprocessed))?;
         if items.is_empty() {
             info!(
                 "{} items in the queue for {}",
@@ -57,7 +59,12 @@ impl BatchCommand {
         );
         let mut count = 0;
         for hash in items {
-            let Some(mut item) = self.queue.get(hash)? else {
+            let Some(mut item) = self
+                .queue
+                .get(hash)
+                .await
+                .map_err(Failure::wrap(BatchAction::GetQueueItem))?
+            else {
                 error!("{} to retrieve {hash} from the queue", "Failed".bold());
                 continue;
             };
@@ -66,86 +73,94 @@ impl BatchCommand {
                 debug!("{} {item} as it doesn't have an id", "Skipping".bold());
                 let status = VerifyStatus::from_issue(SourceIssue::Id(IdProviderError::NoId));
                 item.verify = Some(status);
-                self.queue.set(item).await?;
+                self.queue
+                    .set(item)
+                    .await
+                    .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                 continue;
             };
             let source = match self.source_provider.get(id).await {
-                Ok(source) => source,
-                Err(issue) => {
+                Ok(Ok(source)) => source,
+                Ok(Err(issue)) => {
                     debug!("{} {item}", "Skipping".bold());
                     debug!("{issue}");
-                    match issue.clone() {
-                        SourceIssue::Api {
-                            response: GazelleError::Unauthorized { message: _ },
-                        } => {
-                            trace!("{issue}");
-                            return Err(error(
-                                "get source",
-                                format!(
-                                    "{} response received. This likely means the API Key is invalid.",
-                                    "Unauthorized".bold()
-                                ),
-                            ));
-                        }
-                        SourceIssue::Api {
-                            response: GazelleError::TooManyRequests { message: _ },
-                        } => {
-                            trace!("{issue}");
-                            warn!("{} rate limit", "Exceeded".bold());
-                            pause().await;
-                        }
-                        SourceIssue::Api {
-                            response:
-                                GazelleError::Other {
-                                    status: _,
-                                    message: _,
-                                },
-                        } => {
-                            warn!("{} response received", "Unexpected".bold());
-                            warn!("{issue}");
-                            pause().await;
-                        }
-                        _ => {
-                            item.verify = Some(VerifyStatus::from_issue(issue));
-                            self.queue.set(item).await?;
-                        }
-                    }
+                    item.verify = Some(VerifyStatus::from_issue(issue));
+                    self.queue
+                        .set(item)
+                        .await
+                        .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                     continue;
                 }
+                Err(failure) => {
+                    debug!("{} {item}", "Skipping".bold());
+                    debug!("{failure}");
+                    let api_error = failure
+                        .source()
+                        .and_then(|e| e.downcast_ref::<GazelleError>());
+                    match api_error.map(|e| &e.operation) {
+                        Some(GazelleOperation::ApiResponse(ApiResponseKind::Unauthorized)) => {
+                            return Err(Failure::new(
+                                BatchAction::GetSource,
+                                BatchError::Unauthorized,
+                            ));
+                        }
+                        Some(GazelleOperation::ApiResponse(ApiResponseKind::TooManyRequests)) => {
+                            warn!("{} rate limit", "Exceeded".bold());
+                            pause().await;
+                            continue;
+                        }
+                        Some(GazelleOperation::ApiResponse(ApiResponseKind::Other)) => {
+                            warn!("{} response received", "Unexpected".bold());
+                            warn!("{}", failure.render());
+                            pause().await;
+                            continue;
+                        }
+                        _ => {
+                            warn!("{}", failure.render());
+                            continue;
+                        }
+                    }
+                }
             };
-            let status = self.verify.execute(&source).await;
-            if status.verified {
+            let result = self.verify.execute(&source).await;
+            let verified = result.verified();
+            if verified {
                 debug!("{} {}", "Verified".bold(), source);
-                item.verify = Some(status);
             } else {
                 debug!("{} {source}", "Skipping".bold());
                 debug!("{} for transcoding {}", "Unsuitable".bold(), source);
-                if let Some(issues) = &status.issues {
-                    for issue in issues {
-                        debug!("{issue}");
-                    }
+                for issue in &result.issues {
+                    debug!("{issue}");
                 }
-                item.verify = Some(status);
-                self.queue.set(item).await?;
+            }
+            item.verify = Some(VerifyStatus::new(Ok(result)));
+            if !verified {
+                self.queue
+                    .set(item)
+                    .await
+                    .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                 continue;
             }
             if spectrogram_enabled {
-                let status = self.spectrogram.execute(&source).await;
-                if let Some(error) = &status.error {
-                    warn!("{error}");
+                let result = self.spectrogram.execute(&source).await;
+                if let Err(e) = &result {
+                    warn!("{}", e.render());
                 }
-                item.spectrogram = Some(status);
+                item.spectrogram = Some(SpectrogramStatus::new(result));
             }
             if transcode_enabled {
-                let status = self.transcode.execute(&source).await;
-                if let Some(error) = &status.error {
-                    error.log();
+                let result = self.transcode.execute(&source).await;
+                let success = result.is_ok();
+                if let Err(e) = &result {
+                    error!("{}", e.render());
                 }
-                if status.success {
-                    item.transcode = Some(status);
-                } else {
-                    item.transcode = Some(status);
-                    self.queue.set(item).await?;
+                let status = TranscodeStatus::new(result);
+                item.transcode = Some(status);
+                if !success {
+                    self.queue
+                        .set(item)
+                        .await
+                        .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                     continue;
                 }
                 if upload_enabled {
@@ -153,14 +168,19 @@ impl BatchCommand {
                         info!("{} {wait_before_upload:?} before upload", "Waiting".bold());
                         sleep(wait_before_upload).await;
                     }
-                    let status = self.upload.execute(&source).await;
-                    if !self.upload_options.dry_run {
-                        item.upload = Some(status);
+                    let result = self.upload.execute(&source).await;
+                    if let Err(e) = &result {
+                        error!("{}", e.render());
                     }
-                    // Errors were already logged in UploadCommand::Execute()
+                    if !self.upload_options.dry_run {
+                        item.upload = Some(UploadStatus::new(result));
+                    }
                 }
             }
-            self.queue.set(item).await?;
+            self.queue
+                .set(item)
+                .await
+                .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
             count += 1;
             if let Some(limit) = limit
                 && count >= limit

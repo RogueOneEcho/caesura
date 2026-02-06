@@ -9,7 +9,7 @@ pub(crate) struct QueueListCommand {
 }
 
 impl QueueListCommand {
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;
         let upload_enabled = self.batch_options.upload;
@@ -41,7 +41,7 @@ impl QueueListCommand {
         let pad = found.to_string().len();
         let mut index = 1;
         for hash in items {
-            let Some(item) = self.queue.get(hash)? else {
+            let Some(item) = self.queue.get(hash).await? else {
                 error!("{} to retrieve {hash} from the queue", "Failed".bold());
                 continue;
             };

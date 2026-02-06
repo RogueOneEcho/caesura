@@ -7,15 +7,14 @@ pub(crate) struct QueueSummaryCommand {
 }
 
 impl QueueSummaryCommand {
-    pub(crate) async fn execute_cli(&self) -> Result<bool, Error> {
+    pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         let summary = self.execute().await?;
-        let yaml = serde_yaml::to_string(&summary)
-            .map_err(|e| yaml_error(e, "serialize queue summary"))?;
+        let yaml = serde_yaml::to_string(&summary).expect("should be able to serialize summary");
         println!("{yaml}");
         Ok(true)
     }
 
-    pub(crate) async fn execute(&self) -> Result<QueueSummary, Error> {
+    pub(crate) async fn execute(&self) -> Result<QueueSummary, Failure<QueueAction>> {
         let items = self.queue.get_all().await?;
         let mut summary = QueueSummary::default();
         for (_, item) in items {

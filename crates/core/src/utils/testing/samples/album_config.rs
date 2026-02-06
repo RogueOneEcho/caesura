@@ -360,8 +360,8 @@ fn build_mock_client(
         }))
         .with_download_torrent(Ok(torrent_bytes))
         .with_upload_torrent(Ok(UploadResponse {
-            torrent_id: Some(99999),
-            group_id: Some(group_id),
+            torrent_id: 99999,
+            group_id,
             private: true,
             request_id: None,
             source: false,

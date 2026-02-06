@@ -1,7 +1,9 @@
 use crate::prelude::*;
-use gazelle_api::GazelleError;
+use gazelle_api::GazelleSerializableError;
 use reqwest::StatusCode;
+use rogue_logging::Colors;
 use serde::{Deserialize, Serialize};
+use std::error::Error;
 
 /// Maximum allowed path length for transcodes.
 pub const MAX_PATH_LENGTH: isize = 180;
@@ -32,9 +34,11 @@ pub enum SourceIssue {
     #[deprecated(since = "0.24.1", note = "use `Api` instead")]
     #[allow(dead_code)]
     Provider,
+    #[deprecated(since = "0.25.0", note = "use `NotFound` instead")]
     Api {
-        response: GazelleError,
+        response: GazelleSerializableError,
     },
+    NotFound,
     Category {
         actual: String,
     },
@@ -105,7 +109,9 @@ pub enum SourceIssue {
 }
 
 impl SourceIssue {
-    pub(crate) fn api(error: GazelleError) -> Self {
+    #[deprecated(since = "0.25.0", note = "use `NotFound` instead")]
+    pub(crate) fn api(error: GazelleSerializableError) -> Self {
+        #[allow(deprecated)]
         Self::Api { response: error }
     }
 }
@@ -130,6 +136,7 @@ impl Display for SourceIssue {
             }
             Provider => "Received unsuccessful API response".to_owned(),
             Api { response: issue } => issue.to_string(),
+            NotFound => "Torrent not found".to_owned(),
             GroupMismatch { actual, expected } => {
                 format!("Group of torrent `{actual}` did not match torrent group `{expected}`")
             }
@@ -199,3 +206,5 @@ impl Display for SourceIssue {
         write!(formatter, "{message}")
     }
 }
+
+impl Error for SourceIssue {}

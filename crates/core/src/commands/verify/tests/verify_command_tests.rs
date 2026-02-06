@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 use crate::utils::SourceIssue::UnnecessaryDirectory;
 
 #[tokio::test]
-async fn verify_command_mocked() -> Result<(), Error> {
+async fn verify_command_mocked() -> Result<(), TestError> {
     // Arrange
     let _ = init_logger();
     let test_dir = TestDirectory::new();
@@ -19,18 +19,17 @@ async fn verify_command_mocked() -> Result<(), Error> {
     let source = provider
         .get(AlbumConfig::TORRENT_ID)
         .await
-        .expect("should get source");
-    let status = verifier.execute(&source).await;
+        .expect("should not fail")
+        .expect("should find source");
+    let result = verifier.execute(&source).await;
 
     // Assert
-    if !status.verified
-        && let Some(issues) = &status.issues
-    {
-        for issue in issues {
+    if !result.verified() {
+        for issue in &result.issues {
             eprintln!("Issue: {issue}");
         }
     }
-    assert!(status.verified);
+    assert!(result.verified());
     Ok(())
 }
 

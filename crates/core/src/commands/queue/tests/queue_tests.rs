@@ -6,7 +6,7 @@ use flat_db::Hash;
 
 /// Test that `Queue::set` adds an item successfully.
 #[tokio::test]
-async fn queue_set_adds_item() -> Result<(), Error> {
+async fn queue_set_adds_item() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_set_adds_item");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -23,7 +23,7 @@ async fn queue_set_adds_item() -> Result<(), Error> {
     queue.set(item.clone()).await?;
 
     // Assert
-    let retrieved = queue.get(hash)?;
+    let retrieved = queue.get(hash).await?;
     assert!(retrieved.is_some());
     let retrieved = retrieved.expect("should have item");
     assert_eq!(retrieved.name, "Test Item");
@@ -33,7 +33,7 @@ async fn queue_set_adds_item() -> Result<(), Error> {
 
 /// Test that `Queue::set_many` adds multiple items.
 #[tokio::test]
-async fn queue_set_many_adds_items() -> Result<(), Error> {
+async fn queue_set_many_adds_items() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_set_many_adds_items");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -68,14 +68,14 @@ async fn queue_set_many_adds_items() -> Result<(), Error> {
 
     // Assert
     assert_eq!(added, 2);
-    assert!(queue.get(hash1)?.is_some());
-    assert!(queue.get(hash2)?.is_some());
+    assert!(queue.get(hash1).await?.is_some());
+    assert!(queue.get(hash2).await?.is_some());
     Ok(())
 }
 
 /// Test that `Queue::set_many` with replace=false does not overwrite existing items.
 #[tokio::test]
-async fn queue_set_many_no_replace_skips_existing() -> Result<(), Error> {
+async fn queue_set_many_no_replace_skips_existing() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_set_many_no_replace");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -106,14 +106,14 @@ async fn queue_set_many_no_replace_skips_existing() -> Result<(), Error> {
 
     // Assert
     assert_eq!(added, 0); // Should not add since item exists
-    let retrieved = queue.get(hash)?.expect("should have item");
+    let retrieved = queue.get(hash).await?.expect("should have item");
     assert_eq!(retrieved.name, "Original"); // Should keep original
     Ok(())
 }
 
 /// Test that `Queue::set_many` with replace=true overwrites existing items.
 #[tokio::test]
-async fn queue_set_many_with_replace_overwrites() -> Result<(), Error> {
+async fn queue_set_many_with_replace_overwrites() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_set_many_with_replace");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -144,14 +144,14 @@ async fn queue_set_many_with_replace_overwrites() -> Result<(), Error> {
 
     // Assert
     assert_eq!(added, 1); // Should replace
-    let retrieved = queue.get(hash)?.expect("should have item");
+    let retrieved = queue.get(hash).await?.expect("should have item");
     assert_eq!(retrieved.name, "Updated"); // Should have new name
     Ok(())
 }
 
 /// Test that `Queue::get_all` returns all items.
 #[tokio::test]
-async fn queue_get_all_returns_all_items() -> Result<(), Error> {
+async fn queue_get_all_returns_all_items() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_get_all");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -187,7 +187,7 @@ async fn queue_get_all_returns_all_items() -> Result<(), Error> {
 
 /// Test that `Queue::remove` removes an existing item.
 #[tokio::test]
-async fn queue_remove_removes_existing_item() -> Result<(), Error> {
+async fn queue_remove_removes_existing_item() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_remove_existing");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -202,7 +202,7 @@ async fn queue_remove_removes_existing_item() -> Result<(), Error> {
     queue.set(item).await?;
 
     // Verify item exists
-    assert!(queue.get(hash)?.is_some());
+    assert!(queue.get(hash).await?.is_some());
 
     // Act
     let removed = queue.remove(hash).await?;
@@ -213,13 +213,13 @@ async fn queue_remove_removes_existing_item() -> Result<(), Error> {
     assert_eq!(removed.name, "Test Item");
 
     // Verify item no longer exists
-    assert!(queue.get(hash)?.is_none());
+    assert!(queue.get(hash).await?.is_none());
     Ok(())
 }
 
 /// Test that `Queue::remove` returns None for non-existent item.
 #[tokio::test]
-async fn queue_remove_nonexistent_returns_none() -> Result<(), Error> {
+async fn queue_remove_nonexistent_returns_none() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_remove_nonexistent");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -235,7 +235,7 @@ async fn queue_remove_nonexistent_returns_none() -> Result<(), Error> {
 
 /// Test that `Queue::remove` only removes the specified item.
 #[tokio::test]
-async fn queue_remove_only_affects_specified_item() -> Result<(), Error> {
+async fn queue_remove_only_affects_specified_item() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_remove_specific");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -266,15 +266,15 @@ async fn queue_remove_only_affects_specified_item() -> Result<(), Error> {
 
     // Assert
     assert!(removed.is_some());
-    assert!(queue.get(hash1)?.is_none()); // First item removed
-    assert!(queue.get(hash2)?.is_some()); // Second item still exists
+    assert!(queue.get(hash1).await?.is_none()); // First item removed
+    assert!(queue.get(hash2).await?.is_some()); // Second item still exists
     Ok(())
 }
 
 /// Test `get_unprocessed` filters by processing status.
 #[tokio::test]
 #[allow(deprecated)]
-async fn queue_get_unprocessed() -> Result<(), Error> {
+async fn queue_get_unprocessed() -> Result<(), TestError> {
     // Arrange
     let new = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
     let verified = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
@@ -415,7 +415,7 @@ async fn queue_get_unprocessed() -> Result<(), Error> {
 
 /// Test `get_unprocessed` filters by indexer.
 #[tokio::test]
-async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), Error> {
+async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_filter_indexer");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -459,7 +459,7 @@ async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), Error> {
 
 /// Test `get_unprocessed` includes PTH items when indexer is RED.
 #[tokio::test]
-async fn queue_get_unprocessed_red_includes_pth() -> Result<(), Error> {
+async fn queue_get_unprocessed_red_includes_pth() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_red_includes_pth");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -497,7 +497,7 @@ async fn queue_get_unprocessed_red_includes_pth() -> Result<(), Error> {
 
 /// Test `get_unprocessed` sorts items by name.
 #[tokio::test]
-async fn queue_get_unprocessed_sorts_by_name() -> Result<(), Error> {
+async fn queue_get_unprocessed_sorts_by_name() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_sorts_by_name");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -549,7 +549,7 @@ async fn queue_get_unprocessed_sorts_by_name() -> Result<(), Error> {
 
 /// Test `get_unprocessed` excludes uploaded items.
 #[tokio::test]
-async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), Error> {
+async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_excludes_uploaded");
     let queue = Queue::from_path(temp.to_path_buf());
@@ -594,7 +594,7 @@ async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), Error> {
 
 /// Test `get_unprocessed` with empty queue returns empty list.
 #[tokio::test]
-async fn queue_get_unprocessed_empty_queue() -> Result<(), Error> {
+async fn queue_get_unprocessed_empty_queue() -> Result<(), TestError> {
     // Arrange
     let temp = TempDirectory::create("queue_empty");
     let queue = Queue::from_path(temp.to_path_buf());

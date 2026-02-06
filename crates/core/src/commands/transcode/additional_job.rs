@@ -10,7 +10,7 @@ pub(crate) struct AdditionalJob {
 
 impl AdditionalJob {
     #[allow(clippy::integer_division)]
-    pub(crate) async fn execute(self) -> Result<(), Error> {
+    pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         trace!(
             "{} image to maximum {} px and {}% quality: {}",
             "Resizing".bold(),
@@ -18,12 +18,16 @@ impl AdditionalJob {
             self.resize.quality,
             self.resize.input.display()
         );
+        let output = self.resize.output.clone();
         let info = self.resize.to_info();
         trace!("{info}");
         info.to_command()
             .run()
             .await
-            .map_err(|e| process_error(e, "resize image", CONVERT))?;
+            .map_err(Failure::wrap_with_path(
+                TranscodeAction::ResizeImage,
+                &output,
+            ))?;
         Ok(())
     }
 }

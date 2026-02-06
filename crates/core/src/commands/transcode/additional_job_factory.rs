@@ -19,7 +19,7 @@ impl AdditionalJobFactory {
         files: &[AdditionalFile],
         source: &Source,
         target: TargetFormat,
-    ) -> Result<Vec<Job>, Error> {
+    ) -> Result<Vec<Job>, Failure<TranscodeAction>> {
         let mut jobs = Vec::new();
         for (index, file) in files.iter().enumerate() {
             if let Some(job) = self.create_single(index, file, source, target).await? {
@@ -37,14 +37,17 @@ impl AdditionalJobFactory {
         file: &AdditionalFile,
         source: &Source,
         target: TargetFormat,
-    ) -> Result<Option<Job>, Error> {
+    ) -> Result<Option<Job>, Failure<TranscodeAction>> {
         let source_path = file.path.clone();
         let output_dir = self
             .paths
             .get_transcode_target_dir(source, target)
             .join(&file.sub_dir);
         let mut output_path = output_dir.join(&file.file_name);
-        let size = file.get_size().await?;
+        let size = file
+            .get_size()
+            .await
+            .map_err(Failure::wrap(TranscodeAction::ReadFlac))?;
         let max_file_size = self.file_options.max_file_size;
         let extension = source_path
             .extension()
@@ -57,7 +60,10 @@ impl AdditionalJobFactory {
         let no_image_compression = self.file_options.no_image_compression;
         create_dir_all(&output_dir)
             .await
-            .map_err(|e| io_error(e, "create directories for additional file"))?;
+            .map_err(Failure::wrap_with_path(
+                TranscodeAction::CreateOutputDirectory,
+                &output_dir,
+            ))?;
         if !is_image || no_image_compression || !is_large {
             if is_large {
                 warn!(
@@ -67,17 +73,21 @@ impl AdditionalJobFactory {
                     source_path.display()
                 );
             }
-            let verb = if self.copy_options.hard_link {
-                hard_link(&source_path, &output_path)
-                    .await
-                    .map_err(|e| io_error(e, "hard link additional file"))?;
-                "Hard Linked"
-            } else {
-                copy(&source_path, &output_path)
-                    .await
-                    .map_err(|e| io_error(e, "copy additional file"))?;
-                "Copied"
-            };
+            let verb =
+                if self.copy_options.hard_link {
+                    hard_link(&source_path, &output_path).await.map_err(
+                        Failure::wrap_with_path(TranscodeAction::HardLinkAdditional, &output_path),
+                    )?;
+                    "Hard Linked"
+                } else {
+                    copy(&source_path, &output_path)
+                        .await
+                        .map_err(Failure::wrap_with_path(
+                            TranscodeAction::CopyAdditional,
+                            &output_path,
+                        ))?;
+                    "Copied"
+                };
             trace!(
                 "{} {} to {}",
                 verb.bold(),
