@@ -9,21 +9,17 @@
 //! Use [`AlbumConfig`] to configure metadata (artist, album, tracks, disc numbers,
 //! vinyl-style numbering) and audio format (bit depth, sample rate).
 
-use std::fs::{self, File};
+use std::fs;
 use std::path::{Path, PathBuf};
-use std::thread;
-use std::time::{Duration, Instant};
 
 use super::SampleError;
+use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
 use crate::dependencies::ImdlCommand;
 use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
 use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR};
 
 /// Generates a complete test album (FLAC files, cover image, torrent) and mock client.
 pub struct AlbumGenerator;
-
-const TIMEOUT_SECONDS: u64 = 10;
-const POLL_MILLISECONDS: u64 = 500;
 
 impl AlbumGenerator {
     /// Generate album in cached `SAMPLES_CONTENT_DIR` location.
@@ -44,31 +40,9 @@ impl AlbumGenerator {
         config: &AlbumConfig,
         source_dir: &Path,
     ) -> Result<(), SampleError> {
-        let marker = source_dir.join(".generated");
-        let lock = source_dir.join(".lock");
-
-        // Fast path: already generated
-        if !marker.exists() {
-            // Try to acquire lock
-            if let Some(parent) = lock.parent() {
-                let _ = fs::create_dir_all(parent);
-            }
-            if fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(&lock)
-                .is_ok()
-            {
-                // We got the lock - generate samples
-                Self::generate_files(config, source_dir).await;
-                // Create marker on success
-                let _ = File::create(&marker);
-                // Release lock
-                let _ = fs::remove_file(&lock);
-            } else {
-                // Lock exists - wait for completion
-                wait_for_generation(&marker, &lock);
-            }
+        if let LockOutcome::Acquired(_guard) = acquire_generation_lock(source_dir) {
+            Self::generate_files(config, source_dir).await;
+            mark_generated(source_dir);
         }
         Ok(())
     }
@@ -128,19 +102,4 @@ fn append_extension(path: &Path, ext: &str) -> PathBuf {
     result.push(".");
     result.push(ext);
     PathBuf::from(result)
-}
-
-fn wait_for_generation(marker: &Path, lock: &Path) {
-    let timeout = Duration::from_secs(TIMEOUT_SECONDS);
-    let poll = Duration::from_millis(POLL_MILLISECONDS);
-    let start = Instant::now();
-    while start.elapsed() < timeout {
-        if marker.exists() {
-            return; // Generation complete
-        }
-        // Lock released but no marker - generation failed
-        assert!(lock.exists(), "Sample generation failed in another process");
-        thread::sleep(poll);
-    }
-    unreachable!("Timeout waiting for sample generation");
 }

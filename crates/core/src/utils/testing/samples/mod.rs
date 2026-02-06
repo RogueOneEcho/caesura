@@ -5,6 +5,7 @@ mod album_generator;
 mod album_provider;
 mod flac_generator;
 mod image_generator;
+mod lock_guard;
 mod sample_error;
 mod sample_format;
 mod transcode_config;

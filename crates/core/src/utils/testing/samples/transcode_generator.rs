@@ -3,11 +3,9 @@
 //! [`TranscodeGenerator`] uses the same file-based locking pattern as [`AlbumGenerator`]
 //! to support cross-process coordination when running tests in parallel.
 
-use std::fs::{self, File};
 use std::path::Path;
-use std::thread;
-use std::time::{Duration, Instant};
 
+use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
 use super::{SampleError, TranscodeConfig};
 use crate::commands::TranscodeCommand;
 use crate::hosting::HostBuilder;
@@ -17,9 +15,6 @@ use tokio::fs::create_dir_all;
 
 /// Generates cached transcode outputs for testing.
 pub struct TranscodeGenerator;
-
-const TIMEOUT_SECONDS: u64 = 60;
-const POLL_MILLISECONDS: u64 = 500;
 
 impl TranscodeGenerator {
     /// Generate transcode in cached `SAMPLE_TRANSCODES_DIR` location.
@@ -40,31 +35,9 @@ impl TranscodeGenerator {
         config: &TranscodeConfig,
         transcode_dir: &Path,
     ) -> Result<(), SampleError> {
-        let marker = transcode_dir.join(".generated");
-        let lock = transcode_dir.join(".lock");
-
-        // Fast path: already generated
-        if !marker.exists() {
-            // Try to acquire lock
-            if let Some(parent) = lock.parent() {
-                let _ = fs::create_dir_all(parent);
-            }
-            if fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(&lock)
-                .is_ok()
-            {
-                // We got the lock - generate transcode
-                Self::generate_files(config, transcode_dir).await?;
-                // Create marker on success
-                let _ = File::create(&marker);
-                // Release lock
-                let _ = fs::remove_file(&lock);
-            } else {
-                // Lock exists - wait for completion
-                wait_for_generation(&marker, &lock);
-            }
+        if let LockOutcome::Acquired(_guard) = acquire_generation_lock(transcode_dir) {
+            Self::generate_files(config, transcode_dir).await?;
+            mark_generated(transcode_dir);
         }
         Ok(())
     }
@@ -117,22 +90,4 @@ impl TranscodeGenerator {
 
         Ok(())
     }
-}
-
-fn wait_for_generation(marker: &Path, lock: &Path) {
-    let timeout = Duration::from_secs(TIMEOUT_SECONDS);
-    let poll = Duration::from_millis(POLL_MILLISECONDS);
-    let start = Instant::now();
-    while start.elapsed() < timeout {
-        if marker.exists() {
-            return; // Generation complete
-        }
-        // Lock released but no marker - generation failed
-        assert!(
-            lock.exists(),
-            "Transcode generation failed in another process"
-        );
-        thread::sleep(poll);
-    }
-    unreachable!("Timeout waiting for transcode generation");
 }
