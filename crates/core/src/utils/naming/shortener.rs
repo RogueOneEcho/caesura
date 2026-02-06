@@ -1,6 +1,12 @@
+use std::path::Path;
+use std::sync::LazyLock;
+
 use crate::prelude::*;
 use regex::Regex;
-use std::path::Path;
+
+/// Match a trailing parenthetical suffix like `"Album Name (Deluxe Edition)"`.
+static PARENTHETICAL_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(.+)\(.+\)$").expect("regex should compile"));
 
 /// Suggest shorter names for albums and tracks.
 pub struct Shortener;
@@ -78,9 +84,7 @@ impl Shortener {
 }
 
 fn remove_parenthetical_suffix(input: &str) -> Option<String> {
-    let captures = Regex::new(r"^(.+)\(.+\)$")
-        .expect("regex should compile")
-        .captures(input.trim())?;
+    let captures = PARENTHETICAL_REGEX.captures(input.trim())?;
     let shortened = captures.get(1).expect("should have captures").as_str();
     Some(shortened.trim().to_owned())
 }

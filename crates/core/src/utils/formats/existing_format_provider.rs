@@ -1,6 +1,14 @@
+use std::sync::LazyLock;
+
 use crate::prelude::*;
 use gazelle_api::Torrent;
 use regex::Regex;
+
+/// Match a zero-padded number, capturing the significant digits.
+static ZERO_PAD_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^0*(\d+)$").expect("regex should compile"));
+
+/// Determine which formats already exist for a given release.
 pub struct ExistingFormatProvider;
 
 impl ExistingFormatProvider {
@@ -34,8 +42,7 @@ fn is_equal_numeric(left: &str, right: &str) -> bool {
 }
 
 fn remove_zero_pad(input: &str) -> String {
-    let regex = Regex::new(r"^0*(\d+)$").expect("Regex should compile");
-    regex.replace(input, "$1").to_string()
+    ZERO_PAD_REGEX.replace(input, "$1").to_string()
 }
 
 #[cfg(test)]
