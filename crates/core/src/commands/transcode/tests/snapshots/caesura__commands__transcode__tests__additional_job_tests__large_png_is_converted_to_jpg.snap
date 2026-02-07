@@ -1,0 +1,12 @@
+---
+source: crates/core/src/commands/transcode/tests/additional_job_tests.rs
+expression: snapshot
+---
+- directory: ~
+  filename: cover.jpg
+  size: 2485
+  sha256: 7f27288e0239cab0a85520ef0c8207803f910dcd5cd3c5caf7cc82a3be60a7b6
+  image:
+    width: 320
+    height: 240
+    color_type: Rgb8
