@@ -8,7 +8,7 @@ use crate::utils::TargetFormat::_320;
 async fn small_image_is_copied_not_resized() {
     // Arrange
     let file_options = FileOptions {
-        max_file_size: 750_000,
+        max_file_size: FileOptions::DEFAULT_MAX_FILE_SIZE,
         ..small_max_file_options()
     };
     let (_test_dir, source_dir, factory, source) = setup_factory(file_options).await;
@@ -157,15 +157,15 @@ fn small_max_file_options() -> FileOptions {
         no_image_compression: false,
         rename_tracks: false,
         no_png_to_jpg: false,
-        max_pixel_size: 1280,
-        jpg_quality: 80,
+        max_pixel_size: FileOptions::DEFAULT_MAX_PIXEL_SIZE,
+        jpg_quality: FileOptions::DEFAULT_JPG_QUALITY,
     }
 }
 
 async fn setup_factory(
     file_options: FileOptions,
 ) -> (TestDirectory, PathBuf, Ref<AdditionalJobFactory>, Source) {
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");

@@ -4,8 +4,8 @@ expression: snapshot
 ---
 - directory: ~
   filename: cover.jpg
-  size: 4365
-  sha256: 4d6e554d7ddfb89737f6b3f22baa21572c54988165634705a41046c02ebdc99c
+  size: 5845
+  sha256: 79960d20f0c9cbc9e5f7f0b9196ea9fea60045f70591e9425f09c8396085e38d
   image:
     width: 320
     height: 240

@@ -44,8 +44,11 @@ serde_json = "1.0.149"
 serde_yaml = "0.9.34"
 tokio = { version = "1.49.0", features = ["full"] }
 
-# Dev dependencies
+# Image processing
+fast_image_resize = { version = "5.4", features = ["image"] }
 image = { version = "0.25.9", default-features = false, features = ["png", "jpeg"] }
+
+# Dev dependencies
 insta = { version = "1.46.3", features = ["yaml"] }
 sha2 = "0.10.9"
 
