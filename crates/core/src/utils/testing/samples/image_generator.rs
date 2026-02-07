@@ -44,7 +44,6 @@ impl ImageGenerator {
 
     /// Set the image dimensions (default: 100x100).
     #[must_use]
-    #[expect(dead_code)]
     pub fn with_size(mut self, width: u32, height: u32) -> Self {
         self.width = width;
         self.height = height;
