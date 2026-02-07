@@ -70,9 +70,9 @@ async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
             rename_tracks: true,
             no_image_compression: true,
             no_png_to_jpg: true,
-            max_file_size: 750_000,
-            max_pixel_size: 1280,
-            jpg_quality: 80,
+            max_file_size: FileOptions::DEFAULT_MAX_FILE_SIZE,
+            max_pixel_size: FileOptions::DEFAULT_MAX_PIXEL_SIZE,
+            jpg_quality: FileOptions::DEFAULT_JPG_QUALITY,
         })
         .expect_build();
 

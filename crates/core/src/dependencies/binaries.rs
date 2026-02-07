@@ -22,15 +22,6 @@ pub const FLAC: &str = "flac.exe";
 #[cfg(not(target_os = "windows"))]
 pub const FLAC: &str = "flac";
 
-// TODO MUST confirm binary name on windows
-/// Path to the imagemagick convert binary.
-#[cfg(target_os = "windows")]
-pub const CONVERT: &str = "convert.exe";
-
-/// Path to the imagemagick convert binary.
-#[cfg(not(target_os = "windows"))]
-pub const CONVERT: &str = "convert";
-
 /// Path to the imdl binary.
 #[cfg(target_os = "windows")]
 pub const IMDL: &str = "imdl.exe";

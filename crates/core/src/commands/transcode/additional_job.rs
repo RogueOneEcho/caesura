@@ -1,3 +1,5 @@
+use tokio::task::spawn_blocking;
+
 use crate::prelude::*;
 
 /// Job to resize and copy an additional file to the transcode directory.
@@ -9,7 +11,6 @@ pub(crate) struct AdditionalJob {
 }
 
 impl AdditionalJob {
-    #[allow(clippy::integer_division)]
     pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         trace!(
             "{} image to maximum {} px and {}% quality: {}",
@@ -19,11 +20,9 @@ impl AdditionalJob {
             self.resize.input.display()
         );
         let output = self.resize.output.clone();
-        let info = self.resize.to_info();
-        trace!("{info}");
-        info.to_command()
-            .run()
+        spawn_blocking(move || self.resize.execute())
             .await
+            .expect("resize task should not panic")
             .map_err(Failure::wrap_with_path(
                 TranscodeAction::ResizeImage,
                 &output,

@@ -46,6 +46,15 @@ pub struct FileOptions {
     pub no_png_to_jpg: bool,
 }
 
+impl FileOptions {
+    /// Default maximum file size in bytes beyond which images are compressed.
+    pub const DEFAULT_MAX_FILE_SIZE: u64 = 750_000;
+    /// Default maximum size in pixels for images.
+    pub const DEFAULT_MAX_PIXEL_SIZE: u32 = 1280;
+    /// Default quality percentage for JPG compression.
+    pub const DEFAULT_JPG_QUALITY: u8 = 80;
+}
+
 impl OptionsContract for FileOptions {
     type Partial = FileOptionsPartial;
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}

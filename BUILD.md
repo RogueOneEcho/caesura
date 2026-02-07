@@ -41,18 +41,18 @@ curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14
   "imdl"
 ```
 
-4. Install FLAC, LAME, SOX and ImageMagick dependencies.
+4. Install FLAC, LAME and SOX dependencies.
 
 With Homebrew:
 
 ```bash
-brew install flac lame sox imagemagick eye-d3
+brew install flac lame sox eye-d3
 ```
 
 Or, from your package manager:
 
 ```bash
-sudo apt install flac lame sox imagemagick --yes
+sudo apt install flac lame sox --yes
 ```
 
 5. MacOS Only
