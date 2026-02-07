@@ -34,7 +34,7 @@ async fn spectrogram_command_track_1s() {
 
 async fn spectrogram_command_helper(album: AlbumConfig) -> Vec<FileSnapshot> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     AlbumGenerator::generate(&album)
         .await

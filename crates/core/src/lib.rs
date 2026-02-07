@@ -3,6 +3,7 @@
 #[allow(unused_imports)]
 pub use commands::*;
 pub use hosting::*;
+pub use utils::logging::*;
 pub mod options;
 
 mod commands;

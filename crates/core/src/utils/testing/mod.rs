@@ -1,7 +1,6 @@
 //! Testing utilities for sample generation, snapshots, and temporary directories.
 
 pub(crate) use fs::*;
-pub(crate) use logging::*;
 pub(crate) use samples::*;
 #[cfg(test)]
 pub(crate) use snapshots::*;
@@ -10,7 +9,6 @@ pub(crate) use temp_directory::*;
 pub(crate) use test_directory::*;
 
 mod fs;
-mod logging;
 mod samples;
 #[cfg(test)]
 mod snapshots;

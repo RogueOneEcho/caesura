@@ -7,7 +7,7 @@ use std::fs;
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_succeeds_with_valid_source() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let host = build_upload_test_host(&transcode, &test_dir).await;
@@ -31,7 +31,7 @@ async fn upload_command_succeeds_with_valid_source() -> Result<(), TestError> {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let host = HostBuilder::new()
@@ -73,7 +73,7 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
 #[tokio::test]
 async fn upload_command_missing_transcode_returns_error() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -106,7 +106,7 @@ async fn upload_command_missing_transcode_returns_error() -> Result<(), TestErro
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_missing_torrent_fails() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -165,7 +165,7 @@ fn delete_torrent_files(dir: &PathBuf) {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let copy_target = TempDirectory::create("content_copy_target");
@@ -208,7 +208,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let copy_target = TempDirectory::create("custom_copy_target");
@@ -249,7 +249,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let torrent_target = TempDirectory::create("torrent_copy_target");
@@ -294,7 +294,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
 
@@ -391,7 +391,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_captures_response_ids() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let host = build_upload_test_host(&transcode, &test_dir).await;
@@ -416,7 +416,7 @@ async fn upload_command_captures_response_ids() -> Result<(), TestError> {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn upload_command_skip_existing_copy_succeeds() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let host = build_upload_test_host(&transcode, &test_dir).await;

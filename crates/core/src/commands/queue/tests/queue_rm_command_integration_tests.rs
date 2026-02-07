@@ -4,7 +4,7 @@ use crate::testing_prelude::*;
 #[tokio::test]
 async fn queue_rm_command_removes_item() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -56,7 +56,7 @@ async fn queue_rm_command_removes_item() -> Result<(), TestError> {
 #[tokio::test]
 async fn queue_rm_command_nonexistent_hash() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -84,7 +84,7 @@ async fn queue_rm_command_nonexistent_hash() -> Result<(), TestError> {
 #[tokio::test]
 async fn queue_rm_command_invalid_hash_format() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 

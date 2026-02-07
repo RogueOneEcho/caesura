@@ -4,7 +4,7 @@ use crate::utils::SourceIssue::UnnecessaryDirectory;
 #[tokio::test]
 async fn verify_command_mocked() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()

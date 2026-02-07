@@ -4,7 +4,7 @@ use gazelle_api::{Group, GroupResponse, MockGazelleClient, Torrent, TorrentRespo
 #[tokio::test]
 async fn get_finds_directory_with_exact_path() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let dir_name = AlbumConfig::default().dir_name();
@@ -23,7 +23,7 @@ async fn get_finds_directory_with_exact_path() -> Result<(), TestError> {
 #[tokio::test]
 async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let dir_name = AlbumConfig::default().dir_name();
@@ -43,7 +43,7 @@ async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), T
 #[tokio::test]
 async fn get_returns_missing_directory_when_path_not_found() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let host = build_host(&test_dir, mock_api("Nonexistent Directory")).await;

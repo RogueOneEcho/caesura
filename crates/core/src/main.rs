@@ -1,6 +1,5 @@
-use caesura::HostBuilder;
+use caesura::{HostBuilder, init_logger};
 use log::error;
-use rogue_logging::LoggerBuilder;
 use std::process::ExitCode;
 
 #[tokio::main]
@@ -8,7 +7,7 @@ async fn main() -> ExitCode {
     let host = match HostBuilder::new().build() {
         Ok(host) => host,
         Err(error) => {
-            let _ = LoggerBuilder::new().create();
+            init_logger();
             error!("{error}");
             return ExitCode::FAILURE;
         }

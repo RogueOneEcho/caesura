@@ -4,7 +4,7 @@ use crate::testing_prelude::*;
 #[tokio::test]
 async fn queue_list_command_empty_queue() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -29,7 +29,7 @@ async fn queue_list_command_empty_queue() -> Result<(), TestError> {
 #[tokio::test]
 async fn queue_list_command_lists_items() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 

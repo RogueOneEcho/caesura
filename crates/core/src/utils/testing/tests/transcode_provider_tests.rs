@@ -5,7 +5,7 @@ use std::fs;
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn transcode_provider_320() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
 
     // Act
     let config = TranscodeProvider::get(SampleFormat::FLAC16_441, TargetFormat::_320).await;
@@ -38,7 +38,7 @@ async fn transcode_provider_320() {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn transcode_provider_v0() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
 
     // Act
     let config = TranscodeProvider::get(SampleFormat::FLAC16_441, TargetFormat::V0).await;
@@ -71,7 +71,7 @@ async fn transcode_provider_v0() {
 #[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn transcode_provider_caching() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
 
     // Act - Call twice to verify caching works
     let config1 = TranscodeProvider::get(SampleFormat::FLAC16_441, TargetFormat::_320).await;

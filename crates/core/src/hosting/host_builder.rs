@@ -5,7 +5,7 @@ use crate::prelude::*;
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
-use rogue_logging::LoggerBuilder;
+use rogue_logging::InitLog;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
@@ -39,13 +39,14 @@ impl HostBuilder {
             // Add main services
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();
-                LoggerBuilder::new()
-                    .with_exclude_filter("reqwest".to_owned())
-                    .with_exclude_filter("cookie".to_owned())
-                    .with_exclude_filter("lofty".to_owned())
-                    .with_verbosity(options.verbosity)
-                    .with_time_format(options.log_time)
-                    .create()
+                let logger = Ref::new(
+                    default_logger()
+                        .with_verbosity(options.verbosity)
+                        .with_time_format(options.log_time)
+                        .create(),
+                );
+                logger.clone().init();
+                logger
             }))
             .add(PathManager::transient())
             .add(IdProvider::transient())

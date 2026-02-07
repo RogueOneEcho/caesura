@@ -5,7 +5,7 @@ use flat_db::Hash;
 #[tokio::test]
 async fn batch_command_empty_queue_succeeds() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -29,7 +29,7 @@ async fn batch_command_empty_queue_succeeds() -> Result<(), TestError> {
 #[tokio::test]
 async fn batch_command_verifies_item() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
@@ -77,7 +77,7 @@ async fn batch_command_verifies_item() -> Result<(), TestError> {
 #[tokio::test]
 async fn batch_command_skips_item_without_id() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -123,7 +123,7 @@ async fn batch_command_skips_item_without_id() -> Result<(), TestError> {
 #[tokio::test]
 async fn batch_command_respects_limit() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -172,7 +172,7 @@ async fn batch_command_respects_limit() -> Result<(), TestError> {
 #[tokio::test]
 async fn batch_command_filters_by_indexer() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -232,7 +232,7 @@ async fn batch_command_filters_by_indexer() -> Result<(), TestError> {
 #[tokio::test]
 async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
@@ -274,7 +274,7 @@ async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Te
 #[tokio::test]
 async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
@@ -326,7 +326,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
 #[tokio::test]
 async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
@@ -383,7 +383,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), TestE
 #[tokio::test]
 async fn batch_command_upload_saves_status() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();

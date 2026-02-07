@@ -78,7 +78,7 @@ async fn queue_add_command_empty_directory() -> Result<(), TestError> {
 async fn queue_add_test_helper(
     queue_add_path: PathBuf,
 ) -> (TestDirectory, Ref<QueueAddCommand>, Ref<Queue>) {
-    let _ = init_logger();
+    init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let host = HostBuilder::new()

@@ -1,9 +1,6 @@
 use crate::prelude::*;
 use di::{ServiceCollection, existing_as_self};
-use rogue_logging::Verbosity::Trace;
-use rogue_logging::{Logger, LoggerBuilder};
 use std::fs::read_to_string;
-use std::sync::Arc;
 
 pub const DEFAULT_CONFIG_PATH: &str = "config.yml";
 
@@ -40,7 +37,7 @@ impl OptionsProvider {
                 partial.merge(file_partial);
             }
             Err(error) => {
-                let _ = init_logger();
+                init_logger();
                 error!("{} to deserialize config file: {}", "Failed".bold(), error);
             }
         }
@@ -102,19 +99,11 @@ fn read_config_file(options: &Option<SharedOptionsPartial>) -> Option<String> {
     match read_to_string(path) {
         Ok(yaml) => Some(yaml),
         Err(e) => {
-            let _ = init_logger();
+            init_logger();
             warn!("{} to read config file: {}", "Failed".bold(), e);
             None
         }
     }
-}
-
-fn init_logger() -> Arc<Logger> {
-    LoggerBuilder::new()
-        .with_exclude_filter("reqwest".to_owned())
-        .with_exclude_filter("cookie".to_owned())
-        .with_verbosity(Trace)
-        .create()
 }
 
 pub trait RegisterOptions {

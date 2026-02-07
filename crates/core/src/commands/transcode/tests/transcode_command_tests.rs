@@ -37,7 +37,7 @@ async fn transcode_command_flac24_96() {
 
 async fn transcode_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(format).await;
     let host = HostBuilder::new()

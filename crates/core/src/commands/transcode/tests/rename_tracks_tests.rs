@@ -49,7 +49,7 @@ async fn transcode_rename_tracks_vinyl_numbering() {
 }
 
 async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
-    let _ = init_logger();
+    init_logger();
 
     // Generate sample files in cached location
     AlbumGenerator::generate(&config)

@@ -15,7 +15,7 @@ const MODIFICATION_TIME_WAIT: Duration = Duration::from_millis(50);
 #[tokio::test]
 async fn transcode_creates_only_indexed_torrent() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
@@ -61,7 +61,7 @@ async fn transcode_creates_only_indexed_torrent() {
 #[tokio::test]
 async fn get_or_duplicate_returns_path_when_exists() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
@@ -111,7 +111,7 @@ async fn get_or_duplicate_returns_path_when_exists() -> Result<(), TestError> {
 #[tokio::test]
 async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     // First create a transcode with RED indexer
@@ -180,7 +180,7 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), TestError> 
 #[tokio::test]
 async fn get_or_duplicate_returns_none_when_missing() -> Result<(), TestError> {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
@@ -214,7 +214,7 @@ async fn get_or_duplicate_returns_none_when_missing() -> Result<(), TestError> {
 #[tokio::test]
 async fn torrent_filename_includes_format_and_indexer() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
@@ -265,7 +265,7 @@ async fn torrent_filename_includes_format_and_indexer() {
 #[tokio::test]
 async fn transcode_creates_torrents_for_each_format() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
@@ -305,7 +305,7 @@ async fn transcode_creates_torrents_for_each_format() {
 #[tokio::test]
 async fn transcode_skips_when_other_tracker_torrent_exists() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     // First create a transcode with RED indexer
@@ -395,7 +395,7 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
 #[tokio::test]
 async fn transcode_skips_when_torrent_exists() {
     // Arrange
-    let _ = init_logger();
+    init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let host = HostBuilder::new()
