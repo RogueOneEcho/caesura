@@ -229,7 +229,12 @@ impl UploadCommand {
                     "[pad=0|10|0|19]Details[/pad] [hide][pre]{details}[/pre][/hide]"
                 ));
             }
-            Err(e) => warn!("Failed to get transcode details: {e}"),
+            Err(e) => {
+                warn!(
+                    "Unable to add track details to upload description\n{}",
+                    e.render()
+                );
+            }
         }
         lines.into_iter().fold(String::new(), |mut output, line| {
             output.push_str("[quote]");
