@@ -145,10 +145,10 @@ jobs:
       run: echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
 
     - if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
-      run: /home/linuxbrew/.linuxbrew/bin/brew install flac lame sox imagemagick eye-d3 intermodal
+      run: /home/linuxbrew/.linuxbrew/bin/brew install flac lame sox eye-d3 intermodal
 
     - if: matrix.test && contains(matrix.os, 'macos')
-      run: brew install flac lame sox imagemagick eye-d3 intermodal
+      run: brew install flac lame sox eye-d3 intermodal
 
     - name: Save brew cache (Linux only)
       if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'

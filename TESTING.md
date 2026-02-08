@@ -23,7 +23,6 @@ The following tools must be installed to run tests. Version numbers are those us
 | metaflac    | 1.5.0   | FLAC metadata manipulation          | Included with FLAC        |
 | LAME        | 3.100   | MP3 encoding for transcode tests    | `brew install lame`       |
 | imdl        | 0.1.13  | Torrent file creation               | `brew install intermodal` |
-| ImageMagick | -       | Image manipulation (spectrogram)    | `brew install imagemagick`|
 
 ## Running Tests
 

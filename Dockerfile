@@ -59,7 +59,7 @@ RUN cargo build --release
 
 # Build final image with minimal dependencies
 FROM alpine:latest
-RUN apk add --no-cache libogg lame sox imagemagick imagemagick-jpeg eyed3
+RUN apk add --no-cache libogg lame sox eyed3
 COPY --from=flac-builder /flac-install/usr/bin/flac /usr/bin/flac
 COPY --from=flac-builder /flac-install/usr/bin/metaflac /usr/bin/metaflac
 COPY --from=flac-builder /flac-install/usr/lib/libFLAC.so* /usr/lib/
