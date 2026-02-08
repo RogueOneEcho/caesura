@@ -223,7 +223,8 @@ impl UploadCommand {
                 "[pad=0|10|0|0]Transcode[/pad] [code]{transcode_command}[/code]"
             ));
         }
-        match self.get_details(source, target).await {
+        let path = self.paths.get_transcode_target_dir(source, target);
+        match get_details(&path, target).await {
             Ok(details) => {
                 lines.push(format!(
                     "[pad=0|10|0|19]Details[/pad] [hide][pre]{details}[/pre][/hide]"
@@ -301,20 +302,21 @@ impl UploadCommand {
         };
         Ok(command)
     }
+}
 
-    async fn get_details(
-        &self,
-        source: &Source,
-        target: TargetFormat,
-    ) -> Result<String, Failure<UploadAction>> {
-        let path = self.paths.get_transcode_target_dir(source, target);
-        match target {
-            Flac => MetaflacCommand::list_dir(&path)
-                .await
-                .map_err(Failure::wrap(UploadAction::GetTranscodeDetails)),
-            _320 | V0 => EyeD3Command::display(&path)
-                .await
-                .map_err(Failure::wrap(UploadAction::GetTranscodeDetails)),
-        }
+/// Get track details for a transcode directory.
+///
+/// - Dispatches to `metaflac` for FLAC or `eyeD3` for MP3 targets.
+pub(crate) async fn get_details(
+    path: &Path,
+    target: TargetFormat,
+) -> Result<String, Failure<UploadAction>> {
+    match target {
+        Flac => MetaflacCommand::list_dir(path)
+            .await
+            .map_err(Failure::wrap(UploadAction::GetTranscodeDetails)),
+        _320 | V0 => EyeD3Command::display(path)
+            .await
+            .map_err(Failure::wrap(UploadAction::GetTranscodeDetails)),
     }
 }
