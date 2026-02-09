@@ -10,6 +10,12 @@ pub enum CommandArguments {
     /// Generate markdown documentation for configuration options.
     Docs,
 
+    /// Inspect audio file metadata in a directory.
+    Inspect {
+        #[command(flatten)]
+        arg: InspectArg,
+    },
+
     /// Verify, transcode, and upload from multiple FLAC sources in one command.
     Batch {
         #[command(flatten)]

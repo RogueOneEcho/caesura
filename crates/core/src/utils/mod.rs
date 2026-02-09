@@ -9,6 +9,7 @@ pub(crate) use naming::*;
 pub(crate) use process::*;
 pub(crate) use rogue_logging::Failure;
 pub(crate) use source::*;
+pub(crate) use table::*;
 #[cfg(test)]
 pub(crate) use testing::*;
 
@@ -20,5 +21,6 @@ pub mod logging;
 mod naming;
 mod process;
 mod source;
+mod table;
 #[cfg(test)]
 mod testing;

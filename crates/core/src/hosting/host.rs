@@ -35,6 +35,11 @@ impl Host {
                 .execute()
                 .map_err(Report::new),
             Docs => Ok(self.services.get_required::<DocsCommand>().execute()),
+            Inspect { .. } => self
+                .services
+                .get_required::<InspectCommand>()
+                .execute_cli()
+                .map_err(Report::new),
             Batch { .. } => self
                 .services
                 .get_required::<BatchCommand>()

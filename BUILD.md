@@ -46,7 +46,7 @@ curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14
 With Homebrew:
 
 ```bash
-brew install flac lame sox eye-d3
+brew install flac lame sox
 ```
 
 Or, from your package manager:

@@ -126,7 +126,6 @@ impl FlacGenerator {
 
     /// Set a sub-directory within the output directory.
     #[must_use]
-    #[expect(dead_code)]
     pub fn with_sub_directory(mut self, sub_dir: impl Into<String>) -> Self {
         self.sub_directory = Some(sub_dir.into());
         self

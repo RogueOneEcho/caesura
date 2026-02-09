@@ -1,0 +1,69 @@
+---
+source: crates/core/src/commands/inspect/tests/inspect_tests.rs
+expression: output
+---
+D   T   Time    Size      Bitrate    Sample Rate   Channels   Bit Depth
+1   1   01:05   830 KiB   104 kbps   44100 Hz      2          16
+1   2   01:05   1.2 MiB   158 kbps   44100 Hz      2          16
+2   1   01:05   936 KiB   117 kbps   44100 Hz      2          16
+2   2   01:05   1.3 MiB   172 kbps   44100 Hz      2          16
+
+---
+
+Disc 1/Rename Artist - Multi Disc Album - 01 First Track.flac
+
+COMMENT       Comment            Processed by SoX
+ARTIST        Track Artist       Rename Artist
+ALBUM         Album Title        Multi Disc Album
+TITLE         Track Title        First Track
+TRACKNUMBER   Track Number       1
+DISCNUMBER    Disc Number        1
+DATE          Recording Date     2024
+ENCODER       Encoder Software   reference libFLAC 1.5.0 20250211
+
+METADATA_BLOCK_PICTURE   Front Cover   0.8 KiB   image/png
+
+---
+
+Disc 1/Rename Artist - Multi Disc Album - 02 Second Track.flac
+
+COMMENT       Comment            Processed by SoX
+ARTIST        Track Artist       Rename Artist
+ALBUM         Album Title        Multi Disc Album
+TITLE         Track Title        Second Track
+TRACKNUMBER   Track Number       2
+DISCNUMBER    Disc Number        1
+DATE          Recording Date     2024
+ENCODER       Encoder Software   reference libFLAC 1.5.0 20250211
+
+METADATA_BLOCK_PICTURE   Front Cover   0.8 KiB   image/png
+
+---
+
+Disc 2/Rename Artist - Multi Disc Album - 01 Third Track.flac
+
+COMMENT       Comment            Processed by SoX
+ARTIST        Track Artist       Rename Artist
+ALBUM         Album Title        Multi Disc Album
+TITLE         Track Title        Third Track
+TRACKNUMBER   Track Number       1
+DISCNUMBER    Disc Number        2
+DATE          Recording Date     2024
+ENCODER       Encoder Software   reference libFLAC 1.5.0 20250211
+
+METADATA_BLOCK_PICTURE   Front Cover   0.8 KiB   image/png
+
+---
+
+Disc 2/Rename Artist - Multi Disc Album - 02 Fourth Track.flac
+
+COMMENT       Comment            Processed by SoX
+ARTIST        Track Artist       Rename Artist
+ALBUM         Album Title        Multi Disc Album
+TITLE         Track Title        Fourth Track
+TRACKNUMBER   Track Number       2
+DISCNUMBER    Disc Number        2
+DATE          Recording Date     2024
+ENCODER       Encoder Software   reference libFLAC 1.5.0 20250211
+
+METADATA_BLOCK_PICTURE   Front Cover   0.8 KiB   image/png

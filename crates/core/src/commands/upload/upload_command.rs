@@ -1,6 +1,5 @@
 use crate::built_info::{PKG_NAME, PKG_REPOSITORY, PKG_VERSION};
 use crate::prelude::*;
-use TargetFormat::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
 use std::collections::HashSet;
 use tokio::fs::{copy, hard_link};
@@ -108,7 +107,7 @@ impl UploadCommand {
                 format: target.get_file_extension().to_uppercase(),
                 bitrate: target.get_bitrate().to_owned(),
                 media: source.torrent.media.clone(),
-                release_desc: self.create_description(source, target).await,
+                release_desc: self.create_description(source, target),
                 group_id: source.group.id,
             };
             if self.upload_options.dry_run {
@@ -207,7 +206,7 @@ impl UploadCommand {
     }
 
     #[allow(clippy::uninlined_format_args)]
-    async fn create_description(&self, source: &Source, target: TargetFormat) -> String {
+    fn create_description(&self, source: &Source, target: TargetFormat) -> String {
         let base = &self.shared_options.indexer_url;
         let source_url = get_permalink(base, source.group.id, source.torrent.id);
         let source_title = source.format.get_title();
@@ -224,10 +223,13 @@ impl UploadCommand {
             ));
         }
         let path = self.paths.get_transcode_target_dir(source, target);
-        match get_details(&path, target).await {
-            Ok(details) => {
+        match get_details_split(&path) {
+            Ok((properties, tags)) => {
                 lines.push(format!(
-                    "[pad=0|10|0|19]Details[/pad] [hide][pre]{details}[/pre][/hide]"
+                    "[pad=0|10|0|19]Details[/pad] [pre]{properties}[/pre]"
+                ));
+                lines.push(format!(
+                    "[pad=0|10|0|31]Tags[/pad] [hide][pre]{tags}[/pre][/hide]"
                 ));
             }
             Err(e) => {
@@ -301,22 +303,5 @@ impl UploadCommand {
             Variant::Include(_) => None,
         };
         Ok(command)
-    }
-}
-
-/// Get track details for a transcode directory.
-///
-/// - Dispatches to `metaflac` for FLAC or `eyeD3` for MP3 targets.
-pub(crate) async fn get_details(
-    path: &Path,
-    target: TargetFormat,
-) -> Result<String, Failure<UploadAction>> {
-    match target {
-        Flac => MetaflacCommand::list_dir(path)
-            .await
-            .map_err(Failure::wrap(UploadAction::GetTranscodeDetails)),
-        _320 | V0 => EyeD3Command::display(path)
-            .await
-            .map_err(Failure::wrap(UploadAction::GetTranscodeDetails)),
     }
 }

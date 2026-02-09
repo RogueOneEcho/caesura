@@ -59,9 +59,8 @@ RUN cargo build --release
 
 # Build final image with minimal dependencies
 FROM alpine:latest
-RUN apk add --no-cache libogg lame sox eyed3
+RUN apk add --no-cache libogg lame sox
 COPY --from=flac-builder /flac-install/usr/bin/flac /usr/bin/flac
-COPY --from=flac-builder /flac-install/usr/bin/metaflac /usr/bin/metaflac
 COPY --from=flac-builder /flac-install/usr/lib/libFLAC.so* /usr/lib/
 COPY --from=imdl /bin/imdl /bin/imdl
 COPY --from=builder /app/target/release/caesura /bin/caesura

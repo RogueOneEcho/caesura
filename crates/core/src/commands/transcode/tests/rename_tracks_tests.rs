@@ -12,8 +12,24 @@ async fn transcode_rename_tracks_single_disc() {
     assert_yaml_snapshot!(snapshot);
 }
 
-/// Test `rename_tracks` with a multi-disc album.
+/// Test `rename_tracks` with a multi-disc album from flat source directory.
 ///
+/// Source: all files in one directory (no disc subdirs)
+/// Expected output structure:
+/// - `CD1/1 First Track.mp3`
+/// - `CD1/2 Second Track.mp3`
+/// - `CD2/1 Third Track.mp3`
+/// - `CD2/2 Fourth Track.mp3`
+#[tokio::test]
+#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
+async fn transcode_rename_tracks_multi_disc_flat_source() {
+    let snapshot = rename_tracks_helper(AlbumConfig::multi_disc_flat()).await;
+    assert_yaml_snapshot!(snapshot);
+}
+
+/// Test `rename_tracks` with a multi-disc album from source with disc subdirectories.
+///
+/// Source: `Disc 1/01 First Track.flac`, `Disc 2/01 Third Track.flac`, etc.
 /// Expected output structure:
 /// - `CD1/1 First Track.mp3`
 /// - `CD1/2 Second Track.mp3`

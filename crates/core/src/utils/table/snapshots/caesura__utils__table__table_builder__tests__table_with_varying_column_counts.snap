@@ -1,0 +1,8 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+A   B   C
+1   2   3
+4   5
+6

@@ -68,6 +68,9 @@ impl AlbumGenerator {
                 .with_date(config.year.to_string())
                 .with_disc_number(track.disc_number)
                 .with_cover_image();
+            if let Some(subdir) = config.disc_subdir(track) {
+                generator = generator.with_sub_directory(subdir);
+            }
             if let Some(duration) = track.duration_secs {
                 generator = generator.with_duration_secs(duration);
             }

@@ -69,12 +69,15 @@ impl HostBuilder {
             .add(DebugSubscriber::transient())
             .add(ProgressBarSubscriber::transient())
             .add(TargetFormatProvider::transient())
+            // Add batch services
+            .add(BatchCommand::transient())
             // Add config services
             .add(ConfigCommand::transient())
             // Add docs services
             .add(DocsCommand::transient())
-            // Add batch services
-            .add(BatchCommand::transient())
+            // Add inspect services
+            .add(InspectCommand::transient())
+            .add(InspectArg::singleton())
             // Add queue services
             .add(QueueAddCommand::transient())
             .add(QueueListCommand::transient())

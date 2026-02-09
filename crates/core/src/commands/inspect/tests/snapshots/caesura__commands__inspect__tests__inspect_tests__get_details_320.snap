@@ -1,0 +1,69 @@
+---
+source: crates/core/src/commands/inspect/tests/inspect_tests.rs
+expression: output
+---
+D   T   Time    Size      Bitrate    Sample Rate   Channels
+1   1   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
+1   2   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
+2   1   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
+2   2   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
+
+---
+
+Disc 1/Rename Artist - Multi Disc Album - 01 First Track.mp3
+
+COMM   Comment            Processed by SoX
+TPE1   Track Artist       Rename Artist
+TALB   Album Title        Multi Disc Album
+TIT2   Track Title        First Track
+TDRC   Recording Date     2024
+TSSE   Encoder Settings   reference libFLAC 1.5.0 20250211
+TRCK   Track Number       1
+TPOS   Disc Number        1
+
+APIC   Front Cover   0.8 KiB   image/png
+
+---
+
+Disc 1/Rename Artist - Multi Disc Album - 02 Second Track.mp3
+
+COMM   Comment            Processed by SoX
+TPE1   Track Artist       Rename Artist
+TALB   Album Title        Multi Disc Album
+TIT2   Track Title        Second Track
+TDRC   Recording Date     2024
+TSSE   Encoder Settings   reference libFLAC 1.5.0 20250211
+TRCK   Track Number       2
+TPOS   Disc Number        1
+
+APIC   Front Cover   0.8 KiB   image/png
+
+---
+
+Disc 2/Rename Artist - Multi Disc Album - 01 Third Track.mp3
+
+COMM   Comment            Processed by SoX
+TPE1   Track Artist       Rename Artist
+TALB   Album Title        Multi Disc Album
+TIT2   Track Title        Third Track
+TDRC   Recording Date     2024
+TSSE   Encoder Settings   reference libFLAC 1.5.0 20250211
+TRCK   Track Number       1
+TPOS   Disc Number        2
+
+APIC   Front Cover   0.8 KiB   image/png
+
+---
+
+Disc 2/Rename Artist - Multi Disc Album - 02 Fourth Track.mp3
+
+COMM   Comment            Processed by SoX
+TPE1   Track Artist       Rename Artist
+TALB   Album Title        Multi Disc Album
+TIT2   Track Title        Fourth Track
+TDRC   Recording Date     2024
+TSSE   Encoder Settings   reference libFLAC 1.5.0 20250211
+TRCK   Track Number       2
+TPOS   Disc Number        2
+
+APIC   Front Cover   0.8 KiB   image/png

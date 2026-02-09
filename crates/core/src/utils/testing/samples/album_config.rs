@@ -18,6 +18,8 @@ pub struct AlbumConfig {
     pub year: u16,
     /// Audio format (bit depth and sample rate).
     pub format: SampleFormat,
+    /// Place tracks in disc subdirectories (e.g., "Disc 1/", "Disc 2/").
+    pub use_disc_subdirs: bool,
 }
 
 /// Configuration for a single track within an album.
@@ -42,6 +44,7 @@ impl Default for AlbumConfig {
             album: "Test Album",
             year: 2020,
             format: SampleFormat::default(),
+            use_disc_subdirs: false,
             tracks: vec![
                 TrackConfig {
                     title: "Track One",
@@ -82,6 +85,7 @@ impl AlbumConfig {
             album: "Single Disc Album",
             year: 2024,
             format: SampleFormat::default(),
+            use_disc_subdirs: false,
             tracks: vec![
                 TrackConfig {
                     title: "Track One",
@@ -101,13 +105,59 @@ impl AlbumConfig {
         }
     }
 
-    /// Create a multi-disc album configuration for rename tests.
+    /// Create a multi-disc album with all files in a flat directory (no disc subdirs).
+    ///
+    /// Used to test that transcode correctly creates disc subdirectories from flat input.
+    pub fn multi_disc_flat() -> Self {
+        Self {
+            artist: "Rename Artist",
+            album: "Multi Disc Album Flat",
+            year: 2024,
+            format: SampleFormat::default(),
+            use_disc_subdirs: false,
+            tracks: vec![
+                TrackConfig {
+                    title: "First Track",
+                    track_number: "1",
+                    disc_number: Some("1"),
+                    frequency: 440,
+                    duration_secs: None,
+                },
+                TrackConfig {
+                    title: "Second Track",
+                    track_number: "2",
+                    disc_number: Some("1"),
+                    frequency: 550,
+                    duration_secs: None,
+                },
+                TrackConfig {
+                    title: "Third Track",
+                    track_number: "1",
+                    disc_number: Some("2"),
+                    frequency: 660,
+                    duration_secs: None,
+                },
+                TrackConfig {
+                    title: "Fourth Track",
+                    track_number: "2",
+                    disc_number: Some("2"),
+                    frequency: 770,
+                    duration_secs: None,
+                },
+            ],
+        }
+    }
+
+    /// Create a multi-disc album with tracks in disc subdirectories.
+    ///
+    /// Structure: `Disc 1/01 First Track.flac`, `Disc 2/01 Third Track.flac`, etc.
     pub fn multi_disc() -> Self {
         Self {
             artist: "Rename Artist",
             album: "Multi Disc Album",
             year: 2024,
             format: SampleFormat::default(),
+            use_disc_subdirs: true,
             tracks: vec![
                 TrackConfig {
                     title: "First Track",
@@ -148,6 +198,7 @@ impl AlbumConfig {
             album: "Double Digit Album",
             year: 2024,
             format: SampleFormat::default(),
+            use_disc_subdirs: false,
             tracks: (1..=10_u32)
                 .map(|i| {
                     let title = match i {
@@ -182,6 +233,7 @@ impl AlbumConfig {
             album: "Vinyl Album",
             year: 2024,
             format: SampleFormat::default(),
+            use_disc_subdirs: false,
             tracks: vec![
                 TrackConfig {
                     title: "Side A Track One",
@@ -223,6 +275,7 @@ impl AlbumConfig {
             album: "Short Album",
             year: 2024,
             format: SampleFormat::default(),
+            use_disc_subdirs: false,
             tracks: vec![TrackConfig {
                 title: "Short Track",
                 track_number: "1",
@@ -241,6 +294,7 @@ impl AlbumConfig {
             album: "Very Short Album",
             year: 2024,
             format: SampleFormat::default(),
+            use_disc_subdirs: false,
             tracks: vec![TrackConfig {
                 title: "Very Short Track",
                 track_number: "1",
@@ -292,11 +346,27 @@ impl AlbumConfig {
         )
     }
 
+    /// Disc subdirectory for a track (e.g., "Disc 1"), if using disc subdirs.
+    #[must_use]
+    pub fn disc_subdir(&self, track: &TrackConfig) -> Option<String> {
+        if self.use_disc_subdirs {
+            track.disc_number.map(|d| format!("Disc {d}"))
+        } else {
+            None
+        }
+    }
+
     /// File list in Gazelle API format.
     fn file_list(&self) -> String {
         self.tracks
             .iter()
-            .map(|t| format!("{}{{{{{{8972941}}}}}}", self.track_filename(t)))
+            .map(|t| {
+                let path = match self.disc_subdir(t) {
+                    Some(subdir) => format!("{}/{}", subdir, self.track_filename(t)),
+                    None => self.track_filename(t),
+                };
+                format!("{path}{{{{{{8972941}}}}}}")
+            })
             .collect::<Vec<_>>()
             .join("|||")
             + "|||"

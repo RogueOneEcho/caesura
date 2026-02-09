@@ -19,8 +19,6 @@ pub enum UploadAction {
     CopyTranscode,
     #[error("get transcode command")]
     GetTranscodeCommand,
-    #[error("get transcode details")]
-    GetTranscodeDetails,
 }
 
 /// Errors that can occur during upload.

@@ -30,18 +30,14 @@ pub const IMDL: &str = "imdl.exe";
 #[cfg(not(target_os = "windows"))]
 pub const IMDL: &str = "imdl";
 
-/// Path to the eyeD3 binary.
-#[cfg(target_os = "windows")]
-pub const EYED3: &str = "eyeD3.exe";
-
-/// Path to the eyeD3 binary.
-#[cfg(not(target_os = "windows"))]
-pub const EYED3: &str = "eyeD3";
-
 /// Path to the metaflac binary.
-#[cfg(target_os = "windows")]
+///
+/// Only used in tests for setting tags and embedding cover art in generated FLAC samples.
+#[cfg(all(test, target_os = "windows"))]
 pub const METAFLAC: &str = "metaflac.exe";
 
 /// Path to the metaflac binary.
-#[cfg(not(target_os = "windows"))]
+///
+/// Only used in tests for setting tags and embedding cover art in generated FLAC samples.
+#[cfg(all(test, not(target_os = "windows")))]
 pub const METAFLAC: &str = "metaflac";

@@ -1,0 +1,102 @@
+use crate::testing_prelude::*;
+use insta::assert_snapshot;
+use std::fs;
+
+/// Test that `get_details` returns FLAC metadata for a multi-disc source directory.
+#[tokio::test]
+#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+async fn get_details_flac() -> Result<(), TestError> {
+    // Arrange
+    let config = AlbumConfig::multi_disc();
+    AlbumGenerator::generate(&config)
+        .await
+        .expect("should generate album");
+    let path = SAMPLE_SOURCES_DIR.join(config.dir_name());
+
+    // Act
+    let output = get_details(&path)?;
+
+    // Assert
+    assert_snapshot!(output);
+    Ok(())
+}
+
+/// Test that `get_details` returns MP3 metadata for a 320kbps transcode.
+#[tokio::test]
+#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
+async fn get_details_320() -> Result<(), TestError> {
+    // Arrange
+    let config = AlbumConfig::multi_disc();
+    AlbumGenerator::generate(&config)
+        .await
+        .expect("should generate album");
+    let transcode = TranscodeProvider::get_for_album(&config, TargetFormat::_320).await;
+    let path = transcode.transcode_dir();
+
+    // Act
+    let output = get_details(&path)?;
+
+    // Assert
+    assert_snapshot!(output);
+    Ok(())
+}
+
+/// Test that `get_details` returns MP3 metadata for a V0 transcode.
+#[tokio::test]
+#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
+async fn get_details_v0() -> Result<(), TestError> {
+    // Arrange
+    let config = AlbumConfig::multi_disc();
+    AlbumGenerator::generate(&config)
+        .await
+        .expect("should generate album");
+    let transcode = TranscodeProvider::get_for_album(&config, TargetFormat::V0).await;
+    let path = transcode.transcode_dir();
+
+    // Act
+    let output = get_details(&path)?;
+
+    // Assert
+    assert_snapshot!(output);
+    Ok(())
+}
+
+/// Test that `get_details` handles mixed FLAC and MP3 files in the same directory.
+#[tokio::test]
+#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test with controlled config guarantees indices exist"
+)]
+async fn get_details_mixed() -> Result<(), TestError> {
+    // Arrange
+    let config = AlbumConfig::multi_disc();
+    AlbumGenerator::generate(&config)
+        .await
+        .expect("should generate album");
+    let flac_dir = SAMPLE_SOURCES_DIR.join(config.dir_name());
+    let transcode = TranscodeProvider::get_for_album(&config, TargetFormat::_320).await;
+    let mp3_dir = transcode.transcode_dir();
+
+    let temp = TempDirectory::create("mixed_format");
+    fs::copy(
+        flac_dir
+            .join("Disc 1")
+            .join(config.track_filename(&config.tracks[0])),
+        temp.join(config.track_filename(&config.tracks[0])),
+    )?;
+    let mp3_filename = config
+        .track_filename(&config.tracks[1])
+        .replace(".flac", ".mp3");
+    fs::copy(
+        mp3_dir.join("Disc 1").join(&mp3_filename),
+        temp.join(&mp3_filename),
+    )?;
+
+    // Act
+    let output = get_details(&temp)?;
+
+    // Assert
+    assert_snapshot!(output);
+    Ok(())
+}
