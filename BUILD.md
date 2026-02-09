@@ -18,30 +18,7 @@ Just use Docker or ask ChatGPT. I imagine it's tedious.
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-2. [Install Intermodal](https://github.com/casey/intermodal#installation)
-
-From Cargo:
-
-```bash
-cargo install imdl
-```
-
-Or, from GitHub Releases:
-
-```bash
-curl "https://github.com/casey/intermodal/releases/download/v0.1.14/imdl-v0.1.14-x86_64-unknown-linux-musl.tar.gz" \
-  --location \
-  --show-error \
-  --silent \
-| tar \
-  --extract \
-  --gzip \
-  --directory "/usr/local/bin" \
-  --file - \
-  "imdl"
-```
-
-4. Install FLAC, LAME and SOX dependencies.
+2. Install FLAC, LAME and SOX dependencies.
 
 With Homebrew:
 

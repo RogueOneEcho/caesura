@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use flat_db::Hash;
+use lava_torrent::torrent::v1::Torrent;
 use serde::{Deserialize, Serialize};
 
 /// A source in the batch processing queue.
@@ -31,19 +32,19 @@ pub(crate) struct QueueItem {
 }
 
 impl QueueItem {
-    /// Create a new [`QueueItem`] from a [`TorrentSummary`]
+    /// Create a new [`QueueItem`] from a [`Torrent`].
     ///
-    /// Returns `None` if the torrent does not have a source or comment
-    /// or the comment does not contain a torrent id
+    /// - Takes a reference to avoid moving the large `pieces` buffer
     #[must_use]
-    pub(crate) fn from_torrent(path: PathBuf, torrent: TorrentSummary) -> Self {
-        let comment = torrent.comment.unwrap_or_default();
-        let id = get_torrent_id_from_torrent_url(&comment);
+    pub(crate) fn from_torrent(path: PathBuf, torrent: &Torrent) -> Self {
+        let comment = torrent.comment().unwrap_or_default();
+        let id = get_torrent_id_from_torrent_url(comment);
+        let info_hash = torrent.info_hash();
         Self {
-            name: torrent.name,
+            name: torrent.name.clone(),
             path,
-            hash: Hash::from_string(&torrent.info_hash).expect("torrent hash should be valid"),
-            indexer: torrent.source.unwrap_or_default().to_lowercase(),
+            hash: Hash::from_string(&info_hash).expect("torrent hash should be valid"),
+            indexer: torrent.source().unwrap_or_default().to_lowercase(),
             id,
             ..Self::default()
         }

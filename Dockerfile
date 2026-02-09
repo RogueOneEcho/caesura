@@ -15,29 +15,6 @@ RUN curl -L "https://downloads.xiph.org/releases/flac/flac-${FLAC_VERSION}.tar.x
     && make -j"$(nproc)" \
     && make install DESTDIR=/flac-install
 
-# Download imdl binary
-FROM alpine:latest AS imdl
-ARG TARGETARCH
-ARG IMDL_VERSION=0.1.15
-RUN apk add --no-cache curl
-RUN case "${TARGETARCH}" in \
-      amd64) ARCH="x86_64" ;; \
-      arm64) ARCH="aarch64" ;; \
-      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
-    esac && \
-    curl "https://github.com/casey/intermodal/releases/download/v${IMDL_VERSION}/imdl-v${IMDL_VERSION}-${ARCH}-unknown-linux-musl.tar.gz" \
-      --location \
-      --show-error \
-      --silent \
-      --connect-timeout 2 \
-      --max-time 30 \
-    | tar \
-      --extract \
-      --gzip \
-      --directory "/bin" \
-      --file - \
-      "imdl"
-
 # Cargo chef base
 FROM rust:alpine AS chef
 RUN apk add --no-cache libc-dev && cargo install cargo-chef cargo-edit
@@ -62,7 +39,6 @@ FROM alpine:latest
 RUN apk add --no-cache libogg lame sox
 COPY --from=flac-builder /flac-install/usr/bin/flac /usr/bin/flac
 COPY --from=flac-builder /flac-install/usr/lib/libFLAC.so* /usr/lib/
-COPY --from=imdl /bin/imdl /bin/imdl
 COPY --from=builder /app/target/release/caesura /bin/caesura
 WORKDIR /
 ENTRYPOINT ["caesura"]

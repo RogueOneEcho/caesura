@@ -22,14 +22,6 @@ pub const FLAC: &str = "flac.exe";
 #[cfg(not(target_os = "windows"))]
 pub const FLAC: &str = "flac";
 
-/// Path to the imdl binary.
-#[cfg(target_os = "windows")]
-pub const IMDL: &str = "imdl.exe";
-
-/// Path to the imdl binary.
-#[cfg(not(target_os = "windows"))]
-pub const IMDL: &str = "imdl";
-
 /// Path to the metaflac binary.
 ///
 /// Only used in tests for setting tags and embedding cover art in generated FLAC samples.

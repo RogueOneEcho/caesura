@@ -65,7 +65,7 @@ impl UploadCommand {
             }
             let target_dir = self.paths.get_transcode_target_dir(source, target);
             trace!("{} content of {}", "Verifying".bold(), target_dir.display());
-            ImdlCommand::verify(&torrent_path, &target_dir)
+            TorrentVerifier::execute(&torrent_path, &target_dir)
                 .await
                 .map_err(Failure::wrap(UploadAction::VerifyContent))?;
             if self.upload_options.copy_transcode_to_content_dir {

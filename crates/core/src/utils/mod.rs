@@ -12,6 +12,7 @@ pub(crate) use source::*;
 pub(crate) use table::*;
 #[cfg(test)]
 pub(crate) use testing::*;
+pub(crate) use torrent::*;
 
 mod diagnostic_ext;
 mod formats;
@@ -24,3 +25,4 @@ mod source;
 mod table;
 #[cfg(test)]
 mod testing;
+mod torrent;

@@ -196,14 +196,14 @@ impl TranscodeCommand {
         &self,
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
-    ) -> Result<(), Failure<ImdlAction>> {
+    ) -> Result<(), Failure<TorrentCreateAction>> {
         debug!("{} torrents {}", "Creating".bold(), source);
         for target in targets {
             let content_dir = self.paths.get_transcode_target_dir(source, *target);
             let torrent_path = self.paths.get_torrent_path(source, *target);
             let announce_url = self.shared_options.announce_url.clone();
             let indexer = self.shared_options.indexer.clone();
-            ImdlCommand::create(&content_dir, &torrent_path, announce_url, indexer).await?;
+            TorrentCreator::create(&content_dir, &torrent_path, announce_url, indexer).await?;
             trace!("{} torrent {}", "Created".bold(), torrent_path.display());
         }
         debug!("{} torrents {}", "Created".bold(), source);

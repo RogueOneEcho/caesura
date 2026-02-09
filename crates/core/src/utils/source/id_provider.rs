@@ -29,7 +29,7 @@ pub enum IdProviderError {
     /// Input was a torrent file that did not exist
     #[serde(alias = "TorrentFileNotFound")]
     TorrentFileNotFound,
-    /// Input was a torrent file that IMDL failed to show
+    /// Input was a torrent file that could not be parsed
     #[serde(alias = "TorrentFileInvalid")]
     TorrentFileInvalid,
     /// Input was a torrent file with an unwanted source
@@ -62,17 +62,17 @@ impl IdProvider {
     }
 
     async fn get_by_file(&self, path: &Path) -> Result<u32, IdProviderError> {
-        let summary = ImdlCommand::show(path).await.map_err(|e| {
+        let torrent = TorrentReader::execute(path).await.map_err(|e| {
             warn!("{e}");
             IdProviderError::TorrentFileInvalid
         })?;
         let tracker_id = self.options.indexer.clone();
-        if summary.is_source_equal(&tracker_id) {
-            let url = summary.comment.unwrap_or_default();
-            get_torrent_id_from_url(&url)
+        if torrent.is_source_equal(&tracker_id) {
+            let url = torrent.comment().unwrap_or_default();
+            get_torrent_id_from_url(url)
         } else {
             Err(IdProviderError::TorrentFileSource {
-                actual: summary.source.unwrap_or_default(),
+                actual: torrent.source().unwrap_or_default().to_owned(),
                 expected: tracker_id.to_ascii_uppercase(),
             })
         }

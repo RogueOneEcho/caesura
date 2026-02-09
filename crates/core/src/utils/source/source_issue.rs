@@ -70,9 +70,24 @@ pub enum SourceIssue {
         expected: usize,
         actual: usize,
     },
+    #[deprecated(
+        since = "0.27.0",
+        note = "split into `HashCheck`, `MissingFile`, and `OpenFile`"
+    )]
     Imdl {
         details: String,
     },
+    HashCheck {
+        piece_index: usize,
+    },
+    MissingFile {
+        path: PathBuf,
+    },
+    OpenFile {
+        path: PathBuf,
+        error: String,
+    },
+    ExcessContent,
     Length {
         path: PathBuf,
         excess: usize,
@@ -171,6 +186,16 @@ impl Display for SourceIssue {
                 format!("Expected {expected} FLACs, found {actual}")
             }
             Imdl { details } => format!("Files do not match hash:\n{details}"),
+            HashCheck { piece_index } => {
+                format!("Piece {piece_index} hash mismatch")
+            }
+            MissingFile { path } => {
+                format!("Expected file not found: {}", path.display())
+            }
+            OpenFile { path, error } => {
+                format!("Failed to open {}: {error}", path.display())
+            }
+            ExcessContent => "Content is larger than expected by torrent".to_owned(),
             Length { path, excess } => {
                 format!(
                     "Path is {excess} characters longer than allowed:\n{}",

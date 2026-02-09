@@ -99,12 +99,12 @@ impl PathManager {
     /// Or attempts to duplicate from another tracker's torrent file
     /// (e.g., `.ops.torrent`, `.pth.torrent`, `.red.torrent`).
     ///
-    /// Returns the torrent path if duplication is successful, else `None`.
+    /// Returns the torrent path if duplication is successful.
     pub async fn get_or_duplicate_existing_torrent_path(
         &self,
         source: &Source,
         target: TargetFormat,
-    ) -> Result<Option<PathBuf>, Failure<ImdlAction>> {
+    ) -> Result<Option<PathBuf>, Failure<TorrentCreateAction>> {
         let target_path = self.get_torrent_path(source, target);
         if target_path.is_file() {
             return Ok(Some(target_path));
@@ -113,22 +113,10 @@ impl PathManager {
         let Some(fallback_path) = fallback_path else {
             return Ok(None);
         };
-        let transcode_dir = self.get_transcode_target_dir(source, target);
         let announce_url = self.shared_options.announce_url.clone();
         let indexer = self.shared_options.indexer_lowercase();
-        let success = ImdlCommand::duplicate_torrent(
-            &fallback_path,
-            &target_path,
-            &transcode_dir,
-            announce_url,
-            indexer,
-        )
-        .await?;
-        if success {
-            Ok(Some(target_path))
-        } else {
-            Ok(None)
-        }
+        TorrentCreator::duplicate(&fallback_path, &target_path, announce_url, indexer).await?;
+        Ok(Some(target_path))
     }
 
     /// Find a torrent file from another tracker that can be duplicated.

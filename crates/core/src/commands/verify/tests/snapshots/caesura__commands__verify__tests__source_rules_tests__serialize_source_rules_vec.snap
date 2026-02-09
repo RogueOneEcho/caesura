@@ -1,0 +1,83 @@
+---
+source: crates/core/src/commands/verify/tests/source_rules_tests.rs
+expression: yaml
+---
+- type: id_error
+  details: invalid id
+- type: id
+  no_match: null
+- type: group_mismatch
+  actual: 1
+  expected: 2
+- type: api_response
+  action: get
+  status_code: 500
+  error: server error
+- type: provider
+- type: api
+  response:
+    type: not_found
+    message: not found
+- type: not_found
+- type: category
+  actual: Music
+- type: scene
+- type: lossy_master
+- type: lossy_web
+- type: trumpable
+- type: unconfirmed
+- type: excluded
+  tags:
+  - tag1
+- type: existing
+  formats:
+  - flac
+  - '320'
+- type: not_source
+  format: MP3
+  encoding: '320'
+- type: missing_directory
+  path: /path/to/source
+- type: unnecessary_directory
+  prefix: subdir
+- type: no_flacs
+  path: /path/to/source
+- type: flac_count
+  expected: 10
+  actual: 8
+- type: imdl
+  details: "\e[2m[1/2]\e[0m 💾 \e[1mLoading metainfo from `./cache/torrents/123456.red.torrent`…\e[0m\n\e[2m[2/2]\e[0m 🧮 \e[1mVerifying pieces from `/srv/shared/music/`…\e[0m\nPieces corrupted.\n\e[1;31merror\e[0m\e[1m: Torrent verification failed.\e[0m\n"
+- type: hash_check
+  piece_index: 42
+- type: missing_file
+  path: /path/to/file.flac
+- type: open_file
+  path: /path/to/file.flac
+  error: permission denied
+- type: excess_content
+- type: length
+  path: /path/to/file
+  excess: 10
+- type: missing_tags
+  path: /path/to/file.flac
+  tags:
+  - Title
+  - Artist
+- type: flac_error
+  path: /path/to/file.flac
+  error: I/O Error
+- type: sample_rate
+  path: /path/to/file.flac
+  rate: 44100
+- type: bit_rate
+  path: /path/to/file.flac
+  rate: 128
+- type: duration
+  path: /path/to/file.flac
+  seconds: 43200
+- type: channels
+  path: /path/to/file.flac
+  count: 2
+- type: error
+  domain: Torrent
+  details: something went wrong

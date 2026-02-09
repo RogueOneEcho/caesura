@@ -36,6 +36,7 @@ gazelle_api = { workspace = true }
 html-escape = { workspace = true }
 humantime = { workspace = true }
 indicatif = { workspace = true }
+lava_torrent = { workspace = true }
 lofty = { workspace = true }
 log = { workspace = true }
 miette = { workspace = true }
@@ -48,6 +49,7 @@ rogue_logging = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
+sha1 = { workspace = true }
 fast_image_resize = { workspace = true }
 image = { workspace = true }
 thiserror = { workspace = true }

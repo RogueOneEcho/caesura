@@ -220,11 +220,11 @@ impl VerifyCommand {
                 }];
             }
         }
-        ImdlCommand::verify(&torrent_path, &source.directory)
+        TorrentVerifier::execute(&torrent_path, &source.directory)
             .await
             .unwrap_or_else(|e| {
                 Some(SourceIssue::Error {
-                    domain: "IMDL".to_owned(),
+                    domain: "Torrent".to_owned(),
                     details: e.to_string(),
                 })
             })

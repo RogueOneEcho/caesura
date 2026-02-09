@@ -16,7 +16,7 @@ use rogue_logging::Failure;
 
 use super::SampleAction;
 use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
-use crate::dependencies::ImdlCommand;
+use crate::utils::TorrentCreator;
 use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
 use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR};
 
@@ -80,7 +80,7 @@ impl AlbumGenerator {
             .with_filename("cover.png")
             .generate(source_dir)?;
         let torrent_path = append_extension(source_dir, "torrent");
-        ImdlCommand::create(
+        TorrentCreator::create(
             source_dir,
             &torrent_path,
             "https://flacsfor.me/test/announce".to_owned(),

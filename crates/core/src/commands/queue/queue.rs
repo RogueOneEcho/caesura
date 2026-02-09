@@ -192,14 +192,14 @@ impl Queue {
         let stream = iter(paths.into_iter());
         let items: BTreeMap<_, _> = stream
             .filter_map(|path| async {
-                let torrent = match ImdlCommand::show(&path).await {
+                let torrent = match TorrentReader::execute(&path).await {
                     Ok(torrent) => Some(torrent),
                     Err(error) => {
-                        error!("Failed to read torrent: {}\n{error}", path.display());
+                        warn!("{}", error.render());
                         None
                     }
                 };
-                let item = QueueItem::from_torrent(path, torrent?);
+                let item = QueueItem::from_torrent(path, &torrent?);
                 Some((item.hash, item))
             })
             .collect()
