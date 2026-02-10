@@ -4,10 +4,12 @@ use std::process::exit;
 /// Command line argument parser.
 #[derive(Parser)]
 #[command(
-    version,
     about = "An all-in-one command line tool to transcode FLAC audio files and upload to gazelle based indexers/trackers"
 )]
 pub struct ArgumentsParser {
+    /// Display version information for caesura and dependencies.
+    #[arg(long, short = 'V')]
+    pub version: bool,
     /// The command to run
     #[command(subcommand)]
     pub command: Option<CommandArguments>,
@@ -20,6 +22,7 @@ impl ArgumentsParser {
     #[must_use]
     pub(crate) fn get_or_show_help() -> CommandArguments {
         match ArgumentsParser::try_parse() {
+            Ok(cli) if cli.version => CommandArguments::Version,
             Ok(cli) => cli.command.unwrap_or_else(|| {
                 debug!("No command provided. Showing help documentation:\n");
                 ArgumentsParser::command()

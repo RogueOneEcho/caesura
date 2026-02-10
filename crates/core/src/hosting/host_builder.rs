@@ -106,7 +106,9 @@ impl HostBuilder {
             // Add upload services
             .add(UploadCommand::transient())
             // Add verify services
-            .add(VerifyCommand::transient());
+            .add(VerifyCommand::transient())
+            // Add version services
+            .add(VersionCommand::transient());
         HostBuilder { services, options }
     }
 

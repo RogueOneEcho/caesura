@@ -99,6 +99,9 @@ pub enum CommandArguments {
         #[command(flatten)]
         verify: VerifyOptionsPartial,
     },
+
+    /// Display version information for caesura and dependencies.
+    Version,
 }
 
 #[derive(Subcommand, Debug, Clone)]

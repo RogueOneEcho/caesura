@@ -11,6 +11,7 @@ pub(crate) use spectrogram::*;
 pub(crate) use transcode::*;
 pub(crate) use upload::*;
 pub(crate) use verify::*;
+pub(crate) use version::*;
 
 mod arguments_parser;
 mod batch;
@@ -23,3 +24,4 @@ mod spectrogram;
 mod transcode;
 mod upload;
 mod verify;
+mod version;
