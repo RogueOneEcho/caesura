@@ -47,8 +47,20 @@ async fn get_version_sox() {
         .expect("sox should be available");
 
     // Assert
-    assert!(info.version.is_some(), "should extract sox version");
-    assert!(!info.first_line.is_empty());
+    assert!(
+        info.first_line.contains("SoX"),
+        "should contain SoX in output: {:?}",
+        info.first_line
+    );
+    // sox on macOS outputs "sox: SoX v" without the version number
+    // https://sourceforge.net/p/sox/patches/104/
+    if !cfg!(target_os = "macos") {
+        assert!(
+            info.version.is_some(),
+            "should extract sox version from: {:?}",
+            info.first_line
+        );
+    }
 }
 
 #[tokio::test]

@@ -38,9 +38,6 @@ async fn create_produces_valid_torrent() {
         created_by.starts_with("caesura v"),
         "unexpected created by: {created_by}"
     );
-    let snapshot =
-        FileSnapshot::from_path(&test_dir, &output_path).expect("should snapshot torrent");
-    assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]

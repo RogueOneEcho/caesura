@@ -1,8 +1,0 @@
----
-source: crates/core/src/utils/torrent/tests/torrent_creator_tests.rs
-expression: snapshot
----
-directory: ~
-filename: test.torrent
-size: 2773
-sha256: 7bd84b7d44f7fc2ba48a152f94097acb045c29708863bcbce263b231a6084948

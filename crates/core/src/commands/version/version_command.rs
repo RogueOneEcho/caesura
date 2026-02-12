@@ -8,6 +8,10 @@ pub(crate) const LAME_VERSION_PATTERN: &str = r"version (\d+\.\d+)";
 pub(crate) const SOX_VERSION_PATTERN: &str = r"v(\d+\.\d+\.\d+)";
 
 /// Display version information for caesura and its dependencies.
+///
+/// Note: sox on macOS outputs `sox: SoX v` without the version number
+/// so the sox version will display as "?".
+/// - <https://sourceforge.net/p/sox/patches/104/>
 #[injectable]
 pub struct VersionCommand;
 
