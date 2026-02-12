@@ -43,11 +43,15 @@ fn verify_options_default_values() {
     assert_yaml_snapshot!(result);
 }
 
-/// Verify `CacheOptions` default values.
+/// Verify `CacheOptions` default uses platform user cache directory.
 #[test]
 fn cache_options_default_values() {
-    let default = CacheOptions::default();
-    assert_yaml_snapshot!(default);
+    let resolved = CacheOptionsPartial::default().resolve_without_validation();
+    assert!(
+        resolved.cache.ends_with("caesura"),
+        "expected cache path to end with 'caesura', got: {:?}",
+        resolved.cache
+    );
 }
 
 /// Verify `CopyOptions` default values.
@@ -393,7 +397,12 @@ fn with_options_overrides_default_registration() {
 /// Verify validation errors for missing required fields.
 #[test]
 fn shared_options_validate_missing_fields() {
-    let result = SharedOptionsPartial::default().resolve();
+    // Use explicit output path to avoid platform-specific path in snapshot
+    let result = SharedOptionsPartial {
+        output: Some(PathBuf::from("./nonexistent-output")),
+        ..SharedOptionsPartial::default()
+    }
+    .resolve();
     let errors = result.expect_err("should reject missing required fields");
     assert_yaml_snapshot!(errors);
 }

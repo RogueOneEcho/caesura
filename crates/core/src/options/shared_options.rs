@@ -5,6 +5,11 @@ use caesura_macros::Options;
 use rogue_logging::{TimeFormat, Verbosity};
 use serde::{Deserialize, Serialize};
 
+/// Legacy config path from before platform user directories.
+const LEGACY_CONFIG_PATH: &str = "./config.yml";
+/// Legacy output path from before platform user directories.
+const LEGACY_OUTPUT_DIR: &str = "./output";
+
 /// Options shared by all commands
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct SharedOptions {
@@ -47,6 +52,7 @@ pub struct SharedOptions {
 
     /// Path to the configuration file.
     #[arg(long)]
+    #[options(default_doc = "`~/.config/caesura/config.yml` or platform equivalent")]
     pub config: Option<PathBuf>,
 
     /// Time format to use in logs.
@@ -55,8 +61,16 @@ pub struct SharedOptions {
 
     /// Directory where transcodes and spectrograms will be written.
     #[arg(long)]
-    #[options(default = PathBuf::from("./output"))]
+    #[options(default_fn = default_output, default_doc = "`~/.local/share/caesura/output/` or platform equivalent")]
     pub output: PathBuf,
+}
+
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Options macro default_fn requires Option<T>"
+)]
+fn default_output(_partial: &SharedOptionsPartial) -> Option<PathBuf> {
+    Some(PathManager::default_output_dir())
 }
 
 fn default_indexer(partial: &SharedOptionsPartial) -> Option<String> {
@@ -103,25 +117,27 @@ impl OptionsContract for SharedOptions {
     type Partial = SharedOptionsPartial;
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if let Some(config) = &self.config {
-            if config.ends_with(".json")
-                || (config.eq(&PathBuf::from(DEFAULT_CONFIG_PATH)) && !config.is_file())
-            {
-                errors.push(Changed(
-                    "Config File".to_owned(),
-                    config.to_string_lossy().to_string(),
-                    "In v0.19.0 the config file format changed. A YAML file is now required.
-Please see the release notes for more details:
-https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
-                        .to_owned(),
-                ));
-            }
-            if !config.is_file() {
-                errors.push(DoesNotExist(
-                    "Config File".to_owned(),
-                    config.to_string_lossy().to_string(),
-                ));
-            }
+        if let Some(config) = &self.config
+            && !config.is_file()
+        {
+            errors.push(DoesNotExist(
+                "Config File".to_owned(),
+                config.to_string_lossy().to_string(),
+            ));
+        }
+        if !self
+            .config
+            .clone()
+            .unwrap_or(PathManager::default_config_path())
+            .is_file()
+            && PathBuf::from(LEGACY_CONFIG_PATH).is_file()
+        {
+            let default_path = PathManager::default_config_path();
+            errors.push(Changed(
+                "Config File".to_owned(),
+                default_path.to_string_lossy().to_string(),
+                format!("In v0.27.0 the default config path changed to {}.\nPass the option: --config {LEGACY_CONFIG_PATH} to use the previous config path.", default_path.display()),
+            ));
         }
         if !self.indexer_url.starts_with("https://") && !self.indexer_url.starts_with("http://") {
             errors.push(UrlNotHttp(
@@ -163,6 +179,14 @@ https://github.com/RogueOneEcho/caesura/releases/tag/v0.19.0"
                 "Output Directory".to_owned(),
                 self.output.to_string_lossy().to_string(),
             ));
+            if PathBuf::from(LEGACY_OUTPUT_DIR).is_dir() {
+                let default_dir = PathManager::default_output_dir();
+                errors.push(Changed(
+                    "Output Directory".to_owned(),
+                    self.output.to_string_lossy().to_string(),
+                    format!("In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.", default_dir.display()),
+                ));
+            }
         }
     }
 }

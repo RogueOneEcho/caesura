@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use std::fs::create_dir;
 
+/// Application name.
+const APP_NAME: &str = "caesura";
+
 /// Supported tracker suffixes for cross-tracker torrent duplication.
 const TRACKER_SUFFIXES: &[&str] = &["red", "ops", "pth"];
 
@@ -12,6 +15,32 @@ pub struct PathManager {
 }
 
 impl PathManager {
+    /// Default user config file.
+    #[must_use]
+    pub fn default_config_path() -> PathBuf {
+        dirs::config_dir()
+            .expect("config directory should be determinable")
+            .join(APP_NAME)
+            .join("config.yml")
+    }
+
+    /// Default user cache directory.
+    #[must_use]
+    pub fn default_cache_dir() -> PathBuf {
+        dirs::cache_dir()
+            .expect("cache directory should be determinable")
+            .join(APP_NAME)
+    }
+
+    /// Default output directory in user data directory.
+    #[must_use]
+    pub fn default_output_dir() -> PathBuf {
+        dirs::data_dir()
+            .expect("data directory should be determinable")
+            .join(APP_NAME)
+            .join("output")
+    }
+
     #[must_use]
     pub fn get_cache_dir(&self) -> PathBuf {
         self.cache_options.cache.clone()

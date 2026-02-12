@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use di::{existing_as_self, ServiceCollection};
+use di::{ServiceCollection, existing_as_self};
 use std::fs::read_to_string;
-
-pub const DEFAULT_CONFIG_PATH: &str = "config.yml";
 
 /// Setup helper for resolving, validating, and registering options with DI.
 ///
@@ -98,7 +96,7 @@ fn read_config_file(options: &Option<SharedOptionsPartial>) -> Option<String> {
     let path = options
         .config
         .clone()
-        .unwrap_or_else(|| PathBuf::from(DEFAULT_CONFIG_PATH));
+        .unwrap_or_else(PathManager::default_config_path);
     read_to_string(path).ok()
 }
 

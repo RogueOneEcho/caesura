@@ -65,7 +65,7 @@ Run:
 
 ```bash
 docker run \
--v ./config.json:/config.json \
+-v ./config.yml:/config.yml \
 -v /path/to/your/content:/content \
 -v ./output:/output \
 ghcr.io/rogueoneecho/caesura \

@@ -17,4 +17,4 @@ expression: errors
     - "./content"
 - DoesNotExist:
     - Output Directory
-    - "./output"
+    - "./nonexistent-output"

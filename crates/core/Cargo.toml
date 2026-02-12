@@ -30,6 +30,7 @@ chrono = { workspace = true }
 clap = { workspace = true }
 claxon = { workspace = true }
 colored = { workspace = true }
+dirs = { workspace = true }
 flat_db = { workspace = true }
 futures = { workspace = true }
 gazelle_api = { workspace = true }
