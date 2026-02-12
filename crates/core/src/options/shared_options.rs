@@ -43,7 +43,7 @@ pub struct SharedOptions {
     ///
     /// Typically this is set as the download directory in your torrent client.
     #[arg(long)]
-    #[options(default = vec![PathBuf::from("./content")])]
+    #[options(required)]
     pub content: Vec<PathBuf>,
 
     /// Level of logs to display.
