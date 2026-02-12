@@ -308,6 +308,15 @@ jobs:
         -f name=caesura
         -f version=${{ needs.release.outputs.version }}
 
+    - name: update nix
+      env:
+        GH_TOKEN: ${{ secrets.NIX_TOKEN }}
+      run: >
+        gh workflow run update-package.yml
+        -R RogueOneEcho/nix
+        -f name=caesura
+        -f version=${{ needs.release.outputs.version }}
+
 
   docker-build:
     runs-on: ${{ matrix.os }}
