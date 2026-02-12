@@ -122,14 +122,16 @@ jobs:
 
     - run: mkdir artifacts
 
-    - run: >
-        cp target/${{ matrix.target }}/release/caesura
-        artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
+    - name: Package binary as tar.xz
+      run: |
+        cp target/${{ matrix.target }}/release/caesura artifacts/caesura
+        tar -cJf artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}.tar.xz \
+          -C artifacts caesura
 
     - uses: actions/upload-artifact@v4
       with:
         name: caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
-        path: artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}
+        path: artifacts/caesura-${{ needs.release.outputs.version }}-${{ matrix.target }}.tar.xz
 
     - run: rm -rf artifacts
 
@@ -296,6 +298,15 @@ jobs:
         --repo "${{ github.repository }}"
       env:
         GH_TOKEN: ${{ github.token }}
+
+    - name: update homebrew-tap
+      env:
+        GH_TOKEN: ${{ secrets.BREW_TAP_TOKEN }}
+      run: >
+        gh workflow run update-formula.yml
+        -R RogueOneEcho/homebrew-tap
+        -f name=caesura
+        -f version=${{ needs.release.outputs.version }}
 
 
   docker-build:
