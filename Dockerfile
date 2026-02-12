@@ -40,5 +40,6 @@ RUN apk add --no-cache libogg lame sox
 COPY --from=flac-builder /flac-install/usr/bin/flac /usr/bin/flac
 COPY --from=flac-builder /flac-install/usr/lib/libFLAC.so* /usr/lib/
 COPY --from=builder /app/target/release/caesura /bin/caesura
+ENV CAESURA_DOCKER=1
 WORKDIR /
 ENTRYPOINT ["caesura"]

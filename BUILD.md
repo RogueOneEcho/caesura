@@ -69,7 +69,6 @@ docker run \
 -v /path/to/your/content:/content \
 -v ./output:/output \
 ghcr.io/rogueoneecho/caesura \
---config /config.yml --content /content --output /output \
 verify 142659
 ```
 

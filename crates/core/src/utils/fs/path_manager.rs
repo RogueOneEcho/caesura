@@ -1,11 +1,20 @@
 use crate::prelude::*;
+use std::env;
 use std::fs::create_dir;
 
 /// Application name.
 const APP_NAME: &str = "caesura";
 
+/// Environment variable set in the Docker image to use container paths.
+const DOCKER_ENV_VAR: &str = "CAESURA_DOCKER";
+
 /// Supported tracker suffixes for cross-tracker torrent duplication.
 const TRACKER_SUFFIXES: &[&str] = &["red", "ops", "pth"];
+
+/// Check if running in a Docker container.
+pub(crate) fn is_docker() -> bool {
+    env::var(DOCKER_ENV_VAR).is_ok()
+}
 
 #[injectable]
 pub struct PathManager {
@@ -16,8 +25,14 @@ pub struct PathManager {
 
 impl PathManager {
     /// Default user config file.
+    ///
+    /// - Docker: `/config.yml`
+    /// - Native: platform user config directory
     #[must_use]
     pub fn default_config_path() -> PathBuf {
+        if is_docker() {
+            return PathBuf::from("/config.yml");
+        }
         dirs::config_dir()
             .expect("config directory should be determinable")
             .join(APP_NAME)
@@ -25,16 +40,28 @@ impl PathManager {
     }
 
     /// Default user cache directory.
+    ///
+    /// - Docker: `/cache`
+    /// - Native: platform user cache directory
     #[must_use]
     pub fn default_cache_dir() -> PathBuf {
+        if is_docker() {
+            return PathBuf::from("/cache");
+        }
         dirs::cache_dir()
             .expect("cache directory should be determinable")
             .join(APP_NAME)
     }
 
-    /// Default output directory in user data directory.
+    /// Default output directory.
+    ///
+    /// - Docker: `/output`
+    /// - Native: platform user data directory
     #[must_use]
     pub fn default_output_dir() -> PathBuf {
+        if is_docker() {
+            return PathBuf::from("/output");
+        }
         dirs::data_dir()
             .expect("data directory should be determinable")
             .join(APP_NAME)

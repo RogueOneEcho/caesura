@@ -43,7 +43,7 @@ pub struct SharedOptions {
     ///
     /// Typically this is set as the download directory in your torrent client.
     #[arg(long)]
-    #[options(required)]
+    #[options(required, default_fn = default_content)]
     pub content: Vec<PathBuf>,
 
     /// Level of logs to display.
@@ -71,6 +71,10 @@ pub struct SharedOptions {
 )]
 fn default_output(_partial: &SharedOptionsPartial) -> Option<PathBuf> {
     Some(PathManager::default_output_dir())
+}
+
+fn default_content(_partial: &SharedOptionsPartial) -> Option<Vec<PathBuf>> {
+    is_docker().then(|| vec![PathBuf::from("/content")])
 }
 
 fn default_indexer(partial: &SharedOptionsPartial) -> Option<String> {

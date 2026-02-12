@@ -59,14 +59,15 @@ Docker is the recommended way to run the application across all platforms.
 - Runs in an isolated environment reducing risks to your system
 
 > [!NOTE]
-> **Native installations** use platform user directories by default:
-> | Directory | Linux | Windows | macOS |
-> |-----------|-------|---------|-------|
-> | Config | `$XDG_CONFIG_HOME/caesura/config.yml` | `%APPDATA%/caesura/config.yml` | `~/Library/Application Support/caesura/config.yml` |
-> | Cache | `$XDG_CACHE_HOME/caesura/` | `%LOCALAPPDATA%/caesura/` | `~/Library/Caches/caesura/` |
-> | Output | `$XDG_DATA_HOME/caesura/output/` | `%LOCALAPPDATA%/caesura/output/` | `~/Library/Application Support/caesura/output/` |
+> **Default paths** vary by platform:
+> | Directory | Docker        | Linux                                 | Windows                          | macOS                                              |
+> |-----------|---------------|---------------------------------------|----------------------------------|----------------------------------------------------|
+> | Config    | `/config.yml` | `$XDG_CONFIG_HOME/caesura/config.yml` | `%APPDATA%/caesura/config.yml`   | `~/Library/Application Support/caesura/config.yml` |
+> | Cache     | `/cache`      | `$XDG_CACHE_HOME/caesura/`            | `%LOCALAPPDATA%/caesura/`        | `~/Library/Caches/caesura/`                        |
+> | Output    | `/output`     | `$XDG_DATA_HOME/caesura/output/`      | `%LOCALAPPDATA%/caesura/output/` | `~/Library/Application Support/caesura/output/`    |
+> | Content   | `/content`    | -                                     | —                                | -                                                  |
 >
-> Docker users must explicitly set paths: `--config /config.yml --content /content --cache /cache --output /output`
+> `content` must be set explicitly for native installations.
 
 > [!TIP]
 > **[Configuration options and the commands they apply to are documented in CONFIG.md](CONFIG.md)**
