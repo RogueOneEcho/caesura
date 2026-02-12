@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use di::{ServiceCollection, existing_as_self};
+use di::{existing_as_self, ServiceCollection};
 use std::fs::read_to_string;
 
 pub const DEFAULT_CONFIG_PATH: &str = "config.yml";
@@ -89,21 +89,17 @@ impl OptionsProvider {
 
 /// Read the config file.
 ///
-/// Use the default config path if no path is set on the command line.
+/// - Returns `None` if the command does not use shared options
+/// - Returns `None` if the file does not exist (validation reports the error)
+/// - Falls back to the default config path if `--config` is not set
 #[expect(clippy::ref_option, reason = "caller has Option<T>, not &T")]
 fn read_config_file(options: &Option<SharedOptionsPartial>) -> Option<String> {
+    let options = options.as_ref()?;
     let path = options
-        .as_ref()
-        .and_then(|o| o.config.clone())
+        .config
+        .clone()
         .unwrap_or_else(|| PathBuf::from(DEFAULT_CONFIG_PATH));
-    match read_to_string(path) {
-        Ok(yaml) => Some(yaml),
-        Err(e) => {
-            init_logger();
-            warn!("{} to read config file: {}", "Failed".bold(), e);
-            None
-        }
-    }
+    read_to_string(path).ok()
 }
 
 pub trait RegisterOptions {
