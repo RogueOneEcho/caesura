@@ -362,12 +362,81 @@ jobs:
     - run: rm -rf /tmp/.buildx-cache
     - run: mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+  docker-scan:
+    runs-on: ubuntu-24.04
+    if: needs.release.outputs.version != ''
+    needs: [release, docker-build]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: amd64
+        - arch: arm64
+    env:
+      IMAGE: ghcr.io/rogueoneecho/caesura:${{ needs.release.outputs.version }}-${{ matrix.arch }}
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - run: echo $GH_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - run: echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+    - run: /home/linuxbrew/.linuxbrew/bin/brew install syft grype cosign CycloneDX/cyclonedx/cyclonedx-cli
+
+    - name: Generate SBOM
+      run: >
+        syft ${{ env.IMAGE }}
+        --platform linux/${{ matrix.arch }}
+        --output cyclonedx-json=syft-sbom.cdx.json
+
+    - name: Merge SBOMs
+      run: >
+        cyclonedx merge
+        --input-files syft-sbom.cdx.json .github/sbom/source-deps.cdx.json
+        --output-file merged-sbom.cdx.json
+        --input-format json
+        --output-format json
+        --output-version v1_6
+
+    - name: Vulnerability scan
+      run: >
+        grype sbom:merged-sbom.cdx.json
+        --output table
+        --fail-on critical
+
+    - name: Get image digest
+      id: digest
+      run: |
+        DIGEST=$(docker buildx imagetools inspect "${{ env.IMAGE }}" --format '{{json .Manifest.Digest}}' | tr -d '"')
+        echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+    - name: Attest SBOM
+      run: >
+        cosign attest
+        --predicate merged-sbom.cdx.json
+        --type cyclonedx
+        --yes
+        ghcr.io/rogueoneecho/caesura@${{ steps.digest.outputs.digest }}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: sbom-${{ matrix.arch }}
+        path: merged-sbom.cdx.json
+
   docker-release:
     runs-on: ubuntu-24.04
     needs:
     - release
     - cargo-build
     - docker-build
+    - docker-scan
     steps:
 
     - run: echo $GH_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
