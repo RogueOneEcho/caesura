@@ -99,6 +99,9 @@ jobs:
     - run: git --no-pager diff --color
 
     - if: contains(matrix.os, 'ubuntu')
+      run: echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+    - if: contains(matrix.os, 'ubuntu')
       run: sudo apt-get update
 
     - if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
@@ -106,7 +109,9 @@ jobs:
 
     - run: rustup target add ${{ matrix.target }}
 
-    - run: cargo build --release --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
+    - run: brew install cargo-auditable
+
+    - run: cargo auditable build --release --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
 
     - name: Save cargo cache
       id: cargo-cache-save
@@ -143,11 +148,8 @@ jobs:
         key: ${{ runner.os }}-brew-${{ runner.arch }}-v3-
         path: /home/linuxbrew/.linuxbrew
 
-    - if: matrix.test && contains(matrix.os, 'ubuntu')
-      run: echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
-
     - if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
-      run: /home/linuxbrew/.linuxbrew/bin/brew install flac lame sox intermodal
+      run: brew install flac lame sox intermodal
 
     - if: matrix.test && contains(matrix.os, 'macos')
       run: brew install flac lame sox intermodal
@@ -194,6 +196,17 @@ jobs:
         if ! cargo fmt --check
         then
           echo "::warning title=Format Check Failed::Please review the output for details."
+        fi
+
+    - if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: brew install cargo-audit
+
+    - name: Run cargo audit
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: |
+        if ! cargo audit bin target/${{ matrix.target }}/release/caesura
+        then
+          echo "::warning title=Vulnerability Scan Failed::Please review the output for details."
         fi
 
     - run: git --no-pager diff --color
