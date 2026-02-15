@@ -11,7 +11,7 @@ pub enum SampleAction {
     /// Failed to remove a temporary file.
     #[error("remove file")]
     RemoveFile,
-    /// Failed to generate a FLAC file with SOX.
+    /// Failed to generate a FLAC file with `SoX`.
     #[error("generate FLAC")]
     GenerateFlac,
     /// Failed to set metadata tags with metaflac.

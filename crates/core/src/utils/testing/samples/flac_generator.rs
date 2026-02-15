@@ -5,7 +5,7 @@ use rogue_logging::Failure;
 use tokio::process::Command;
 
 use super::{ImageGenerator, SampleAction};
-use crate::dependencies::{METAFLAC, SOX};
+use crate::dependencies::{METAFLAC, SOX_NG};
 use crate::utils::ProcessExt;
 
 /// Builder for generating sample FLAC files.
@@ -211,8 +211,9 @@ impl FlacGenerator {
         let channels = self.channels.unwrap_or(Self::DEFAULT_CHANNELS);
         let duration_secs = self.duration_secs.unwrap_or(Self::DEFAULT_DURATION_SECS);
         let frequency = self.frequency.unwrap_or(Self::DEFAULT_FREQUENCY);
-        Command::new(SOX)
+        Command::new(SOX_NG)
             .args([
+                "--single-threaded",
                 "-D",
                 "-n",
                 "-r",

@@ -48,6 +48,7 @@ impl HostBuilder {
                 logger.clone().init();
                 logger
             }))
+            .add(SoxFactory::singleton())
             .add(PathManager::transient())
             .add(IdProvider::transient())
             .add(SourceProvider::transient())

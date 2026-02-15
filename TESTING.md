@@ -18,7 +18,7 @@ The following tools must be installed to run tests. Version numbers are those us
 
 | Tool        | Version | Purpose                             | Installation              |
 |-------------|---------|-------------------------------------|---------------------------|
-| SoX         | 14.4.2  | Generate sample audio files         | `brew install sox`        |
+| sox-ng      | 14.7.0  | Generate sample audio files         | `brew install sox_ng`     |
 | FLAC        | 1.5.0   | FLAC encoding/decoding              | `brew install flac`       |
 | metaflac    | 1.5.0   | Test sample tag injection           | Included with FLAC        |
 | LAME        | 3.100   | MP3 encoding for transcode tests    | `brew install lame`       |
@@ -35,6 +35,13 @@ This runs all non-ignored tests, which use:
 - Generated sample FLAC files (created on first run)
 - Mock API client (no network access required)
 - Snapshot testing with `insta`
+
+Tests should complete quickly even with a fresh sample cache. Expect ~45s on an ubuntu-24.04 CI runner and under 10s on a modern desktop. Significantly longer could indicate an issue with a dependency.
+
+```
+❯ ./samples/rm-samples && cargo test --quiet --all-features
+test result: ok. 249 passed; 0 failed; 6 ignored; 0 measured; 0 filtered out; finished in 8.70s
+```
 
 ### Determinism Tests
 
@@ -94,8 +101,8 @@ The `gazelle_api` crate provides `MockGazelleClient` for testing without network
 
 For reproducible test output:
 
-1. **SoX** is invoked with `-D` flag to disable dithering
-2. **24-bit transcode tests** are marked as ignored because SoX dithering during bit-depth conversion is non-deterministic
+1. **sox-ng** is invoked with `-D` flag to disable dithering
+2. **24-bit transcode tests** are marked as ignored because sox-ng dithering during bit-depth conversion is non-deterministic
 3. **Torrent files** are excluded from snapshots (contain timestamps)
 4. **FLAC encoder version** is embedded in files - snapshots may need updating when FLAC is upgraded
 

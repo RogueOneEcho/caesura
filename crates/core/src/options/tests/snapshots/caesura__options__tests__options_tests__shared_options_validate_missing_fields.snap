@@ -6,14 +6,15 @@ expression: errors
 - NotSet: Api key
 - NotSet: Indexer
 - NotSet: Indexer url
-- NotSet: Content
 - UrlNotHttp:
     - Indexer URL
     - ""
 - UrlNotHttp:
     - Announce URL
     - ""
-- IsEmpty: Content Directory
+- DoesNotExist:
+    - Content Directory
+    - "./nonexistent-content"
 - DoesNotExist:
     - Output Directory
     - "./nonexistent-output"

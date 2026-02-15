@@ -14,6 +14,7 @@ pub(crate) use rules::*;
 pub(crate) use runner_options::*;
 pub(crate) use shared_options::*;
 pub(crate) use source_arg::*;
+pub(crate) use sox_options::*;
 pub use spectrogram_options::*;
 pub use target_options::*;
 pub use upload_options::*;
@@ -32,6 +33,7 @@ mod rules;
 mod runner_options;
 mod shared_options;
 mod source_arg;
+mod sox_options;
 mod spectrogram_options;
 mod target_options;
 #[cfg(test)]

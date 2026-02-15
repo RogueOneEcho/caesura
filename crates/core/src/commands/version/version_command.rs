@@ -5,25 +5,24 @@ use tokio::process::Command;
 
 pub(crate) const FLAC_VERSION_PATTERN: &str = r"flac (\d+\.\d+(?:\.\d+)?)";
 pub(crate) const LAME_VERSION_PATTERN: &str = r"version (\d+\.\d+)";
-pub(crate) const SOX_VERSION_PATTERN: &str = r"v(\d+\.\d+\.\d+)";
+pub(crate) const SOX_VERSION_PATTERN: &str = r"v(\d+\.\d+\.\d+(?:\.\d+)?)";
 
 /// Display version information for caesura and its dependencies.
-///
-/// Note: sox on macOS outputs `sox: SoX v` without the version number
-/// so the sox version will display as "?".
-/// - <https://sourceforge.net/p/sox/patches/104/>
 #[injectable]
-pub struct VersionCommand;
+pub struct VersionCommand {
+    sox: Ref<SoxFactory>,
+}
 
 impl VersionCommand {
     /// Execute the version command.
     ///
     /// Returns `true` if all dependencies are found, `false` if any are missing.
     pub async fn execute(&self) -> bool {
+        let sox_binary = self.sox.binary();
         let flac = get_version(FLAC, FLAC_VERSION_PATTERN).await;
         let lame = get_version(LAME, LAME_VERSION_PATTERN).await;
-        let sox = get_version(SOX, SOX_VERSION_PATTERN).await;
-        let dependencies = [(FLAC, flac), (LAME, lame), (SOX, sox)];
+        let sox = get_version(sox_binary, SOX_VERSION_PATTERN).await;
+        let dependencies = [(FLAC, flac), (LAME, lame), (sox_binary, sox)];
         let any_error = dependencies.iter().any(|(_, result)| result.is_err());
         if any_error {
             error!("Failed to find all dependencies");

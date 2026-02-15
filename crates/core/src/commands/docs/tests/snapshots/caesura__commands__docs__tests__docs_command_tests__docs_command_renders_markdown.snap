@@ -42,6 +42,12 @@ Options can be set via CLI flags or in `config.yml`.
 |--------------------|----------------------|-------------|-------------------|------------------------------------|
 | `spectrogram_size` | `--spectrogram-size` | `Vec<Size>` | `["full","zoom"]` | Sizes of spectrograms to generate. |
 
+## Options for sox binary selection
+
+| YAML Key    | CLI Flag      | Type   | Default | Description                                                                                                                                                  |
+|-------------|---------------|--------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `no_sox_ng` | `--no-sox-ng` | `bool` | `false` | Use the original `SoX` binary instead of SoX-ng.<br>When set, the binary name changes from `sox_ng` to `sox` and the<br>`--single-threaded` flag is omitted. |
+
 ## Options for copying files
 
 | YAML Key    | CLI Flag      | Type   | Default | Description                                                                                                                                                |

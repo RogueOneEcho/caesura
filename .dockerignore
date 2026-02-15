@@ -16,3 +16,4 @@ config.yml
 config.*.yml
 Dockerfile
 *.md
+!CONFIG.md

@@ -42,25 +42,21 @@ async fn get_version_lame() {
 #[tokio::test]
 async fn get_version_sox() {
     // Act
-    let info = get_version(SOX, SOX_VERSION_PATTERN)
+    let info = get_version(SOX_NG, SOX_VERSION_PATTERN)
         .await
         .expect("sox should be available");
 
     // Assert
     assert!(
-        info.first_line.contains("SoX"),
-        "should contain SoX in output: {:?}",
+        info.first_line.contains("SoX_ng"),
+        "should contain SoX_ng in output: {:?}",
         info.first_line
     );
-    // sox on macOS outputs "sox: SoX v" without the version number
-    // https://sourceforge.net/p/sox/patches/104/
-    if !cfg!(target_os = "macos") {
-        assert!(
-            info.version.is_some(),
-            "should extract sox version from: {:?}",
-            info.first_line
-        );
-    }
+    assert!(
+        info.version.is_some(),
+        "should extract sox version from: {:?}",
+        info.first_line
+    );
 }
 
 #[tokio::test]

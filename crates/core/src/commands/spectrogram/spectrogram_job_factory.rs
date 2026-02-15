@@ -4,6 +4,7 @@ use crate::prelude::*;
 #[injectable]
 pub(crate) struct SpectrogramJobFactory {
     paths: Ref<PathManager>,
+    sox: Ref<SoxFactory>,
 }
 
 impl SpectrogramJobFactory {
@@ -49,6 +50,7 @@ impl SpectrogramJobFactory {
             image_title,
             size,
             duration_secs,
+            sox: self.sox.clone(),
         })
     }
 }

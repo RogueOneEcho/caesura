@@ -1,8 +1,16 @@
-/// Path to the sox binary.
+/// Path to the SoX-ng binary.
+#[cfg(target_os = "windows")]
+pub const SOX_NG: &str = "sox_ng.exe";
+
+/// Path to the SoX-ng binary.
+#[cfg(not(target_os = "windows"))]
+pub const SOX_NG: &str = "sox_ng";
+
+/// Path to the original sox binary.
 #[cfg(target_os = "windows")]
 pub const SOX: &str = "sox.exe";
 
-/// Path to the sox binary.
+/// Path to the original sox binary.
 #[cfg(not(target_os = "windows"))]
 pub const SOX: &str = "sox";
 

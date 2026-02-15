@@ -1,11 +1,11 @@
 ---
-source: src/commands/transcode/tests/transcode_command_tests.rs
+source: crates/core/src/commands/transcode/tests/transcode_command_tests.rs
 expression: snapshot
 ---
 - directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: Test Artist - Test Album - 01 Track One.mp3
   size: 2604910
-  sha256: a3921e5a0f7af99a5ea8cb9d1d047548576fa02366973f008132a04fc1ee6364
+  sha256: 030a8c236ab4cc59f752264a1218ba1e3cb5c06184611b8de5798e3356b5cd9a
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -32,7 +32,7 @@ expression: snapshot
 - directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: Test Artist - Test Album - 02 Track Two.mp3
   size: 2604910
-  sha256: 91302550eb284b1c65627224b1099ab164136f5cbf4181f5841c2bc090afdd8a
+  sha256: 9ae3a41c630f6d2fc713d71e387e004ad7048f78ce08a40f5a4da136eb98640f
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -66,8 +66,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 01 Track One.mp3
-  size: 1401795
-  sha256: d8d77fb1bb982b93aff9d8a73afc6cb0bc8b51aac4ee205054d639eea260fdcc
+  size: 1401794
+  sha256: 244dbf65cb1920e4966c156fd502725d5144c315cfc4c21a909ccc17c67e7add
   audio:
     duration_ms: 65045
     overall_bitrate: 172
@@ -93,8 +93,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 02 Track Two.mp3
-  size: 1330916
-  sha256: a4de4150d94d4c1e1e1acf734ce7110a2f60723e3e1c1274584b85cb59de8f36
+  size: 1330283
+  sha256: 5e8b5fb2c8fc09d57e03e9488af1ddf046640544cc8779370b1202f88090cbde
   audio:
     duration_ms: 65045
     overall_bitrate: 163

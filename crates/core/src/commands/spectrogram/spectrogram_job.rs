@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use std::fs::create_dir_all;
 use std::process::Output;
-use tokio::process::Command;
 
 /// Duration of the zoom spectrogram capture window in seconds.
 const ZOOM_DURATION: u32 = 2;
@@ -26,6 +25,8 @@ pub(crate) struct SpectrogramJob {
     /// Spectrogram size variant.
     pub size: Size,
     pub duration_secs: Option<u32>,
+    /// Factory for creating sox commands.
+    pub sox: Ref<SoxFactory>,
 }
 
 impl SpectrogramJob {
@@ -49,7 +50,9 @@ impl SpectrogramJob {
     async fn execute_zoom(&self) -> Result<Output, Failure<SpectrogramAction>> {
         let start_time = calculate_zoom_start(self.duration_secs);
         let duration = format!("0:{ZOOM_DURATION:02}");
-        Command::new(SOX)
+        self.sox
+            .create()
+            .to_command()
             .arg(&self.source_path)
             .arg("-n")
             .arg("remix")
@@ -82,7 +85,9 @@ impl SpectrogramJob {
     }
 
     async fn execute_full(&self) -> Result<Output, Failure<SpectrogramAction>> {
-        Command::new(SOX)
+        self.sox
+            .create()
+            .to_command()
             .arg(&self.source_path)
             .arg("-n")
             .arg("remix")

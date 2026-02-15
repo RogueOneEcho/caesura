@@ -47,11 +47,15 @@ fn verify_options_default_values() {
 #[test]
 fn cache_options_default_values() {
     let resolved = CacheOptionsPartial::default().resolve_without_validation();
-    assert!(
-        resolved.cache.ends_with("caesura"),
-        "expected cache path to end with 'caesura', got: {:?}",
-        resolved.cache
-    );
+    if is_docker() {
+        assert_eq!(resolved.cache, PathBuf::from("/cache"));
+    } else {
+        assert!(
+            resolved.cache.ends_with("caesura"),
+            "expected cache path to end with 'caesura', got: {:?}",
+            resolved.cache
+        );
+    }
 }
 
 /// Verify `CopyOptions` default values.
@@ -397,8 +401,9 @@ fn with_options_overrides_default_registration() {
 /// Verify validation errors for missing required fields.
 #[test]
 fn shared_options_validate_missing_fields() {
-    // Use explicit output path to avoid platform-specific path in snapshot
+    // Use explicit paths to avoid platform-specific and Docker-specific defaults in snapshot
     let result = SharedOptionsPartial {
+        content: Some(vec![PathBuf::from("./nonexistent-content")]),
         output: Some(PathBuf::from("./nonexistent-output")),
         ..SharedOptionsPartial::default()
     }

@@ -18,18 +18,18 @@ Just use Docker or ask ChatGPT. I imagine it's tedious.
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-2. Install FLAC, LAME and SOX dependencies.
+2. Install FLAC, LAME and sox-ng dependencies.
 
 With Homebrew:
 
 ```bash
-brew install flac lame sox
+brew install flac lame sox_ng
 ```
 
-Or, from your package manager:
+Or, with Nix:
 
 ```bash
-sudo apt install flac lame sox --yes
+nix profile install nixpkgs#flac nixpkgs#lame github:RogueOneEcho/nix#sox-ng
 ```
 
 5. MacOS Only

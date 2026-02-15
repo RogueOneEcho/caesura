@@ -6,12 +6,22 @@ use crate::prelude::*;
 #[test]
 fn default_config_path() {
     let path = PathManager::default_config_path();
-    #[cfg(target_os = "linux")]
-    let expected = ".config/caesura/config.yml";
-    #[cfg(target_os = "macos")]
-    let expected = "Library/Application Support/caesura/config.yml";
-    #[cfg(target_os = "windows")]
-    let expected = "AppData/Roaming/caesura/config.yml";
+    let expected = if is_docker() {
+        "/config.yml"
+    } else {
+        #[cfg(target_os = "linux")]
+        {
+            ".config/caesura/config.yml"
+        }
+        #[cfg(target_os = "macos")]
+        {
+            "Library/Application Support/caesura/config.yml"
+        }
+        #[cfg(target_os = "windows")]
+        {
+            "AppData/Roaming/caesura/config.yml"
+        }
+    };
     assert!(
         path.ends_with(expected),
         "expected path to end with '{expected}', got: {path:?}"
@@ -22,12 +32,22 @@ fn default_config_path() {
 #[test]
 fn default_cache_dir() {
     let path = PathManager::default_cache_dir();
-    #[cfg(target_os = "linux")]
-    let expected = ".cache/caesura";
-    #[cfg(target_os = "macos")]
-    let expected = "Library/Caches/caesura";
-    #[cfg(target_os = "windows")]
-    let expected = "AppData/Local/caesura";
+    let expected = if is_docker() {
+        "/cache"
+    } else {
+        #[cfg(target_os = "linux")]
+        {
+            ".cache/caesura"
+        }
+        #[cfg(target_os = "macos")]
+        {
+            "Library/Caches/caesura"
+        }
+        #[cfg(target_os = "windows")]
+        {
+            "AppData/Local/caesura"
+        }
+    };
     assert!(
         path.ends_with(expected),
         "expected path to end with '{expected}', got: {path:?}"
@@ -38,12 +58,22 @@ fn default_cache_dir() {
 #[test]
 fn default_output_dir() {
     let path = PathManager::default_output_dir();
-    #[cfg(target_os = "linux")]
-    let expected = ".local/share/caesura/output";
-    #[cfg(target_os = "macos")]
-    let expected = "Library/Application Support/caesura/output";
-    #[cfg(target_os = "windows")]
-    let expected = "AppData/Roaming/caesura/output";
+    let expected = if is_docker() {
+        "/output"
+    } else {
+        #[cfg(target_os = "linux")]
+        {
+            ".local/share/caesura/output"
+        }
+        #[cfg(target_os = "macos")]
+        {
+            "Library/Application Support/caesura/output"
+        }
+        #[cfg(target_os = "windows")]
+        {
+            "AppData/Roaming/caesura/output"
+        }
+    };
     assert!(
         path.ends_with(expected),
         "expected path to end with '{expected}', got: {path:?}"

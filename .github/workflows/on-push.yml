@@ -145,14 +145,14 @@ jobs:
       if: matrix.test && contains(matrix.os, 'ubuntu')
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.os }}-brew-${{ runner.arch }}-v3-
+        key: brew-${{ runner.os }}-${{ runner.arch }}-
         path: /home/linuxbrew/.linuxbrew
 
     - if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
-      run: brew install flac lame sox intermodal
+      run: brew install flac lame sox_ng
 
     - if: matrix.test && contains(matrix.os, 'macos')
-      run: brew install flac lame sox intermodal
+      run: brew install flac lame sox_ng
 
     - name: Save brew cache (Linux only)
       if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'

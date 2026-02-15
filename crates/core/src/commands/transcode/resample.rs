@@ -10,6 +10,8 @@ pub(crate) struct Resample {
     pub resample_rate: u32,
     /// Use repeatable mode for `SoX` (deterministic dithering)
     pub repeatable: bool,
+    /// Factory for creating sox commands
+    pub sox: Ref<SoxFactory>,
 }
 
 impl Resample {
@@ -17,11 +19,11 @@ impl Resample {
     #[must_use]
     #[allow(clippy::wrong_self_convention)]
     pub(crate) fn to_info(self) -> CommandInfo {
-        let mut args = Vec::new();
+        let mut info = self.sox.create();
         if self.repeatable {
-            args.push("-R".to_owned());
+            info.args.push("-R".to_owned());
         }
-        args.extend([
+        info.args.extend([
             self.input.to_string_lossy().to_string(),
             "-G".to_owned(),
             "-b".to_owned(),
@@ -33,9 +35,6 @@ impl Resample {
             self.resample_rate.to_string(),
             "dither".to_owned(),
         ]);
-        CommandInfo {
-            program: SOX.to_owned(),
-            args,
-        }
+        info
     }
 }

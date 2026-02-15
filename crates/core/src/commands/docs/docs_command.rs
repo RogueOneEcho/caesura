@@ -19,6 +19,7 @@ impl DocsCommand {
             VerifyOptions::doc_metadata(),
             TargetOptions::doc_metadata(),
             SpectrogramOptions::doc_metadata(),
+            SoxOptions::doc_metadata(),
             CopyOptions::doc_metadata(),
             FileOptions::doc_metadata(),
             RunnerOptions::doc_metadata(),

@@ -102,7 +102,7 @@ impl Host {
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Version => Ok(self
+            Version { .. } => Ok(self
                 .services
                 .get_required::<VersionCommand>()
                 .execute()

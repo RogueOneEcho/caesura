@@ -1,19 +1,19 @@
 ---
-source: src/commands/spectrogram/tests/spectrogram_command_tests.rs
+source: crates/core/src/commands/spectrogram/tests/spectrogram_command_tests.rs
 expression: snapshot
 ---
 - directory: "Very Short Artist - Very Short Album [2024] [WEB SPECTROGRAMS]"
   filename: Very Short Artist - Very Short Album - 01 Very Short Track.full.png
-  size: 42443
-  sha256: a4aa17ab2cea35704aea49a98f14b9c7efab96bd3a3b6d2ef2bec1e3ffd21bd1
+  size: 42150
+  sha256: 348de4809b752eaf416a1398da93ecf52551c2a1cbe85774f32128cd169ea176
   image:
     width: 3144
     height: 611
     color_type: Rgb8
 - directory: "Very Short Artist - Very Short Album [2024] [WEB SPECTROGRAMS]"
   filename: Very Short Artist - Very Short Album - 01 Very Short Track.zoom.png
-  size: 17053
-  sha256: bc53f15252670b6f13011aaa408c30178fd9bd7ef2f017972fb46cf23ec603e1
+  size: 16977
+  sha256: 16b68f0ae3411c5444d428a57488fe334e60a91bacc7f06f84d9a0c74700bf71
   image:
     width: 395
     height: 1123

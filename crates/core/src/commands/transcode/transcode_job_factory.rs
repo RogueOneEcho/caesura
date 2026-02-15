@@ -6,6 +6,7 @@ pub(crate) struct TranscodeJobFactory {
     paths: Ref<PathManager>,
     copy_options: Ref<CopyOptions>,
     target_options: Ref<TargetOptions>,
+    sox: Ref<SoxFactory>,
 }
 
 impl TranscodeJobFactory {
@@ -48,6 +49,7 @@ impl TranscodeJobFactory {
                             Failure::wrap_with_path(TranscodeAction::GetSampleRate, &flac.path),
                         )?,
                         repeatable,
+                        sox: self.sox.clone(),
                     })
                 } else {
                     Variant::Include(Include {
@@ -70,6 +72,7 @@ impl TranscodeJobFactory {
                         input: flac.path.clone(),
                         resample_rate,
                         repeatable,
+                        sox: self.sox.clone(),
                     },
                     Encode {
                         format,

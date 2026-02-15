@@ -25,6 +25,29 @@
           "url": "https://downloads.xiph.org/releases/flac/flac-1.5.0.tar.xz"
         }
       ]
+    },
+    {
+      "type": "library",
+      "name": "sox_ng",
+      "version": "14.7.0.7",
+      "purl": "pkg:generic/sox_ng/sox_ng@14.7.0.7?download_url=https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.7.0.7/sox_ng-14.7.0.7.tar.gz",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://codeberg.org/sox_ng/sox_ng"
+        },
+        {
+          "type": "distribution",
+          "url": "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.7.0.7/sox_ng-14.7.0.7.tar.gz"
+        }
+      ]
     }
   ]
 }

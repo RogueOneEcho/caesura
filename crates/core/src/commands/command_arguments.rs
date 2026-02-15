@@ -21,6 +21,8 @@ pub enum CommandArguments {
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
+        sox: SoxOptionsPartial,
+        #[command(flatten)]
         target: TargetOptionsPartial,
         #[command(flatten)]
         verify: VerifyOptionsPartial,
@@ -53,6 +55,8 @@ pub enum CommandArguments {
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
+        sox: SoxOptionsPartial,
+        #[command(flatten)]
         spectrogram: SpectrogramOptionsPartial,
         #[command(flatten)]
         runner: RunnerOptionsPartial,
@@ -64,6 +68,8 @@ pub enum CommandArguments {
         source: SourceArg,
         #[command(flatten)]
         shared: SharedOptionsPartial,
+        #[command(flatten)]
+        sox: SoxOptionsPartial,
         #[command(flatten)]
         target: TargetOptionsPartial,
         #[command(flatten)]
@@ -101,7 +107,11 @@ pub enum CommandArguments {
     },
 
     /// Display version information for caesura and dependencies.
-    Version,
+    #[command(short_flag = 'V', long_flag = "version")]
+    Version {
+        #[command(flatten)]
+        sox: SoxOptionsPartial,
+    },
 }
 
 #[derive(Subcommand, Debug, Clone)]
