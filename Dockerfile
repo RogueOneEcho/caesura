@@ -17,7 +17,7 @@ RUN curl -L "https://downloads.xiph.org/releases/flac/flac-${FLAC_VERSION}.tar.x
 
 # Cargo chef base
 FROM rust:alpine AS chef
-RUN apk add --no-cache libc-dev && cargo install cargo-chef cargo-edit
+RUN apk add --no-cache libc-dev && cargo install cargo-chef cargo-edit cargo-auditable
 WORKDIR /app
 
 # Prepare recipe
@@ -32,7 +32,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 ARG VERSION=0.0.0
 RUN cargo set-version -p caesura $VERSION
-RUN cargo build --release
+RUN cargo auditable build --release
 
 # Build final image with minimal dependencies
 FROM alpine:latest
