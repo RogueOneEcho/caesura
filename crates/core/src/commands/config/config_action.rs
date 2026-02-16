@@ -5,6 +5,6 @@ use crate::prelude::*;
 pub enum ConfigAction {
     #[error("collate config")]
     CollateConfig,
-    #[error("serialize config")]
-    SerializeConfig,
+    #[error("serialize value")]
+    SerializeValue,
 }
