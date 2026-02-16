@@ -29,7 +29,7 @@ impl Host {
     pub async fn execute(&self) -> Result<bool, Report> {
         let _ = self.services.get_required::<Logger>();
         match ArgumentsParser::get_or_show_help() {
-            Config => self
+            Config { .. } => self
                 .services
                 .get_required::<ConfigCommand>()
                 .execute()

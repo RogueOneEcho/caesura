@@ -18,7 +18,7 @@ pub struct OptionsProvider {
 impl OptionsProvider {
     pub fn new() -> Self {
         let args = ArgumentsParser::get();
-        let cli_options = SharedOptionsPartial::from_args(&args);
+        let cli_options = ConfigOptionsPartial::from_args(&args);
         Self {
             yaml: read_config_file(&cli_options),
             errors: Vec::new(),
@@ -69,6 +69,7 @@ impl OptionsProvider {
         self.register(SharedOptionsPartial::from_args(&args), services);
         self.register(BatchOptionsPartial::from_args(&args), services);
         self.register(CacheOptionsPartial::from_args(&args), services);
+        self.register(ConfigOptionsPartial::from_args(&args), services);
         self.register(CopyOptionsPartial::from_args(&args), services);
         self.register(FileOptionsPartial::from_args(&args), services);
         self.register(RunnerOptionsPartial::from_args(&args), services);
@@ -92,7 +93,7 @@ impl OptionsProvider {
 /// - Returns `None` if the file does not exist (validation reports the error)
 /// - Falls back to the default config path if `--config` is not set
 #[expect(clippy::ref_option, reason = "caller has Option<T>, not &T")]
-fn read_config_file(options: &Option<SharedOptionsPartial>) -> Option<String> {
+fn read_config_file(options: &Option<ConfigOptionsPartial>) -> Option<String> {
     let options = options.as_ref()?;
     let path = options
         .config

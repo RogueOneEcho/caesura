@@ -5,7 +5,10 @@ use clap::Subcommand;
 #[derive(Subcommand, Debug, Clone)]
 pub enum CommandArguments {
     /// Read the config file if it exists and concatenate default values.
-    Config,
+    Config {
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
+    },
 
     /// Generate markdown documentation for configuration options.
     Docs,
@@ -18,6 +21,8 @@ pub enum CommandArguments {
 
     /// Verify, transcode, and upload from multiple FLAC sources in one command.
     Batch {
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
@@ -53,6 +58,8 @@ pub enum CommandArguments {
         #[command(flatten)]
         source: SourceArg,
         #[command(flatten)]
+        config: ConfigOptionsPartial,
+        #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
         sox: SoxOptionsPartial,
@@ -66,6 +73,8 @@ pub enum CommandArguments {
     Transcode {
         #[command(flatten)]
         source: SourceArg,
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
@@ -85,6 +94,8 @@ pub enum CommandArguments {
         #[command(flatten)]
         source: SourceArg,
         #[command(flatten)]
+        config: ConfigOptionsPartial,
+        #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
         target: TargetOptionsPartial,
@@ -98,6 +109,8 @@ pub enum CommandArguments {
     Verify {
         #[command(flatten)]
         source: SourceArg,
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
@@ -119,6 +132,8 @@ pub enum QueueCommandArguments {
     /// Add a directory of `.torrent` files to the queue
     Add {
         #[command(flatten)]
+        config: ConfigOptionsPartial,
+        #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
         cache: CacheOptionsPartial,
@@ -128,6 +143,8 @@ pub enum QueueCommandArguments {
 
     /// List the sources in the queue
     List {
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
@@ -140,6 +157,8 @@ pub enum QueueCommandArguments {
     #[command(name = "rm")]
     Remove {
         #[command(flatten)]
+        config: ConfigOptionsPartial,
+        #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
         cache: CacheOptionsPartial,
@@ -149,6 +168,8 @@ pub enum QueueCommandArguments {
 
     /// Summarize the sources in the queue
     Summary {
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]

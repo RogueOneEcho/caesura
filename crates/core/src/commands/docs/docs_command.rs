@@ -15,6 +15,7 @@ impl DocsCommand {
     #[must_use]
     pub fn render() -> String {
         let docs: Vec<&OptionsDoc> = vec![
+            ConfigOptions::doc_metadata(),
             SharedOptions::doc_metadata(),
             VerifyOptions::doc_metadata(),
             TargetOptions::doc_metadata(),

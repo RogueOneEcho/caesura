@@ -293,7 +293,6 @@ fn shared_options_yaml_round_trip() {
         output: Some(PathBuf::from("/data/output")),
         verbosity: Some(Verbosity::Debug),
         log_time: Some(TimeFormat::Elapsed),
-        config: Some(PathBuf::from("./custom_config.yml")),
     };
 
     // Act

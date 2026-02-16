@@ -2,6 +2,7 @@
 
 pub use batch_options::*;
 pub use cache_options::*;
+pub use config_options::*;
 pub use copy_options::*;
 pub use doc_metadata::*;
 pub use file_options::*;
@@ -22,6 +23,7 @@ pub use verify_options::*;
 
 mod batch_options;
 mod cache_options;
+mod config_options;
 mod copy_options;
 mod doc_metadata;
 mod file_options;
