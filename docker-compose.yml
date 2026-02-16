@@ -1,12 +1,18 @@
 services:
   caesura:
     container_name: caesura
-    build: .
+    image: ghcr.io/rogueoneecho/caesura:latest
     volumes:
-    - ./config.yml:/config.yml:ro
-    - ./content:/content
-    - cache:/cache
-    - output:/output
+    - /srv/caesura/cache:/cache
+    - /srv/qBittorrent/BT_backup:/srv/qBittorrent/BT_backup:ro
+    - /srv/shared:/srv/shared
+    configs:
+    - source: caesura_config
+      target: /config.yml
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
 
   caddy:
     container_name: caddy
@@ -16,12 +22,40 @@ services:
     volumes:
     - caddy_data:/data
     - caddy_config:/config
-    - output:/srv
+    - output:/srv:ro
     restart: unless-stopped
     command: caddy file-server --browse --root /srv
+    read_only: true
+    tmpfs:
+    - /tmp
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    cap_add:
+    - NET_BIND_SERVICE
 
 volumes:
   output:
   cache:
   caddy_data:
   caddy_config:
+
+configs:
+  caesura_config:
+    content: |
+      announce_url: https://tracker.example.com/YOUR_ANNOUNCE_KEY/announce
+      api_key: YOUR_API_KEY
+      content:
+      - /srv/shared/downloads/content
+      copy_torrent_to: /srv/shared/caesura/autoadd
+      hard_link: true
+      output: /srv/shared/caesura
+      queue_add_path: /srv/qBittorrent/BT_backup
+      rename_tracks: true
+      target:
+      - flac
+      - v0
+      - '320'
+      verbosity: debug
+
