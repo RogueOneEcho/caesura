@@ -27,6 +27,7 @@ impl DocsCommand {
             UploadOptions::doc_metadata(),
             CacheOptions::doc_metadata(),
             BatchOptions::doc_metadata(),
+            QueueAddArgs::doc_metadata(),
         ];
 
         let mut out = String::new();
@@ -65,9 +66,14 @@ fn render_options_table(doc: &OptionsDoc) -> String {
                 "~".to_owned()
             };
             let description = escape_markdown_table(field.description);
+            let cli_flag = if field.cli_flag.is_empty() {
+                "~".to_owned()
+            } else {
+                format!("`{}`", field.cli_flag)
+            };
             [
                 format!("`{}`", field.config_key),
-                format!("`{}`", field.cli_flag),
+                cli_flag,
                 format!("`{}`", field.field_type),
                 default,
                 description,

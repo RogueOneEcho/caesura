@@ -73,7 +73,7 @@ impl crate::options::Documented for CustomArgOptions {
             description: "",
             fields: ::std::vec![
                 crate ::options::FieldDoc { config_key : "file_path", cli_flag :
-                "--file-path", field_type : "String", default_value :
+                "--custom-name", field_type : "String", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < String >
                 ::default()).unwrap()), default_doc : ::std::option::Option::None,
                 description : "", }

@@ -15,7 +15,7 @@ pub fn generate_doc_metadata(
     let struct_description = extract_doc_string(struct_attrs);
     let field_docs = fields.iter().map(|f| {
         let config_key = f.ident.to_string();
-        let cli_flag = format!("--{}", config_key.replace('_', "-"));
+        let cli_flag = generate_cli_flag(f);
         let field_type = type_to_display_string(&f.ty);
         let description = extract_doc_string(&f.doc_attrs);
         let default_value_expr = generate_default_value_expr(f);
@@ -42,6 +42,26 @@ pub fn generate_doc_metadata(
                         fields: ::std::vec![#(#field_docs),*],
                     });
                 &DOC
+            }
+        }
+    }
+}
+
+/// Generate the CLI flag string for documentation.
+///
+/// - `#[arg(long = "name")]` produces `--name`
+/// - `#[arg(long)]` produces `--field-name` (kebab-case from field ident)
+/// - No `long` with `#[arg(value_name = "X")]` produces `<X>` (positional arg)
+/// - No `#[arg(...)]` at all produces `--field-name` (default kebab-case)
+fn generate_cli_flag(f: &ParsedField) -> String {
+    match &f.arg_long {
+        Some(name) if !name.is_empty() => format!("--{name}"),
+        Some(_) => format!("--{}", f.ident.to_string().replace('_', "-")),
+        None => {
+            if f.arg_value_name.is_some() {
+                String::new()
+            } else {
+                format!("--{}", f.ident.to_string().replace('_', "-"))
             }
         }
     }

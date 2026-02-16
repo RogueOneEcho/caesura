@@ -12,14 +12,11 @@ pub(crate) struct QueueAddCommand {
 
 impl QueueAddCommand {
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
-        if !self.args.validate() {
-            return Ok(false);
-        }
         let path = self
             .args
             .queue_add_path
             .clone()
-            .expect("source should be set");
+            .expect("queue add path should be set after validation");
         let status = self.execute(path).await?;
         info!("{} {} items to the queue", "Added".bold(), status.added);
         trace!(
@@ -37,7 +34,7 @@ impl QueueAddCommand {
             self.execute_file(path).await
         } else {
             Err(Failure::new(
-                QueueAction::ReadTorrent,
+                QueueAction::MatchPath,
                 IoError::new(ErrorKind::NotFound, "path does not exist"),
             )
             .with_path(&path))

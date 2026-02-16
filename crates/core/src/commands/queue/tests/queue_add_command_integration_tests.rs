@@ -32,17 +32,16 @@ async fn queue_add_command_skips_duplicate() -> Result<(), TestError> {
     Ok(())
 }
 
-/// Test that `QueueAddCommand` returns false for non-existent path.
+/// Test that `QueueAddCommand` returns an error for non-existent path.
 #[tokio::test]
 async fn queue_add_command_nonexistent_path_fails() -> Result<(), TestError> {
-    let (_test_dir, command, queue) =
+    let (_test_dir, command, _queue) =
         queue_add_test_helper(PathBuf::from("/nonexistent/path")).await;
 
     let result = command.execute_cli().await;
 
-    assert!(matches!(result, Ok(false)));
-    let items = get_items(queue).await;
-    assert_yaml_snapshot!(items);
+    let error = result.expect_err("should fail for nonexistent path");
+    assert_eq!(error.action(), &QueueAction::MatchPath);
     Ok(())
 }
 

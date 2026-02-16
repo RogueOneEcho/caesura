@@ -72,6 +72,7 @@ impl OptionsProvider {
         self.register(ConfigOptionsPartial::from_args(&args), services);
         self.register(CopyOptionsPartial::from_args(&args), services);
         self.register(FileOptionsPartial::from_args(&args), services);
+        self.register(QueueAddArgsPartial::from_args(&args), services);
         self.register(RunnerOptionsPartial::from_args(&args), services);
         self.register(SoxOptionsPartial::from_args(&args), services);
         self.register(SpectrogramOptionsPartial::from_args(&args), services);

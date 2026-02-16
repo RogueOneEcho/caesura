@@ -34,7 +34,6 @@ impl HostBuilder {
         services
             .register_options(&mut options)
             .add(SourceArg::singleton())
-            .add(QueueAddArgs::singleton())
             .add(QueueRemoveArgs::singleton())
             // Add main services
             .add(singleton_as_self().from(|provider| {

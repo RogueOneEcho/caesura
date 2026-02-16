@@ -138,7 +138,7 @@ pub enum QueueCommandArguments {
         #[command(flatten)]
         cache: CacheOptionsPartial,
         #[command(flatten)]
-        args: QueueAddArgs,
+        args: QueueAddArgsPartial,
     },
 
     /// List the sources in the queue

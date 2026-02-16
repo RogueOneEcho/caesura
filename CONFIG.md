@@ -99,3 +99,9 @@ Options can be set via CLI flags or in `config.yml`.
 | `no_limit`           | `--no-limit`           | `bool`           | `false` | Should the `limit` option be ignored?                                                                                               |
 | `wait_before_upload` | `--wait-before-upload` | `Option<String>` | ~       | Wait for a duration before uploading the torrent.<br>The duration is a string that can be parsed such as `500ms`, `5m`, `1h30m15s`. |
 
+## Options for `queue add` command.
+
+| YAML Key         | CLI Flag | Type              | Default | Description                                                                                                                                 |
+|------------------|----------|-------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `queue_add_path` | ~        | `Option<PathBuf>` | ~       | A path to either a directory of `.torrent` files or a single YAML queue file.<br>Examples: `./torrents`, `/path/to/torrents`, `./queue.yml` |
+

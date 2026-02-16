@@ -80,6 +80,10 @@ pub struct ParsedField {
     pub serde_attrs: Vec<Attribute>,
     /// Doc comment attributes.
     pub doc_attrs: Vec<Attribute>,
+    /// Explicit `long` name from `#[arg(long = "name")]`, or empty string for bare `#[arg(long)]`.
+    pub arg_long: Option<String>,
+    /// Explicit `value_name` from `#[arg(value_name = "NAME")]`.
+    pub arg_value_name: Option<String>,
 }
 
 /// Parse a struct field into a [`ParsedField`].
@@ -98,6 +102,8 @@ pub fn parse_field(field: &Field) -> syn::Result<ParsedField> {
     let mut arg_attrs = Vec::new();
     let mut serde_attrs = Vec::new();
     let mut doc_attrs = Vec::new();
+    let mut arg_long = None;
+    let mut arg_value_name = None;
     for attr in &field.attrs {
         if attr.path().is_ident("options") {
             attr.parse_nested_meta(|meta| {
@@ -119,6 +125,7 @@ pub fn parse_field(field: &Field) -> syn::Result<ParsedField> {
                 Ok(())
             })?;
         } else if attr.path().is_ident("arg") {
+            parse_arg_attr(attr, &mut arg_long, &mut arg_value_name)?;
             arg_attrs.push(attr.clone());
         } else if attr.path().is_ident("serde") {
             serde_attrs.push(attr.clone());
@@ -138,6 +145,32 @@ pub fn parse_field(field: &Field) -> syn::Result<ParsedField> {
         arg_attrs,
         serde_attrs,
         doc_attrs,
+        arg_long,
+        arg_value_name,
+    })
+}
+
+/// Extract `long` and `value_name` from an `#[arg(...)]` attribute.
+fn parse_arg_attr(
+    attr: &Attribute,
+    arg_long: &mut Option<String>,
+    arg_value_name: &mut Option<String>,
+) -> syn::Result<()> {
+    attr.parse_nested_meta(|meta| {
+        if meta.path.is_ident("long") {
+            if meta.input.peek(syn::Token![=]) {
+                let _eq: syn::Token![=] = meta.input.parse()?;
+                let lit: syn::LitStr = meta.input.parse()?;
+                *arg_long = Some(lit.value());
+            } else {
+                *arg_long = Some(String::new());
+            }
+        } else if meta.path.is_ident("value_name") {
+            let _eq: syn::Token![=] = meta.input.parse()?;
+            let lit: syn::LitStr = meta.input.parse()?;
+            *arg_value_name = Some(lit.value());
+        }
+        Ok(())
     })
 }
 

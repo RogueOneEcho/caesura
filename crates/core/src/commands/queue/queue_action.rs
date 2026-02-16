@@ -15,4 +15,6 @@ pub enum QueueAction {
     Remove,
     #[error("read torrent")]
     ReadTorrent,
+    #[error("match path")]
+    MatchPath,
 }
