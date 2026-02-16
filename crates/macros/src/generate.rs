@@ -42,13 +42,20 @@ fn get_partial_type(f: &ParsedField) -> TokenStream2 {
 
 /// Generates clap `#[arg(...)]` attribute for a field.
 ///
-/// Bool fields use `SetTrue` action so the flag sets true when present.
+/// Bool fields use `num_args = 0..=1` with `default_missing_value = "true"`. This keeps
+/// the field as `None` when absent from the CLI, preserving the config file merge:
+///
+/// - Flag absent → `None` (config file value applied during merge)
+/// - `--flag` → `Some(true)` (via `default_missing_value`)
+/// - `--flag true` → `Some(true)` (explicit value)
+/// - `--flag false` → `Some(false)` (explicit override)
+///
 /// Other fields use forwarded attributes or default `long` argument.
 fn generate_arg_attr(f: &ParsedField) -> TokenStream2 {
     let ident_str = f.ident.to_string().replace('_', "-");
     if f.is_bool {
         quote! {
-            #[arg(long = #ident_str, default_value = None, action = ::clap::ArgAction::SetTrue)]
+            #[arg(long = #ident_str, num_args = 0..=1, default_missing_value = "true")]
         }
     } else if !f.arg_attrs.is_empty() {
         let attrs = &f.arg_attrs;

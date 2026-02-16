@@ -23,11 +23,7 @@ pub struct TargetOptionsPartial {
     /// Note: This is only useful for development and should probably not be used.
     ///
     /// Default: `false`
-    #[arg(
-        long = "allow-existing",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "allow-existing", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub allow_existing: Option<bool>,
     /// Use random dithering when resampling with `SoX`.
@@ -37,11 +33,7 @@ pub struct TargetOptionsPartial {
     /// Set this to `true` to use random dithering instead.
     ///
     /// Default: `false`
-    #[arg(
-        long = "sox-random-dither",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "sox-random-dither", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub sox_random_dither: Option<bool>,
 }

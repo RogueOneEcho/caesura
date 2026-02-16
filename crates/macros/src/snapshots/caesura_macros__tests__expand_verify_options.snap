@@ -17,11 +17,7 @@ pub struct VerifyOptionsPartial {
     /// Note: This is only useful for development and should probably not be used.
     ///
     /// Default: `false`
-    #[arg(
-        long = "no-hash-check",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "no-hash-check", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub no_hash_check: Option<bool>,
     /// Should sources with specific tags be excluded?

@@ -14,23 +14,24 @@ expression: expand_options_from_file(source)
 pub struct CacheOptionsPartial {
     /// Path to cache directory.
     ///
-    /// Default: `PathBuf::from("./cache")`
+    /// Default: ``~/.cache/caesura/` or platform equivalent`
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub cache: Option<PathBuf>,
 }
 impl CacheOptionsPartial {
     fn resolve_internal(
-        self,
+        mut self,
         validate: bool,
     ) -> ::std::result::Result<
         CacheOptions,
         ::std::vec::Vec<crate::options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
-        let cache = self.cache;
+        let defaults = self.clone();
+        let cache = self.cache.or_else(|| default_cache(&defaults));
         let resolved = CacheOptions {
-            cache: cache.unwrap_or_else(|| PathBuf::from("./cache")),
+            cache: cache.unwrap_or_default(),
         };
         if validate {
             resolved.validate(&mut errors);
@@ -64,7 +65,7 @@ impl crate::options::OptionsPartialContract for CacheOptionsPartial {
 impl ::std::default::Default for CacheOptions {
     fn default() -> Self {
         Self {
-            cache: PathBuf::from("./cache"),
+            cache: ::std::default::Default::default(),
         }
     }
 }
@@ -77,9 +78,10 @@ impl crate::options::Documented for CacheOptions {
             fields: ::std::vec![
                 crate ::options::FieldDoc { config_key : "cache", cli_flag : "--cache",
                 field_type : "PathBuf", default_value :
-                ::std::option::Option::Some(::serde_json::to_string(&
-                (PathBuf::from("./cache"))).unwrap()), default_doc :
-                ::std::option::Option::None, description : "Path to cache directory.", }
+                ::std::option::Option::Some(::serde_json::to_string(& < PathBuf >
+                ::default()).unwrap()), default_doc :
+                ::std::option::Option::Some("`~/.cache/caesura/` or platform equivalent"),
+                description : "Path to cache directory.", }
             ],
         });
         &DOC

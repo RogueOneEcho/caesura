@@ -15,33 +15,25 @@ pub struct BatchOptionsPartial {
     /// Should the spectrogram command be executed?
     ///
     /// Default: `false`
-    #[arg(
-        long = "spectrogram",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "spectrogram", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub spectrogram: Option<bool>,
     /// Should the transcode command be executed?
     ///
     /// Default: `false`
-    #[arg(long = "transcode", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[arg(long = "transcode", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub transcode: Option<bool>,
     /// Should failed transcodes be retried?
     ///
     /// Default: `false`
-    #[arg(
-        long = "retry-transcode",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "retry-transcode", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub retry_transcode: Option<bool>,
     /// Should the upload command be executed?
     ///
     /// Default: `false`
-    #[arg(long = "upload", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[arg(long = "upload", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub upload: Option<bool>,
     /// Limit the number of torrents to batch process.
@@ -55,7 +47,7 @@ pub struct BatchOptionsPartial {
     /// Should the `limit` option be ignored?
     ///
     /// Default: `false`
-    #[arg(long = "no-limit", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[arg(long = "no-limit", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub no_limit: Option<bool>,
     /// Wait for a duration before uploading the torrent.

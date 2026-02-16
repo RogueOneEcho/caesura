@@ -17,8 +17,8 @@ pub struct UploadOptionsPartial {
     /// Default: `false`
     #[arg(
         long = "copy-transcode-to-content-dir",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
+        num_args = 0..= 1,
+        default_missing_value = "true"
     )]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub copy_transcode_to_content_dir: Option<bool>,
@@ -39,7 +39,7 @@ pub struct UploadOptionsPartial {
     /// If enabled data won't be uploaded and will instead be printed to the console.
     ///
     /// Default: `false`
-    #[arg(long = "dry-run", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[arg(long = "dry-run", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub dry_run: Option<bool>,
 }

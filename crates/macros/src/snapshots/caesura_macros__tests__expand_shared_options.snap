@@ -41,8 +41,6 @@ pub struct SharedOptionsPartial {
     /// Directories containing torrent content.
     ///
     /// Typically this is set as the download directory in your torrent client.
-    ///
-    /// Default: `vec![PathBuf::from("./content")]`
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub content: Option<Vec<PathBuf>>,
@@ -50,17 +48,13 @@ pub struct SharedOptionsPartial {
     #[arg(long, value_enum)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub verbosity: Option<Verbosity>,
-    /// Path to the configuration file.
-    #[arg(long)]
-    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub config: Option<PathBuf>,
     /// Time format to use in logs.
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub log_time: Option<TimeFormat>,
     /// Directory where transcodes and spectrograms will be written.
     ///
-    /// Default: `PathBuf::from("./output")`
+    /// Default: ``~/.local/share/caesura/output/` or platform equivalent`
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub output: Option<PathBuf>,
@@ -79,11 +73,10 @@ impl SharedOptionsPartial {
         let api_key = self.api_key;
         let indexer = self.indexer.or_else(|| default_indexer(&defaults));
         let indexer_url = self.indexer_url.or_else(|| default_indexer_url(&defaults));
-        let content = self.content;
+        let content = self.content.or_else(|| default_content(&defaults));
         let verbosity = self.verbosity;
-        let config = self.config;
         let log_time = self.log_time;
-        let output = self.output;
+        let output = self.output.or_else(|| default_output(&defaults));
         if validate && announce_url.is_none() {
             errors.push(crate::options::OptionRule::NotSet("Announce url".to_owned()));
         }
@@ -96,16 +89,18 @@ impl SharedOptionsPartial {
         if validate && indexer_url.is_none() {
             errors.push(crate::options::OptionRule::NotSet("Indexer url".to_owned()));
         }
+        if validate && content.is_none() {
+            errors.push(crate::options::OptionRule::NotSet("Content".to_owned()));
+        }
         let resolved = SharedOptions {
             announce_url: announce_url.unwrap_or_default(),
             api_key: api_key.unwrap_or_default(),
             indexer: indexer.unwrap_or_default(),
             indexer_url: indexer_url.unwrap_or_default(),
-            content: content.unwrap_or_else(|| vec![PathBuf::from("./content")]),
+            content: content.unwrap_or_default(),
             verbosity: verbosity.unwrap_or_default(),
-            config,
             log_time: log_time.unwrap_or_default(),
-            output: output.unwrap_or_else(|| PathBuf::from("./output")),
+            output: output.unwrap_or_default(),
         };
         if validate {
             resolved.validate(&mut errors);
@@ -138,9 +133,6 @@ impl crate::options::OptionsPartialContract for SharedOptionsPartial {
         if self.verbosity.is_none() {
             self.verbosity = other.verbosity;
         }
-        if self.config.is_none() {
-            self.config = other.config;
-        }
         if self.log_time.is_none() {
             self.log_time = other.log_time;
         }
@@ -167,11 +159,10 @@ impl ::std::default::Default for SharedOptions {
             api_key: ::std::default::Default::default(),
             indexer: ::std::default::Default::default(),
             indexer_url: ::std::default::Default::default(),
-            content: vec![PathBuf::from("./content")],
+            content: ::std::default::Default::default(),
             verbosity: ::std::default::Default::default(),
-            config: ::std::option::Option::None,
             log_time: ::std::default::Default::default(),
-            output: PathBuf::from("./output"),
+            output: ::std::default::Default::default(),
         }
     }
 }
@@ -207,28 +198,25 @@ impl crate::options::Documented for SharedOptions {
                 "URL of the indexer.<br>Examples: `https://redacted.sh`, `https://orpheus.network`",
                 }, crate ::options::FieldDoc { config_key : "content", cli_flag :
                 "--content", field_type : "Vec<PathBuf>", default_value :
-                ::std::option::Option::Some(::serde_json::to_string(&
-                (vec![PathBuf::from("./content")])).unwrap()), default_doc :
-                ::std::option::Option::None, description :
+                ::std::option::Option::Some(::serde_json::to_string(& < Vec < PathBuf > >
+                ::default()).unwrap()), default_doc : ::std::option::Option::None,
+                description :
                 "Directories containing torrent content.<br>Typically this is set as the download directory in your torrent client.",
                 }, crate ::options::FieldDoc { config_key : "verbosity", cli_flag :
                 "--verbosity", field_type : "Verbosity", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < Verbosity >
                 ::default()).unwrap()), default_doc : ::std::option::Option::None,
                 description : "Level of logs to display.", }, crate ::options::FieldDoc {
-                config_key : "config", cli_flag : "--config", field_type :
-                "Option<PathBuf>", default_value : ::std::option::Option::None,
-                default_doc : ::std::option::Option::None, description :
-                "Path to the configuration file.", }, crate ::options::FieldDoc {
                 config_key : "log_time", cli_flag : "--log-time", field_type :
                 "TimeFormat", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < TimeFormat >
                 ::default()).unwrap()), default_doc : ::std::option::Option::None,
                 description : "Time format to use in logs.", }, crate ::options::FieldDoc
                 { config_key : "output", cli_flag : "--output", field_type : "PathBuf",
-                default_value : ::std::option::Option::Some(::serde_json::to_string(&
-                (PathBuf::from("./output"))).unwrap()), default_doc :
-                ::std::option::Option::None, description :
+                default_value : ::std::option::Option::Some(::serde_json::to_string(& <
+                PathBuf > ::default()).unwrap()), default_doc :
+                ::std::option::Option::Some("`~/.local/share/caesura/output/` or platform equivalent"),
+                description :
                 "Directory where transcodes and spectrograms will be written.", }
             ],
         });

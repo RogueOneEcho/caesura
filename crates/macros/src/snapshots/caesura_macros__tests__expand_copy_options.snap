@@ -17,7 +17,7 @@ pub struct CopyOptionsPartial {
     /// Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
     ///
     /// Default: `false`
-    #[arg(long = "hard-link", default_value = None, action = ::clap::ArgAction::SetTrue)]
+    #[arg(long = "hard-link", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub hard_link: Option<bool>,
 }

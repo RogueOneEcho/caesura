@@ -17,8 +17,8 @@ pub struct FileOptionsPartial {
     /// Default: `false`
     #[arg(
         long = "no-image-compression",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
+        num_args = 0..= 1,
+        default_missing_value = "true"
     )]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub no_image_compression: Option<bool>,
@@ -28,11 +28,7 @@ pub struct FileOptionsPartial {
     /// Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.
     ///
     /// Default: `false`
-    #[arg(
-        long = "rename-tracks",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "rename-tracks", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub rename_tracks: Option<bool>,
     /// Maximum file size in bytes beyond which images are compressed.
@@ -64,11 +60,7 @@ pub struct FileOptionsPartial {
     /// Only applied if the image is greater than `max_file_size`.
     ///
     /// Default: `false`
-    #[arg(
-        long = "no-png-to-jpg",
-        default_value = None,
-        action = ::clap::ArgAction::SetTrue
-    )]
+    #[arg(long = "no-png-to-jpg", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub no_png_to_jpg: Option<bool>,
 }
