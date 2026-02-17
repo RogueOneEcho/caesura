@@ -4,7 +4,7 @@ use crate::prelude::*;
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
-use rogue_logging::InitLog;
+use rogue_logging::{InitLog, Verbosity};
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
@@ -112,37 +112,56 @@ impl HostBuilder {
     }
 
     /// Configure the builder with mock API and sample data for demo screencasts.
+    ///
+    /// - Uses a fixed path (`/tmp/caesura-demo/`) so state persists across invocations
     #[cfg(feature = "demo")]
     pub async fn with_demo(&mut self) -> &mut Self {
-        use tokio::fs::copy;
+        use std::env::temp_dir;
+        use tokio::fs::create_dir_all;
         self.options.errors.clear();
-        let test_dir = TestDirectory::new().keep();
+        let demo_dir = temp_dir().join("caesura-demo");
+        let output_dir = demo_dir.join("output");
+        let cache_dir = demo_dir.join("cache");
+        create_dir_all(&output_dir)
+            .await
+            .expect("should create output dir");
+        create_dir_all(&cache_dir)
+            .await
+            .expect("should create cache dir");
         let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+        let transcode_dest = output_dir.join(transcode.dir_name());
+        if !transcode_dest.exists() {
+            copy_dir(
+                &transcode.transcode_dir(),
+                &transcode_dest,
+                false,
+            )
+            .await
+            .expect("should copy transcode dir");
+        }
+        let queue_dir = cache_dir.join("queue");
+        create_dir_all(&queue_dir)
+            .await
+            .expect("should create queue dir");
+        let queue = Queue::from_path(queue_dir);
+        let torrent = TorrentReader::execute(&transcode.torrent_path())
+            .await
+            .expect("should read torrent file");
+        let mut item = QueueItem::from_torrent(transcode.torrent_path(), &torrent);
+        item.id = Some(AlbumConfig::TORRENT_ID);
+        queue.set(item).await.expect("should insert queue item");
         self.with_mock_api(transcode.album.clone())
-            .with_test_options(&test_dir)
-            .await;
-        let output = test_dir.output();
-        copy_dir(
-            &transcode.transcode_dir(),
-            &output.join(transcode.dir_name()),
-            false,
-        )
-        .await
-        .expect("should copy transcode dir");
-        copy(
-            transcode.torrent_path(),
-            output.join(format!(
-                "{}.{}.torrent",
-                transcode.dir_name(),
-                SharedOptions::MOCK_INDEXER,
-            )),
-        )
-        .await
-        .expect("should copy torrent file");
-        self.with_options(TargetOptions {
-            target: vec![transcode.target],
-            ..TargetOptions::default()
-        })
+            .with_options(SharedOptions {
+                content: vec![SAMPLE_SOURCES_DIR.clone()],
+                output: output_dir,
+                verbosity: Verbosity::Debug,
+                ..SharedOptions::mock()
+            })
+            .with_options(CacheOptions { cache: cache_dir })
+            .with_options(TargetOptions {
+                target: vec![transcode.target],
+                ..TargetOptions::default()
+            })
     }
 
     /// Register custom options for testing.
