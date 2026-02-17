@@ -58,6 +58,9 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 unicode-width = { workspace = true }
 
+[features]
+demo = ["gazelle_api/mock"]
+
 [dev-dependencies]
 gazelle_api = { workspace = true, features = ["mock"] }
 image = { workspace = true }

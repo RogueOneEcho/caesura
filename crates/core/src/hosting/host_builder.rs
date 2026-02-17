@@ -1,6 +1,6 @@
 use crate::hosting::*;
 use crate::prelude::*;
-#[cfg(test)]
+#[cfg(any(test, feature = "demo"))]
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
@@ -111,9 +111,18 @@ impl HostBuilder {
         HostBuilder { services, options }
     }
 
+    /// Configure the builder with mock API and sample data for demo screencasts.
+    #[cfg(feature = "demo")]
+    pub async fn with_demo(&mut self) -> &mut Self {
+        self.options.errors.clear();
+        let test_dir = TestDirectory::new().keep();
+        let album = AlbumProvider::get(SampleFormat::default()).await;
+        self.with_mock_api(album).with_test_options(&test_dir).await
+    }
+
     /// Register custom options for testing.
     #[must_use]
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
     pub fn with_options<T: Send + Sync + 'static>(&mut self, options: T) -> &mut Self {
         self.services.add(existing_as_self(options));
         self
@@ -121,14 +130,14 @@ impl HostBuilder {
 
     /// Register a mock API client built from an [`AlbumConfig`].
     #[must_use]
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
     pub fn with_mock_api(&mut self, album_config: AlbumConfig) -> &mut Self {
         self.with_mock_client(album_config.api())
     }
 
     /// Register a pre-configured mock API client for testing.
     #[must_use]
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
     #[expect(
         clippy::as_conversions,
         reason = "required for DI trait object registration"
@@ -144,7 +153,7 @@ impl HostBuilder {
     /// Configure test options for the builder.
     ///
     /// - Sets up content, output, and cache directories
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
     pub async fn with_test_options(&mut self, test_dir: &TestDirectory) -> &mut Self {
         use tokio::fs::create_dir_all;
         let output_dir = test_dir.output();
@@ -177,7 +186,7 @@ impl HostBuilder {
     /// Build the [`Host`], panicking on error.
     ///
     /// Intended for tests where build errors indicate a test setup bug.
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
     #[must_use]
     #[expect(clippy::panic, reason = "intentional panic for test failures")]
     pub fn expect_build(&self) -> Host {

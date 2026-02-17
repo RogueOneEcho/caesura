@@ -4,7 +4,11 @@ use std::process::ExitCode;
 
 #[tokio::main]
 async fn main() -> ExitCode {
-    let host = match HostBuilder::new().build() {
+    #[cfg_attr(not(feature = "demo"), allow(unused_mut))]
+    let mut builder = HostBuilder::new();
+    #[cfg(feature = "demo")]
+    builder.with_demo().await;
+    let host = match builder.build() {
         Ok(host) => host,
         Err(error) => {
             init_logger();

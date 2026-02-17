@@ -11,7 +11,7 @@ pub(crate) use process::*;
 pub(crate) use rogue_logging::Failure;
 pub(crate) use source::*;
 pub(crate) use table::*;
-#[cfg(test)]
+#[cfg(any(test, feature = "demo"))]
 pub(crate) use testing::*;
 pub(crate) use torrent::*;
 
@@ -25,6 +25,7 @@ mod naming;
 mod process;
 mod source;
 mod table;
-#[cfg(test)]
+#[cfg(any(test, feature = "demo"))]
+#[cfg_attr(all(feature = "demo", not(test)), allow(unused))]
 mod testing;
 mod torrent;

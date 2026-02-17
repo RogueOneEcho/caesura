@@ -89,7 +89,7 @@ fn default_indexer_url(partial: &SharedOptionsPartial) -> Option<String> {
 
 impl SharedOptions {
     /// Default indexer used by [`Self::mock()`] for testing.
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
     pub const MOCK_INDEXER: &'static str = "red";
 
     /// Returns the indexer name, normalized to lowercase.
@@ -98,7 +98,8 @@ impl SharedOptions {
         self.indexer.to_lowercase()
     }
 
-    #[cfg(test)]
+    #[cfg(any(test, feature = "demo"))]
+    #[must_use]
     pub fn mock() -> Self {
         Self {
             indexer: Self::MOCK_INDEXER.to_owned(),

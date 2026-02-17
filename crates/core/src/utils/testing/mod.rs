@@ -5,7 +5,6 @@ pub(crate) use samples::*;
 #[cfg(test)]
 pub(crate) use snapshots::*;
 pub(crate) use temp_directory::*;
-#[cfg(test)]
 pub(crate) use test_directory::*;
 
 mod fs;

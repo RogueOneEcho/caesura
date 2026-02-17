@@ -32,12 +32,12 @@ pub const FLAC: &str = "flac";
 
 /// Path to the metaflac binary.
 ///
-/// Only used in tests for setting tags and embedding cover art in generated FLAC samples.
-#[cfg(all(test, target_os = "windows"))]
+/// Only used in tests and demo mode for setting tags and embedding cover art in generated FLAC samples.
+#[cfg(all(any(test, feature = "demo"), target_os = "windows"))]
 pub const METAFLAC: &str = "metaflac.exe";
 
 /// Path to the metaflac binary.
 ///
-/// Only used in tests for setting tags and embedding cover art in generated FLAC samples.
-#[cfg(all(test, not(target_os = "windows")))]
+/// Only used in tests and demo mode for setting tags and embedding cover art in generated FLAC samples.
+#[cfg(all(any(test, feature = "demo"), not(target_os = "windows")))]
 pub const METAFLAC: &str = "metaflac";
