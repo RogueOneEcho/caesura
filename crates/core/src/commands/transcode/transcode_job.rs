@@ -19,6 +19,7 @@ pub(crate) struct TranscodeJob {
 }
 
 impl TranscodeJob {
+    /// Execute the transcode, resample, or include operation and write tags.
     pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         let output_path = match &self.variant {
             Variant::Transcode(_, encode) => encode.output.clone(),

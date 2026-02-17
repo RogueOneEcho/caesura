@@ -1,12 +1,13 @@
 use crate::prelude::*;
 
-/// List the sources in the queue
+/// Summarize the status of all items in the queue.
 #[injectable]
 pub(crate) struct QueueSummaryCommand {
     queue: Ref<Queue>,
 }
 
 impl QueueSummaryCommand {
+    /// Print a YAML summary of queue status to stdout.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         let summary = self.execute().await?;
         let yaml = serde_yaml::to_string(&summary).expect("should be able to serialize summary");
@@ -14,6 +15,7 @@ impl QueueSummaryCommand {
         Ok(true)
     }
 
+    /// Aggregate queue items into a [`QueueSummary`].
     pub(crate) async fn execute(&self) -> Result<QueueSummary, Failure<QueueAction>> {
         let items = self.queue.get_all().await?;
         let mut summary = QueueSummary::default();

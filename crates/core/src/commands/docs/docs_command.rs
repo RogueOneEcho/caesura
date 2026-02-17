@@ -5,6 +5,7 @@ use crate::prelude::*;
 pub struct DocsCommand;
 
 impl DocsCommand {
+    /// Print rendered options documentation to stdout.
     #[allow(clippy::unused_self)]
     pub fn execute(&self) -> bool {
         print!("{}", Self::render());

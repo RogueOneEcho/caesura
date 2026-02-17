@@ -16,6 +16,7 @@ pub struct OptionsProvider {
 }
 
 impl OptionsProvider {
+    /// Create a new [`OptionsProvider`] by reading CLI args and the config file.
     pub fn new() -> Self {
         let args = ArgumentsParser::get();
         let cli_options = ConfigOptionsPartial::from_args(&args);
@@ -103,6 +104,7 @@ fn read_config_file(options: &Option<ConfigOptionsPartial>) -> Option<String> {
     read_to_string(path).ok()
 }
 
+/// Extension trait for registering resolved options with a [`ServiceCollection`].
 pub trait RegisterOptions {
     /// Register all options with the service collection.
     ///

@@ -9,6 +9,7 @@ pub(crate) struct QueueRemoveCommand {
 }
 
 impl QueueRemoveCommand {
+    /// Remove an item from the queue by its hash.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         if !self.args.validate() {
             return Ok(false);

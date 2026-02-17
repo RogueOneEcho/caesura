@@ -1,3 +1,5 @@
+//! Generate markdown documentation for configuration options.
+
 pub(crate) use docs_command::*;
 mod docs_command;
 #[cfg(test)]

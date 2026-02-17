@@ -16,6 +16,7 @@ pub struct Host {
 }
 
 impl Host {
+    /// Create a new [`Host`] from a configured [`ServiceProvider`].
     #[must_use]
     pub fn new(services: ServiceProvider) -> Self {
         Host { services }

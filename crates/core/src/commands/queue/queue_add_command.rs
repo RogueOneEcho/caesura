@@ -11,6 +11,7 @@ pub(crate) struct QueueAddCommand {
 }
 
 impl QueueAddCommand {
+    /// Add torrent files from the configured path to the queue.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         let path = self
             .args

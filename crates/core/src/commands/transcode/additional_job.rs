@@ -11,6 +11,7 @@ pub(crate) struct AdditionalJob {
 }
 
 impl AdditionalJob {
+    /// Resize the image and copy it to the output directory.
     pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         trace!(
             "{} image to maximum {} px and {}% quality: {}",

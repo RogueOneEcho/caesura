@@ -24,7 +24,7 @@ pub enum Job {
 ///
 /// A [command design pattern](https://refactoring.guru/design-patterns/command) is used
 /// so the execution of the command can be deferred and multiple commands can be executed
-/// in parallel via the multithreaded [`CommandRunner`].
+/// in parallel via the multithreaded [`JobRunner`].
 impl Job {
     /// Get the ID of the wrapped command.
     #[must_use]

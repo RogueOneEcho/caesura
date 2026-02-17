@@ -11,6 +11,7 @@ pub(crate) struct TimeStamp {
 }
 
 impl TimeStamp {
+    /// Create a [`TimeStamp`] for the current UTC time.
     pub(crate) fn now() -> Self {
         TimeStamp {
             datetime: Utc::now(),

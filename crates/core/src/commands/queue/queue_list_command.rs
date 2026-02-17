@@ -9,6 +9,7 @@ pub(crate) struct QueueListCommand {
 }
 
 impl QueueListCommand {
+    /// List unprocessed sources in the queue for the current indexer.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;

@@ -3,8 +3,8 @@ use rogue_logging::Colors;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 
-/// Log all [Command] status updates to the console by subscribing to
-/// [`CommandRunner`] as a [Subscriber].
+/// Log all [`Job`] status updates to the console by subscribing to
+/// [`JobRunner`] as a [`Subscriber`].
 pub struct DebugSubscriber {
     /// Semaphore to check available permits.
     pub semaphore: Arc<Semaphore>,

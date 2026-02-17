@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use serde::Serialize;
 
+/// Validation rule violation for a configuration option.
 #[derive(Clone, Debug, Serialize)]
 pub enum OptionRule {
     Changed(String, String, String),
@@ -36,6 +37,7 @@ impl Display for OptionRule {
 }
 
 impl OptionRule {
+    /// Log all validation errors to the console.
     pub fn show(errors: &Vec<OptionRule>) {
         if !errors.is_empty() {
             error!("{} configuration", "Invalid".bold());

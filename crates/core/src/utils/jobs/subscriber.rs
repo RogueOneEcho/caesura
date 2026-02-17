@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-/// A generic trait for subscribing to the status of a [Job].
+/// A generic trait for subscribing to the status of a [`Job`].
 ///
-/// The [`CommandRunner`] will call the [update] method when the status of
-/// a [Job] changes.
+/// The [`JobRunner`] will call the [`Subscriber::update`] method when the status of
+/// a [`Job`] changes.
 ///
 /// An [observer design pattern](https://refactoring.guru/design-patterns/observer) allows different
 /// subscribers to be implemented independently.
