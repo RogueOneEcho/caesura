@@ -114,10 +114,35 @@ impl HostBuilder {
     /// Configure the builder with mock API and sample data for demo screencasts.
     #[cfg(feature = "demo")]
     pub async fn with_demo(&mut self) -> &mut Self {
+        use tokio::fs::copy;
         self.options.errors.clear();
         let test_dir = TestDirectory::new().keep();
-        let album = AlbumProvider::get(SampleFormat::default()).await;
-        self.with_mock_api(album).with_test_options(&test_dir).await
+        let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+        self.with_mock_api(transcode.album.clone())
+            .with_test_options(&test_dir)
+            .await;
+        let output = test_dir.output();
+        copy_dir(
+            &transcode.transcode_dir(),
+            &output.join(transcode.dir_name()),
+            false,
+        )
+        .await
+        .expect("should copy transcode dir");
+        copy(
+            transcode.torrent_path(),
+            output.join(format!(
+                "{}.{}.torrent",
+                transcode.dir_name(),
+                SharedOptions::MOCK_INDEXER,
+            )),
+        )
+        .await
+        .expect("should copy torrent file");
+        self.with_options(TargetOptions {
+            target: vec![transcode.target],
+            ..TargetOptions::default()
+        })
     }
 
     /// Register custom options for testing.
