@@ -1,4 +1,3 @@
-use crate::built_info::{PKG_HOMEPAGE, PKG_NAME, PKG_VERSION};
 use crate::hosting::*;
 use crate::prelude::*;
 #[cfg(test)]
@@ -57,7 +56,7 @@ impl HostBuilder {
                     options: GazelleClientOptions {
                         url: options.indexer_url.clone(),
                         key: options.api_key.clone(),
-                        user_agent: format!("{PKG_NAME}/{PKG_VERSION} ({PKG_HOMEPAGE})"),
+                        user_agent: app_user_agent(true),
                         requests_allowed_per_duration: None,
                         request_limit_duration: None,
                     },

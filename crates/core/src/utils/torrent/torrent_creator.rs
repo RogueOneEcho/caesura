@@ -1,17 +1,13 @@
 //! Create and duplicate `.torrent` files.
 
-use colored::Colorize;
+use crate::prelude::*;
 use lava_torrent::bencode::BencodeElem;
 use lava_torrent::torrent::v1::TorrentBuilder;
-use log::trace;
 use rogue_logging::Failure;
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 use tokio::fs::copy;
 use tokio::task::spawn_blocking;
-
-use crate::built_info::{PKG_NAME, PKG_VERSION};
 
 use super::{TorrentCreateAction, TorrentExt, TorrentReader};
 
@@ -36,7 +32,7 @@ impl TorrentCreator {
         spawn_blocking(move || {
             let content_size = dir_size(&content_dir)?;
             let pl = piece_length(content_size);
-            let created_by = format!("{PKG_NAME} v{PKG_VERSION}");
+            let created_by = format!("{APP_NAME} {}", app_version_or_describe());
             let torrent = TorrentBuilder::new(&content_dir, pl)
                 .set_announce(Some(announce_url))
                 .set_privacy(true)

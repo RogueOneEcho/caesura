@@ -2,9 +2,6 @@ use crate::prelude::*;
 use std::env;
 use std::fs::create_dir;
 
-/// Application name.
-const APP_NAME: &str = "caesura";
-
 /// Environment variable set in the Docker image to use container paths.
 const DOCKER_ENV_VAR: &str = "CAESURA_DOCKER";
 

@@ -10,6 +10,7 @@ default-members = ["crates/core"]
 edition = "2024"
 authors = ["DevYukine <devyukine@gmx.de>", "RogueOneEcho"]
 repository = "https://github.com/RogueOneEcho/caesura"
+homepage = "https://github.com/RogueOneEcho/caesura"
 license = "AGPL-3.0-only"
 
 [workspace.dependencies]
@@ -54,9 +55,6 @@ image = { version = "0.25.9", default-features = false, features = ["png", "jpeg
 # Dev dependencies
 insta = { version = "1.46.3", features = ["yaml"] }
 sha2 = "0.10.9"
-
-# Build dependencies
-built = "0.8.0"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }

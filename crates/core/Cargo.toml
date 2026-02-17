@@ -1,11 +1,12 @@
 [package]
 name = "caesura"
 edition.workspace = true
-build = "build.rs"
 authors.workspace = true
 description = "An all-in-one command line tool to transcode FLAC audio files and upload to gazelle based indexers/trackers"
 repository.workspace = true
+homepage.workspace = true
 license.workspace = true
+build = "build.rs"
 include = [
     "src/**/*",
     "build.rs",
@@ -61,9 +62,6 @@ gazelle_api = { workspace = true, features = ["mock"] }
 image = { workspace = true }
 insta = { workspace = true }
 sha2 = { workspace = true }
-
-[build-dependencies]
-built = { workspace = true }
 
 [lints]
 workspace = true

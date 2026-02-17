@@ -1,5 +1,6 @@
 //! Core utilities for error handling, file operations, naming, and format conversion.
 
+pub(crate) use app_info::*;
 pub(crate) use diagnostic_ext::*;
 pub(crate) use formats::*;
 pub(crate) use fs::*;
@@ -14,6 +15,7 @@ pub(crate) use table::*;
 pub(crate) use testing::*;
 pub(crate) use torrent::*;
 
+mod app_info;
 mod diagnostic_ext;
 mod formats;
 mod fs;

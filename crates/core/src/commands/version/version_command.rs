@@ -1,4 +1,3 @@
-use crate::built_info::{PKG_NAME, PKG_VERSION};
 use crate::prelude::*;
 use regex::Regex;
 use tokio::process::Command;
@@ -64,8 +63,11 @@ pub(super) async fn get_version(binary: &str, pattern: &str) -> Result<VersionIn
 
 /// Build the version table.
 fn build_table(dependencies: [(&str, Result<VersionInfo, VersionError>); 3]) -> String {
-    let mut builder =
-        TableBuilder::new().row([PKG_NAME.to_owned(), PKG_VERSION.to_owned(), String::new()]);
+    let mut builder = TableBuilder::new().row([
+        APP_NAME.to_owned(),
+        app_version_or_describe().trim_start_matches('v').to_owned(),
+        app_user_agent(false).dimmed().to_string(),
+    ]);
     for (name, result) in dependencies {
         let (version, detail) = match result {
             Ok(info) => (

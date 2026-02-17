@@ -1,4 +1,3 @@
-use crate::built_info::{PKG_NAME, PKG_REPOSITORY, PKG_VERSION};
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
 use std::collections::HashSet;
@@ -212,8 +211,10 @@ impl UploadCommand {
         let source_title = source.format.get_title();
         let mut lines: Vec<String> = vec![
             format!(
-                "Transcoded and uploaded with [url={}][b]{}[/b] v{}[/url]",
-                PKG_REPOSITORY, PKG_NAME, PKG_VERSION
+                "Transcoded and uploaded with [url={}][b]{}[/b] {}[/url]",
+                APP_HOMEPAGE,
+                APP_NAME,
+                app_version_or_describe()
             ),
             format!("[pad=0|10|0|20]Source[/pad] [url={source_url}]{source_title}[/url]"),
         ];
