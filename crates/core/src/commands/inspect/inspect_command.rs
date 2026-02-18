@@ -23,6 +23,7 @@ impl InspectCommand {
 /// Auto-detects file format by extension (FLAC and MP3).
 pub(crate) fn get_details(dir: &Path, style: bool) -> Result<String, Failure<InspectAction>> {
     let (properties, tags) = get_details_split(dir, style)?;
+    let _guard = (!style).then(DisableStyleGuard::new);
     Ok(format!("{properties}{}{tags}", divider()))
 }
 
