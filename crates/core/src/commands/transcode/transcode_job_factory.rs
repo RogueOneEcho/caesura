@@ -86,6 +86,12 @@ impl TranscodeJobFactory {
         } else {
             None
         };
-        Ok(Job::Transcode(TranscodeJob { id, variant, tags }))
+        let exclude_vorbis_comments = self.target_options.exclude_vorbis_comments.clone();
+        Ok(Job::Transcode(TranscodeJob {
+            id,
+            variant,
+            tags,
+            exclude_vorbis_comments,
+        }))
     }
 }

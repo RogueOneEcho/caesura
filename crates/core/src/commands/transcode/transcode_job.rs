@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use lofty::config::WriteOptions;
 use lofty::prelude::TagExt;
-use lofty::tag::ItemKey::{Popularimeter, Work};
 use lofty::tag::Tag;
 use std::fs::create_dir_all;
 use std::process::Stdio;
@@ -16,10 +15,17 @@ pub(crate) struct TranscodeJob {
     pub variant: Variant,
     /// ID3 tags to write to MP3 output.
     pub tags: Option<Tag>,
+    /// Vorbis comment tag names to exclude from output.
+    pub exclude_vorbis_comments: Vec<String>,
 }
 
 impl TranscodeJob {
     /// Execute the transcode, resample, or include operation and write tags.
+    ///
+    /// Tags named in [`exclude_vorbis_comments`](TranscodeJob::exclude_vorbis_comments) are
+    /// stripped from the output via two paths:
+    /// - **MP3 transcode**: excluded from the in-memory `ID3v2` [`Tag`] before writing
+    /// - **FLAC resample**: excluded from the on-disk Vorbis comments after `SoX` writes the file
     pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         let output_path = match &self.variant {
             Variant::Transcode(_, encode) => encode.output.clone(),
@@ -35,17 +41,15 @@ impl TranscodeJob {
         ))?;
         match self.variant {
             Variant::Transcode(decode, encode) => execute_transcode(decode, encode).await?,
-            Variant::Resample(resample) => execute_resample(resample).await?,
+            Variant::Resample(resample) => {
+                execute_resample(resample).await?;
+                exclude_vorbis_comments_from_flac(&output_path, &self.exclude_vorbis_comments)
+                    .map_err(Failure::wrap(TranscodeAction::ExcludeVorbisComments))?;
+            }
             Variant::Include(include) => execute_include(include).await?,
         }
         if let Some(mut tags) = self.tags {
-            let exclude = [Popularimeter, Work];
-            for key in exclude {
-                if let Some(value) = tags.get_string(&key) {
-                    trace!("Excluding invalid {key:?} value: {value}");
-                    tags.remove_key(&key);
-                }
-            }
+            exclude_tags(&mut tags, &vorbis_keys(&self.exclude_vorbis_comments));
             tags.save_to_path(&output_path, WriteOptions::default())
                 .map_err(Failure::wrap_with_path(
                     TranscodeAction::WriteTags,

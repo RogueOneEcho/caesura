@@ -41,6 +41,13 @@ cpus: 4
 dry_run: false
 # Should sources with specific tags be excluded?
 exclude_tags: null
+# Vorbis comment tag names to exclude from transcoded output.
+# Default: ["COMMENT","ENCODER","RATING","WORK"]
+exclude_vorbis_comments:
+- COMMENT
+- ENCODER
+- RATING
+- WORK
 # Should files be hard linked instead of copied?
 # Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
 # Default: false

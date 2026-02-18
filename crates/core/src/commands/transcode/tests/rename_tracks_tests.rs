@@ -78,9 +78,8 @@ async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
         .with_test_options(&test_dir)
         .await
         .with_options(TargetOptions {
-            allow_existing: false,
             target: vec![_320, V0],
-            sox_random_dither: false,
+            ..TargetOptions::default()
         })
         .with_options(FileOptions {
             rename_tracks: true,
