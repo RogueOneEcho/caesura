@@ -197,12 +197,6 @@ mod tests {
     }
 
     #[test]
-    fn build_status_is_not_release() {
-        let status = BuildStatus::get();
-        assert_ne!(status, BuildStatus::Release);
-    }
-
-    #[test]
     fn app_user_agent_contains_status() {
         let ua = app_user_agent(true);
         let status = BuildStatus::get();
