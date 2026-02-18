@@ -14,7 +14,7 @@ async fn get_details_flac() -> Result<(), TestError> {
     let path = SAMPLE_SOURCES_DIR.join(config.dir_name());
 
     // Act
-    let output = get_details(&path)?;
+    let output = get_details(&path, false)?;
 
     // Assert
     assert_snapshot!(output);
@@ -34,7 +34,7 @@ async fn get_details_320() -> Result<(), TestError> {
     let path = transcode.transcode_dir();
 
     // Act
-    let output = get_details(&path)?;
+    let output = get_details(&path, false)?;
 
     // Assert
     assert_snapshot!(output);
@@ -54,7 +54,7 @@ async fn get_details_v0() -> Result<(), TestError> {
     let path = transcode.transcode_dir();
 
     // Act
-    let output = get_details(&path)?;
+    let output = get_details(&path, false)?;
 
     // Assert
     assert_snapshot!(output);
@@ -94,7 +94,7 @@ async fn get_details_mixed() -> Result<(), TestError> {
     )?;
 
     // Act
-    let output = get_details(&temp)?;
+    let output = get_details(&temp, false)?;
 
     // Assert
     assert_snapshot!(output);
