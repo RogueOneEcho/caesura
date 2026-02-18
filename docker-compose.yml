@@ -3,31 +3,44 @@ services:
     container_name: caesura
     image: ghcr.io/rogueoneecho/caesura:latest
     volumes:
+    # Persistent cache for queue state and downloaded .torrent files
     - /srv/caesura/cache:/cache
+    # qBittorrent torrent state used by `queue add` (read-only)
     - /srv/qBittorrent/BT_backup:/srv/qBittorrent/BT_backup:ro
+    # Shared volume for content, output and autoadd — a single mount
+    # enables hard linking between content and output directories
     - /srv/shared:/srv/shared
+    # Inject config.yml from the `configs:` block at the bottom of this file
     configs:
     - source: caesura_config
       target: /config.yml
+    # Drop all capabilities and prevent privilege escalation
     security_opt:
     - no-new-privileges:true
     cap_drop:
     - ALL
 
+  # Optional: browse output directory at http://localhost:3000
   caddy:
     container_name: caddy
     image: caddy:2-alpine
+    profiles:
+    - browse
     ports:
     - "3000:80"
     volumes:
+    # Mount the caesura output directory so it's browseable
+    - /srv/shared/caesura:/srv:ro
     - caddy_data:/data
     - caddy_config:/config
-    - output:/srv:ro
     restart: unless-stopped
     command: caddy file-server --browse --root /srv
+    # Filesystem is read-only except for /tmp (tmpfs) and named volumes
     read_only: true
     tmpfs:
     - /tmp
+    # Drop all capabilities and prevent privilege escalation, then grant
+    # only NET_BIND_SERVICE so Caddy can listen on port 80
     security_opt:
     - no-new-privileges:true
     cap_drop:
@@ -36,11 +49,12 @@ services:
     - NET_BIND_SERVICE
 
 volumes:
-  output:
-  cache:
   caddy_data:
   caddy_config:
 
+# Inline config - edit the values below
+# Refer to SETUP.md and CONFIG.md for more details on settings.
+# The paths must match the layout of the docker container which may differ from your host system.
 configs:
   caesura_config:
     content: |
@@ -58,4 +72,3 @@ configs:
       - v0
       - '320'
       verbosity: debug
-
