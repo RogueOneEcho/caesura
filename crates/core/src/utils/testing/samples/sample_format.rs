@@ -97,6 +97,14 @@ impl SampleFormat {
         rate: Rate::_96000,
     };
 
+    /// Gazelle API encoding string (e.g. `"Lossless"` or `"24bit Lossless"`).
+    pub fn encoding(self) -> &'static str {
+        match self.depth {
+            Depth::_24 => "24bit Lossless",
+            Depth::_16 => "Lossless",
+        }
+    }
+
     pub(super) fn dir_suffix(self) -> String {
         format!("{{{}-{}}}", self.depth.as_u16(), self.rate.dir_suffix())
     }

@@ -394,7 +394,7 @@ fn build_mock_client(
     let torrent = Torrent {
         id: torrent_id,
         format: "FLAC".to_owned(),
-        encoding: "Lossless".to_owned(),
+        encoding: config.format.encoding().to_owned(),
         media: "WEB".to_owned(),
         remastered: true,
         remaster_year: Some(config.year),

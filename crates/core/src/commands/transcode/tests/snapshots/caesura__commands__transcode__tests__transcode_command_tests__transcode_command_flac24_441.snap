@@ -64,6 +64,58 @@ expression: snapshot
     width: 100
     height: 100
     color_type: Rgb8
+- directory: "Test Artist - Test Album [2020] [WEB FLAC]"
+  filename: Test Artist - Test Album - 01 Track One.flac
+  size: 1601261
+  sha256: 8cf45b7a69b23429325ae37c3093f221d460a3822be8ae48941dbc455abae179
+  audio:
+    duration_ms: 65000
+    overall_bitrate: 197
+    audio_bitrate: 197
+    sample_rate: 44100
+    bit_depth: 16
+    channels: 2
+    channel_mask: ~
+    tags:
+      VorbisComments:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSoftware: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "1"
+        TrackTitle: Track One
+    pictures: []
+- directory: "Test Artist - Test Album [2020] [WEB FLAC]"
+  filename: Test Artist - Test Album - 02 Track Two.flac
+  size: 1727963
+  sha256: 9cd47af9c25eee8f3e2281ac058b821b1628cab3990bd93936f29bd714f6427e
+  audio:
+    duration_ms: 65000
+    overall_bitrate: 212
+    audio_bitrate: 212
+    sample_rate: 44100
+    bit_depth: 16
+    channels: 2
+    channel_mask: ~
+    tags:
+      VorbisComments:
+        AlbumTitle: Test Album
+        Comment: Processed by SoX
+        EncoderSoftware: reference libFLAC 1.5.0 20250211
+        RecordingDate: "2020"
+        TrackArtist: Test Artist
+        TrackNumber: "2"
+        TrackTitle: Track Two
+    pictures: []
+- directory: "Test Artist - Test Album [2020] [WEB FLAC]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 01 Track One.mp3
   size: 1401794
