@@ -35,7 +35,7 @@ async fn create_produces_valid_torrent() {
     assert!(torrent.comment().is_none());
     let created_by = torrent.created_by().expect("should have created by");
     assert!(
-        created_by.starts_with("caesura v"),
+        created_by.starts_with("caesura "),
         "unexpected created by: {created_by}"
     );
 }
