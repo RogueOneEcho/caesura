@@ -1,3 +1,4 @@
+use super::super::album_generator::AlbumGenerator;
 use crate::testing_prelude::*;
 
 async fn test_sample_format_determinism(format: SampleFormat, name: &str) {

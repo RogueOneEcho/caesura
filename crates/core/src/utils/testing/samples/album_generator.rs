@@ -3,8 +3,8 @@
 //! [`AlbumGenerator`] generates test albums as FLAC files with cover images and torrents.
 //! It supports two modes:
 //!
-//! - **Ephemeral**: Generate in temp directories for isolated tests
-//! - **Cached**: Generate in `SAMPLES_CONTENT_DIR` with file locking for shared samples
+//! - **Ephemeral**: Generate in temp directories for isolated tests via [`AlbumGenerator::generate_in_dir`]
+//! - **Cached**: Generate in `SAMPLE_SOURCES_DIR` with deduplication via [`AlbumProvider`]
 //!
 //! Use [`AlbumConfig`] to configure metadata (artist, album, tracks, disc numbers,
 //! vinyl-style numbering) and audio format (bit depth, sample rate).
@@ -15,42 +15,30 @@ use std::path::{Path, PathBuf};
 use rogue_logging::Failure;
 
 use super::SampleAction;
-use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
+use crate::utils::AlbumConfig;
 use crate::utils::TorrentCreator;
 use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
-use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR};
 
-/// Generates a complete test album (FLAC files, cover image, torrent) and mock client.
-pub struct AlbumGenerator;
+/// Generates a complete test album (FLAC files, cover image, torrent).
+pub(super) struct AlbumGenerator;
 
 impl AlbumGenerator {
-    /// Generate album in cached `SAMPLES_CONTENT_DIR` location.
+    /// Generate album in a specific directory without caching.
     ///
-    /// Uses file-based locking for cross-process coordination:
-    /// - If `.generated` marker exists, skips generation
-    /// - Otherwise acquires `.lock` file, generates, creates marker
-    pub async fn generate(config: &AlbumConfig) -> Result<(), Failure<SampleAction>> {
-        let source_dir = SAMPLE_SOURCES_DIR.join(config.dir_name());
-        Self::generate_in_dir(config, &source_dir).await
-    }
-
-    /// Generate album in a specific directory.
-    ///
-    /// - Uses file-based locking for cross-process coordination
-    /// - Skips generation if `.generated` marker exists
-    pub async fn generate_in_dir(
+    /// Use this for isolated tests (e.g., determinism checks in temp directories).
+    /// For cached generation, use [`AlbumProvider::generate`] instead.
+    pub(super) async fn generate_in_dir(
         config: &AlbumConfig,
         source_dir: &Path,
     ) -> Result<(), Failure<SampleAction>> {
-        if let LockOutcome::Acquired(_guard) = acquire_generation_lock(source_dir) {
-            Self::generate_files(config, source_dir).await?;
-            mark_generated(source_dir);
-        }
-        Ok(())
+        Self::generate_files(config, source_dir).await
     }
 
-    /// Generate album files in the specified directory (shared implementation).
-    async fn generate_files(
+    /// Generate album files in the specified directory.
+    ///
+    /// - Creates FLAC files, cover image, and torrent unconditionally
+    /// - Caller is responsible for coordination (see [`AlbumProvider`])
+    pub(super) async fn generate_files(
         config: &AlbumConfig,
         source_dir: &Path,
     ) -> Result<(), Failure<SampleAction>> {

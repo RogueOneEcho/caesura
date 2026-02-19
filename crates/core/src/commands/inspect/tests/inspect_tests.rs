@@ -5,10 +5,7 @@ use std::fs;
 #[tokio::test]
 async fn get_details_flac() -> Result<(), TestError> {
     // Arrange
-    let config = AlbumConfig::multi_disc();
-    AlbumGenerator::generate(&config)
-        .await
-        .expect("should generate album");
+    let config = AlbumProvider::get_advanced(AlbumConfig::multi_disc()).await;
     let path = SAMPLE_SOURCES_DIR.join(config.dir_name());
 
     // Act
@@ -23,11 +20,8 @@ async fn get_details_flac() -> Result<(), TestError> {
 #[tokio::test]
 async fn get_details_320() -> Result<(), TestError> {
     // Arrange
-    let config = AlbumConfig::multi_disc();
-    AlbumGenerator::generate(&config)
-        .await
-        .expect("should generate album");
-    let transcode = TranscodeProvider::get_for_album(&config, TargetFormat::_320).await;
+    let config = AlbumProvider::get_advanced(AlbumConfig::multi_disc()).await;
+    let transcode = TranscodeProvider::get_advanced(&config, TargetFormat::_320).await;
     let path = transcode.transcode_dir();
 
     // Act
@@ -42,11 +36,8 @@ async fn get_details_320() -> Result<(), TestError> {
 #[tokio::test]
 async fn get_details_v0() -> Result<(), TestError> {
     // Arrange
-    let config = AlbumConfig::multi_disc();
-    AlbumGenerator::generate(&config)
-        .await
-        .expect("should generate album");
-    let transcode = TranscodeProvider::get_for_album(&config, TargetFormat::V0).await;
+    let config = AlbumProvider::get_advanced(AlbumConfig::multi_disc()).await;
+    let transcode = TranscodeProvider::get_advanced(&config, TargetFormat::V0).await;
     let path = transcode.transcode_dir();
 
     // Act
@@ -65,12 +56,9 @@ async fn get_details_v0() -> Result<(), TestError> {
 )]
 async fn get_details_mixed() -> Result<(), TestError> {
     // Arrange
-    let config = AlbumConfig::multi_disc();
-    AlbumGenerator::generate(&config)
-        .await
-        .expect("should generate album");
+    let config = AlbumProvider::get_advanced(AlbumConfig::multi_disc()).await;
     let flac_dir = SAMPLE_SOURCES_DIR.join(config.dir_name());
-    let transcode = TranscodeProvider::get_for_album(&config, TargetFormat::_320).await;
+    let transcode = TranscodeProvider::get_advanced(&config, TargetFormat::_320).await;
     let mp3_dir = transcode.transcode_dir();
 
     let temp = TempDirectory::create("mixed_format");

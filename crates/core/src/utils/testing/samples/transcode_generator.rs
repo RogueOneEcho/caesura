@@ -1,51 +1,29 @@
-//! Generate cached transcode outputs for testing.
+//! Generate transcode outputs for testing.
 //!
-//! [`TranscodeGenerator`] uses the same file-based locking pattern as [`AlbumGenerator`]
-//! to support cross-process coordination when running tests in parallel.
+//! [`TranscodeGenerator`] transcodes a source album into a target format (e.g., MP3 320, V0)
+//! by running the real [`TranscodeCommand`] pipeline against a mock API.
+//! Caching and deduplication are handled by [`TranscodeProvider`].
 
 use std::path::Path;
 
 use rogue_logging::Failure;
 use tokio::fs::create_dir_all;
 
-use super::lock_guard::{LockOutcome, acquire_generation_lock, mark_generated};
 use super::{SampleAction, TranscodeConfig};
 use crate::commands::TranscodeCommand;
 use crate::hosting::HostBuilder;
 use crate::options::{SharedOptions, TargetOptions};
 use crate::utils::{AlbumConfig, SAMPLE_SOURCES_DIR, SourceProvider};
 
-/// Generates cached transcode outputs for testing.
-pub struct TranscodeGenerator;
+/// Generates transcode outputs for testing.
+pub(super) struct TranscodeGenerator;
 
 impl TranscodeGenerator {
-    /// Generate transcode in cached `SAMPLE_TRANSCODES_DIR` location.
-    ///
-    /// Uses file-based locking for cross-process coordination:
-    /// - If `.generated` marker exists, skips generation
-    /// - Otherwise acquires `.lock` file, generates, creates marker
-    pub async fn generate(config: &TranscodeConfig) -> Result<(), Failure<SampleAction>> {
-        let transcode_dir = config.transcode_dir();
-        Self::generate_in_dir(config, &transcode_dir).await
-    }
-
-    /// Generate transcode in a specific directory.
-    ///
-    /// - Uses file-based locking for cross-process coordination
-    /// - Skips generation if `.generated` marker exists
-    pub async fn generate_in_dir(
-        config: &TranscodeConfig,
-        transcode_dir: &Path,
-    ) -> Result<(), Failure<SampleAction>> {
-        if let LockOutcome::Acquired(_guard) = acquire_generation_lock(transcode_dir) {
-            Self::generate_files(config, transcode_dir).await?;
-            mark_generated(transcode_dir);
-        }
-        Ok(())
-    }
-
     /// Generate transcode files in the specified directory.
-    async fn generate_files(
+    ///
+    /// - Writes transcoded files unconditionally
+    /// - Caller is responsible for coordination (see [`TranscodeProvider`])
+    pub(super) async fn generate_files(
         config: &TranscodeConfig,
         transcode_dir: &Path,
     ) -> Result<(), Failure<SampleAction>> {

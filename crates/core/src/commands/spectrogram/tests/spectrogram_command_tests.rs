@@ -49,9 +49,7 @@ async fn spectrogram_command_helper(album: AlbumConfig) -> Vec<FileSnapshot> {
     // Arrange
     init_logger();
     let test_dir = TestDirectory::new();
-    AlbumGenerator::generate(&album)
-        .await
-        .expect("should generate album");
+    let album = AlbumProvider::get_advanced(album).await;
     let host = HostBuilder::new()
         .with_mock_api(album)
         .with_test_options(&test_dir)

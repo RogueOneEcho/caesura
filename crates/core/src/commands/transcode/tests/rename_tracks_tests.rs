@@ -61,12 +61,7 @@ async fn transcode_rename_tracks_vinyl_numbering() {
 
 async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
     init_logger();
-
-    // Generate sample files in cached location
-    AlbumGenerator::generate(&config)
-        .await
-        .expect("should generate album");
-
+    let config = AlbumProvider::get_advanced(config).await;
     let test_dir = TestDirectory::new();
     let host = HostBuilder::new()
         .with_mock_api(config)
