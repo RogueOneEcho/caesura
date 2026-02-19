@@ -4,7 +4,7 @@ use std::fs;
 
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_succeeds_with_valid_source() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -28,7 +28,7 @@ async fn upload_command_succeeds_with_valid_source() -> Result<(), TestError> {
 
 /// Test that `UploadCommand` with `dry_run=true` does not call the API.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -103,7 +103,7 @@ async fn upload_command_missing_transcode_returns_error() -> Result<(), TestErro
 
 /// Test that `UploadCommand` fails when the torrent file is missing.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_missing_torrent_fails() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -162,7 +162,7 @@ fn delete_torrent_files(dir: &PathBuf) {
 
 /// Test that `UploadCommand` copies transcode to content directory when enabled.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -205,7 +205,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
 
 /// Test that `UploadCommand` copies transcode to custom directory.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -246,7 +246,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
 
 /// Test that `UploadCommand` copies torrent file to specified directory.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -291,7 +291,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
 
 /// Test that `UploadCommand` handles API failure gracefully.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -388,7 +388,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
 
 /// Test that `UploadCommand` captures torrent ID from API response.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_captures_response_ids() -> Result<(), TestError> {
     // Arrange
     init_logger();
@@ -413,7 +413,7 @@ async fn upload_command_captures_response_ids() -> Result<(), TestError> {
 
 /// Test that upload succeeds when copy target already exists.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn upload_command_skip_existing_copy_succeeds() -> Result<(), TestError> {
     // Arrange
     init_logger();

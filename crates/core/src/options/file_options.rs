@@ -11,10 +11,14 @@ pub struct FileOptions {
     #[arg(long)]
     pub no_image_compression: bool,
 
-    /// Should transcoded files be renamed from source filenames to a
-    /// standardized format: `{track:0>N} {title}.{ext}`?
+    /// Should transcoded files be renamed?
+    ///
+    /// If enabled then tracks are renamed into a standardized format: `{number} {title}.{ext}`.
     ///
     /// Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.
+    ///
+    /// - `1 Example track title.flac`
+    /// - `CD1/10 Example track title.mp3`
     #[arg(long)]
     pub rename_tracks: bool,
 

@@ -41,6 +41,13 @@ cpus: 4
 dry_run: false
 # Should sources with specific tags be excluded?
 exclude_tags: null
+# Vorbis comment tag names to exclude from transcoded output.
+# Default: ["COMMENT","ENCODER","RATING","WORK"]
+exclude_vorbis_comments:
+- COMMENT
+- ENCODER
+- RATING
+- WORK
 # Should files be hard linked instead of copied?
 # Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
 # Default: false
@@ -95,11 +102,20 @@ no_sox_ng: false
 # Default: `~/.local/share/caesura/output/` or platform equivalent
 output: /test/output
 # A path to either a directory of `.torrent` files or a single YAML queue file.
-# Examples: `./torrents`, `/path/to/torrents`, `./queue.yml`
+# If you set this to the directory your torrent client stores `.torrent` files then caesura
+# will automatically load everything from your client.
+# - For qBittorrent use the `BT_backup` directory
+# - For deluge use the `state` directory
+# Examples:
+# - `/srv/qBittorrent/BT_backup`
+# - `/srv/deluge/state`
+# - `./queue.yml`
 queue_add_path: null
-# Should transcoded files be renamed from source filenames to a
-# standardized format: `{track:0>N} {title}.{ext}`?
+# Should transcoded files be renamed?
+# If enabled then tracks are renamed into a standardized format: `{number} {title}.{ext}`.
 # Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.
+# - `1 Example track title.flac`
+# - `CD1/10 Example track title.mp3`
 # Default: false
 rename_tracks: false
 # Should failed transcodes be retried?

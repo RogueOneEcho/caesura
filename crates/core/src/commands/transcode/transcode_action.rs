@@ -41,6 +41,8 @@ pub enum TranscodeAction {
     ResizeImage,
     #[error("execute transcode runner")]
     ExecuteRunner,
+    #[error("exclude vorbis comments from resampled output")]
+    ExcludeVorbisComments,
 }
 
 /// Errors that can occur during transcoding.

@@ -1,6 +1,7 @@
+use std::collections::HashSet;
+
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
-use std::collections::HashSet;
 use tokio::fs::{copy, hard_link};
 
 const MUSIC_CATEGORY_ID: u8 = 0;
@@ -226,7 +227,8 @@ impl UploadCommand {
             ));
         }
         let path = self.paths.get_transcode_target_dir(source, target);
-        match get_details_split(&path) {
+        let details = get_details_split(&path, false);
+        match details {
             Ok((properties, tags)) => {
                 lines.push(format!(
                     "[pad=0|10|0|19]Details[/pad] [pre]{properties}[/pre]"

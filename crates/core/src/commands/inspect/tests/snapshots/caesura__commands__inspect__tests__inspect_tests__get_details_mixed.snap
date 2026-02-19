@@ -25,13 +25,11 @@ METADATA_BLOCK_PICTURE   Front Cover   0.8 KiB   image/png
 
 Rename Artist - Multi Disc Album - 02 Second Track.mp3
 
-COMM   Comment            Processed by SoX
-TPE1   Track Artist       Rename Artist
-TALB   Album Title        Multi Disc Album
-TIT2   Track Title        Second Track
-TDRC   Recording Date     2024
-TSSE   Encoder Settings   reference libFLAC 1.5.0 20250211
-TRCK   Track Number       2
-TPOS   Disc Number        1
+TPE1   Track Artist     Rename Artist
+TALB   Album Title      Multi Disc Album
+TIT2   Track Title      Second Track
+TDRC   Recording Date   2024
+TRCK   Track Number     2
+TPOS   Disc Number      1
 
 APIC   Front Cover   0.8 KiB   image/png

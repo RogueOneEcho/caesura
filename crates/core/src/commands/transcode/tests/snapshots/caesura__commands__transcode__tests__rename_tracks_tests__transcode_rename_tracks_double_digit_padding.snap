@@ -1,11 +1,11 @@
 ---
-source: src/commands/transcode/tests/rename_tracks_tests.rs
+source: crates/core/src/commands/transcode/tests/rename_tracks_tests.rs
 expression: snapshot
 ---
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 01 Track One.mp3
-  size: 2604920
-  sha256: 8748338d889e4dbe9e32da9e3bcd7cb3bfa482c2860c17f28fc7825d8eaa747e
+  size: 2604846
+  sha256: 7c1bc7cbab6463cacd88b93c60106eaa03e19f3fc8ffa721666f728026fdb264
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -17,8 +17,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -31,8 +29,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 02 Track Two.mp3
-  size: 2604920
-  sha256: 314dd5531b1ffaacb6af12a72d22fb4a99280c340207fd43281a664b8fc4e921
+  size: 2604846
+  sha256: 85a123b96e2383eca83b94690bb532852a3a31cc7ef7a4f3cb7c36b92672bf0e
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -44,8 +42,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -58,8 +54,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 03 Track Three.mp3
-  size: 2604922
-  sha256: 8aeac812a7ee870c013a13feaa3062de4b06df41e9184bf8c6771b88c25b056a
+  size: 2604848
+  sha256: 377a7e97973888442b2d8d8a765f196c03b8cbfe214d047764398800395d5e62
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -71,8 +67,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "3"
@@ -85,8 +79,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 04 Track Four.mp3
-  size: 2604921
-  sha256: d235fe96cf952f2ae05cfcaf4b5cd400cd04d544531506f559bcd2dc8fae9d76
+  size: 2604847
+  sha256: 325e9425f1ff65e952c5a9063e2e60c6c087540d831400a3127e707806223132
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -98,8 +92,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "4"
@@ -112,8 +104,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 05 Track Five.mp3
-  size: 2604921
-  sha256: 270ff67b46a37a8e41006683f6a035f8d0256311214c63c1fe8fcc46a873102d
+  size: 2604847
+  sha256: 7c749f8b21e12808699e7d260f25e95da5a8c785d115e019952d5d828b8c35c5
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -125,8 +117,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "5"
@@ -139,8 +129,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 06 Track Six.mp3
-  size: 2604920
-  sha256: 9d2cd5265ea9b5bc5dc374e5b8053452fcc00a531ed16c770d43058e677d191c
+  size: 2604846
+  sha256: b1e8224536f87e1a044a3b0f9fde18bdc5426277b7027b5ebabe9611ce637b2c
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -152,8 +142,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "6"
@@ -166,8 +154,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 07 Track Seven.mp3
-  size: 2604922
-  sha256: 1034ff65c03d55fd0ebd13f7eb55d32973730649ba9e9247f2c13015240866bc
+  size: 2604848
+  sha256: c3a8df489d81d392653b39bd0baa8f4dec789dc1b24eab8ace4b1300e6193ed3
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -179,8 +167,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "7"
@@ -193,8 +179,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 08 Track Eight.mp3
-  size: 2604922
-  sha256: b9df2c2853a0165f9dfa1641111f3c018c3eb670dfac6a7da2cbf937d9e49589
+  size: 2604848
+  sha256: fddf64a1f40b3194a2ea723408ac439754cf699b74c50673b0aab714b005a984
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -206,8 +192,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "8"
@@ -220,8 +204,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 09 Track Nine.mp3
-  size: 2604921
-  sha256: 476111e78c17e013d0578e23f1b144457e06c634830a66debcb506ac1766e6c5
+  size: 2604847
+  sha256: 9d9adfca59cdf423f9922f17511743f9e214b2f6c7718a086ebc73e0df3487a7
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -233,8 +217,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "9"
@@ -247,8 +229,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 10 Track Ten.mp3
-  size: 2604921
-  sha256: 49a75b442f936189e36b1544c220bd9595ca0f6aad86c1337e0e47e82a0dfd93
+  size: 2604847
+  sha256: 92811a79954594932e656e2cb887ed5b2a72956e1dd9a79620a63e7a518c4e57
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -260,8 +242,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "10"
@@ -282,8 +262,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 01 Track One.mp3
-  size: 613444
-  sha256: dbf243bcec220d34f76d9bb3c9e81700a8a782d8fe99363cee55c1d9ba33dc9f
+  size: 613370
+  sha256: 0416d3c1dd081128e49eba6c2455ccb3692e7662dab8d51f16a5b747956da062
   audio:
     duration_ms: 65045
     overall_bitrate: 75
@@ -295,8 +275,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -309,8 +287,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 02 Track Two.mp3
-  size: 693469
-  sha256: f381cdc338d6444c354b2dd0e18f8bd8834b62d555bee9df2a58b18a1bd4c572
+  size: 693395
+  sha256: dffb79e39f3f0c4330cb12c80f3143d22f50d34a52a6f395ae407bb1bf661931
   audio:
     duration_ms: 65045
     overall_bitrate: 85
@@ -322,8 +300,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -336,8 +312,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 03 Track Three.mp3
-  size: 827761
-  sha256: 1c18f38e28d1bc652d5e1ab2f175eb09c92a205911a2e7b1692127d82c35e625
+  size: 827687
+  sha256: a2b2a6fcb29d829e0c3eab366bbd7d743c470de5deb9182552ccbb7aa9c72dfb
   audio:
     duration_ms: 65045
     overall_bitrate: 101
@@ -349,8 +325,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "3"
@@ -363,8 +337,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 04 Track Four.mp3
-  size: 814007
-  sha256: 3f86e86d3dd9c0595a1d2e8d5887909dfd8bca115651a254639fa8c287f50c37
+  size: 813933
+  sha256: d6f7146904ad8df6f8a6dbbe7a064c6cadab1707ac4dc261220a1ea60da46724
   audio:
     duration_ms: 65045
     overall_bitrate: 100
@@ -376,8 +350,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "4"
@@ -390,8 +362,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 05 Track Five.mp3
-  size: 729949
-  sha256: bcd8d9ea6718cff2beec71c6b42310c816a29f522473de1a0cacb066f7266833
+  size: 729875
+  sha256: 226e1e1a1ffa227082f02d2016f3c2def64c1a3f6c52636eaafe8e6cd9a6b3bb
   audio:
     duration_ms: 65045
     overall_bitrate: 89
@@ -403,8 +375,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "5"
@@ -417,8 +387,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 06 Track Six.mp3
-  size: 827317
-  sha256: e5801552e93300ca6f72c6e2a00d9973821e9803373eb3dd45eefdc10bf5dccf
+  size: 827243
+  sha256: b34d4676a79ee591add2b983c4261de661f9aa1df11d31fae0a7002649116a54
   audio:
     duration_ms: 65045
     overall_bitrate: 101
@@ -430,8 +400,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "6"
@@ -444,8 +412,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 07 Track Seven.mp3
-  size: 847652
-  sha256: eab31bd65dd80f423005437e62c18fd1c3543003308c311ef6b2987ad338d127
+  size: 847578
+  sha256: bd309152ab97ed1d87ae6a94be42b2eb0196c29b6409b18c03f3682ec046b7e6
   audio:
     duration_ms: 65045
     overall_bitrate: 104
@@ -457,8 +425,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "7"
@@ -471,8 +437,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 08 Track Eight.mp3
-  size: 683275
-  sha256: fcfbbc3f840abc3fdb29e12a3df2d5fa3474737918763d1007610519d4c2256e
+  size: 683201
+  sha256: f118eab95813226044318cd41ed5a321279e7d944bec9ab9d5599e75d7a4f0d6
   audio:
     duration_ms: 65045
     overall_bitrate: 84
@@ -484,8 +450,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "8"
@@ -498,8 +462,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 09 Track Nine.mp3
-  size: 830933
-  sha256: 5c98003bff6fd0a32db82e68d378b60d3a0903f5f61e624a1bddfb839a7375bc
+  size: 830859
+  sha256: e98ed02cc972337daa460bd629c5321bd43411241ef59110d1e6ed36219ec7ca
   audio:
     duration_ms: 65045
     overall_bitrate: 102
@@ -511,8 +475,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "9"
@@ -525,8 +487,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 10 Track Ten.mp3
-  size: 824199
-  sha256: b9facc860718df389ba19b67654b703d4870da58392796c1119110ede179af71
+  size: 824125
+  sha256: a2181573ade5294845a5b702420e3d888bedce686fcc12048014a80e2e6888e5
   audio:
     duration_ms: 65045
     overall_bitrate: 101
@@ -538,8 +500,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Double Digit Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "10"

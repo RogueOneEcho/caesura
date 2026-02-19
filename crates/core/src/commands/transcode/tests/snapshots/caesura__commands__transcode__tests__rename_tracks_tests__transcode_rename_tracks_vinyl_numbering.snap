@@ -1,5 +1,5 @@
 ---
-source: src/commands/transcode/tests/rename_tracks_tests.rs
+source: crates/core/src/commands/transcode/tests/rename_tracks_tests.rs
 expression: snapshot
 ---
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]"
@@ -12,8 +12,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD1"
   filename: 1 Side A Track One.mp3
-  size: 2604932
-  sha256: 2521ab501fd738644615b38fbf708446f9e5bc65a2396408a87645bc80566004
+  size: 2604858
+  sha256: 7b1bb609e5d7fdea5060754f2863e827a82927d350f43acd5b27fd0e9a83a597
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -25,9 +25,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -40,8 +38,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD1"
   filename: 2 Side A Track Two.mp3
-  size: 2604932
-  sha256: bd8b6514a5defce279ab6dbd8b411ceda6609e26a785f4345107ba9b8f0ad2c4
+  size: 2604858
+  sha256: f098ae75b9dcf4e4e6c7cc7d40467aaa3f4d8eac31b0c04b25934bebbfb1f6af
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -53,9 +51,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -68,8 +64,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD2"
   filename: 1 Side B Track One.mp3
-  size: 2604932
-  sha256: 057b291682c0558d89c2bb06aeb0fe4f2c416a9f9da2536be49e295b16b2a2c8
+  size: 2604858
+  sha256: f25d3014038dd0d7ef4b9c7d9672c23546fa20bc19bd2d66dc4c43e7f3c0b6c4
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -81,9 +77,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -96,8 +90,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD2"
   filename: 2 Side B Track Two.mp3
-  size: 2604932
-  sha256: 8105ec22a193cad1552f942643c1b22a70386f9ad29f2271e57158e8c639af25
+  size: 2604858
+  sha256: ebae43d9db488173e457fca87a1a4f932bdec32cf58ce882f1739e16b01342e5
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -109,9 +103,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -132,8 +124,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD1"
   filename: 1 Side A Track One.mp3
-  size: 786275
-  sha256: a4ca462abc6df35bfb5db4192eee9581ebd92a7d9006402d329a5487c5c6f001
+  size: 786201
+  sha256: 649ba7eb11a41d187b76512498d4ece0ad911156bf28ac75298b72c64e1b9598
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -145,9 +137,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -160,8 +150,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD1"
   filename: 2 Side A Track Two.mp3
-  size: 764955
-  sha256: 58ce48f3e4d2f27257f7766a98a6626f16b233dfa22c93fa77d6893945c27c48
+  size: 764881
+  sha256: cddcd45c491ba4900250c694b6d2974a20a173d995977b69ba0faba5fefc7857
   audio:
     duration_ms: 65045
     overall_bitrate: 94
@@ -173,9 +163,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -188,8 +176,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD2"
   filename: 1 Side B Track One.mp3
-  size: 785002
-  sha256: 4c417228a4cda7bf86e03363b62dfb1985705540b35c15b20ca356deef3f0c59
+  size: 784928
+  sha256: 73665f180a43baeaa70b4c19c1dfc3922818f1a65aed161cbb8e59243278951c
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -201,9 +189,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -216,8 +202,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD2"
   filename: 2 Side B Track Two.mp3
-  size: 755778
-  sha256: 9d5e6a8a9d0211a42aae631a22169159009aa6e9958612cb1b2b766eb90f4159
+  size: 755704
+  sha256: 70dae82e95671cfb387c4f5d76dc67930d95281864afa8c113a70ee56c5829d4
   audio:
     duration_ms: 65045
     overall_bitrate: 92
@@ -229,9 +215,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Vinyl Album
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"

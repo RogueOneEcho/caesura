@@ -8,8 +8,12 @@ pub(crate) use temp_directory::*;
 #[cfg(test)]
 pub(crate) use test_directory::*;
 
+#[cfg(test)]
+mod assert_macros;
 mod fs;
 mod samples;
+#[cfg(test)]
+pub(crate) use assert_macros::*;
 #[cfg(test)]
 mod snapshots;
 mod temp_directory;

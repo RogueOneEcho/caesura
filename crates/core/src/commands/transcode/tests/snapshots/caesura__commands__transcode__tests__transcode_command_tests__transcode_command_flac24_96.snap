@@ -4,8 +4,8 @@ expression: snapshot
 ---
 - directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: Test Artist - Test Album - 01 Track One.mp3
-  size: 2604630
-  sha256: 76b00d5b9febc797a310dde295ea54035317f931c4314dcd2a401ce8a0401338
+  size: 2604556
+  sha256: bf80ca0e451b4519e8e46a29138895fdc55c15f35d04176888901a5320f5479a
   audio:
     duration_ms: 65040
     overall_bitrate: 320
@@ -17,8 +17,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Test Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2020"
         TrackArtist: Test Artist
         TrackNumber: "1"
@@ -31,8 +29,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Test Artist - Test Album [2020] [WEB 320]"
   filename: Test Artist - Test Album - 02 Track Two.mp3
-  size: 2604630
-  sha256: bf4ded85b6d58262e7591c150dc3da3b797da4dbf701ce678009a8a1419c0dd1
+  size: 2604556
+  sha256: 93d2148e4fb03545bfebca0b20015e1defc9f97c53d5b9a622e8ccbefdca4cb3
   audio:
     duration_ms: 65040
     overall_bitrate: 320
@@ -44,8 +42,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Test Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2020"
         TrackArtist: Test Artist
         TrackNumber: "2"
@@ -66,11 +62,11 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB FLAC]"
   filename: Test Artist - Test Album - 01 Track One.flac
-  size: 2201293
-  sha256: bef95a306a62dd296b34cb3be815df26451b62f0cc648361de1edb6aca8d823b
+  size: 2202293
+  sha256: 70a5cda15f427ff027462d16011997fae0734fc69163dfa94c7d4023123b38b2
   audio:
     duration_ms: 65000
-    overall_bitrate: 270
+    overall_bitrate: 271
     audio_bitrate: 270
     sample_rate: 48000
     bit_depth: 16
@@ -79,7 +75,6 @@ expression: snapshot
     tags:
       VorbisComments:
         AlbumTitle: Test Album
-        Comment: Processed by SoX
         EncoderSoftware: reference libFLAC 1.5.0 20250211
         RecordingDate: "2020"
         TrackArtist: Test Artist
@@ -88,8 +83,8 @@ expression: snapshot
     pictures: []
 - directory: "Test Artist - Test Album [2020] [WEB FLAC]"
   filename: Test Artist - Test Album - 02 Track Two.flac
-  size: 2397360
-  sha256: e3bb17c6f805a0b8867b4c482bcd7811d241c62d7dcb99ba725030d86a9e4a5f
+  size: 2398360
+  sha256: a2346f21c0db2eeac8ca64c3c1b4c638a663b9c71bd973365d4a965b10edc43d
   audio:
     duration_ms: 65000
     overall_bitrate: 295
@@ -101,7 +96,6 @@ expression: snapshot
     tags:
       VorbisComments:
         AlbumTitle: Test Album
-        Comment: Processed by SoX
         EncoderSoftware: reference libFLAC 1.5.0 20250211
         RecordingDate: "2020"
         TrackArtist: Test Artist
@@ -118,8 +112,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 01 Track One.mp3
-  size: 1406286
-  sha256: 163d0b7fba2fc7d15eaa5f9242bb4d9f32fa3857dd6112c9110d2b4be81207d5
+  size: 1406212
+  sha256: c33d43070ecb8148322f700f47c8430b9517449151f6991db84477f11bbc6e4f
   audio:
     duration_ms: 65040
     overall_bitrate: 172
@@ -131,8 +125,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Test Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2020"
         TrackArtist: Test Artist
         TrackNumber: "1"
@@ -145,8 +137,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Test Artist - Test Album [2020] [WEB V0]"
   filename: Test Artist - Test Album - 02 Track Two.mp3
-  size: 1430838
-  sha256: dc5b68d1a8d0fcf3d4aa926a383c0927efefa88ef12487c0549f17c6986a440a
+  size: 1430764
+  sha256: ed91eff6195bedd2dc5390f165e21cb2f592baa184c5668bedb8f0a6f5ae5156
   audio:
     duration_ms: 65040
     overall_bitrate: 175
@@ -158,8 +150,6 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Test Album
-        Comment: Processed by SoX
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2020"
         TrackArtist: Test Artist
         TrackNumber: "2"
