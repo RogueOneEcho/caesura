@@ -10,7 +10,10 @@ static PARENTHETICAL_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(.+)\(.+\)$").expect("regex should compile"));
 
 /// Suggest shorter names for albums and tracks.
-pub struct Shortener;
+#[injectable]
+pub struct Shortener{
+    source_name: Ref<SourceName>
+}
 
 impl Shortener {
     /// Attempt to shorten album name by removing parenthetical suffix.
@@ -42,10 +45,10 @@ impl Shortener {
     }
 
     /// Log a suggestion if renaming the album would save characters.
-    pub fn suggest_album_name(source: &Source) {
+    pub fn suggest_album_name(&self, source: &Source) {
         if let Some(shortened) = Shortener::shorten_album(&source.metadata) {
-            let before = SourceName::get(&source.metadata);
-            let after = SourceName::get(&shortened);
+            let before = self.source_name.get(&source.metadata);
+            let after = self.source_name.get(&shortened);
             let difference = compare_char_count(&before, &after);
             if difference < 0 {
                 info!(

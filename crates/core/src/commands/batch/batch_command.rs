@@ -18,6 +18,7 @@ pub(crate) struct BatchCommand {
     transcode: Ref<TranscodeCommand>,
     upload: Ref<UploadCommand>,
     queue: Ref<Queue>,
+    source_name: Ref<SourceName>
 }
 
 impl BatchCommand {
@@ -124,11 +125,12 @@ impl BatchCommand {
             };
             let result = self.verify.execute(&source).await;
             let verified = result.verified();
+            let source_fmt = self.source_name.get(&source.metadata);
             if verified {
-                debug!("{} {}", "Verified".bold(), source);
+                debug!("{} {}", "Verified".bold(), source_fmt);
             } else {
-                debug!("{} {source}", "Skipping".bold());
-                debug!("{} for transcoding {}", "Unsuitable".bold(), source);
+                debug!("{} {source_fmt}", "Skipping".bold());
+                debug!("{} for transcoding {}", "Unsuitable".bold(), source_fmt);
                 for issue in &result.issues {
                     debug!("{issue}");
                 }

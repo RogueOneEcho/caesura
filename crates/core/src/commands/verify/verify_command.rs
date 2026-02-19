@@ -12,6 +12,8 @@ pub(crate) struct VerifyCommand {
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     targets: Ref<TargetFormatProvider>,
     paths: Ref<PathManager>,
+    source_name: Ref<SourceName>,
+    shortener: Ref<Shortener>,
 }
 
 impl VerifyCommand {
@@ -41,7 +43,7 @@ impl VerifyCommand {
             Err(e) => return Err(Failure::new(VerifyAction::GetSource, e)),
         };
         let result = self.execute(&source).await;
-        let id = source.to_string();
+        let id = self.source_name.get(&source.metadata);
         if result.verified() {
             info!("{} {id}", "Verified".bold());
         } else {
@@ -57,7 +59,7 @@ impl VerifyCommand {
     ///
     /// Returns a [`VerifySuccess`] containing any issues found.
     pub(crate) async fn execute(&self, source: &Source) -> VerifySuccess {
-        debug!("{} {}", "Verifying".bold(), source);
+        debug!("{} {}", "Verifying".bold(), self.source_name.get(&source.metadata));
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.append(&mut self.api_checks(source));
         issues.append(&mut self.flac_checks(source));
@@ -173,7 +175,7 @@ impl VerifyCommand {
             }
         }
         if too_long {
-            Shortener::suggest_album_name(source);
+            self.shortener.suggest_album_name(source);
         }
         issues
     }

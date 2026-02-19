@@ -18,6 +18,8 @@ pub struct PathManager {
     shared_options: Ref<SharedOptions>,
     cache_options: Ref<CacheOptions>,
     file_options: Ref<FileOptions>,
+    spectrogram_name: Ref<SpectrogramName>,
+    transcode_name: Ref<TranscodeName>
 }
 
 impl PathManager {
@@ -65,6 +67,22 @@ impl PathManager {
             .join("output")
     }
 
+    /// Default transcoded name format (Fallback without remaster title)
+    ///
+    /// "{artist} - {album} [{year}]"
+    #[must_use]
+    pub fn default_transcoded_name_template_fallback() -> String {
+        String::from("{artist} - {album} [{year}]")
+    }
+
+    /// Default transcoded name format
+    ///
+    /// "{artist} - {album} (metadata.remaster_title) [{metadata.year}]"
+    #[must_use]
+    pub fn default_transcoded_name_template() -> String {
+        String::from("{artist} - {album} (remaster_title) [{year}]")
+    }
+
     #[must_use]
     pub fn get_cache_dir(&self) -> PathBuf {
         self.cache_options.cache.clone()
@@ -89,13 +107,13 @@ impl PathManager {
     #[must_use]
     pub fn get_spectrogram_dir(&self, source: &Source) -> PathBuf {
         self.get_output_dir()
-            .join(SpectrogramName::get(&source.metadata))
+            .join(self.spectrogram_name.get(&source.metadata))
     }
 
     #[must_use]
     pub fn get_transcode_target_dir(&self, source: &Source, target: TargetFormat) -> PathBuf {
         self.get_output_dir()
-            .join(TranscodeName::get(&source.metadata, target))
+            .join(self.transcode_name.get(&source.metadata, target))
     }
 
     #[must_use]
@@ -134,7 +152,7 @@ impl PathManager {
         target: TargetFormat,
         indexer: &str,
     ) -> PathBuf {
-        let mut filename = TranscodeName::get(&source.metadata, target);
+        let mut filename = self.transcode_name.get(&source.metadata, target);
         filename.push('.');
         filename.push_str(indexer);
         filename.push_str(".torrent");

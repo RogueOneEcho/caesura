@@ -16,6 +16,7 @@ pub(crate) struct TranscodeCommand {
     transcode_job_factory: Ref<TranscodeJobFactory>,
     additional_job_factory: Ref<AdditionalJobFactory>,
     runner: Ref<JobRunner>,
+    source_name: Ref<SourceName>
 }
 
 impl TranscodeCommand {
@@ -106,12 +107,13 @@ impl TranscodeCommand {
             Collector::get_flacs(&source.directory)
         };
 
+        let source_fmt = self.source_name.get(&source.metadata);
         info!(
             "{} to {} for {} FLACs in {}",
             "Transcoding".bold(),
             join_humanized(targets),
             flacs.len().to_string().gray(),
-            source
+            source_fmt
         );
         for target in targets {
             let jobs = self.transcode_job_factory.create(&flacs, source, *target)?;
@@ -121,7 +123,7 @@ impl TranscodeCommand {
             .execute()
             .await
             .map_err(Failure::wrap(TranscodeAction::ExecuteRunner))?;
-        info!("{} {}", "Transcoded".bold(), source);
+        info!("{} {}", "Transcoded".bold(), source_fmt);
         Ok(())
     }
 
@@ -187,7 +189,7 @@ impl TranscodeCommand {
                 }
             }
         }
-        debug!("{} additional files {}", "Added".bold(), source);
+        debug!("{} additional files {}", "Added".bold(), self.source_name.get(&source.metadata));
 
         Ok(())
     }
@@ -197,7 +199,8 @@ impl TranscodeCommand {
         source: &Source,
         targets: &BTreeSet<TargetFormat>,
     ) -> Result<(), Failure<TorrentCreateAction>> {
-        debug!("{} torrents {}", "Creating".bold(), source);
+        let source_fmt = self.source_name.get(&source.metadata);
+        debug!("{} torrents {}", "Creating".bold(), source_fmt);
         for target in targets {
             let content_dir = self.paths.get_transcode_target_dir(source, *target);
             let torrent_path = self.paths.get_torrent_path(source, *target);
@@ -206,7 +209,7 @@ impl TranscodeCommand {
             TorrentCreator::create(&content_dir, &torrent_path, announce_url, indexer).await?;
             trace!("{} torrent {}", "Created".bold(), torrent_path.display());
         }
-        debug!("{} torrents {}", "Created".bold(), source);
+        debug!("{} torrents {}", "Created".bold(), source_fmt);
         Ok(())
     }
 }

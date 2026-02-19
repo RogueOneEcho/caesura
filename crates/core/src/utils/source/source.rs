@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use gazelle_api::{Group, Torrent};
-use rogue_logging::Colors;
 
 /// Source to be transcoded
 #[derive(Debug)]
@@ -17,14 +16,4 @@ pub struct Source {
     pub directory: PathBuf,
     /// Audio metadata extracted from the source files.
     pub metadata: Metadata,
-}
-
-impl Display for Source {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
-        write!(
-            formatter,
-            "{}",
-            SourceName::get(&self.metadata).gray().italic()
-        )
-    }
 }

@@ -56,6 +56,17 @@ pub struct SharedOptions {
     #[arg(long)]
     #[options(default_fn = default_output, default_doc = "`~/.local/share/caesura/output/` or platform equivalent")]
     pub output: PathBuf,
+
+    /// Template to name the transcoded folders
+    #[arg(long)]
+    #[options(default_fn = default_transcoded_name_template, default_doc = "{artist} - {album} ({remaster_title}) [{year}]")]
+    pub transcoded_name_template: String,
+
+    /// Template to name the transcoded folders
+    /// (Fallback when no Remaster Title is available)
+    #[arg(long)]
+    #[options(default_fn = default_transcoded_name_template_fallback , default_doc = "{artist} - {album} [{year}]")]
+    pub transcoded_name_template_fallback: String,
 }
 
 #[expect(
@@ -64,6 +75,14 @@ pub struct SharedOptions {
 )]
 fn default_output(_partial: &SharedOptionsPartial) -> Option<PathBuf> {
     Some(PathManager::default_output_dir())
+}
+
+fn default_transcoded_name_template(_partial: &SharedOptionsPartial) -> Option<String> {
+    Some(PathManager::default_transcoded_name_template())
+}
+
+fn default_transcoded_name_template_fallback(_partial: &SharedOptionsPartial) -> Option<String> {
+    Some(PathManager::default_transcoded_name_template_fallback())
 }
 
 fn default_content(_partial: &SharedOptionsPartial) -> Option<Vec<PathBuf>> {
@@ -162,7 +181,7 @@ impl OptionsContract for SharedOptions {
                     format!("In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.", default_dir.display()),
                 ));
             }
-        }
+        } // TODO check that the custom folder format is correct
     }
 }
 

@@ -17,6 +17,7 @@ pub(crate) struct UploadCommand {
     paths: Ref<PathManager>,
     targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
+    source_name: Ref<SourceName>
 }
 
 impl UploadCommand {
@@ -109,9 +110,10 @@ impl UploadCommand {
                 release_desc: self.create_description(source, target),
                 group_id: source.group.id,
             };
+            let source_fmt = self.source_name.get(&source.metadata);
             if self.upload_options.dry_run {
                 warn!("{} upload as this is a dry run", "Skipping".bold());
-                info!("{} data of {target} for {source}:", "Upload".bold());
+                info!("{} data of {target} for {source_fmt}:", "Upload".bold());
                 info!("\n{form}");
                 continue;
             }
@@ -120,7 +122,7 @@ impl UploadCommand {
                 .upload_torrent(form)
                 .await
                 .map_err(Failure::wrap(UploadAction::Upload))?;
-            info!("{} {target} for {source}", "Uploaded".bold());
+            info!("{} {target} for {source_fmt}", "Uploaded".bold());
             let base = &self.shared_options.indexer_url;
             let id = response.torrent_id;
             let link = get_permalink(base, response.group_id, id);

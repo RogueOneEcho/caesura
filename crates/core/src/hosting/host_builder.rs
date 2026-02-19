@@ -48,6 +48,10 @@ impl HostBuilder {
             }))
             .add(SoxFactory::singleton())
             .add(PathManager::transient())
+            .add(SourceName::transient())
+            .add(TranscodeName::transient())
+            .add(SpectrogramName::transient())
+            .add(Shortener::transient())
             .add(IdProvider::transient())
             .add(SourceProvider::transient())
             .add(singleton_as_self().from(|provider| {

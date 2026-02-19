@@ -8,6 +8,7 @@ pub(crate) struct SpectrogramCommand {
     paths: Ref<PathManager>,
     factory: Ref<SpectrogramJobFactory>,
     runner: Ref<JobRunner>,
+    source_name: Ref<SourceName>
 }
 
 impl SpectrogramCommand {
@@ -38,12 +39,13 @@ impl SpectrogramCommand {
         source: &Source,
     ) -> Result<SpectrogramSuccess, Failure<SpectrogramAction>> {
         let path = self.paths.get_spectrogram_dir(source);
+        let source_fmt = self.source_name.get(&source.metadata);
         if path.is_dir() {
-            info!("{} existing spectrograms {source}", "Found".bold());
+            info!("{} existing spectrograms {source_fmt}", "Found".bold());
             debug!("in {}", path.display());
             return Ok(SpectrogramSuccess { path, count: 0 });
         }
-        info!("{} spectrograms for {}", "Creating".bold(), source);
+        info!("{} spectrograms for {}", "Creating".bold(), source_fmt);
         let collection = Collector::get_flacs(&source.directory);
         let jobs = self.factory.create(&collection, source);
         let count = jobs.len();
@@ -52,7 +54,7 @@ impl SpectrogramCommand {
             .execute()
             .await
             .map_err(Failure::wrap(SpectrogramAction::ExecuteRunner))?;
-        info!("{} {count} spectrograms for {source}", "Created".bold());
+        info!("{} {count} spectrograms for {source_fmt}", "Created".bold());
         debug!("in {}", path.display());
         Ok(SpectrogramSuccess { path, count })
     }
