@@ -11,6 +11,10 @@ pub(crate) use test_directory::*;
 mod fs;
 mod samples;
 #[cfg(test)]
+mod assert_macros;
+#[cfg(test)]
+pub(crate) use assert_macros::*;
+#[cfg(test)]
 mod snapshots;
 mod temp_directory;
 mod test_directory;

@@ -1,11 +1,11 @@
 use crate::testing_prelude::*;
 
-/// Assert snapshot exactly, or just check files are non-empty on macOS and Docker.
+/// Assert snapshot exactly, or just check files are non-empty on macOS, Docker, and Nix.
 ///
-/// Spectrogram output is not byte-identical on macOS.
+/// Spectrogram output is not byte-identical across platforms and build environments.
 macro_rules! assert_spectrogram_snapshot {
     ($snapshot:expr) => {
-        if is_docker() || cfg!(target_os = "macos") {
+        if is_docker() || is_nix() || is_macos() {
             assert!(!$snapshot.is_empty(), "should produce spectrogram files");
         } else {
             assert_yaml_snapshot!($snapshot);

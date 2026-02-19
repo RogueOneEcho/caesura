@@ -6,10 +6,9 @@ use crate::utils::TargetFormat::{_320, V0};
 /// Expected output filenames: `1 Track One.mp3`, `2 Track Two.mp3`
 /// (single-digit padding since max track is 2)
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn transcode_rename_tracks_single_disc() {
     let snapshot = rename_tracks_helper(AlbumConfig::single_disc()).await;
-    assert_yaml_snapshot!(snapshot);
+    assert_transcode_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with a multi-disc album from flat source directory.
@@ -21,10 +20,9 @@ async fn transcode_rename_tracks_single_disc() {
 /// - `CD2/1 Third Track.mp3`
 /// - `CD2/2 Fourth Track.mp3`
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn transcode_rename_tracks_multi_disc_flat_source() {
     let snapshot = rename_tracks_helper(AlbumConfig::multi_disc_flat()).await;
-    assert_yaml_snapshot!(snapshot);
+    assert_transcode_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with a multi-disc album from source with disc subdirectories.
@@ -36,10 +34,9 @@ async fn transcode_rename_tracks_multi_disc_flat_source() {
 /// - `CD2/1 Third Track.mp3`
 /// - `CD2/2 Fourth Track.mp3`
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn transcode_rename_tracks_multi_disc() {
     let snapshot = rename_tracks_helper(AlbumConfig::multi_disc()).await;
-    assert_yaml_snapshot!(snapshot);
+    assert_transcode_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with double-digit track numbers.
@@ -47,10 +44,9 @@ async fn transcode_rename_tracks_multi_disc() {
 /// Expected output filenames: `01 Track One.mp3` through `10 Track Ten.mp3`
 /// (two-digit padding since max track is 10)
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn transcode_rename_tracks_double_digit_padding() {
     let snapshot = rename_tracks_helper(AlbumConfig::double_digit_tracks()).await;
-    assert_yaml_snapshot!(snapshot);
+    assert_transcode_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with vinyl-style track numbers (A1, A2, B1, B2).
@@ -58,10 +54,9 @@ async fn transcode_rename_tracks_double_digit_padding() {
 /// The `fix_track_numbering` logic converts vinyl notation to proper track/disc numbers
 /// in the cached ID3 tags, so renamed files use numeric tracks with CD subfolders.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn transcode_rename_tracks_vinyl_numbering() {
     let snapshot = rename_tracks_helper(AlbumConfig::vinyl_tracks()).await;
-    assert_yaml_snapshot!(snapshot);
+    assert_transcode_snapshot!(snapshot);
 }
 
 async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
