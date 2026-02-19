@@ -1,10 +1,8 @@
 use crate::testing_prelude::*;
-use insta::assert_snapshot;
 use std::fs;
 
 /// Test that `get_details` returns FLAC metadata for a multi-disc source directory.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
 async fn get_details_flac() -> Result<(), TestError> {
     // Arrange
     let config = AlbumConfig::multi_disc();
@@ -17,13 +15,12 @@ async fn get_details_flac() -> Result<(), TestError> {
     let output = get_details(&path, false)?;
 
     // Assert
-    assert_snapshot!(output);
+    assert_inspect_snapshot!(output);
     Ok(())
 }
 
 /// Test that `get_details` returns MP3 metadata for a 320kbps transcode.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn get_details_320() -> Result<(), TestError> {
     // Arrange
     let config = AlbumConfig::multi_disc();
@@ -37,13 +34,12 @@ async fn get_details_320() -> Result<(), TestError> {
     let output = get_details(&path, false)?;
 
     // Assert
-    assert_snapshot!(output);
+    assert_inspect_snapshot!(output);
     Ok(())
 }
 
 /// Test that `get_details` returns MP3 metadata for a V0 transcode.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 async fn get_details_v0() -> Result<(), TestError> {
     // Arrange
     let config = AlbumConfig::multi_disc();
@@ -57,13 +53,12 @@ async fn get_details_v0() -> Result<(), TestError> {
     let output = get_details(&path, false)?;
 
     // Assert
-    assert_snapshot!(output);
+    assert_inspect_snapshot!(output);
     Ok(())
 }
 
 /// Test that `get_details` handles mixed FLAC and MP3 files in the same directory.
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "Transcode output differs on ARM")]
 #[expect(
     clippy::indexing_slicing,
     reason = "test with controlled config guarantees indices exist"
@@ -97,6 +92,6 @@ async fn get_details_mixed() -> Result<(), TestError> {
     let output = get_details(&temp, false)?;
 
     // Assert
-    assert_snapshot!(output);
+    assert_inspect_snapshot!(output);
     Ok(())
 }
