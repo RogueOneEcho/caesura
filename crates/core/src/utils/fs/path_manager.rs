@@ -71,7 +71,7 @@ impl PathManager {
     /// "{artist} - {album} (metadata.remaster_title) [{metadata.year}]"
     #[must_use]
     pub fn default_transcoded_name_template() -> String {
-        String::from("{artist} - {album} (remaster_title) [{year}]")
+        String::from("{artist} - {album} ({remaster_title}) [{year}]")
     }
 
     #[must_use]
