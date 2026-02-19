@@ -111,9 +111,11 @@ jobs:
     - run: cargo auditable build --release --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
 
     - name: Clean cargo cache
+      if: github.ref_name == 'main'
       run: rm -rf target/*/release/incremental
 
     - name: Delete stale cargo caches
+      if: github.ref_name == 'main'
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
@@ -123,6 +125,7 @@ jobs:
         done
 
     - name: Save cargo cache
+      if: github.ref_name == 'main'
       uses: actions/cache/save@v4
       with:
         key: ${{ steps.cache-cargo.outputs.cache-primary-key }}
@@ -384,6 +387,7 @@ jobs:
     - run: mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
     - name: Delete stale buildx caches
+      if: github.ref_name == 'main'
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
@@ -393,6 +397,7 @@ jobs:
         done
 
     - name: Save buildx cache
+      if: github.ref_name == 'main'
       uses: actions/cache/save@v4
       with:
         path: /tmp/.buildx-cache
