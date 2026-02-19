@@ -11,6 +11,19 @@ use tokio::task::spawn_blocking;
 
 use super::{TorrentCreateAction, TorrentExt, TorrentReader};
 
+/// Maximum number of threads used by `lava_torrent`.
+///
+/// `lava_torrent` creates a rayon thread pool for piece hashing. If no default is provided it
+/// defaults to the number of CPUs. Normally this would be fine but our test infrastructure calls
+/// `TorrentCreator::create()` when generating samples and for various tests. When running on a
+/// a machine with 128 cores with tests running in parallel the OS process limit quickly becomes
+/// exhausted resulting in:
+///
+/// ```text
+/// TorrentBuilderFailure("failed to create rayon thread pool: Resource temporarily unavailable (os error 11)")
+/// ```
+const MAX_THREADS: usize = 4;
+
 /// Create and duplicate `.torrent` files using `lava_torrent`.
 pub struct TorrentCreator;
 
@@ -34,6 +47,7 @@ impl TorrentCreator {
             let pl = piece_length(content_size);
             let created_by = format!("{APP_NAME} {}", app_version_or_describe());
             let torrent = TorrentBuilder::new(&content_dir, pl)
+                .set_num_threads(num_threads())
                 .set_announce(Some(announce_url))
                 .set_privacy(true)
                 .add_extra_field("created by".to_owned(), BencodeElem::String(created_by))
@@ -166,6 +180,10 @@ fn piece_length(content_size: u64) -> i64 {
     let half_exp = log2 / 2 + 4;
     let length = 1_u64 << half_exp;
     length.clamp(16 * 1024, 16 * 1024 * 1024) as i64
+}
+
+fn num_threads() -> usize {
+    num_cpus::get().min(MAX_THREADS)
 }
 
 #[expect(
