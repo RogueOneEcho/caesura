@@ -268,6 +268,7 @@ fn target_options_yaml_round_trip() {
         target: Some(vec![TargetFormat::Flac, TargetFormat::V0]),
         allow_existing: Some(true),
         sox_random_dither: Some(true),
+        exclude_vorbis_comments: Some(TargetOptions::default_exclude_vorbis_comments()),
     };
 
     // Act
@@ -278,6 +279,10 @@ fn target_options_yaml_round_trip() {
     assert_eq!(original.target, parsed.target);
     assert_eq!(original.allow_existing, parsed.allow_existing);
     assert_eq!(original.sox_random_dither, parsed.sox_random_dither);
+    assert_eq!(
+        original.exclude_vorbis_comments,
+        parsed.exclude_vorbis_comments
+    );
 }
 
 /// Verify `SharedOptionsPartial` round-trips through YAML.

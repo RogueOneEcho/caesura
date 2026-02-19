@@ -24,12 +24,7 @@ impl VersionCommand {
         let dependencies = [(FLAC, flac), (LAME, lame), (sox_binary, sox)];
         let any_error = dependencies.iter().any(|(_, result)| result.is_err());
         if any_error {
-            error!("Failed to find all dependencies");
-            for (name, result) in &dependencies {
-                if let Err(err) = result {
-                    eprintln!("    {name}: {err}");
-                }
-            }
+            error!("Failed to find all dependencies\n");
         }
         let table = build_table(dependencies);
         print!("{table}");
@@ -74,7 +69,7 @@ fn build_table(dependencies: [(&str, Result<VersionInfo, VersionError>); 3]) -> 
                 info.version.unwrap_or_else(|| String::from("?")),
                 info.first_line.dimmed().to_string(),
             ),
-            Err(e) => (String::from("?"), e.to_string().red().to_string()),
+            Err(e) => ("⚠".yellow().to_string(), e.to_string().yellow().to_string()),
         };
         builder = builder.row([name.to_owned(), version, detail]);
     }

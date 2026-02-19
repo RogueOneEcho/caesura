@@ -3,10 +3,12 @@
 use std::sync::LazyLock;
 
 use crate::prelude::*;
+use lofty::config::WriteOptions;
 use lofty::file::TaggedFileExt;
+use lofty::prelude::TagExt;
 use lofty::probe::Probe;
 use lofty::tag::ItemKey::TrackNumber;
-use lofty::tag::{Accessor, Tag, TagType};
+use lofty::tag::{Accessor, ItemKey, Tag, TagType};
 use regex::Regex;
 
 /// Match vinyl track numbering: letter followed by optional digits.
@@ -110,6 +112,51 @@ pub(crate) fn get_numeric_from_total_format(input: &str) -> Option<(u32, u32)> {
     let track_number: u32 = captures.get(1)?.as_str().parse().ok()?;
     let track_total: u32 = captures.get(2)?.as_str().parse().ok()?;
     Some((track_number, track_total))
+}
+
+/// Remove tag items matching the given [`ItemKey`] list.
+pub(crate) fn exclude_tags(tags: &mut Tag, keys: &[ItemKey]) {
+    for key in keys {
+        if let Some(value) = tags.get_string(key) {
+            trace!("Excluding {key:?}: {value}");
+            tags.remove_key(key);
+        }
+    }
+}
+
+/// Map Vorbis comment names to [`ItemKey`] values.
+///
+/// - Unrecognized names become [`ItemKey::Unknown`] and silently match nothing
+pub(crate) fn vorbis_keys(names: &[String]) -> Vec<ItemKey> {
+    names
+        .iter()
+        .map(|name| ItemKey::from_key(TagType::VorbisComments, name))
+        .collect()
+}
+
+/// Exclude specified Vorbis comments from a FLAC file on disk.
+///
+/// - `ENCODER` cannot be stripped from flac files as lofty conflates it with the vendor string
+///   and the FLAC writer always restores the vendor from the file's raw bytes
+/// - <https://github.com/Serial-ATA/lofty-rs/blob/d9eb83ba614001973f9ba3663c9f3e10dd27a702/lofty/src/flac/write.rs#L90-L104>
+pub(crate) fn exclude_vorbis_comments_from_flac(
+    path: &Path,
+    keys: &[String],
+) -> Result<(), Failure<TagsAction>> {
+    if keys.is_empty() {
+        return Ok(());
+    }
+    let mut file = Probe::open(path)
+        .map_err(Failure::wrap_with_path(TagsAction::OpenFile, path))?
+        .read()
+        .map_err(Failure::wrap_with_path(TagsAction::ReadTags, path))?;
+    if let Some(vorbis) = file.tag_mut(TagType::VorbisComments) {
+        exclude_tags(vorbis, &vorbis_keys(keys));
+        vorbis
+            .save_to_path(path, WriteOptions::default())
+            .map_err(Failure::wrap_with_path(TagsAction::WriteTags, path))?;
+    }
+    Ok(())
 }
 
 /// Print all tag key-value pairs to stdout for debugging.

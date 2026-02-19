@@ -1,17 +1,8 @@
 use crate::prelude::*;
-use std::env;
 use std::fs::create_dir;
-
-/// Environment variable set in the Docker image to use container paths.
-const DOCKER_ENV_VAR: &str = "CAESURA_DOCKER";
 
 /// Supported tracker suffixes for cross-tracker torrent duplication.
 const TRACKER_SUFFIXES: &[&str] = &["red", "ops", "pth"];
-
-/// Check if running in a Docker container.
-pub(crate) fn is_docker() -> bool {
-    env::var(DOCKER_ENV_VAR).is_ok()
-}
 
 #[injectable]
 pub struct PathManager {

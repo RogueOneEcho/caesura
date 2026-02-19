@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 use std::fs;
 
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn transcode_provider_320() {
     // Arrange
     init_logger();
@@ -35,7 +35,7 @@ async fn transcode_provider_320() {
 }
 
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn transcode_provider_v0() {
     // Arrange
     init_logger();
@@ -68,7 +68,7 @@ async fn transcode_provider_v0() {
 }
 
 #[tokio::test]
-#[cfg_attr(target_arch = "aarch64", ignore = "FLAC output differs on ARM")]
+
 async fn transcode_provider_caching() {
     // Arrange
     init_logger();

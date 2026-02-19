@@ -56,6 +56,7 @@ fast_image_resize = { workspace = true }
 image = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+unicode-width = { workspace = true }
 
 [dev-dependencies]
 gazelle_api = { workspace = true, features = ["mock"] }

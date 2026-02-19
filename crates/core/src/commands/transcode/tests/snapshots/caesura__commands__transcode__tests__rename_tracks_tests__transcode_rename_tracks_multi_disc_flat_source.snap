@@ -12,8 +12,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB 320]/CD1"
   filename: 1 First Track.mp3
-  size: 2604937
-  sha256: daa019294e8ff2ac4104216e6e09f9c274e7e576e3e361225d65c1244802a599
+  size: 2604863
+  sha256: 57cc59c024a07a18ae83e70b303f5c2add1446c7fa152069915c6ddd4ed76507
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -25,9 +25,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -40,8 +38,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB 320]/CD1"
   filename: 2 Second Track.mp3
-  size: 2604938
-  sha256: b04a1d9aa45b0bbf5ef98df8c7fc34ebfd5896d83c6ff48d905bf1972916755b
+  size: 2604864
+  sha256: 270da51d09f33dfe6f2b6b4c208eef673f338993de8bbf37ab8da473fd1da4eb
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -53,9 +51,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -68,8 +64,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB 320]/CD2"
   filename: 1 Third Track.mp3
-  size: 2604937
-  sha256: dee8c25bd835518d480b368545fdf7d0d76c9c4c4be5472b6ca82e086589ea86
+  size: 2604863
+  sha256: 812b9b7a57e3347966b40d2d5fb158bd70c80787fc3946caeb6fce776fae71da
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -81,9 +77,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -96,8 +90,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB 320]/CD2"
   filename: 2 Fourth Track.mp3
-  size: 2604938
-  sha256: 1eb0417c53444dff4c6d3edf596aeb4848ef7eeeed39322551bf9d25ad25d468
+  size: 2604864
+  sha256: 480ef18f170465500c7e68819bf7715b7c77a1630e3f52589db20a767c23eafc
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -109,9 +103,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -132,8 +124,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB V0]/CD1"
   filename: 1 First Track.mp3
-  size: 786280
-  sha256: 9386aaebd213b4adac5e0bbbb5718cbf93c0949def3fb90af515ab0d80ae8395
+  size: 786206
+  sha256: 0d5ea530c9270659603f2a5c00a1deb73416c0784a9525af5feab0511b399f96
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -145,9 +137,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -160,8 +150,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB V0]/CD1"
   filename: 2 Second Track.mp3
-  size: 764961
-  sha256: 045f77de8b7161b9787b937c339968b9d6288717215226a42ba52eae383e4799
+  size: 764887
+  sha256: de543e9c53baf1b5163764f595d4a13a1f5cf78a1ece3be01d6a51e463901637
   audio:
     duration_ms: 65045
     overall_bitrate: 94
@@ -173,9 +163,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "1"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"
@@ -188,8 +176,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB V0]/CD2"
   filename: 1 Third Track.mp3
-  size: 785007
-  sha256: 9751cfc497cf9b32a67c556b069ad0bdd304f89286059c0805782150767d0d42
+  size: 784933
+  sha256: 2ea840588fe922753223155fc1bbb1ad8e37754f28515ed492476a87454cc2fe
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -201,9 +189,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "1"
@@ -216,8 +202,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Multi Disc Album Flat [2024] [WEB V0]/CD2"
   filename: 2 Fourth Track.mp3
-  size: 755784
-  sha256: 03b60f8068bdc30af77d1d620faaae11130a2b7f734633c2339a8eda5883c413
+  size: 755710
+  sha256: 12e81ec41c2af9576b839c3b1dc4b5dd104af758895054e083ae907b088904e8
   audio:
     duration_ms: 65045
     overall_bitrate: 92
@@ -229,9 +215,7 @@ expression: snapshot
     tags:
       Id3v2:
         AlbumTitle: Multi Disc Album Flat
-        Comment: Processed by SoX
         DiscNumber: "2"
-        EncoderSettings: reference libFLAC 1.5.0 20250211
         RecordingDate: "2024"
         TrackArtist: Rename Artist
         TrackNumber: "2"

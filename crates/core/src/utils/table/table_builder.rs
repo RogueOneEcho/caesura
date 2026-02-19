@@ -1,7 +1,10 @@
 //! Builder for formatting data as aligned text tables.
 
 use std::borrow::Cow;
-use std::fmt::Write;
+use std::sync::LazyLock;
+
+use regex::Regex;
+use unicode_width::UnicodeWidthStr;
 
 /// Number of spaces between columns.
 const COLUMN_GAP: usize = 3;
@@ -85,16 +88,27 @@ impl<'a> TableBuilder<'a> {
         let mut widths = vec![0; col_count];
         if let Some(headers) = &self.headers {
             for (width, cell) in widths.iter_mut().zip(headers) {
-                *width = (*width).max(cell.len());
+                *width = (*width).max(visible_width(cell));
             }
         }
         for row in &self.rows {
             for (width, cell) in widths.iter_mut().zip(row) {
-                *width = (*width).max(cell.len());
+                *width = (*width).max(visible_width(cell));
             }
         }
         widths
     }
+}
+
+/// Visible width of a string in terminal columns.
+///
+/// - Strips ANSI SGR escape sequences before measuring
+/// - Uses [`UnicodeWidthStr`] for accurate column widths (e.g., CJK characters
+///   occupy 2 columns, emoji occupy 2 columns, zero-width characters occupy 0)
+fn visible_width(s: &str) -> usize {
+    static ANSI_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"\x1b\[[0-9;]*m").expect("ANSI regex should be valid"));
+    ANSI_RE.replace_all(s, "").width()
 }
 
 /// Format a single row with proper padding.
@@ -109,10 +123,14 @@ fn format_row(
         return;
     };
     for (i, (cell, &width)) in rest.iter().zip(widths).enumerate() {
+        let visible = visible_width(cell);
+        let padding = width.saturating_sub(visible);
         if right_aligned.get(i).copied().unwrap_or(false) {
-            let _ = write!(output, "{cell:>width$}");
+            output.push_str(&" ".repeat(padding));
+            output.push_str(cell);
         } else {
-            let _ = write!(output, "{cell:<width$}");
+            output.push_str(cell);
+            output.push_str(&" ".repeat(padding));
         }
         output.push_str(&" ".repeat(COLUMN_GAP));
     }
@@ -188,6 +206,80 @@ mod tests {
             .row(["foo.txt", "1.2 MB", "42"])
             .row(["bar.txt", "956 KB", "7"])
             .row(["baz.txt", "12.5 MB", "128"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn visible_width_plain_text() {
+        assert_eq!(visible_width("hello"), 5);
+    }
+
+    #[test]
+    fn visible_width_empty_string() {
+        assert_eq!(visible_width(""), 0);
+    }
+
+    #[test]
+    fn visible_width_single_ansi_code() {
+        // \x1b[31m = red, \x1b[0m = reset
+        assert_eq!(visible_width("\x1b[31mhello\x1b[0m"), 5);
+    }
+
+    #[test]
+    fn visible_width_multiple_ansi_codes() {
+        // bold + red + text + reset
+        assert_eq!(visible_width("\x1b[1m\x1b[31merror\x1b[0m"), 5);
+    }
+
+    #[test]
+    fn visible_width_ansi_with_semicolons() {
+        // \x1b[1;31m = bold red (compound SGR)
+        assert_eq!(visible_width("\x1b[1;31mwarning\x1b[0m"), 7);
+    }
+
+    #[test]
+    fn visible_width_mixed_plain_and_ansi() {
+        assert_eq!(visible_width("plain \x1b[2mdimmed\x1b[0m end"), 16);
+    }
+
+    #[test]
+    fn visible_width_multibyte_utf8() {
+        // ⚠ is 3 bytes but 1 character
+        assert_eq!(visible_width("⚠"), 1);
+    }
+
+    #[test]
+    fn visible_width_multibyte_utf8_with_ansi() {
+        assert_eq!(visible_width("\x1b[31m⚠\x1b[0m"), 1);
+    }
+
+    #[test]
+    fn visible_width_emoji() {
+        // Most emoji occupy 2 terminal columns
+        assert_eq!(visible_width("✅"), 2);
+        assert_eq!(visible_width("🎵"), 2);
+    }
+
+    #[test]
+    fn visible_width_emoji_with_ansi() {
+        assert_eq!(visible_width("\x1b[33m🎵\x1b[0m"), 2);
+    }
+
+    #[test]
+    fn table_with_ansi_colored_cells() {
+        let table = TableBuilder::new()
+            .row(["plain", "\x1b[31mred\x1b[0m", "after"])
+            .row(["a", "b", "c"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_multibyte_and_ansi_cells() {
+        let table = TableBuilder::new()
+            .row(["name", "\x1b[31m⚠\x1b[0m", "detail"])
+            .row(["longer", "ok", "other"])
             .build();
         assert_snapshot!(table);
     }

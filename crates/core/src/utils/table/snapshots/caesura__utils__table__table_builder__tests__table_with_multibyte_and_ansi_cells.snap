@@ -1,0 +1,6 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+name     [31m⚠[0m    detail
+longer   ok   other

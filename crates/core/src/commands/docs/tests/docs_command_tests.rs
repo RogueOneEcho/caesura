@@ -13,7 +13,7 @@ fn docs_command_renders_markdown() {
 #[test]
 fn config_md_matches_docs_command() {
     let expected = DocsCommand::render();
-    let actual = include_str!("../../../../../../CONFIG.md");
+    let actual = include_str!("../../../../../../docs/CONFIG.md");
 
     assert_eq!(
         actual, expected,

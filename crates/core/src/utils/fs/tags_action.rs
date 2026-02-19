@@ -9,6 +9,8 @@ pub enum TagsAction {
     ReadTags,
     #[error("get vorbis comments")]
     GetVorbisComments,
+    #[error("write tags")]
+    WriteTags,
 }
 
 /// Errors that can occur when reading or parsing tags.

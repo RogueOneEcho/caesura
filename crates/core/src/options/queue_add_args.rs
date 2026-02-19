@@ -10,7 +10,15 @@ use std::path::PathBuf;
 pub struct QueueAddArgs {
     /// A path to either a directory of `.torrent` files or a single YAML queue file.
     ///
-    /// Examples: `./torrents`, `/path/to/torrents`, `./queue.yml`
+    /// If you set this to the directory your torrent client stores `.torrent` files then caesura
+    /// will automatically load everything from your client.
+    /// - For qBittorrent use the `BT_backup` directory
+    /// - For deluge use the `state` directory
+    ///
+    /// Examples:
+    /// - `/srv/qBittorrent/BT_backup`
+    /// - `/srv/deluge/state`
+    /// - `./queue.yml`
     #[arg(value_name = "PATH")]
     pub queue_add_path: Option<PathBuf>,
 }

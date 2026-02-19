@@ -1,11 +1,13 @@
 //! Formatting utilities for inspect output.
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use super::picture_info::PictureInfo;
 use super::track_info::{TagEntry, TrackInfo};
 use crate::prelude::*;
 use lofty::tag::ItemKey;
 
-pub(crate) const DIVIDER: &str = "\n---\n";
+static IS_STYLE_ENABLED: AtomicBool = AtomicBool::new(true);
 
 impl TrackInfo {
     /// Duration formatted as MM:SS.
@@ -45,11 +47,12 @@ impl TrackInfo {
             headers.push("Bit Depth");
             align.push(L);
         }
+        let headers = style_headers(headers);
         let mut builder = TableBuilder::new().headers(headers).right_align(align);
         for track in tracks {
             let mut row = vec![
-                track.disc.clone().unwrap_or_default(),
-                track.track.clone().unwrap_or_default(),
+                style_key(track.disc.clone().unwrap_or_default()),
+                style_key(track.track.clone().unwrap_or_default()),
             ];
             if has_mixed_types {
                 row.push(track.file_type.clone());
@@ -57,8 +60,8 @@ impl TrackInfo {
             row.extend([
                 track.format_duration(),
                 track.format_file_size(),
-                format!("{} kbps", track.bitrate),
-                format!("{} Hz", track.sample_rate),
+                format!("{} {}", track.bitrate, style_unit("kbps")),
+                format!("{} {}", track.sample_rate, style_unit("Hz")),
                 track.channels.clone(),
             ]);
             if has_flac_columns {
@@ -74,7 +77,7 @@ impl TrackInfo {
         let mut output = String::new();
         for (i, track) in tracks.iter().enumerate() {
             if i > 0 {
-                output.push_str(DIVIDER);
+                output.push_str(&divider());
             }
             output.push_str(&track.format_tags());
         }
@@ -84,7 +87,7 @@ impl TrackInfo {
     /// Format tags and pictures as tables.
     fn format_tags(&self) -> String {
         let mut output = String::from("\n");
-        output.push_str(&self.sub_path);
+        output.push_str(&style_path(&self.sub_path));
         output.push_str("\n\n");
         if !self.tags.is_empty() {
             output.push_str(&self.format_tags_table());
@@ -101,7 +104,7 @@ impl TrackInfo {
         let mut builder = TableBuilder::new();
         for entry in &self.tags {
             builder = builder.row([
-                entry.native.as_deref().unwrap_or("").to_owned(),
+                style_key(entry.native.as_deref().unwrap_or("")),
                 entry.format_item(),
                 entry.value.clone(),
             ]);
@@ -133,7 +136,7 @@ impl PictureInfo {
     /// Format as a table row.
     fn as_row(&self) -> [String; 4] {
         [
-            self.native.clone(),
+            style_key(self.native.clone()),
             self.type_name.clone(),
             format_size(u64::try_from(self.size).unwrap_or(u64::MAX)),
             self.mime.clone(),
@@ -153,14 +156,14 @@ fn format_size(bytes: u64) -> String {
         let mib = bytes / MIB;
         let kib_remainder = (bytes % MIB) / KIB;
         let decimal = kib_remainder * 10 / 1024;
-        format!("{mib}.{decimal} MiB")
+        format!("{mib}.{decimal} {}", style_unit("MiB"))
     } else {
         let kib = bytes / KIB;
         if kib >= 100 {
-            format!("{kib} KiB")
+            format!("{kib} {}", style_unit("KiB"))
         } else {
             let decimal = (bytes % KIB) * 10 / KIB;
-            format!("{kib}.{decimal} KiB")
+            format!("{kib}.{decimal} {}", style_unit("KiB"))
         }
     }
 }
@@ -175,4 +178,62 @@ fn split_camel_case(s: &str) -> String {
         result.push(ch);
     }
     result
+}
+
+pub(crate) fn divider() -> String {
+    if is_style_disabled() {
+        return "\n---\n".to_owned();
+    }
+    "\n---\n".black().to_string()
+}
+
+fn style_headers(headers: Vec<&str>) -> Vec<String> {
+    if is_style_disabled() {
+        return headers.into_iter().map(ToString::to_string).collect();
+    }
+    headers
+        .into_iter()
+        .map(|header| header.dimmed().to_string())
+        .collect()
+}
+
+fn style_key(input: impl Into<String>) -> String {
+    if is_style_disabled() {
+        return input.into();
+    }
+    input.into().yellow().to_string()
+}
+
+fn style_path(input: impl Into<String>) -> String {
+    if is_style_disabled() {
+        return input.into();
+    }
+    input.into().green().to_string()
+}
+
+fn style_unit(input: impl Into<String>) -> String {
+    if is_style_disabled() {
+        return input.into();
+    }
+    input.into().dimmed().to_string()
+}
+
+fn is_style_disabled() -> bool {
+    !IS_STYLE_ENABLED.load(Ordering::Relaxed)
+}
+
+/// Guard that disables styling on creation and restores it on drop.
+pub(super) struct DisableStyleGuard;
+
+impl DisableStyleGuard {
+    pub(super) fn new() -> Self {
+        IS_STYLE_ENABLED.store(false, Ordering::Relaxed);
+        Self
+    }
+}
+
+impl Drop for DisableStyleGuard {
+    fn drop(&mut self) {
+        IS_STYLE_ENABLED.store(true, Ordering::Relaxed);
+    }
 }
