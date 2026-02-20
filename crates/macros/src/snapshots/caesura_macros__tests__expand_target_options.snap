@@ -36,6 +36,12 @@ pub struct TargetOptionsPartial {
     #[arg(long = "sox-random-dither", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub sox_random_dither: Option<bool>,
+    /// Vorbis comment tag names to exclude from transcoded output.
+    ///
+    /// Default: `TargetOptions::default_exclude_vorbis_comments()`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub exclude_vorbis_comments: Option<Vec<String>>,
 }
 impl TargetOptionsPartial {
     fn resolve_internal(
@@ -49,6 +55,7 @@ impl TargetOptionsPartial {
         let target = self.target;
         let allow_existing = self.allow_existing;
         let sox_random_dither = self.sox_random_dither;
+        let exclude_vorbis_comments = self.exclude_vorbis_comments;
         let resolved = TargetOptions {
             target: target
                 .unwrap_or_else(|| {
@@ -56,6 +63,8 @@ impl TargetOptionsPartial {
                 }),
             allow_existing: allow_existing.unwrap_or_default(),
             sox_random_dither: sox_random_dither.unwrap_or_default(),
+            exclude_vorbis_comments: exclude_vorbis_comments
+                .unwrap_or_else(|| TargetOptions::default_exclude_vorbis_comments()),
         };
         if validate {
             resolved.validate(&mut errors);
@@ -79,6 +88,9 @@ impl crate::options::OptionsPartialContract for TargetOptionsPartial {
         if self.sox_random_dither.is_none() {
             self.sox_random_dither = other.sox_random_dither;
         }
+        if self.exclude_vorbis_comments.is_none() {
+            self.exclude_vorbis_comments = other.exclude_vorbis_comments;
+        }
     }
     fn resolve_without_validation(self) -> TargetOptions {
         self.resolve_internal(false).expect("validation disabled")
@@ -98,6 +110,7 @@ impl ::std::default::Default for TargetOptions {
             target: vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0],
             allow_existing: ::std::default::Default::default(),
             sox_random_dither: ::std::default::Default::default(),
+            exclude_vorbis_comments: TargetOptions::default_exclude_vorbis_comments(),
         }
     }
 }
@@ -123,7 +136,12 @@ impl crate::options::Documented for TargetOptions {
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
                 "Use random dithering when resampling with `SoX`.<br>By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither<br>random number generator with a fixed value, producing deterministic output.<br>Set this to `true` to use random dithering instead.",
-                }
+                }, crate ::options::FieldDoc { config_key : "exclude_vorbis_comments",
+                cli_flag : "--exclude-vorbis-comments", field_type : "Vec<String>",
+                default_value : ::std::option::Option::Some(::serde_json::to_string(&
+                (TargetOptions::default_exclude_vorbis_comments())).unwrap()),
+                default_doc : ::std::option::Option::None, description :
+                "Vorbis comment tag names to exclude from transcoded output.", }
             ],
         });
         &DOC

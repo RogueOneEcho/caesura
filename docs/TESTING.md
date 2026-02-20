@@ -170,3 +170,11 @@ To accept all diffs:
 ```bash
 cargo insta accept
 ```
+
+### Macro Expansion Snapshots
+
+The `caesura_macros` crate has snapshot tests that expand each options struct via the `Options` derive macro (e.g. `expand_shared_options`, `expand_target_options`). These snapshots must be updated whenever a file in `crates/core/src/options/` is modified — including field additions, removals, renames, doc comment changes, or attribute changes.
+
+```bash
+cargo insta test -p caesura_macros
+```
