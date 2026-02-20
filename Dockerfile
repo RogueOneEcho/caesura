@@ -16,7 +16,7 @@ RUN curl -L "https://downloads.xiph.org/releases/flac/flac-${FLAC_VERSION}.tar.x
     && make -j"$(nproc)" \
     && make install DESTDIR=/artifacts
 
-# Build sox-ng from source
+# Build SoX_ng from source
 # https://codeberg.org/sox_ng/sox_ng
 FROM alpine:latest AS sox
 RUN apk add --no-cache build-base autoconf automake \

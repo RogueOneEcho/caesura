@@ -58,6 +58,7 @@ Each source is verified to ensure:
 |--------------------------------------------|------------------------------------------------------|
 | **[DOCKER.md](docs/DOCKER.md)**                 | Docker installation (recommended)                    |
 | **[INSTALL.md](docs/INSTALL.md)**               | Native installation                                  |
+| **[DEPENDENCIES.md](docs/DEPENDENCIES.md)**     | External tool dependencies (FLAC, LAME, SoX_ng)     |
 | **[SETUP.md](docs/SETUP.md)**                   | Configuration, default paths, multi-indexer          |
 | **[USE.md](docs/USE.md)**                       | Command-by-command usage guide                       |
 | **[CONFIG.md](docs/CONFIG.md)**                  | Configuration option reference                       |

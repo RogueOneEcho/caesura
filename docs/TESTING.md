@@ -14,7 +14,7 @@ The following tools must be installed to run tests. Version numbers are those us
 
 | Tool        | Version  | Purpose                             | Installation              |
 |-------------|----------|-------------------------------------|---------------------------|
-| sox-ng      | 14.7.0.8 | Generate sample audio files         | `brew install sox_ng`     |
+| SoX_ng      | 14.7.0.9 | Generate sample audio files         | `brew install sox_ng`     |
 | FLAC        | 1.5.0    | FLAC encoding/decoding              | `brew install flac`       |
 | metaflac    | 1.5.0    | Test sample tag injection           | Included with FLAC        |
 | LAME        | 3.100    | MP3 encoding for transcode tests    | `brew install lame`       |
@@ -138,8 +138,8 @@ async fn example() -> Result<(), TestError> {
 
 For reproducible test output:
 
-1. **sox-ng** is invoked with `-D` flag to disable dithering
-2. **24-bit transcode tests** are marked as ignored because sox-ng dithering during bit-depth conversion is non-deterministic
+1. **SoX** is invoked with `-D` flag to disable dithering
+2. **24-bit transcode tests** are marked as ignored because SoX dithering during bit-depth conversion is non-deterministic
 3. **Torrent files** are excluded from snapshots
 4. **FLAC encoder version** is embedded in files - snapshots may need updating when FLAC is upgraded
 

@@ -30,14 +30,44 @@ brew install rogueoneecho/tap/caesura
 nix profile install github:RogueOneEcho/nix#caesura
 ```
 
+## GitHub Releases (Linux and macOS)
+
+1. [Install the dependencies](DEPENDENCIES.md)
+
+2. Download the binary for your platform from the [latest release](https://github.com/RogueOneEcho/caesura/releases/latest).
+
+| OS    | CPU           | Binary Suffix                | Note                     |
+|-------|---------------|------------------------------|--------------------------|
+| Linux | Intel/AMD     | `x86_64-unknown-linux-gnu`   | Standard (with glibc)    |
+| Linux | ARM           | `aarch64-unknown-linux-gnu`  | Standard (with glibc)    |
+| Linux | Intel/AMD     | `x86_64-unknown-linux-musl`  | Portable (without glibc) |
+| Linux | ARM           | `aarch64-unknown-linux-musl` | Portable (without glibc) |
+| macOS | Apple Silicon | `aarch64-apple-darwin`       |                          |
+| macOS | Intel         | `x86_64-apple-darwin`        |                          |
+
+3. Make the binary executable and move it to a directory on your `PATH`.
+
+```bash
+chmod +x caesura-*
+mv caesura-* /usr/local/bin/caesura
+```
+
+Alternatively, use the install script to automate the above steps:
+
+> [!CAUTION]
+> This script is experimental and piping straight to bash can be dangerous.
+>
+> Only proceed if you understand the risks and are running on an isolated, recoverable system without sensitive data.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/RogueOneEcho/install/main/scripts/install-caesura.sh | bash
+```
+
 ## Cargo (Linux and macOS)
 
 *Cargo isn't recommended because you have to manually install the dependencies and these are unlikely to be as up to date or compatible as the brew or nix packages.*
 
-1. Install the `flac`, `lame` and `sox_ng` with your preferred package manager or ideally build them from source.
-- Sox: https://codeberg.org/sox_ng/sox_ng/#compiling-it-from-source
-- FLAC: https://github.com/xiph/flac?tab=readme-ov-file#building-flac
-- LAME: https://lame.sourceforge.io/download.php
+1. [Install the dependencies](DEPENDENCIES.md)
 
 2. Install `caesura` with Cargo.
 
