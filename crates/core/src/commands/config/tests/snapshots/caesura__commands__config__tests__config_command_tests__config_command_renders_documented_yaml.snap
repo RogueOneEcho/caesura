@@ -93,11 +93,6 @@ no_limit: false
 # Only applied if the image is greater than `max_file_size`.
 # Default: false
 no_png_to_jpg: false
-# Use the original `SoX` binary instead of SoX-ng.
-# When set, the binary name changes from `sox_ng` to `sox` and the
-# `--single-threaded` flag is omitted.
-# Default: false
-no_sox_ng: false
 # Directory where transcodes and spectrograms will be written.
 # Default: `~/.local/share/caesura/output/` or platform equivalent
 output: /test/output
@@ -127,6 +122,10 @@ retry_transcode: false
 # Set this to `true` to use random dithering instead.
 # Default: false
 sox_random_dither: false
+# `SoX` binary to use.
+# Options: `sox` or `sox_ng`
+# Default: auto-detected
+sox_variant: sox_ng
 # Should the spectrogram command be executed?
 # Default: false
 spectrogram: false

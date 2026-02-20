@@ -50,9 +50,9 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for sox binary selection
 
-| YAML Key    | CLI Flag      | Type   | Default | Description                                                                                                                                                  |
-|-------------|---------------|--------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `no_sox_ng` | `--no-sox-ng` | `bool` | `false` | Use the original `SoX` binary instead of SoX-ng.<br>When set, the binary name changes from `sox_ng` to `sox` and the<br>`--single-threaded` flag is omitted. |
+| YAML Key      | CLI Flag        | Type         | Default       | Description                                        |
+|---------------|-----------------|--------------|---------------|----------------------------------------------------|
+| `sox_variant` | `--sox-variant` | `SoxVariant` | auto-detected | `SoX` binary to use.<br>Options: `sox` or `sox_ng` |
 
 ## Options for copying files
 

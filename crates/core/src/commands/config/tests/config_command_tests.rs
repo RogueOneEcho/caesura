@@ -19,6 +19,9 @@ fn config_command_renders_documented_yaml() {
             cache: PathBuf::from("/test/cache"),
         })
         .with_options(RunnerOptions { cpus: Some(4) })
+        .with_options(SoxOptions {
+            sox_variant: SoxVariant::SoxNg,
+        })
         .expect_build();
     let config_command = host.services.get_required::<ConfigCommand>();
 

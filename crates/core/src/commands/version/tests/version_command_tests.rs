@@ -41,22 +41,17 @@ async fn get_version_lame() {
 
 #[tokio::test]
 async fn get_version_sox() {
+    // Arrange
+    let binary = DETECTED_SOX_VARIANT.binary();
+
     // Act
-    let info = get_version(SOX_NG, SOX_VERSION_PATTERN)
+    let info = get_version(binary, SOX_VERSION_PATTERN)
         .await
         .expect("sox should be available");
 
     // Assert
-    assert!(
-        info.first_line.contains("SoX_ng"),
-        "should contain SoX_ng in output: {:?}",
-        info.first_line
-    );
-    assert!(
-        info.version.is_some(),
-        "should extract sox version from: {:?}",
-        info.first_line
-    );
+    assert!(info.version.is_some(), "should extract sox version");
+    assert!(!info.first_line.is_empty());
 }
 
 #[tokio::test]

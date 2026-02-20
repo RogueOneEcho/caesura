@@ -3,18 +3,27 @@
 use serde::{Deserialize, Serialize};
 
 use crate::commands::CommandArguments::{self, *};
+use crate::dependencies::{DETECTED_SOX_VARIANT, SoxVariant};
 use crate::options::{FromArgs, OptionRule, OptionsContract};
 use caesura_macros::Options;
 
 /// Options for sox binary selection
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct SoxOptions {
-    /// Use the original `SoX` binary instead of SoX-ng.
+    /// `SoX` binary to use.
     ///
-    /// When set, the binary name changes from `sox_ng` to `sox` and the
-    /// `--single-threaded` flag is omitted.
-    #[arg(long)]
-    pub no_sox_ng: bool,
+    /// Options: `sox` or `sox_ng`
+    #[arg(long, value_enum)]
+    #[options(default_fn = default_sox_variant, default_doc = "auto-detected")]
+    pub sox_variant: SoxVariant,
+}
+
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Options macro default_fn requires Option<T>"
+)]
+fn default_sox_variant(_partial: &SoxOptionsPartial) -> Option<SoxVariant> {
+    Some(*DETECTED_SOX_VARIANT)
 }
 
 impl OptionsContract for SoxOptions {
