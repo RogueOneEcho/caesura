@@ -18,6 +18,7 @@ impl DocsCommand {
         let docs: Vec<&OptionsDoc> = vec![
             ConfigOptions::doc_metadata(),
             SharedOptions::doc_metadata(),
+            NameOptions::doc_metadata(),
             VerifyOptions::doc_metadata(),
             TargetOptions::doc_metadata(),
             SpectrogramOptions::doc_metadata(),

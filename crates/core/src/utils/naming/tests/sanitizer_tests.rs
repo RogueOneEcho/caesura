@@ -59,3 +59,29 @@ fn test_contains_valid_emoji() {
     // Assert
     assert_eq!(result, input);
 }
+
+#[test]
+fn execute_strips_dots() {
+    // Arrange
+    let input = "Artist - Album.torrent".to_owned();
+
+    // Act
+    let result = Sanitizer::execute(input);
+
+    // Assert
+    assert_eq!(result, "Artist - Albumtorrent");
+}
+
+#[test]
+fn validate_returns_false_on_restricted_chars() {
+    assert!(!Sanitizer::validate("Artist: Album"));
+    assert!(!Sanitizer::validate("folder.name"));
+    assert!(!Sanitizer::validate("path/name"));
+}
+
+#[test]
+fn validate_returns_true_on_clean_input() {
+    assert!(Sanitizer::validate("Artist - Album [2020]"));
+    assert!(Sanitizer::validate("My Custom Name"));
+    assert!(Sanitizer::validate("안녕하세요"));
+}

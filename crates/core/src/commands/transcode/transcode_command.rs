@@ -109,7 +109,7 @@ impl TranscodeCommand {
         info!(
             "{} to {} for {} FLACs in {}",
             "Transcoding".bold(),
-            join_humanized(targets),
+            and_join(targets),
             flacs.len().to_string().gray(),
             source
         );

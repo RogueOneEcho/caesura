@@ -24,7 +24,7 @@ impl TranscodeConfig {
     ///
     /// Format: `Artist - Album [Year] [WEB FORMAT]`
     ///
-    /// Note: This matches the naming convention used by [`TranscodeName`].
+    /// Note: This matches the naming convention used by [`PathManager`].
     #[must_use]
     pub fn dir_name(&self) -> String {
         format!(

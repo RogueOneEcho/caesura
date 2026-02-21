@@ -56,7 +56,7 @@ impl SourceProvider {
             Ok(dir) => dir,
             Err(issue) => return Ok(Err(issue)),
         };
-        let metadata = Metadata::new(&group, &torrent);
+        let metadata = Metadata::new_with_logging(&group, &torrent);
         Ok(Ok(Source {
             torrent,
             group,

@@ -22,6 +22,14 @@ Options can be set via CLI flags or in `config.yml`.
 | `log_time`     | `--log-time`     | `TimeFormat`   | `"local"`                                               | Time format to use in logs.                                                                                                             |
 | `output`       | `--output`       | `PathBuf`      | `~/.local/share/caesura/output/` or platform equivalent | Directory where transcodes and spectrograms will be written.                                                                            |
 
+## Options for output names
+
+| YAML Key                     | CLI Flag                       | Type             | Default | Description                                                                                                                                                                                                                                                                               |
+|------------------------------|--------------------------------|------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                       | `--name`                       | `Option<String>` | ~       | Override the output name prefix.<br>When set, this value replaces the default `Artist - Album (Remaster) [Year]`<br>prefix. The format suffix (`[CD FLAC]`, etc.) is still appended automatically.<br>When `--name-template` is set, available as `{{ name }}` instead.                   |
+| `name_template`              | `--name-template`              | `Option<String>` | ~       | Minijinja template for full control over output naming.<br>Unlike `--name`, the format suffix is **not** appended automatically.<br>Refer to [NAME-TEMPLATE.md](NAME-TEMPLATE.md) for details on the template syntax and available variables.<br>Requires `--experimental-name-template`. |
+| `experimental_name_template` | `--experimental-name-template` | `bool`           | `false` | Enable experimental minijinja template rendering for `--name-template`.<br>Required when using `--name-template`. Signals that the template naming<br>system is still a work in progress and may change.                                                                                  |
+
 ## Options for verify
 
 | YAML Key        | CLI Flag          | Type                  | Default | Description                                                                                                                     |

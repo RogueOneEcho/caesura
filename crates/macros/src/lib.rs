@@ -253,6 +253,12 @@ mod tests {
     }
 
     #[test]
+    fn expand_name_options() {
+        let source = include_str!("../../core/src/options/name_options.rs");
+        assert_snapshot!(expand_options_from_file(source));
+    }
+
+    #[test]
     fn expand_runner_options() {
         let source = include_str!("../../core/src/options/runner_options.rs");
         assert_snapshot!(expand_options_from_file(source));

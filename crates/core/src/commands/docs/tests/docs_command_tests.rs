@@ -17,6 +17,6 @@ fn config_md_matches_docs_command() {
 
     assert_eq!(
         actual, expected,
-        "CONFIG.md is out of date. Run `caesura docs > CONFIG.md` to update it."
+        "CONFIG.md is out of date. Run `cargo run -- docs > docs/CONFIG.md` to update it."
     );
 }

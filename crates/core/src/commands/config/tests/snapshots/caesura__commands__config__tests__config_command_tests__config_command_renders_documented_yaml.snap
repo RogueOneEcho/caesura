@@ -48,6 +48,11 @@ exclude_vorbis_comments:
 - ENCODER
 - RATING
 - WORK
+# Enable experimental minijinja template rendering for `--name-template`.
+# Required when using `--name-template`. Signals that the template naming
+# system is still a work in progress and may change.
+# Default: false
+experimental_name_template: false
 # Should files be hard linked instead of copied?
 # Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
 # Default: false
@@ -79,6 +84,16 @@ max_file_size: 750000
 # Only applied if the image is greater than `max_file_size`.
 # Default: 1280
 max_pixel_size: 1280
+# Override the output name prefix.
+# When set, this value replaces the default `Artist - Album (Remaster) [Year]`
+# prefix. The format suffix (`[CD FLAC]`, etc.) is still appended automatically.
+# When `--name-template` is set, available as `{{ name }}` instead.
+name: null
+# Minijinja template for full control over output naming.
+# Unlike `--name`, the format suffix is **not** appended automatically.
+# Refer to [NAME-TEMPLATE.md](NAME-TEMPLATE.md) for details on the template syntax and available variables.
+# Requires `--experimental-name-template`.
+name_template: null
 # Should the hash check of source files be skipped?
 # Note: This is only useful for development and should probably not be used.
 # Default: false

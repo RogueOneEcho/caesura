@@ -161,11 +161,11 @@ impl Display for SourceIssue {
             LossyWeb => "Lossy web releases need approval".to_owned(),
             Trumpable => "Source is trumpable".to_owned(),
             Unconfirmed => "Source is missing edition information".to_owned(),
-            Excluded { tags } => format!("Excluded tags: {}", join_humanized(tags)),
+            Excluded { tags } => format!("Excluded tags: {}", and_join(tags)),
             Existing { formats } => {
                 format!(
                     "All allowed formats have been transcoded to already: {}",
-                    join_humanized(formats)
+                    and_join(formats)
                 )
             }
             NotSource { format, encoding } => format!("Not a suitable source: {format} {encoding}"),
@@ -210,7 +210,7 @@ impl Display for SourceIssue {
                 )
             }
             MissingTags { path, tags } => {
-                format!("Missing tags: {}: {}", join_humanized(tags), path.display())
+                format!("Missing tags: {}: {}", and_join(tags), path.display())
             }
             SampleRate { path, rate } => {
                 format!("Unsupported sample rate: {rate}: {}", path.display())

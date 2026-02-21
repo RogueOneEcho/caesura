@@ -85,6 +85,7 @@ impl Host {
                 .execute_cli()
                 .await
                 .map_err(Report::new),
+            TestName { .. } => Ok(self.services.get_required::<TestNameCommand>().execute()),
             Transcode { .. } => self
                 .services
                 .get_required::<TranscodeCommand>()

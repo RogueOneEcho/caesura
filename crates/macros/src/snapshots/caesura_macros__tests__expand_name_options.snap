@@ -1,0 +1,135 @@
+---
+source: crates/macros/src/lib.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct NameOptionsPartial {
+    /// Override the output name prefix.
+    ///
+    /// When set, this value replaces the default `Artist - Album (Remaster) [Year]`
+    /// prefix. The format suffix (`[CD FLAC]`, etc.) is still appended automatically.
+    /// When `--name-template` is set, available as `{{ name }}` instead.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub name: Option<String>,
+    /// Minijinja template for full control over output naming.
+    ///
+    /// Unlike `--name`, the format suffix is **not** appended automatically.
+    ///
+    /// Refer to [NAME-TEMPLATE.md](NAME-TEMPLATE.md) for details on the template syntax and available variables.
+    ///
+    /// Requires `--experimental-name-template`.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub name_template: Option<String>,
+    /// Enable experimental minijinja template rendering for `--name-template`.
+    ///
+    /// Required when using `--name-template`. Signals that the template naming
+    /// system is still a work in progress and may change.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "experimental-name-template",
+        num_args = 0..= 1,
+        default_missing_value = "true"
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub experimental_name_template: Option<bool>,
+}
+impl NameOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        NameOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let name = self.name;
+        let name_template = self.name_template;
+        let experimental_name_template = self.experimental_name_template;
+        let resolved = NameOptions {
+            name,
+            name_template,
+            experimental_name_template: experimental_name_template.unwrap_or_default(),
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl crate::options::OptionsPartialContract for NameOptionsPartial {
+    type Resolved = NameOptions;
+    fn merge(&mut self, other: Self) {
+        if self.name.is_none() {
+            self.name = other.name;
+        }
+        if self.name_template.is_none() {
+            self.name_template = other.name_template;
+        }
+        if self.experimental_name_template.is_none() {
+            self.experimental_name_template = other.experimental_name_template;
+        }
+    }
+    fn resolve_without_validation(self) -> NameOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        NameOptions,
+        ::std::vec::Vec<crate::options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for NameOptions {
+    fn default() -> Self {
+        Self {
+            name: ::std::option::Option::None,
+            name_template: ::std::option::Option::None,
+            experimental_name_template: ::std::default::Default::default(),
+        }
+    }
+}
+impl crate::options::Documented for NameOptions {
+    fn doc_metadata() -> &'static crate::options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        crate::options::OptionsDoc {
+            name: "NameOptions",
+            description: "Options for output names",
+            fields: ::std::vec![
+                crate ::options::FieldDoc { config_key : "name", cli_flag : "--name",
+                field_type : "Option<String>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description :
+                "Override the output name prefix.<br>When set, this value replaces the default `Artist - Album (Remaster) [Year]`<br>prefix. The format suffix (`[CD FLAC]`, etc.) is still appended automatically.<br>When `--name-template` is set, available as `{{ name }}` instead.",
+                }, crate ::options::FieldDoc { config_key : "name_template", cli_flag :
+                "--name-template", field_type : "Option<String>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description :
+                "Minijinja template for full control over output naming.<br>Unlike `--name`, the format suffix is **not** appended automatically.<br>Refer to [NAME-TEMPLATE.md](NAME-TEMPLATE.md) for details on the template syntax and available variables.<br>Requires `--experimental-name-template`.",
+                }, crate ::options::FieldDoc { config_key : "experimental_name_template",
+                cli_flag : "--experimental-name-template", field_type : "bool",
+                default_value : ::std::option::Option::Some("false".to_owned()),
+                default_doc : ::std::option::Option::None, description :
+                "Enable experimental minijinja template rendering for `--name-template`.<br>Required when using `--name-template`. Signals that the template naming<br>system is still a work in progress and may change.",
+                }
+            ],
+        });
+        &DOC
+    }
+}

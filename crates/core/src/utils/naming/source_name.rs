@@ -14,16 +14,15 @@ impl SourceName {
     /// Directory name for a source without sanitization.
     #[must_use]
     pub fn get_unsanitized(metadata: &Metadata) -> String {
-        if metadata.remaster_title.is_empty() {
-            format!(
+        match &metadata.edition_title {
+            Some(title) => format!(
+                "{} - {} ({}) [{}]",
+                metadata.artist, metadata.album, title, metadata.year
+            ),
+            None => format!(
                 "{} - {} [{}]",
                 metadata.artist, metadata.album, metadata.year
-            )
-        } else {
-            format!(
-                "{} - {} ({}) [{}]",
-                metadata.artist, metadata.album, metadata.remaster_title, metadata.year
-            )
+            ),
         }
     }
 }

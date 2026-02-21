@@ -42,6 +42,7 @@ lava_torrent = { workspace = true }
 lofty = { workspace = true }
 log = { workspace = true }
 miette = { workspace = true }
+minijinja = { workspace = true }
 more-di = { workspace = true }
 once_cell = { workspace = true }
 num_cpus = { workspace = true }

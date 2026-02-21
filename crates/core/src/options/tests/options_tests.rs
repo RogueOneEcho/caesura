@@ -448,3 +448,75 @@ fn shared_options_validate_no_errors_when_valid() {
     .resolve();
     assert!(result.is_ok());
 }
+
+/// Verify template syntax in `--name` without `--experimental-name-template` is rejected.
+#[test]
+fn name_options_rejects_template_syntax_without_flag() {
+    let result = NameOptionsPartial {
+        name: Some("{{ artist }} - {{ album }}".to_owned()),
+        ..NameOptionsPartial::default()
+    }
+    .resolve();
+    let errors = result.expect_err("should reject template syntax without flag");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::TemplateSyntaxNotAllowed(_)))
+    );
+}
+
+/// Verify `--name-template` without `--experimental-name-template` is rejected.
+#[test]
+fn name_options_rejects_name_template_without_flag() {
+    let result = NameOptionsPartial {
+        name_template: Some("{{ artist }} - {{ album }}".to_owned()),
+        ..NameOptionsPartial::default()
+    }
+    .resolve();
+    let errors = result.expect_err("should reject name_template without flag");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::Dependent(_, _)))
+    );
+}
+
+/// Verify invalid `--name-template` syntax is rejected.
+#[test]
+fn name_options_rejects_invalid_template() {
+    let result = NameOptionsPartial {
+        name_template: Some("{{ artist".to_owned()),
+        experimental_name_template: Some(true),
+        ..NameOptionsPartial::default()
+    }
+    .resolve();
+    let errors = result.expect_err("should reject invalid template");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::TemplateSyntax(_, _)))
+    );
+}
+
+/// Verify valid `--name-template` with `--experimental-name-template` passes validation.
+#[test]
+fn name_options_accepts_valid_template() {
+    let result = NameOptionsPartial {
+        name_template: Some("{{ artist }} - {{ album }} [{{ year }}]".to_owned()),
+        experimental_name_template: Some(true),
+        ..NameOptionsPartial::default()
+    }
+    .resolve();
+    assert!(result.is_ok());
+}
+
+/// Verify static `--name` without template syntax passes validation.
+#[test]
+fn name_options_accepts_static_name() {
+    let result = NameOptionsPartial {
+        name: Some("My Custom Name".to_owned()),
+        ..NameOptionsPartial::default()
+    }
+    .resolve();
+    assert!(result.is_ok());
+}

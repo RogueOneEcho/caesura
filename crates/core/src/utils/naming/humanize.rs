@@ -3,10 +3,10 @@ use crate::prelude::*;
 /// Join multiple strings with commas and ampersand.
 ///
 /// # Examples
-/// `join_humanized(&["a", "b", "c"])` returns `a, b & c`
-/// `join_humanized(&["a", "b"])` returns `a & b`
-/// `join_humanized(&["a"])` returns `a`
-pub fn join_humanized<I, T>(strings: I) -> String
+/// `and_join(&["a", "b", "c"])` returns `a, b & c`
+/// `and_join(&["a", "b"])` returns `a & b`
+/// `and_join(&["a"])` returns `a`
+pub fn and_join<I, T>(strings: I) -> String
 where
     I: IntoIterator<Item = T>,
     I::IntoIter: DoubleEndedIterator,

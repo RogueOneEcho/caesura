@@ -47,6 +47,7 @@ impl HostBuilder {
                 logger
             }))
             .add(SoxFactory::singleton())
+            .add(NameResolver::transient())
             .add(PathManager::transient())
             .add(IdProvider::transient())
             .add(SourceProvider::transient())
@@ -86,6 +87,8 @@ impl HostBuilder {
                 let options = provider.get_required::<CacheOptions>();
                 Ref::new(Queue::from_options(options))
             }))
+            // Add test-name services
+            .add(TestNameCommand::transient())
             // Add spectrogram services
             .add(SpectrogramCommand::transient())
             .add(SpectrogramJobFactory::transient())

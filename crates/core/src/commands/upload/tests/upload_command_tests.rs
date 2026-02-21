@@ -354,8 +354,8 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
     let mut builder = HostBuilder::new();
 
     #[allow(clippy::as_conversions)]
-    let client: di::Ref<Box<dyn gazelle_api::GazelleClientTrait + Send + Sync>> =
-        di::Ref::new(Box::new(mock) as Box<dyn gazelle_api::GazelleClientTrait + Send + Sync>);
+    let client: Ref<Box<dyn gazelle_api::GazelleClientTrait + Send + Sync>> =
+        Ref::new(Box::new(mock) as Box<dyn gazelle_api::GazelleClientTrait + Send + Sync>);
     builder
         .services
         .add(di::singleton_as_self().from(move |_| client.clone()));
@@ -455,7 +455,7 @@ async fn build_upload_test_host(transcode: &TranscodeConfig, test_dir: &TestDire
 }
 
 /// Helper to get source and upload command from a host.
-async fn get_source_and_command(host: &Host) -> (Source, di::Ref<UploadCommand>) {
+async fn get_source_and_command(host: &Host) -> (Source, Ref<UploadCommand>) {
     let provider = host.services.get_required::<SourceProvider>();
     let source = provider
         .get(AlbumConfig::TORRENT_ID)

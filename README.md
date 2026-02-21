@@ -54,19 +54,20 @@ Each source is verified to ensure:
 
 ## Documentation
 
-| Guide                                      | Description                                          |
-|--------------------------------------------|------------------------------------------------------|
-| **[DOCKER.md](docs/DOCKER.md)**                 | Docker installation (recommended)                    |
-| **[INSTALL.md](docs/INSTALL.md)**               | Native installation                                  |
-| **[DEPENDENCIES.md](docs/DEPENDENCIES.md)**     | External tool dependencies (FLAC, LAME, SoX_ng)     |
-| **[SETUP.md](docs/SETUP.md)**                   | Configuration, default paths, multi-indexer          |
-| **[USE.md](docs/USE.md)**                       | Command-by-command usage guide                       |
-| **[CONFIG.md](docs/CONFIG.md)**                  | Configuration option reference                       |
-| **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Troubleshooting guide                              |
-| **[DIRECTORIES.md](docs/DIRECTORIES.md)**       | Explanation of writable directories                  |
-| **[BUILD.md](docs/BUILD.md)**                        | Building from source                                 |
-| **[TESTING.md](docs/TESTING.md)**               | Test infrastructure and conventions                  |
-| **[CONTRIBUTING.md](CONTRIBUTING.md)**           | Contributing guidelines                              |
+| Guide                                              | Description                                     |
+|----------------------------------------------------|-------------------------------------------------|
+| **[DOCKER.md](docs/DOCKER.md)**                    | Docker installation (recommended)               |
+| **[INSTALL.md](docs/INSTALL.md)**                  | Native installation                             |
+| **[DEPENDENCIES.md](docs/DEPENDENCIES.md)**        | External tool dependencies (FLAC, LAME, SoX_ng) |
+| **[SETUP.md](docs/SETUP.md)**                      | Configuration, default paths, multi-indexer     |
+| **[USE.md](docs/USE.md)**                          | Command-by-command usage guide                  |
+| **[CONFIG.md](docs/CONFIG.md)**                    | Configuration option reference                  |
+| **[NAME-TEMPLATE.md](docs/NAME-TEMPLATE.md)**      | Output name template reference    |
+| **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Troubleshooting guide                           |
+| **[DIRECTORIES.md](docs/DIRECTORIES.md)**          | Explanation of writable directories             |
+| **[BUILD.md](docs/BUILD.md)**                      | Building from source                            |
+| **[TESTING.md](docs/TESTING.md)**                  | Test infrastructure and conventions             |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)**             | Contributing guidelines                         |
 
 ## Build
 

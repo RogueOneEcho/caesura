@@ -26,6 +26,8 @@ pub enum CommandArguments {
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
+        name: NameOptionsPartial,
+        #[command(flatten)]
         sox: SoxOptionsPartial,
         #[command(flatten)]
         target: TargetOptionsPartial,
@@ -62,11 +64,22 @@ pub enum CommandArguments {
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
+        name: NameOptionsPartial,
+        #[command(flatten)]
         sox: SoxOptionsPartial,
         #[command(flatten)]
         spectrogram: SpectrogramOptionsPartial,
         #[command(flatten)]
         runner: RunnerOptionsPartial,
+    },
+
+    /// Test output name resolution with mock metadata.
+    #[command(name = "test-name")]
+    TestName {
+        #[command(flatten)]
+        config: ConfigOptionsPartial,
+        #[command(flatten)]
+        name: NameOptionsPartial,
     },
 
     /// Transcode each track of a FLAC source to the target formats.
@@ -77,6 +90,8 @@ pub enum CommandArguments {
         config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
+        #[command(flatten)]
+        name: NameOptionsPartial,
         #[command(flatten)]
         sox: SoxOptionsPartial,
         #[command(flatten)]
@@ -98,6 +113,8 @@ pub enum CommandArguments {
         #[command(flatten)]
         shared: SharedOptionsPartial,
         #[command(flatten)]
+        name: NameOptionsPartial,
+        #[command(flatten)]
         target: TargetOptionsPartial,
         #[command(flatten)]
         upload: UploadOptionsPartial,
@@ -113,6 +130,8 @@ pub enum CommandArguments {
         config: ConfigOptionsPartial,
         #[command(flatten)]
         shared: SharedOptionsPartial,
+        #[command(flatten)]
+        name: NameOptionsPartial,
         #[command(flatten)]
         target: TargetOptionsPartial,
         #[command(flatten)]

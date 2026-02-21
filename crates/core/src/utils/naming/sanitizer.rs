@@ -15,7 +15,7 @@ pub(crate) const ZERO_WIDTH_NO_BREAK_SPACE: char = '\u{FEFF}';
 
 pub(crate) const EN_DASH: char = '\u{2013}';
 const EM_DASH: char = '\u{2014}';
-const RESTRICTED: [char; 16] = [
+const RESTRICTED: [char; 17] = [
     NON_BREAKING_SPACE,
     ZERO_WIDTH_SPACE,
     LEFT_TO_RIGHT_MARK,
@@ -32,6 +32,7 @@ const RESTRICTED: [char; 16] = [
     '"',
     '?',
     '*',
+    '.',
 ];
 const RESTRICTED_DIVIDERS: [char; 5] = ['/', '\\', '|', EN_DASH, EM_DASH];
 const DIVIDER_REPLACEMENT: char = '-';
@@ -54,5 +55,15 @@ impl Sanitizer {
                 }
             })
             .collect()
+    }
+
+    /// Check whether `input` is clean for use in file paths.
+    ///
+    /// Returns `true` if the string contains no restricted, divider, or control characters.
+    #[must_use]
+    pub fn validate(input: &str) -> bool {
+        !input
+            .chars()
+            .any(|c| RESTRICTED.contains(&c) || RESTRICTED_DIVIDERS.contains(&c) || c.is_control())
     }
 }

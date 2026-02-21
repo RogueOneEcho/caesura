@@ -68,6 +68,7 @@ impl OptionsProvider {
     fn register_all(&mut self, services: &mut ServiceCollection) {
         let args = ArgumentsParser::get();
         self.register(SharedOptionsPartial::from_args(&args), services);
+        self.register(NameOptionsPartial::from_args(&args), services);
         self.register(BatchOptionsPartial::from_args(&args), services);
         self.register(CacheOptionsPartial::from_args(&args), services);
         self.register(ConfigOptionsPartial::from_args(&args), services);

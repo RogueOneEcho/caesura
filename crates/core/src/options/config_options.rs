@@ -52,6 +52,7 @@ impl FromArgs for ConfigOptionsPartial {
                 Batch { config, .. }
                 | Config { config, .. }
                 | Spectrogram { config, .. }
+                | TestName { config, .. }
                 | Transcode { config, .. }
                 | Upload { config, .. }
                 | Verify { config, .. },

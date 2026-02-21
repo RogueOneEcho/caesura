@@ -9,6 +9,7 @@ pub struct PathManager {
     shared_options: Ref<SharedOptions>,
     cache_options: Ref<CacheOptions>,
     file_options: Ref<FileOptions>,
+    name_resolver: Ref<NameResolver>,
 }
 
 impl PathManager {
@@ -79,14 +80,14 @@ impl PathManager {
 
     #[must_use]
     pub fn get_spectrogram_dir(&self, source: &Source) -> PathBuf {
-        self.get_output_dir()
-            .join(SpectrogramName::get(&source.metadata))
+        let name = self.name_resolver.spectrogram(&source.metadata);
+        self.get_output_dir().join(name)
     }
 
     #[must_use]
     pub fn get_transcode_target_dir(&self, source: &Source, target: TargetFormat) -> PathBuf {
-        self.get_output_dir()
-            .join(TranscodeName::get(&source.metadata, target))
+        let name = self.name_resolver.transcode(&source.metadata, target);
+        self.get_output_dir().join(name)
     }
 
     #[must_use]
@@ -125,10 +126,8 @@ impl PathManager {
         target: TargetFormat,
         indexer: &str,
     ) -> PathBuf {
-        let mut filename = TranscodeName::get(&source.metadata, target);
-        filename.push('.');
-        filename.push_str(indexer);
-        filename.push_str(".torrent");
+        let name = self.name_resolver.transcode(&source.metadata, target);
+        let filename = format!("{name}.{indexer}.torrent");
         self.get_output_dir().join(filename)
     }
 
