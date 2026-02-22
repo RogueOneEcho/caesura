@@ -145,15 +145,24 @@ For reproducible test output:
 
 ### Platform-Specific Behavior
 
-Snapshot tests verifying binary output (SHA256 hashes) only pass on x86_64. On ARM (aarch64), libFLAC produces different output due to NEON SIMD optimizations using different floating-point precision than SSE. This is [documented and expected](https://xiph.org/flac/faq.html).
+Some snapshot tests verify binary output (SHA256 hashes) which can differ across platforms. Guard macros (`assert_transcode_snapshot!`, `assert_inspect_snapshot!`, `assert_spectrogram_snapshot!`) fall back to non-empty checks on platforms where exact matching is unreliable.
 
-| Test                         | x86_64    | aarch64   |
-|------------------------------|-----------|-----------|
-| `transcode_command_flac16_*` | ✅        | ❌ skipped |
-| `sample_flac*` (16-bit)      | ✅        | ❌ skipped |
-| `sample_flac*` (24-bit)      | ❌ skipped | ❌ skipped |
+| Test                           | Guard                            | x86_64 Linux | aarch64 Linux | macOS | Docker | Nix |
+|--------------------------------|----------------------------------|:------------:|:-------------:|:-----:|:------:|:---:|
+| `transcode_command_*`          | `assert_transcode_snapshot!`     | ✅           | ❌¹            | ✅     | ✅      | ❌¹  |
+| `transcode_rename_tracks_*`   | `assert_transcode_snapshot!`     | ✅           | ❌¹            | ✅     | ✅      | ❌¹  |
+| `inspect_*`                    | `assert_inspect_snapshot!`       | ✅           | ❌¹            | ✅     | ✅      | ❌¹  |
+| `spectrogram_command_*`        | `assert_spectrogram_snapshot!`   | ✅           | ❌²            | ❌²    | ❌²     | ❌²  |
+| `sample_flac*`                 | `#[ignore]`                      | ℹ️³           | ❌³            | ❌³    | ❌³     | ❌³  |
 
-24-bit sample tests are skipped on all macOS due to additional floating-point sensitivity.
+¹ libFLAC does not guarantee identical output [across machines or builds](https://xiph.org/flac/faq.html#tools__different_sizes).
+
+² SoX is built against libFLAC, so differences in either the SoX or FLAC build can produce different spectrogram images even at the same version.
+
+³ All marked `#[ignore]` and only run on x86_64 Linux via the "Run determinism tests" CI step:
+  ```bash
+  cargo test --release -- --ignored sample_flac
+  ```
 
 ### Updating Snapshots
 
