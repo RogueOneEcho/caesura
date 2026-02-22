@@ -1,9 +1,9 @@
 use image::ImageReader;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
 /// Snapshot of image metadata for deterministic testing.
-#[derive(Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ImageSnapshot {
     /// Width in pixels.
     pub width: u32,

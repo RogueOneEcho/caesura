@@ -3,13 +3,13 @@ use lofty::picture::Picture;
 use lofty::probe::Probe;
 use lofty::properties::{ChannelMask, FileProperties};
 use lofty::tag::{ItemValue, Tag};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 use std::path::Path;
 
 /// Snapshot of audio file metadata for deterministic testing.
-#[derive(Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AudioSnapshot {
     /// Duration in milliseconds.
     pub duration_ms: u128,
@@ -32,7 +32,7 @@ pub struct AudioSnapshot {
 }
 
 /// Snapshot of an embedded picture for deterministic testing.
-#[derive(Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PictureSnapshot {
     /// Picture type (e.g., `CoverFront`).
     pub picture_type: String,
@@ -92,7 +92,7 @@ impl AudioSnapshot {
 }
 
 /// Tag value that can be text or binary data.
-#[derive(Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(untagged)]
 pub enum TagValue {
     /// Text value.

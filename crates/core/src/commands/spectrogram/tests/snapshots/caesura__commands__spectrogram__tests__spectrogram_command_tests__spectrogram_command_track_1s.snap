@@ -4,16 +4,16 @@ expression: snapshot
 ---
 - directory: "Very Short Artist - Very Short Album [2024] [WEB SPECTROGRAMS]"
   filename: Very Short Artist - Very Short Album - 01 Very Short Track.full.png
-  size: 42150
-  sha256: 348de4809b752eaf416a1398da93ecf52551c2a1cbe85774f32128cd169ea176
+  size: 43009
+  sha256: 345b0fb42d0faff8a32ace427aa7759b2a338bd30ca35415a2d93f0f65fadfc7
   image:
     width: 3144
     height: 611
     color_type: Rgb8
 - directory: "Very Short Artist - Very Short Album [2024] [WEB SPECTROGRAMS]"
   filename: Very Short Artist - Very Short Album - 01 Very Short Track.zoom.png
-  size: 16977
-  sha256: 16b68f0ae3411c5444d428a57488fe334e60a91bacc7f06f84d9a0c74700bf71
+  size: 16994
+  sha256: 68f668b722b96f0d1c8fa395bcfb21cba48fcd61ca83a2915b584a4d46913b5f
   image:
     width: 395
     height: 1123

@@ -8,7 +8,8 @@ use crate::utils::TargetFormat::{_320, V0};
 #[tokio::test]
 async fn transcode_rename_tracks_single_disc() {
     let snapshot = rename_tracks_helper(AlbumConfig::single_disc()).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with a multi-disc album from flat source directory.
@@ -22,7 +23,8 @@ async fn transcode_rename_tracks_single_disc() {
 #[tokio::test]
 async fn transcode_rename_tracks_multi_disc_flat_source() {
     let snapshot = rename_tracks_helper(AlbumConfig::multi_disc_flat()).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with a multi-disc album from source with disc subdirectories.
@@ -36,7 +38,8 @@ async fn transcode_rename_tracks_multi_disc_flat_source() {
 #[tokio::test]
 async fn transcode_rename_tracks_multi_disc() {
     let snapshot = rename_tracks_helper(AlbumConfig::multi_disc()).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with double-digit track numbers.
@@ -46,7 +49,8 @@ async fn transcode_rename_tracks_multi_disc() {
 #[tokio::test]
 async fn transcode_rename_tracks_double_digit_padding() {
     let snapshot = rename_tracks_helper(AlbumConfig::double_digit_tracks()).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 /// Test `rename_tracks` with vinyl-style track numbers (A1, A2, B1, B2).
@@ -56,7 +60,8 @@ async fn transcode_rename_tracks_double_digit_padding() {
 #[tokio::test]
 async fn transcode_rename_tracks_vinyl_numbering() {
     let snapshot = rename_tracks_helper(AlbumConfig::vinyl_tracks()).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {

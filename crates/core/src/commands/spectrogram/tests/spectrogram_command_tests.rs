@@ -1,30 +1,19 @@
 use crate::testing_prelude::*;
 
-/// Assert snapshot exactly, or just check files are non-empty on macOS, Docker, and Nix.
-///
-/// Spectrogram output is not byte-identical across platforms and build environments.
-macro_rules! assert_spectrogram_snapshot {
-    ($snapshot:expr) => {
-        if is_docker() || is_nix() || is_macos() {
-            assert!(!$snapshot.is_empty(), "should produce spectrogram files");
-        } else {
-            assert_yaml_snapshot!($snapshot);
-        }
-    };
-}
-
 #[tokio::test]
 async fn spectrogram_command_flac16_441() {
     let album = AlbumConfig::with_format(SampleFormat::FLAC16_441);
     let snapshot = spectrogram_command_helper(album).await;
-    assert_spectrogram_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
 async fn spectrogram_command_flac16_48() {
     let album = AlbumConfig::with_format(SampleFormat::FLAC16_48);
     let snapshot = spectrogram_command_helper(album).await;
-    assert_spectrogram_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 /// Test zoom spectrogram for a 30-second track (shorter than the 60-second standard position).
@@ -33,7 +22,8 @@ async fn spectrogram_command_flac16_48() {
 async fn spectrogram_command_track_30s() {
     let album = AlbumConfig::track_30s();
     let snapshot = spectrogram_command_helper(album).await;
-    assert_spectrogram_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 /// Test zoom spectrogram for a 1-second track (shorter than the 2-second capture window).
@@ -42,7 +32,8 @@ async fn spectrogram_command_track_30s() {
 async fn spectrogram_command_track_1s() {
     let album = AlbumConfig::track_1s();
     let snapshot = spectrogram_command_helper(album).await;
-    assert_spectrogram_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 async fn spectrogram_command_helper(album: AlbumConfig) -> Vec<FileSnapshot> {

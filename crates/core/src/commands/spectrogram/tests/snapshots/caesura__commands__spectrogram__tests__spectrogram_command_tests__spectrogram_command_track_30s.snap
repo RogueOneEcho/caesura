@@ -4,16 +4,16 @@ expression: snapshot
 ---
 - directory: "Short Artist - Short Album [2024] [WEB SPECTROGRAMS]"
   filename: Short Artist - Short Album - 01 Short Track.full.png
-  size: 78428
-  sha256: c9bbb3972e5921af89fe388c6c49d8cce670ae3cea86de82ffa826e0da0b5e29
+  size: 78293
+  sha256: adcdea6d1f8e365a375143c0e3726c845b733a345cdfe6437be99135caf2498b
   image:
     width: 3137
     height: 611
     color_type: Rgb8
 - directory: "Short Artist - Short Album [2024] [WEB SPECTROGRAMS]"
   filename: Short Artist - Short Album - 01 Short Track.zoom.png
-  size: 23935
-  sha256: 65b3b87123bccfb41dd4b0f04b97f9237653af11c403d7ffda1e8fdf6e82a0f0
+  size: 23928
+  sha256: cb7899e80822e1257ccf542e3c31a327f0802eda2911d2fae18265a32856052e
   image:
     width: 644
     height: 1123

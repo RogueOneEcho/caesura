@@ -151,26 +151,8 @@ jobs:
 
     - run: rm -rf artifacts
 
-    - name: Restore brew cache (Linux only)
-      id: cache-brew
-      if: matrix.test && contains(matrix.os, 'ubuntu')
-      uses: actions/cache/restore@v4
-      with:
-        key: brew-${{ runner.os }}-${{ runner.arch }}-
-        path: /home/linuxbrew/.linuxbrew
-
-    - if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
+    - if: matrix.test
       run: brew install flac lame sox_ng
-
-    - if: matrix.test && contains(matrix.os, 'macos')
-      run: brew install flac lame sox_ng
-
-    - name: Save brew cache (Linux only)
-      if: matrix.test && contains(matrix.os, 'ubuntu') && steps.cache-brew.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
-      with:
-        key: ${{ steps.cache-brew.outputs.cache-primary-key }}
-        path: /home/linuxbrew/.linuxbrew
 
     - if: matrix.test
       run: |
@@ -180,6 +162,9 @@ jobs:
 
     - if: matrix.test
       run: cargo test --release --no-fail-fast --target ${{ matrix.target }}
+      env:
+        CAESURA_DETERMINISTIC_TESTS: ${{ matrix.target == 'x86_64-unknown-linux-gnu' && '1' || '' }}
+        CLICOLOR_FORCE: 1
 
     - name: Run macro tests
       if: matrix.test
