@@ -6,7 +6,7 @@ The official repository for [SoX](https://sourceforge.net/projects/sox/) is no l
 
 | Tool   | Recommended Version | Purpose                                                     |
 |--------|---------------------|-------------------------------------------------------------|
-| SoX_ng | `14.7.0.9`          | Resampling hi-res audio, spectrogram generation             |
+| SoX_ng | `14.7.1`            | Resampling hi-res audio, spectrogram generation             |
 | FLAC   | `1.5.0`             | Decoding FLAC to WAV for MP3 encoding, encoding WAV to FLAC |
 | LAME   | `3.100`             | Encoding MP3 (V0 and 320 CBR)                               |
 

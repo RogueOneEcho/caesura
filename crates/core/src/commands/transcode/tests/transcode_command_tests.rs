@@ -3,31 +3,36 @@ use crate::testing_prelude::*;
 #[tokio::test]
 async fn transcode_command_flac16_441() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC16_441).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
 async fn transcode_command_flac16_48() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC16_48).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
 async fn transcode_command_flac24_441() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC24_441).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
 async fn transcode_command_flac24_48() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC24_48).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 #[tokio::test]
 async fn transcode_command_flac24_96() {
     let snapshot = transcode_command_helper(SampleFormat::FLAC24_96).await;
-    assert_transcode_snapshot!(snapshot);
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
 }
 
 async fn transcode_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {

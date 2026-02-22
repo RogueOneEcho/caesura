@@ -14,7 +14,7 @@ The following tools must be installed to run tests. Version numbers are those us
 
 | Tool        | Version  | Purpose                             | Installation              |
 |-------------|----------|-------------------------------------|---------------------------|
-| SoX_ng      | 14.7.0.9 | Generate sample audio files         | `brew install sox_ng`     |
+| SoX_ng      | 14.7.1   | Generate sample audio files         | `brew install sox_ng`     |
 | FLAC        | 1.5.0    | FLAC encoding/decoding              | `brew install flac`       |
 | metaflac    | 1.5.0    | Test sample tag injection           | Included with FLAC        |
 | LAME        | 3.100    | MP3 encoding for transcode tests    | `brew install lame`       |
@@ -134,26 +134,28 @@ async fn example() -> Result<(), TestError> {
 > [!WARNING]
 > `TestDirectory` is cleaned up on drop. Bind it to a named variable (`test_dir` or `_test_dir`), not `_`, or the directory will be deleted mid-test.
 
-## Determinism Considerations
+## Deterministic Snapshot Tests
 
-For reproducible test output:
+Some snapshot tests verify the deterministic output via SHA-256 hashes and file sizes. However, this is not guaranteed to be identical across platforms:
 
-1. **SoX** is invoked with `-D` flag to disable dithering
-2. **24-bit transcode tests** are marked as ignored because SoX dithering during bit-depth conversion is non-deterministic
-3. **Torrent files** are excluded from snapshots
-4. **FLAC encoder version** is embedded in files - snapshots may need updating when FLAC is upgraded
+- libFLAC does not guarantee identical output [across machines or builds](https://xiph.org/flac/faq.html#tools__different_sizes)
+- SoX is built against libFLAC, so differences in either the SoX or FLAC build can produce different spectrogram images even at the same version.
 
-### Platform-Specific Behavior
+Where cross platform behavior is non-deterministic we use x86_64 Linux as the source of truth and ignore the deterministic aspects on other platforms.
 
-Snapshot tests verifying binary output (SHA256 hashes) only pass on x86_64. On ARM (aarch64), libFLAC produces different output due to NEON SIMD optimizations using different floating-point precision than SSE. This is [documented and expected](https://xiph.org/flac/faq.html).
+To enable full deterministic set the `CAESURA_DETERMINISTIC_TESTS` environment variable:
 
-| Test                         | x86_64    | aarch64   |
-|------------------------------|-----------|-----------|
-| `transcode_command_flac16_*` | ✅        | ❌ skipped |
-| `sample_flac*` (16-bit)      | ✅        | ❌ skipped |
-| `sample_flac*` (24-bit)      | ❌ skipped | ❌ skipped |
+```bash
+CAESURA_DETERMINISTIC_TESTS=1 cargo test
+```
 
-24-bit sample tests are skipped on all macOS due to additional floating-point sensitivity.
+| Test                         | Guard                      | Non-deterministic behavior                                                                    |
+|------------------------------|----------------------------|-----------------------------------------------------------------------------------------------|
+| `transcode_command_*`        | `normalize_snapshots!`     | SHA-256, file-size, and bitrate ignored                                                                 |
+| `transcode_rename_tracks_*` | `normalize_snapshots!`     | SHA-256, file-size, and bitrate ignored                                                                 |
+| `inspect_*`                  | `assert_inspect_snapshot!` | Line count only                                                                               |
+| `spectrogram_command_*`      | `normalize_snapshots!`     | SHA-256, file-size, and bitrate ignored                                                                 |
+| `sample_flac*`               | `#[ignore]`                | Ignored, CI only runs on x86_64 Linux via<br>`cargo test --release -- --ignored sample_flac` |
 
 ### Updating Snapshots
 

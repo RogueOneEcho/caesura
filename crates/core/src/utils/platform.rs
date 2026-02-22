@@ -2,32 +2,29 @@
 
 use std::env;
 
+const TRUTHY: &[&str] = &["1", "true", "yes", "on", "y"];
+
 /// Environment variable set in the Docker image to use container paths.
 const DOCKER_ENV_VAR: &str = "CAESURA_DOCKER";
 
-/// Environment variable set in the Nix derivation to relax snapshot assertions.
+/// Environment variable that enables exact deterministic snapshot matching.
 #[cfg(test)]
-const NIX_ENV_VAR: &str = "CAESURA_NIX";
+const DETERMINISTIC_ENV_VAR: &str = "CAESURA_DETERMINISTIC_TESTS";
 
 /// Check if running in a Docker container.
 pub(crate) fn is_docker() -> bool {
-    env::var(DOCKER_ENV_VAR).is_ok()
+    is_env_var_truthy(DOCKER_ENV_VAR)
 }
 
-/// Check if running in a Nix build.
+/// Check if deterministic snapshot tests are enabled.
 #[cfg(test)]
-pub(crate) fn is_nix() -> bool {
-    env::var(NIX_ENV_VAR).is_ok()
+pub(crate) fn is_deterministic() -> bool {
+    is_env_var_truthy(DETERMINISTIC_ENV_VAR)
 }
 
-/// Check if running on macOS.
-#[cfg(test)]
-pub(crate) fn is_macos() -> bool {
-    cfg!(target_os = "macos")
-}
-
-/// Check if running on ARM (aarch64).
-#[cfg(test)]
-pub(crate) fn is_aarch64() -> bool {
-    cfg!(target_arch = "aarch64")
+fn is_env_var_truthy(var: &str) -> bool {
+    let Ok(value) = env::var(var) else {
+        return false;
+    };
+    TRUTHY.iter().any(|t| value.eq_ignore_ascii_case(t))
 }
