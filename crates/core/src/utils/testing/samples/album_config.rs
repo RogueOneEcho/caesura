@@ -396,7 +396,7 @@ fn build_mock_client(
         format: "FLAC".to_owned(),
         encoding: config.format.encoding().to_owned(),
         media: "WEB".to_owned(),
-        remastered: true,
+        remastered: Some(true),
         remaster_year: Some(config.year),
         file_path: config.dir_name(),
         file_list: config.file_list(),

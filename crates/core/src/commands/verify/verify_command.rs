@@ -85,7 +85,7 @@ impl VerifyCommand {
         if source.torrent.trumpable == Some(true) {
             issues.push(SourceIssue::Trumpable);
         }
-        if !source.torrent.remastered {
+        if source.torrent.remastered == Some(false) {
             issues.push(SourceIssue::Unconfirmed);
         }
         let excluded_tags: Vec<String> = self
