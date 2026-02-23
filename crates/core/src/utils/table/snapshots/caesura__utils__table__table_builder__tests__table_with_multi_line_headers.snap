@@ -1,0 +1,9 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+                          Bit    Sample              
+                          Rate   Rate                Bit
+D   T   Time    Size      kbps   kHz      Channels   Depth
+1   1   01:05   830 KiB   104    44.1     2          16
+2   1   01:05   936 KiB   117    44.1     2          16

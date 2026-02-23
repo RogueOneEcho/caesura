@@ -1,0 +1,38 @@
+---
+source: crates/core/src/commands/inspect/tests/inspect_tests.rs
+expression: output
+---
+                          Bit    Sample              
+                          Rate   Rate                Bit
+D   T   Time    Size      kbps   kHz      Channels   Depth
+
+    1   01:05   1.2 MiB    160   48       2          16
+    2   01:05   1.5 MiB    197   48       2          16
+
+---
+
+Test Artist - Test Album - 01 Track One.flac
+
+Comment            Processed by SoX                   COMMENT
+Track Artist       Test Artist                        ARTIST
+Album Title        Test Album                         ALBUM
+Track Title        Track One                          TITLE
+Track Number       1                                  TRACKNUMBER
+Recording Date     2020                               DATE
+Encoder Software   reference libFLAC 1.5.0 20250211   ENCODER
+
+Front Cover   0.8 KiB   image/png   METADATA_BLOCK_PICTURE
+
+---
+
+Test Artist - Test Album - 02 Track Two.flac
+
+Comment            Processed by SoX                   COMMENT
+Track Artist       Test Artist                        ARTIST
+Album Title        Test Album                         ALBUM
+Track Title        Track Two                          TITLE
+Track Number       2                                  TRACKNUMBER
+Recording Date     2020                               DATE
+Encoder Software   reference libFLAC 1.5.0 20250211   ENCODER
+
+Front Cover   0.8 KiB   image/png   METADATA_BLOCK_PICTURE

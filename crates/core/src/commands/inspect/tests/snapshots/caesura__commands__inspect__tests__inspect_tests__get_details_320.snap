@@ -2,60 +2,63 @@
 source: crates/core/src/commands/inspect/tests/inspect_tests.rs
 expression: output
 ---
-D   T   Time    Size      Bitrate    Sample Rate   Channels
-1   1   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
-1   2   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
-2   1   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
-2   2   01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo
+                          Bit    Sample   
+                          Rate   Rate     
+D   T   Time    Size      kbps   kHz      Channels
+
+1   1   01:05   2.4 MiB    320   44.1     Joint stereo
+1   2   01:05   2.4 MiB    320   44.1     Joint stereo
+2   1   01:05   2.4 MiB    320   44.1     Joint stereo
+2   2   01:05   2.4 MiB    320   44.1     Joint stereo
 
 ---
 
 Disc 1/Rename Artist - Multi Disc Album - 01 First Track.mp3
 
-TPE1   Track Artist     Rename Artist
-TALB   Album Title      Multi Disc Album
-TIT2   Track Title      First Track
-TDRC   Recording Date   2024
-TRCK   Track Number     1
-TPOS   Disc Number      1
+Track Artist     Rename Artist      TPE1
+Album Title      Multi Disc Album   TALB
+Track Title      First Track        TIT2
+Recording Date   2024               TDRC
+Track Number     1                  TRCK
+Disc Number      1                  TPOS
 
-APIC   Front Cover   0.8 KiB   image/png
+Front Cover   0.8 KiB   image/png   APIC
 
 ---
 
 Disc 1/Rename Artist - Multi Disc Album - 02 Second Track.mp3
 
-TPE1   Track Artist     Rename Artist
-TALB   Album Title      Multi Disc Album
-TIT2   Track Title      Second Track
-TDRC   Recording Date   2024
-TRCK   Track Number     2
-TPOS   Disc Number      1
+Track Artist     Rename Artist      TPE1
+Album Title      Multi Disc Album   TALB
+Track Title      Second Track       TIT2
+Recording Date   2024               TDRC
+Track Number     2                  TRCK
+Disc Number      1                  TPOS
 
-APIC   Front Cover   0.8 KiB   image/png
+Front Cover   0.8 KiB   image/png   APIC
 
 ---
 
 Disc 2/Rename Artist - Multi Disc Album - 01 Third Track.mp3
 
-TPE1   Track Artist     Rename Artist
-TALB   Album Title      Multi Disc Album
-TIT2   Track Title      Third Track
-TDRC   Recording Date   2024
-TRCK   Track Number     1
-TPOS   Disc Number      2
+Track Artist     Rename Artist      TPE1
+Album Title      Multi Disc Album   TALB
+Track Title      Third Track        TIT2
+Recording Date   2024               TDRC
+Track Number     1                  TRCK
+Disc Number      2                  TPOS
 
-APIC   Front Cover   0.8 KiB   image/png
+Front Cover   0.8 KiB   image/png   APIC
 
 ---
 
 Disc 2/Rename Artist - Multi Disc Album - 02 Fourth Track.mp3
 
-TPE1   Track Artist     Rename Artist
-TALB   Album Title      Multi Disc Album
-TIT2   Track Title      Fourth Track
-TDRC   Recording Date   2024
-TRCK   Track Number     2
-TPOS   Disc Number      2
+Track Artist     Rename Artist      TPE1
+Album Title      Multi Disc Album   TALB
+Track Title      Fourth Track       TIT2
+Recording Date   2024               TDRC
+Track Number     2                  TRCK
+Disc Number      2                  TPOS
 
-APIC   Front Cover   0.8 KiB   image/png
+Front Cover   0.8 KiB   image/png   APIC

@@ -48,6 +48,21 @@ async fn get_details_v0() -> Result<(), TestError> {
     Ok(())
 }
 
+/// Test that `get_details` formats a 48 kHz sample rate without a fractional part.
+#[tokio::test]
+async fn get_details_flac_48khz() -> Result<(), TestError> {
+    // Arrange
+    let config = AlbumProvider::get(SampleFormat::FLAC16_48).await;
+    let path = SAMPLE_SOURCES_DIR.join(config.dir_name());
+
+    // Act
+    let output = get_details(&path, false)?;
+
+    // Assert
+    assert_inspect_snapshot!(output);
+    Ok(())
+}
+
 /// Test that `get_details` handles mixed FLAC and MP3 files in the same directory.
 #[tokio::test]
 #[expect(

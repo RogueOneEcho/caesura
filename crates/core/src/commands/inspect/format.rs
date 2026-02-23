@@ -27,6 +27,22 @@ impl TrackInfo {
         format_size(self.file_size)
     }
 
+    /// Sample rate formatted as kHz.
+    #[expect(
+        clippy::integer_division,
+        reason = "intentional integer division for kHz conversion"
+    )]
+    fn format_sample_rate(&self) -> String {
+        let khz = self.sample_rate / 1000;
+        let remainder = self.sample_rate % 1000;
+        if remainder == 0 {
+            khz.to_string()
+        } else {
+            let decimal = remainder / 100;
+            format!("{khz}.{decimal}")
+        }
+    }
+
     /// Format the audio properties table.
     pub(crate) fn format_properties_table(tracks: &[TrackInfo]) -> String {
         const L: bool = false;
@@ -35,20 +51,31 @@ impl TrackInfo {
         let has_mixed_types = tracks
             .first()
             .is_some_and(|first| tracks.iter().any(|t| t.file_type != first.file_type));
-        let mut headers: Vec<&str> = vec!["D", "T"];
+        let mut headers: Vec<Vec<&str>> = vec![vec!["D"], vec!["T"]];
         let mut align = vec![L, L];
         if has_mixed_types {
-            headers.push("Type");
+            headers.push(vec!["Type"]);
             align.push(L);
         }
-        headers.extend(["Time", "Size", "Bitrate", "Sample Rate", "Channels"]);
+        let kbps = style_unit("kbps");
+        let khz = style_unit("kHz");
+        headers.extend([
+            vec!["Time"],
+            vec!["Size"],
+            vec!["Bit", "Rate", &kbps],
+            vec!["Sample", "Rate", &khz],
+            vec!["Channels"],
+        ]);
         align.extend([R, R, R, L, L]);
         if has_flac_columns {
-            headers.push("Bit Depth");
+            headers.push(vec!["Bit", "Depth"]);
             align.push(L);
         }
         let headers = style_headers(headers);
-        let mut builder = TableBuilder::new().headers(headers).right_align(align);
+        let mut builder = TableBuilder::new()
+            .multi_line_headers(headers)
+            .right_align(align)
+            .newline_after_headers();
         for track in tracks {
             let mut row = vec![
                 style_key(track.disc.clone().unwrap_or_default()),
@@ -60,8 +87,8 @@ impl TrackInfo {
             row.extend([
                 track.format_duration(),
                 track.format_file_size(),
-                format!("{} {}", track.bitrate, style_unit("kbps")),
-                format!("{} {}", track.sample_rate, style_unit("Hz")),
+                track.bit_rate.to_string(),
+                track.format_sample_rate(),
                 track.channels.clone(),
             ]);
             if has_flac_columns {
@@ -104,9 +131,9 @@ impl TrackInfo {
         let mut builder = TableBuilder::new();
         for entry in &self.tags {
             builder = builder.row([
-                style_key(entry.native.as_deref().unwrap_or("")),
-                entry.format_item(),
+                style_key(entry.format_item()),
                 entry.value.clone(),
+                style_info(entry.native.as_deref().unwrap_or("")),
             ]);
         }
         builder.build()
@@ -136,10 +163,10 @@ impl PictureInfo {
     /// Format as a table row.
     fn as_row(&self) -> [String; 4] {
         [
-            style_key(self.native.clone()),
-            self.type_name.clone(),
+            style_key(self.type_name.clone()),
             format_size(u64::try_from(self.size).unwrap_or(u64::MAX)),
             self.mime.clone(),
+            style_info(self.native.clone()),
         ]
     }
 }
@@ -187,13 +214,20 @@ pub(crate) fn divider() -> String {
     "\n---\n".black().to_string()
 }
 
-fn style_headers(headers: Vec<&str>) -> Vec<String> {
+fn style_headers(headers: Vec<Vec<&str>>) -> Vec<Vec<String>> {
     if is_style_disabled() {
-        return headers.into_iter().map(ToString::to_string).collect();
+        return headers
+            .into_iter()
+            .map(|col| col.into_iter().map(ToString::to_string).collect())
+            .collect();
     }
     headers
         .into_iter()
-        .map(|header| header.dimmed().to_string())
+        .map(|col| {
+            col.into_iter()
+                .map(style_info)
+                .collect()
+        })
         .collect()
 }
 
@@ -215,7 +249,14 @@ fn style_unit(input: impl Into<String>) -> String {
     if is_style_disabled() {
         return input.into();
     }
-    input.into().dimmed().to_string()
+    input.into().white().dimmed().to_string()
+}
+
+fn style_info(input: impl Into<String>) -> String {
+    if is_style_disabled() {
+        return input.into();
+    }
+    input.into().cyan().to_string()
 }
 
 fn is_style_disabled() -> bool {

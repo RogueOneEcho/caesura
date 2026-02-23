@@ -41,8 +41,8 @@ pub(super) struct TrackInfo {
     pub(super) disc: Option<String>,
     /// Audio duration.
     pub(super) duration: Duration,
-    /// Audio bitrate in kbps.
-    pub(super) bitrate: u32,
+    /// Audio bit rate in kbps.
+    pub(super) bit_rate: u32,
     /// Sample rate in Hz.
     pub(super) sample_rate: u32,
     /// Channel description.
@@ -56,6 +56,44 @@ pub(super) struct TrackInfo {
 }
 
 impl TrackInfo {
+    /// Create a mock FLAC 16-bit 44.1 kHz [`TrackInfo`] for testing.
+    #[cfg(test)]
+    pub(super) fn mock_flac() -> Self {
+        Self {
+            sub_path: String::new(),
+            file_type: "FLAC".to_owned(),
+            file_size: 1_048_576,
+            track: Some("1".to_owned()),
+            disc: Some("1".to_owned()),
+            duration: Duration::from_secs(60),
+            bit_rate: 800,
+            sample_rate: 44100,
+            channels: "2".to_owned(),
+            bit_depth: Some(16),
+            tags: Vec::new(),
+            pictures: Vec::new(),
+        }
+    }
+
+    /// Create a mock MP3 320 kbps 44.1 kHz [`TrackInfo`] for testing.
+    #[cfg(test)]
+    pub(super) fn mock_mp3() -> Self {
+        Self {
+            sub_path: String::new(),
+            file_type: "MP3".to_owned(),
+            file_size: 2_457_600,
+            track: Some("1".to_owned()),
+            disc: Some("1".to_owned()),
+            duration: Duration::from_secs(60),
+            bit_rate: 320,
+            sample_rate: 44100,
+            channels: "Joint stereo".to_owned(),
+            bit_depth: None,
+            tags: Vec::new(),
+            pictures: Vec::new(),
+        }
+    }
+
     /// Read all audio files from a directory.
     pub(crate) fn read_dir(dir: &Path) -> Result<Vec<TrackInfo>, Failure<InspectAction>> {
         let mut paths = DirectoryReader::new()
@@ -119,7 +157,7 @@ impl TrackInfo {
             track: get_tag_string(&tagged, &ItemKey::TrackNumber),
             disc: get_tag_string(&tagged, &ItemKey::DiscNumber),
             duration: props.duration(),
-            bitrate: props.audio_bitrate(),
+            bit_rate: props.audio_bitrate(),
             sample_rate: props.sample_rate(),
             channels: props.channels().to_string(),
             bit_depth: Some(props.bit_depth()),
@@ -145,7 +183,7 @@ impl TrackInfo {
             track: get_tag_string(&tagged, &ItemKey::TrackNumber),
             disc: get_tag_string(&tagged, &ItemKey::DiscNumber),
             duration: props.duration(),
-            bitrate: props.audio_bitrate(),
+            bit_rate: props.audio_bitrate(),
             sample_rate: props.sample_rate(),
             channels: format_channel_mode(*props.channel_mode()),
             bit_depth: None,

@@ -2,34 +2,37 @@
 source: crates/core/src/commands/inspect/tests/inspect_tests.rs
 expression: output
 ---
-D   T   Type   Time    Size      Bitrate    Sample Rate   Channels       Bit Depth
-1   1   FLAC   01:05   830 KiB   104 kbps   44100 Hz      2              16
-1   2   MP3    01:05   2.4 MiB   320 kbps   44100 Hz      Joint stereo   
+                                 Bit    Sample                  
+                                 Rate   Rate                    Bit
+D   T   Type   Time    Size      kbps   kHz      Channels       Depth
+
+1   1   FLAC   01:05   830 KiB    104   44.1     2              16
+1   2   MP3    01:05   2.4 MiB    320   44.1     Joint stereo   
 
 ---
 
 Rename Artist - Multi Disc Album - 01 First Track.flac
 
-COMMENT       Comment            Processed by SoX
-ARTIST        Track Artist       Rename Artist
-ALBUM         Album Title        Multi Disc Album
-TITLE         Track Title        First Track
-TRACKNUMBER   Track Number       1
-DISCNUMBER    Disc Number        1
-DATE          Recording Date     2024
-ENCODER       Encoder Software   reference libFLAC 1.5.0 20250211
+Comment            Processed by SoX                   COMMENT
+Track Artist       Rename Artist                      ARTIST
+Album Title        Multi Disc Album                   ALBUM
+Track Title        First Track                        TITLE
+Track Number       1                                  TRACKNUMBER
+Disc Number        1                                  DISCNUMBER
+Recording Date     2024                               DATE
+Encoder Software   reference libFLAC 1.5.0 20250211   ENCODER
 
-METADATA_BLOCK_PICTURE   Front Cover   0.8 KiB   image/png
+Front Cover   0.8 KiB   image/png   METADATA_BLOCK_PICTURE
 
 ---
 
 Rename Artist - Multi Disc Album - 02 Second Track.mp3
 
-TPE1   Track Artist     Rename Artist
-TALB   Album Title      Multi Disc Album
-TIT2   Track Title      Second Track
-TDRC   Recording Date   2024
-TRCK   Track Number     2
-TPOS   Disc Number      1
+Track Artist     Rename Artist      TPE1
+Album Title      Multi Disc Album   TALB
+Track Title      Second Track       TIT2
+Recording Date   2024               TDRC
+Track Number     2                  TRCK
+Disc Number      1                  TPOS
 
-APIC   Front Cover   0.8 KiB   image/png
+Front Cover   0.8 KiB   image/png   APIC
