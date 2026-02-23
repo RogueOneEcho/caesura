@@ -6,13 +6,13 @@ Options can be set via CLI flags or in `config.yml`.
 ## Configuration file path.
 
 | YAML Key | CLI Flag   | Type              | Default                                               | Description                     |
-|----------|------------|-------------------|-------------------------------------------------------|---------------------------------|
+| -------- | ---------- | ----------------- | ----------------------------------------------------- | ------------------------------- |
 | `config` | `--config` | `Option<PathBuf>` | `~/.config/caesura/config.yml` or platform equivalent | Path to the configuration file. |
 
 ## Options shared by all commands
 
 | YAML Key       | CLI Flag         | Type           | Default                                                 | Description                                                                                                                             |
-|----------------|------------------|----------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | ---------------- | -------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `announce_url` | `--announce-url` | `String`       | `""`                                                    | Announce URL including passkey<br>Examples: `https://flacsfor.me/a1b2c3d4e5f6/announce`, `https://home.opsfet.ch/a1b2c3d4e5f6/announce` |
 | `api_key`      | `--api-key`      | `String`       | `""`                                                    | API key with torrent permissions for the indexer.                                                                                       |
 | `indexer`      | `--indexer`      | `String`       | from announce_url                                       | ID of the tracker as it appears in the source field of a torrent.<br>Examples: `red`, `pth`, `ops`                                      |
@@ -25,14 +25,14 @@ Options can be set via CLI flags or in `config.yml`.
 ## Options for verify
 
 | YAML Key        | CLI Flag          | Type                  | Default | Description                                                                                                                     |
-|-----------------|-------------------|-----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------|
+| --------------- | ----------------- | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `no_hash_check` | `--no-hash-check` | `bool`                | `false` | Should the hash check of source files be skipped?<br>Note: This is only useful for development and should probably not be used. |
 | `exclude_tags`  | `--exclude-tags`  | `Option<Vec<String>>` | ~       | Should sources with specific tags be excluded?                                                                                  |
 
 ## Options for transcoding
 
 | YAML Key                  | CLI Flag                    | Type                | Default                                 | Description                                                                                                                                                                                                                                                       |
-|---------------------------|-----------------------------|---------------------|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | --------------------------- | ------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `target`                  | `--target`                  | `Vec<TargetFormat>` | `["flac","320","v0"]`                   | Formats to attempt to transcode to.                                                                                                                                                                                                                               |
 | `allow_existing`          | `--allow-existing`          | `bool`              | `false`                                 | Allow transcoding to existing formats.<br>Note: This is only useful for development and should probably not be used.                                                                                                                                              |
 | `sox_random_dither`       | `--sox-random-dither`       | `bool`              | `false`                                 | Use random dithering when resampling with `SoX`.<br>By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither<br>random number generator with a fixed value, producing deterministic output.<br>Set this to `true` to use random dithering instead. |
@@ -41,25 +41,25 @@ Options can be set via CLI flags or in `config.yml`.
 ## Options for spectrograms
 
 | YAML Key           | CLI Flag             | Type        | Default           | Description                        |
-|--------------------|----------------------|-------------|-------------------|------------------------------------|
+| ------------------ | -------------------- | ----------- | ----------------- | ---------------------------------- |
 | `spectrogram_size` | `--spectrogram-size` | `Vec<Size>` | `["full","zoom"]` | Sizes of spectrograms to generate. |
 
 ## Options for sox binary selection
 
 | YAML Key      | CLI Flag        | Type         | Default       | Description                                        |
-|---------------|-----------------|--------------|---------------|----------------------------------------------------|
+| ------------- | --------------- | ------------ | ------------- | -------------------------------------------------- |
 | `sox_variant` | `--sox-variant` | `SoxVariant` | auto-detected | `SoX` binary to use.<br>Options: `sox` or `sox_ng` |
 
 ## Options for copying files
 
 | YAML Key    | CLI Flag      | Type   | Default | Description                                                                                                                                                |
-|-------------|---------------|--------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------- | ------------- | ------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hard_link` | `--hard-link` | `bool` | `false` | Should files be hard linked instead of copied?<br>Enabling this option requires the source and destination to be on the same filesystem or mounted volume. |
 
 ## Options for image resizing
 
 | YAML Key               | CLI Flag                 | Type   | Default  | Description                                                                                                                                                                                                                                                                      |
-|------------------------|--------------------------|--------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------- | ------------------------ | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_image_compression` | `--no-image-compression` | `bool` | `false`  | Should compression of images be disabled?                                                                                                                                                                                                                                        |
 | `rename_tracks`        | `--rename-tracks`        | `bool` | `false`  | Should transcoded files be renamed?<br>If enabled then tracks are renamed into a standardized format: `{number} {title}.{ext}`.<br>Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.<br>- `1 Example track title.flac`<br>- `CD1/10 Example track title.mp3` |
 | `max_file_size`        | `--max-file-size`        | `u64`  | `750000` | Maximum file size in bytes beyond which images are compressed.<br>Only applies to image files.                                                                                                                                                                                   |
@@ -70,13 +70,13 @@ Options can be set via CLI flags or in `config.yml`.
 ## Options for concurrency
 
 | YAML Key | CLI Flag | Type          | Default    | Description                           |
-|----------|----------|---------------|------------|---------------------------------------|
+| -------- | -------- | ------------- | ---------- | ------------------------------------- |
 | `cpus`   | `--cpus` | `Option<u16>` | Total CPUs | Number of cpus to use for processing. |
 
 ## Options for upload
 
 | YAML Key                        | CLI Flag                          | Type              | Default | Description                                                                                                         |
-|---------------------------------|-----------------------------------|-------------------|---------|---------------------------------------------------------------------------------------------------------------------|
+| ------------------------------- | --------------------------------- | ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | `copy_transcode_to_content_dir` | `--copy-transcode-to-content-dir` | `bool`            | `false` | Should the transcoded files be copied to the content directory?                                                     |
 | `copy_transcode_to`             | `--copy-transcode-to`             | `Option<PathBuf>` | ~       | Directory the transcoded files are copied to.<br>This should be set if you wish to auto-add to your torrent client. |
 | `copy_torrent_to`               | `--copy-torrent-to`               | `Option<PathBuf>` | ~       | Directory the torrent file is copied to.<br>This should be set if you wish to auto-add to your torrent client.      |
@@ -85,13 +85,13 @@ Options can be set via CLI flags or in `config.yml`.
 ## Options for queue cache
 
 | YAML Key | CLI Flag  | Type      | Default                                    | Description              |
-|----------|-----------|-----------|--------------------------------------------|--------------------------|
+| -------- | --------- | --------- | ------------------------------------------ | ------------------------ |
 | `cache`  | `--cache` | `PathBuf` | `~/.cache/caesura/` or platform equivalent | Path to cache directory. |
 
 ## Options for batch processing
 
 | YAML Key             | CLI Flag               | Type             | Default | Description                                                                                                                         |
-|----------------------|------------------------|------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------- | ---------------------- | ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `spectrogram`        | `--spectrogram`        | `bool`           | `false` | Should the spectrogram command be executed?                                                                                         |
 | `transcode`          | `--transcode`          | `bool`           | `false` | Should the transcode command be executed?                                                                                           |
 | `retry_transcode`    | `--retry-transcode`    | `bool`           | `false` | Should failed transcodes be retried?                                                                                                |
@@ -103,6 +103,6 @@ Options can be set via CLI flags or in `config.yml`.
 ## Options for `queue add` command.
 
 | YAML Key         | CLI Flag | Type              | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                |
-|------------------|----------|-------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------- | -------- | ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `queue_add_path` | ~        | `Option<PathBuf>` | ~       | A path to either a directory of `.torrent` files or a single YAML queue file.<br>If you set this to the directory your torrent client stores `.torrent` files then caesura<br>will automatically load everything from your client.<br>- For qBittorrent use the `BT_backup` directory<br>- For deluge use the `state` directory<br>Examples:<br>- `/srv/qBittorrent/BT_backup`<br>- `/srv/deluge/state`<br>- `./queue.yml` |
 

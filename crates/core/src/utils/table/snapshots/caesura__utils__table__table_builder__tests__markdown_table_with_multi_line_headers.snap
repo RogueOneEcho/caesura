@@ -1,0 +1,7 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+| Name    | Bit<br>Rate | Sample<br>Rate |
+| ------- | ----------- | -------------- |
+| Track 1 | 320         | 44.1           |

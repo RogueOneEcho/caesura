@@ -2,12 +2,12 @@
 source: crates/core/src/commands/inspect/tests/inspect_tests.rs
 expression: output
 ---
-                                 Bit    Sample                  
+                                 Bit    Sample
                                  Rate   Rate                    Bit
 D   T   Type   Time    Size      kbps   kHz      Channels       Depth
 
 1   1   FLAC   01:05   830 KiB    104   44.1     2              16
-1   2   MP3    01:05   2.4 MiB    320   44.1     Joint stereo   
+1   2   MP3    01:05   2.4 MiB    320   44.1     Joint stereo
 
 ---
 

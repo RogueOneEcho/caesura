@@ -1,0 +1,8 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+| Name  | Age | City     |
+| ----- | --- | -------- |
+| Alice | 30  | New York |
+| Bob   | 25  | London   |

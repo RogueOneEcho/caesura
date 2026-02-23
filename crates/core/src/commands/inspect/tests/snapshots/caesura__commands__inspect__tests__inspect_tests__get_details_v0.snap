@@ -2,8 +2,8 @@
 source: crates/core/src/commands/inspect/tests/inspect_tests.rs
 expression: output
 ---
-                          Bit    Sample   
-                          Rate   Rate     
+                          Bit    Sample
+                          Rate   Rate
 D   T   Time    Size      kbps   kHz      Channels
 
 1   1   01:05   767 KiB     96   44.1     Joint stereo

@@ -2,7 +2,7 @@
 source: crates/core/src/commands/inspect/tests/inspect_tests.rs
 expression: output
 ---
-                          Bit    Sample              
+                          Bit    Sample
                           Rate   Rate                Bit
 D   T   Time    Size      kbps   kHz      Channels   Depth
 

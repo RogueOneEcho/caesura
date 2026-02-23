@@ -1,0 +1,8 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+| Key    | Value       |
+| ------ | ----------- |
+| a\|b   | x\|y\|z     |
+| normal | also normal |

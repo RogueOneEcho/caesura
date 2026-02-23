@@ -3,6 +3,6 @@ source: crates/core/src/utils/table/table_builder.rs
 expression: table
 ---
 Name      Size      Count
-foo.txt    1.2 MB   42
-bar.txt    956 KB   7
-baz.txt   12.5 MB   128
+foo.txt    1.2 MB      42
+bar.txt    956 KB       7
+baz.txt   12.5 MB     128

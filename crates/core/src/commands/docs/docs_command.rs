@@ -31,10 +31,11 @@ impl DocsCommand {
             QueueAddArgs::doc_metadata(),
         ];
 
-        let mut out = String::new();
-        out.push_str("# Options Reference\n\n");
-        out.push_str("This document describes all configuration options available in caesura.\n");
-        out.push_str("Options can be set via CLI flags or in `config.yml`.\n\n");
+        let mut out = String::from(concat!(
+            "# Options Reference\n\n",
+            "This document describes all configuration options available in caesura.\n",
+            "Options can be set via CLI flags or in `config.yml`.\n\n",
+        ));
 
         for doc in docs {
             out.push_str(&render_options_table(doc));
@@ -45,79 +46,38 @@ impl DocsCommand {
 }
 
 fn render_options_table(doc: &OptionsDoc) -> String {
-    let mut out = String::new();
     let header = if doc.description.is_empty() {
         doc.name
     } else {
         doc.description
     };
-    let _ = writeln!(out, "## {header}\n");
-
-    // Prepare rows data
-    let headers = ["YAML Key", "CLI Flag", "Type", "Default", "Description"];
-    let rows: Vec<[String; 5]> = doc
-        .fields
-        .iter()
-        .map(|field| {
-            let default = if let Some(doc) = field.default_doc {
-                doc.to_owned()
-            } else if let Some(value) = &field.default_value {
-                format!("`{value}`")
-            } else {
-                "~".to_owned()
-            };
-            let description = escape_markdown_table(field.description);
-            let cli_flag = if field.cli_flag.is_empty() {
-                "~".to_owned()
-            } else {
-                format!("`{}`", field.cli_flag)
-            };
-            [
-                format!("`{}`", field.config_key),
-                cli_flag,
-                format!("`{}`", field.field_type),
-                default,
-                description,
-            ]
-        })
-        .collect();
-
-    // Calculate column widths
-    let mut widths = headers.map(str::len);
-    for row in &rows {
-        for (width, cell) in widths.iter_mut().zip(row.iter()) {
-            *width = (*width).max(cell.len());
-        }
+    let mut table = TableBuilder::new().markdown().headers([
+        "YAML Key",
+        "CLI Flag",
+        "Type",
+        "Default",
+        "Description",
+    ]);
+    for field in &doc.fields {
+        let default = if let Some(doc) = field.default_doc {
+            doc.to_owned()
+        } else if let Some(value) = &field.default_value {
+            format!("`{value}`")
+        } else {
+            "~".to_owned()
+        };
+        let cli_flag = if field.cli_flag.is_empty() {
+            "~".to_owned()
+        } else {
+            format!("`{}`", field.cli_flag)
+        };
+        table = table.row([
+            format!("`{}`", field.config_key),
+            cli_flag,
+            format!("`{}`", field.field_type),
+            default,
+            field.description.to_owned(),
+        ]);
     }
-
-    // Render header row
-    out.push('|');
-    for (h, width) in headers.iter().zip(widths.iter()) {
-        let _ = write!(out, " {h:<width$} |");
-    }
-    out.push('\n');
-
-    // Render separator row
-    out.push('|');
-    for width in widths {
-        let _ = write!(out, "-{:-<width$}-|", "");
-    }
-    out.push('\n');
-
-    // Render data rows
-    for row in &rows {
-        out.push('|');
-        for (cell, width) in row.iter().zip(widths.iter()) {
-            let _ = write!(out, " {cell:<width$} |");
-        }
-        out.push('\n');
-    }
-
-    out.push('\n');
-    out
-}
-
-/// Escapes pipe characters and newlines for markdown table cells.
-fn escape_markdown_table(s: &str) -> String {
-    s.replace('|', "\\|").replace('\n', " ")
+    format!("## {header}\n\n{}\n", table.build())
 }
