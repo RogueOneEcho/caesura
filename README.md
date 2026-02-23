@@ -63,22 +63,15 @@ Each source is verified to ensure:
 | **[COMMANDS.md](docs/COMMANDS.md)**              | Command guide with examples for every subcommand     |
 | **[OPTIONS.md](docs/OPTIONS.md)**                | CLI flags and `config.yml` file options              |
 | **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Troubleshooting guide                              |
+| **[COMPARISON.md](docs/COMPARISON.md)**          | Comparison with similar tools                        |
 | **[DIRECTORIES.md](docs/DIRECTORIES.md)**       | Explanation of writable directories                  |
 | **[BUILD.md](docs/BUILD.md)**                        | Building from source                                 |
 | **[TESTING.md](docs/TESTING.md)**               | Test infrastructure and conventions                  |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)**           | Contributing guidelines                              |
 
-## Build
-
-**[The build process is documented in BUILD.md](docs/BUILD.md)**
-
 ## Releases and Changes
 
 Releases and a full changelog are available via [GitHub Releases](https://github.com/RogueOneEcho/caesura/releases).
-
-Release versions follow the [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) specification.
-
-Commit messages follow the [Conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
 ## History
 
