@@ -53,7 +53,7 @@ volumes:
   caddy_config:
 
 # Inline config - edit the values below
-# Refer to SETUP.md and CONFIG.md for more details on settings.
+# Refer to SETUP.md and OPTIONS.md for more details on settings.
 # The paths must match the layout of the docker container which may differ from your host system.
 configs:
   caesura_config:

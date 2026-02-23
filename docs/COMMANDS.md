@@ -1,9 +1,9 @@
-# Usage
+# Command Guide
 
 > [!TIP]
 > You can append `--help` to any command to see the available options.
 >
-> **[Configuration options and the commands they apply to are documented in CONFIG.md](CONFIG.md)**
+> **[CLI flags and `config.yml` file options are documented in the options reference](OPTIONS.md)**
 
 ## `version`
 
@@ -252,4 +252,4 @@ Refer to the [troubleshooting guide](TROUBLESHOOTING.md) if you have any issues.
 
 ---
 
-**Next: [Configuration options &rarr;](CONFIG.md)**
+**Next: [Options Reference &rarr;](OPTIONS.md)**

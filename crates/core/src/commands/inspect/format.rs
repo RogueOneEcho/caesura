@@ -223,11 +223,7 @@ fn style_headers(headers: Vec<Vec<&str>>) -> Vec<Vec<String>> {
     }
     headers
         .into_iter()
-        .map(|col| {
-            col.into_iter()
-                .map(style_info)
-                .collect()
-        })
+        .map(|col| col.into_iter().map(style_info).collect())
         .collect()
 }
 

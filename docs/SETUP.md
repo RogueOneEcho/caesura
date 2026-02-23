@@ -19,7 +19,7 @@ api_key: "YOUR_API_KEY"
 ```
 
 > [!TIP]
-> Refer to [CONFIG.md](CONFIG.md) for full documentation of options.
+> Refer to the [options reference](OPTIONS.md) for full documentation.
 
 ## Default paths
 
@@ -132,4 +132,4 @@ If you're using docker then edit `docker-compose.yml` to include separate servic
 
 ---
 
-**Next: [Start using caesura &rarr;](USE.md)**
+**Next: [Command Guide &rarr;](COMMANDS.md)**

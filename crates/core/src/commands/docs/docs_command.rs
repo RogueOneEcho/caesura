@@ -32,7 +32,7 @@ impl DocsCommand {
         ];
 
         let mut out = String::new();
-        out.push_str("# Configuration Reference\n\n");
+        out.push_str("# Options Reference\n\n");
         out.push_str("This document describes all configuration options available in caesura.\n");
         out.push_str("Options can be set via CLI flags or in `config.yml`.\n\n");
 

@@ -9,14 +9,14 @@ fn docs_command_renders_markdown() {
     assert_snapshot!(output);
 }
 
-/// Test that CONFIG.md matches the output of `DocsCommand::render`.
+/// Test that OPTIONS.md matches the output of `DocsCommand::render`.
 #[test]
-fn config_md_matches_docs_command() {
+fn options_md_matches_docs_command() {
     let expected = DocsCommand::render();
-    let actual = include_str!("../../../../../../docs/CONFIG.md");
+    let actual = include_str!("../../../../../../docs/OPTIONS.md");
 
     assert_eq!(
         actual, expected,
-        "CONFIG.md is out of date. Run `caesura docs > CONFIG.md` to update it."
+        "OPTIONS.md is out of date. Run `caesura docs > OPTIONS.md` to update it."
     );
 }

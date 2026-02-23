@@ -38,7 +38,7 @@ Refer to the [setup guide](SETUP.md) for more information on configuring caesura
 
 ## 4. Running commands
 
-The [usage guide](USE.md) shows commands in native form. To run them with Docker Compose, prefix with `docker compose run --rm caesura`.
+The [command guide](COMMANDS.md) shows commands in native form. To run them with Docker Compose, prefix with `docker compose run --rm caesura`.
 
 For example, the native version command is:
 

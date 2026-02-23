@@ -1,4 +1,4 @@
-# Configuration Reference
+# Options Reference
 
 This document describes all configuration options available in caesura.
 Options can be set via CLI flags or in `config.yml`.

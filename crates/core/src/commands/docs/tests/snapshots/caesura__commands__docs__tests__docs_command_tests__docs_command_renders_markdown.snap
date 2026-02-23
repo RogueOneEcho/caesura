@@ -2,7 +2,7 @@
 source: crates/core/src/commands/docs/tests/docs_command_tests.rs
 expression: output
 ---
-# Configuration Reference
+# Options Reference
 
 This document describes all configuration options available in caesura.
 Options can be set via CLI flags or in `config.yml`.

@@ -60,8 +60,8 @@ Each source is verified to ensure:
 | **[INSTALL.md](docs/INSTALL.md)**               | Native installation                                  |
 | **[DEPENDENCIES.md](docs/DEPENDENCIES.md)**     | External tool dependencies (FLAC, LAME, SoX_ng)     |
 | **[SETUP.md](docs/SETUP.md)**                   | Configuration, default paths, multi-indexer          |
-| **[USE.md](docs/USE.md)**                       | Command-by-command usage guide                       |
-| **[CONFIG.md](docs/CONFIG.md)**                  | Configuration option reference                       |
+| **[COMMANDS.md](docs/COMMANDS.md)**              | Command guide with examples for every subcommand     |
+| **[OPTIONS.md](docs/OPTIONS.md)**                | CLI flags and `config.yml` file options              |
 | **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Troubleshooting guide                              |
 | **[DIRECTORIES.md](docs/DIRECTORIES.md)**       | Explanation of writable directories                  |
 | **[BUILD.md](docs/BUILD.md)**                        | Building from source                                 |
