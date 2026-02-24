@@ -1,29 +1,42 @@
 //! Setup helper for resolving, validating, and registering options with DI.
 
-use crate::prelude::*;
+use crate::{
+    ArgsProviderContract, Documented, OptionRule, OptionsPartialContract, OptionsRegistration,
+};
 use di::{ServiceCollection, existing_as_self};
-use std::fs::read_to_string;
+use std::sync::Arc;
 
 /// Setup helper for resolving, validating, and registering options with DI.
 ///
-/// Created as a field on [`HostBuilder`] and used during setup to:
+/// Created during host setup to:
 /// 1. Determine which options are needed for the current command
 /// 2. Resolve options from CLI args and config file
 /// 3. Validate all relevant options
 /// 4. Collect errors for checking before host is built
 /// 5. Register valid options with the DI container
+#[derive(Default)]
 pub struct OptionsProvider {
-    args: Option<Ref<ArgumentsProvider>>,
+    args: Option<Arc<dyn ArgsProviderContract>>,
     yaml: Option<String>,
-    pub(crate) errors: Vec<OptionRule>,
+    /// Validation errors collected during registration.
+    pub errors: Vec<OptionRule>,
 }
 
 impl OptionsProvider {
-    /// Create a new [`OptionsProvider`] by reading CLI args and the config file.
-    pub fn new(args: Option<Ref<ArgumentsProvider>>) -> Self {
-        let yaml = read_config_file(&args);
+    /// Create an [`OptionsProvider`] from parsed CLI arguments.
+    ///
+    /// - `yaml`: config file contents (None if file missing)
+    #[must_use]
+    #[expect(
+        clippy::as_conversions,
+        reason = "required for Arc<dyn ArgsProviderContract> coercion"
+    )]
+    pub fn from_args<A: ArgsProviderContract + 'static>(
+        args: Arc<A>,
+        yaml: Option<String>,
+    ) -> Self {
         Self {
-            args,
+            args: Some(args as Arc<dyn ArgsProviderContract>),
             yaml,
             errors: Vec::new(),
         }
@@ -39,23 +52,19 @@ impl OptionsProvider {
                 partial.merge(file_partial);
             }
             Err(error) => {
-                init_logger();
-                error!("{} to deserialize config file: {}", "Failed".bold(), error);
+                eprintln!("Failed to deserialize config file: {error}");
             }
         }
     }
 
     /// Register a partial options type, extracting from [`ArgMatches`] if applicable.
-    pub(crate) fn register<P>(&mut self, services: &mut ServiceCollection)
+    pub fn register<P>(&mut self, services: &mut ServiceCollection)
     where
         P: OptionsPartialContract,
         P::Resolved: Documented + Send + Sync + 'static,
     {
         let name = P::Resolved::doc_metadata().name;
-        let validate = self
-            .args
-            .as_ref()
-            .is_some_and(|a| a.get_command().uses_options(name));
+        let validate = self.args.as_ref().is_some_and(|a| a.uses_options(name));
         let mut partial = self.parse_cli_or_default::<P>(validate);
         self.merge_from_yaml(&mut partial);
         if validate {
@@ -82,12 +91,10 @@ impl OptionsProvider {
         let Some(args) = self.args.as_ref() else {
             return P::default();
         };
-        args.get_args::<P>().unwrap_or_else(|error| {
-            error!(
-                "{} to extract {} from CLI arguments: {}",
-                "Failed".bold(),
+        P::from_arg_matches(args.arg_matches()).unwrap_or_else(|error| {
+            eprintln!(
+                "Failed to extract {} from CLI arguments: {error}",
                 P::Resolved::doc_metadata().name,
-                error,
             );
             P::default()
         })
@@ -105,25 +112,6 @@ impl OptionsProvider {
     pub fn has_errors(&self) -> bool {
         !self.errors.is_empty()
     }
-}
-
-/// Read the config file.
-///
-/// - Returns `None` if the command does not use config options
-/// - Returns `None` if the file does not exist (validation reports the error)
-/// - Falls back to the default config path if `--config` is not set
-#[expect(clippy::ref_option, reason = "shared reference avoids cloning the Ref")]
-fn read_config_file(args: &Option<Ref<ArgumentsProvider>>) -> Option<String> {
-    let args = args.as_deref()?;
-    if !args.get_command().uses_options("ConfigOptions") {
-        return None;
-    }
-    let options = args.get_args::<ConfigOptionsPartial>().ok()?;
-    let path = options
-        .config
-        .clone()
-        .unwrap_or_else(PathManager::default_config_path);
-    read_to_string(path).ok()
 }
 
 /// Extension trait for registering resolved options with a [`ServiceCollection`].

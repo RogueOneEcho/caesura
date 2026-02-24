@@ -22,7 +22,7 @@ impl CustomArgOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         CustomArgOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let file_path = self.file_path;
@@ -39,7 +39,7 @@ impl CustomArgOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for CustomArgOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for CustomArgOptionsPartial {
     type Resolved = CustomArgOptions;
     fn merge(&mut self, other: Self) {
         if self.file_path.is_none() {
@@ -53,7 +53,7 @@ impl crate::options::OptionsPartialContract for CustomArgOptionsPartial {
         self,
     ) -> ::std::result::Result<
         CustomArgOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -65,14 +65,14 @@ impl ::std::default::Default for CustomArgOptions {
         }
     }
 }
-impl crate::options::Documented for CustomArgOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for CustomArgOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "CustomArgOptions",
             description: "",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "file_path", cli_flag :
+                ::caesura_options::FieldDoc { config_key : "file_path", cli_flag :
                 "--custom-name", field_type : "String", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < String >
                 ::default()).unwrap()), default_doc : ::std::option::Option::None,
@@ -84,13 +84,13 @@ impl crate::options::Documented for CustomArgOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<CustomArgOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < CustomArgOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < CustomArgOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

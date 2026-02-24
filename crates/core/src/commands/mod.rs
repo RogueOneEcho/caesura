@@ -2,7 +2,6 @@
 
 pub(crate) use batch::*;
 pub use command::*;
-pub(crate) use command_trait::*;
 pub(crate) use config::*;
 pub(crate) use docs::*;
 pub(crate) use inspect::*;
@@ -15,7 +14,6 @@ pub(crate) use version::*;
 
 mod batch;
 mod command;
-mod command_trait;
 mod config;
 mod docs;
 mod inspect;

@@ -61,7 +61,7 @@ impl TestOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         TestOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let defaults = self.clone();
@@ -93,7 +93,7 @@ impl TestOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for TestOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for TestOptionsPartial {
     type Resolved = TestOptions;
     fn merge(&mut self, other: Self) {
         if self.a.is_none() {
@@ -128,7 +128,7 @@ impl crate::options::OptionsPartialContract for TestOptionsPartial {
         self,
     ) -> ::std::result::Result<
         TestOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -147,42 +147,42 @@ impl ::std::default::Default for TestOptions {
         }
     }
 }
-impl crate::options::Documented for TestOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for TestOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "TestOptions",
             description: "",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "a", cli_flag : "--a",
+                ::caesura_options::FieldDoc { config_key : "a", cli_flag : "--a",
                 field_type : "String", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < String >
                 ::default()).unwrap()), default_doc : ::std::option::Option::None,
-                description : "non-Option, no defaults", }, crate ::options::FieldDoc {
+                description : "non-Option, no defaults", }, ::caesura_options::FieldDoc {
                 config_key : "b", cli_flag : "--b", field_type : "u32", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (42)).unwrap()),
                 default_doc : ::std::option::Option::None, description :
-                "non-Option, static default", }, crate ::options::FieldDoc { config_key :
-                "c", cli_flag : "--c", field_type : "u32", default_value :
+                "non-Option, static default", }, ::caesura_options::FieldDoc { config_key
+                : "c", cli_flag : "--c", field_type : "u32", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < u32 >
                 ::default()).unwrap()), default_doc :
                 ::std::option::Option::Some("computed at runtime"), description :
-                "non-Option, default_fn with doc", }, crate ::options::FieldDoc {
+                "non-Option, default_fn with doc", }, ::caesura_options::FieldDoc {
                 config_key : "d", cli_flag : "--d", field_type : "u32", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (99)).unwrap()),
                 default_doc : ::std::option::Option::None, description :
-                "non-Option, both", }, crate ::options::FieldDoc { config_key : "e",
+                "non-Option, both", }, ::caesura_options::FieldDoc { config_key : "e",
                 cli_flag : "--e", field_type : "Option<String>", default_value :
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
-                description : "Option, no defaults", }, crate ::options::FieldDoc {
+                description : "Option, no defaults", }, ::caesura_options::FieldDoc {
                 config_key : "f", cli_flag : "--f", field_type : "Option<String>",
                 default_value : ::std::option::Option::Some(::serde_json::to_string(&
                 (Some("fallback".to_owned()))).unwrap()), default_doc :
                 ::std::option::Option::None, description : "Option, static default", },
-                crate ::options::FieldDoc { config_key : "g", cli_flag : "--g",
+                ::caesura_options::FieldDoc { config_key : "g", cli_flag : "--g",
                 field_type : "Option<String>", default_value :
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
-                description : "Option, default_fn", }, crate ::options::FieldDoc {
+                description : "Option, default_fn", }, ::caesura_options::FieldDoc {
                 config_key : "h", cli_flag : "--h", field_type : "Option<String>",
                 default_value : ::std::option::Option::Some(::serde_json::to_string(&
                 (Some("final".to_owned()))).unwrap()), default_doc :
@@ -194,13 +194,13 @@ impl crate::options::Documented for TestOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<TestOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < TestOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < TestOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

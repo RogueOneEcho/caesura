@@ -27,7 +27,7 @@ impl CopyOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         CopyOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let hard_link = self.hard_link;
@@ -44,7 +44,7 @@ impl CopyOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for CopyOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for CopyOptionsPartial {
     type Resolved = CopyOptions;
     fn merge(&mut self, other: Self) {
         if self.hard_link.is_none() {
@@ -58,7 +58,7 @@ impl crate::options::OptionsPartialContract for CopyOptionsPartial {
         self,
     ) -> ::std::result::Result<
         CopyOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -70,14 +70,14 @@ impl ::std::default::Default for CopyOptions {
         }
     }
 }
-impl crate::options::Documented for CopyOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for CopyOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "CopyOptions",
             description: "Options for copying files",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "hard_link", cli_flag :
+                ::caesura_options::FieldDoc { config_key : "hard_link", cli_flag :
                 "--hard-link", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
@@ -90,13 +90,13 @@ impl crate::options::Documented for CopyOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<CopyOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < CopyOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < CopyOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

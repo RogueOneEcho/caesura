@@ -49,7 +49,7 @@ impl TargetOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         TargetOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let target = self.target;
@@ -76,7 +76,7 @@ impl TargetOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for TargetOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for TargetOptionsPartial {
     type Resolved = TargetOptions;
     fn merge(&mut self, other: Self) {
         if self.target.is_none() {
@@ -99,7 +99,7 @@ impl crate::options::OptionsPartialContract for TargetOptionsPartial {
         self,
     ) -> ::std::result::Result<
         TargetOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -114,29 +114,29 @@ impl ::std::default::Default for TargetOptions {
         }
     }
 }
-impl crate::options::Documented for TargetOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for TargetOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "TargetOptions",
             description: "Options for transcoding",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "target", cli_flag : "--target",
-                field_type : "Vec<TargetFormat>", default_value :
+                ::caesura_options::FieldDoc { config_key : "target", cli_flag :
+                "--target", field_type : "Vec<TargetFormat>", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(&
                 (vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0]))
                 .unwrap()), default_doc : ::std::option::Option::None, description :
-                "Formats to attempt to transcode to.", }, crate ::options::FieldDoc {
+                "Formats to attempt to transcode to.", }, ::caesura_options::FieldDoc {
                 config_key : "allow_existing", cli_flag : "--allow-existing", field_type
                 : "bool", default_value : ::std::option::Option::Some("false"
                 .to_owned()), default_doc : ::std::option::Option::None, description :
                 "Allow transcoding to existing formats.<br>Note: This is only useful for development and should probably not be used.",
-                }, crate ::options::FieldDoc { config_key : "sox_random_dither", cli_flag
-                : "--sox-random-dither", field_type : "bool", default_value :
+                }, ::caesura_options::FieldDoc { config_key : "sox_random_dither",
+                cli_flag : "--sox-random-dither", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
                 "Use random dithering when resampling with `SoX`.<br>By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither<br>random number generator with a fixed value, producing deterministic output.<br>Set this to `true` to use random dithering instead.",
-                }, crate ::options::FieldDoc { config_key : "exclude_vorbis_comments",
+                }, ::caesura_options::FieldDoc { config_key : "exclude_vorbis_comments",
                 cli_flag : "--exclude-vorbis-comments", field_type : "Vec<String>",
                 default_value : ::std::option::Option::Some(::serde_json::to_string(&
                 (TargetOptions::default_exclude_vorbis_comments())).unwrap()),
@@ -149,13 +149,13 @@ impl crate::options::Documented for TargetOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<TargetOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < TargetOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < TargetOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

@@ -38,7 +38,7 @@ pub(crate) fn derive(input: DeriveInput) -> syn::Result<TokenStream2> {
             #partial_fields
         }
         #resolve_inherent
-        impl crate::options::OptionsPartialContract for #partial_name {
+        impl ::caesura_options::OptionsPartialContract for #partial_name {
             type Resolved = #struct_name;
             #merge_impl
             #resolve_trait_methods
@@ -47,13 +47,13 @@ pub(crate) fn derive(input: DeriveInput) -> syn::Result<TokenStream2> {
         #doc_metadata_impl
         const _: () = {
             fn __register(
-                provider: &mut crate::options::OptionsProvider,
+                provider: &mut ::caesura_options::OptionsProvider,
                 services: &mut ::di::ServiceCollection,
             ) {
                 provider.register::<#partial_name>(services);
             }
-            ::inventory::submit!(crate::options::OptionsRegistration {
-                doc_metadata: <#struct_name as crate::options::Documented>::doc_metadata,
+            ::inventory::submit!(::caesura_options::OptionsRegistration {
+                doc_metadata: <#struct_name as ::caesura_options::Documented>::doc_metadata,
                 register: __register,
             });
         };

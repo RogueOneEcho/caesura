@@ -3,6 +3,9 @@
 use crate::prelude::*;
 use caesura_macros::CommandEnum;
 
+/// Concrete [`ArgsProvider`] wired to the caesura CLI parser and command enum.
+pub type ArgumentsProvider = ArgsProvider<Cli, Command>;
+
 /// An all-in-one command line tool to transcode FLAC audio files
 /// and upload to gazelle based indexers/trackers
 #[derive(CommandEnum, Clone, Copy, Debug, Eq, Hash, PartialEq)]

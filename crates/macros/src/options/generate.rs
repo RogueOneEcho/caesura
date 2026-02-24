@@ -127,7 +127,7 @@ pub fn generate_resolve_impl(
     };
     let inherent = quote! {
         impl #partial_name {
-            fn resolve_internal(#self_param, validate: bool) -> ::std::result::Result<#struct_name, ::std::vec::Vec<crate::options::OptionRule>> {
+            fn resolve_internal(#self_param, validate: bool) -> ::std::result::Result<#struct_name, ::std::vec::Vec<::caesura_options::OptionRule>> {
                 let mut errors = ::std::vec::Vec::new();
                 #defaults_binding
                 #(#field_bindings)*
@@ -149,7 +149,7 @@ pub fn generate_resolve_impl(
             self.resolve_internal(false).expect("validation disabled")
         }
 
-        fn resolve(self) -> ::std::result::Result<#struct_name, ::std::vec::Vec<crate::options::OptionRule>> {
+        fn resolve(self) -> ::std::result::Result<#struct_name, ::std::vec::Vec<::caesura_options::OptionRule>> {
             self.resolve_internal(true)
         }
     };
@@ -176,7 +176,7 @@ fn generate_required_checks(fields: &[ParsedField]) -> TokenStream2 {
         let name = field_name_for_error(ident);
         quote! {
             if validate && #ident.is_none() {
-                errors.push(crate::options::OptionRule::NotSet(#name.to_owned()));
+                errors.push(::caesura_options::OptionRule::NotSet(#name.to_owned()));
             }
         }
     });

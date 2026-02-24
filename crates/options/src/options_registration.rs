@@ -1,4 +1,4 @@
-use crate::options::OptionsDoc;
+use crate::OptionsDoc;
 
 inventory::collect!(OptionsRegistration);
 
@@ -7,7 +7,7 @@ pub struct OptionsRegistration {
     /// Return documentation metadata for this options type.
     pub doc_metadata: fn() -> &'static OptionsDoc,
     /// Register the partial type with the DI container.
-    pub register: fn(&mut super::OptionsProvider, &mut di::ServiceCollection),
+    pub register: fn(&mut crate::OptionsProvider, &mut di::ServiceCollection),
 }
 
 impl OptionsRegistration {

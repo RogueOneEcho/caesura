@@ -40,7 +40,7 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Option<CommandArgs>,
 }
-impl crate::commands::CommandEnumContract for Command {
+impl ::caesura_options::CommandEnumContract for Command {
     /// All command variants, with sub-commands expanded.
     fn all() -> &'static [Command] {
         static ALL: ::std::sync::OnceLock<::std::vec::Vec<Command>> = ::std::sync::OnceLock::new();
@@ -80,11 +80,8 @@ impl crate::commands::CommandEnumContract for Command {
             Command::Version => &["SoxOptions"],
         }
     }
-}
-impl Command {
     /// Resolve a [`Command`] and subcommand-level [`::clap::ArgMatches`] from top-level matches.
-    #[must_use]
-    pub fn resolve(
+    fn resolve(
         matches: &::clap::ArgMatches,
     ) -> ::std::option::Option<(Command, ::clap::ArgMatches)> {
         let (name, sub_matches) = matches.subcommand()?;
@@ -98,8 +95,7 @@ impl Command {
                 ::std::option::Option::Some((Command::Inspect, sub_matches.clone()))
             }
             "queue" => {
-                let (sub_name, sub_sub_matches) = sub_matches.subcommand()?;
-                QueueCommand::resolve_sub(sub_name, sub_sub_matches)
+                QueueCommand::resolve(sub_matches)
                     .map(|(sub, m)| (Command::Queue(sub), m))
             }
             "transcode" => {

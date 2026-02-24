@@ -49,7 +49,7 @@ impl UploadOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         UploadOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let copy_transcode_to_content_dir = self.copy_transcode_to_content_dir;
@@ -73,7 +73,7 @@ impl UploadOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for UploadOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for UploadOptionsPartial {
     type Resolved = UploadOptions;
     fn merge(&mut self, other: Self) {
         if self.copy_transcode_to_content_dir.is_none() {
@@ -96,7 +96,7 @@ impl crate::options::OptionsPartialContract for UploadOptionsPartial {
         self,
     ) -> ::std::result::Result<
         UploadOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -111,29 +111,30 @@ impl ::std::default::Default for UploadOptions {
         }
     }
 }
-impl crate::options::Documented for UploadOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for UploadOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "UploadOptions",
             description: "Options for upload",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "copy_transcode_to_content_dir",
-                cli_flag : "--copy-transcode-to-content-dir", field_type : "bool",
-                default_value : ::std::option::Option::Some("false".to_owned()),
-                default_doc : ::std::option::Option::None, description :
+                ::caesura_options::FieldDoc { config_key :
+                "copy_transcode_to_content_dir", cli_flag :
+                "--copy-transcode-to-content-dir", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
                 "Should the transcoded files be copied to the content directory?", },
-                crate ::options::FieldDoc { config_key : "copy_transcode_to", cli_flag :
-                "--copy-transcode-to", field_type : "Option<PathBuf>", default_value :
+                ::caesura_options::FieldDoc { config_key : "copy_transcode_to", cli_flag
+                : "--copy-transcode-to", field_type : "Option<PathBuf>", default_value :
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
                 description :
                 "Directory the transcoded files are copied to.<br>This should be set if you wish to auto-add to your torrent client.",
-                }, crate ::options::FieldDoc { config_key : "copy_torrent_to", cli_flag :
-                "--copy-torrent-to", field_type : "Option<PathBuf>", default_value :
+                }, ::caesura_options::FieldDoc { config_key : "copy_torrent_to", cli_flag
+                : "--copy-torrent-to", field_type : "Option<PathBuf>", default_value :
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
                 description :
                 "Directory the torrent file is copied to.<br>This should be set if you wish to auto-add to your torrent client.",
-                }, crate ::options::FieldDoc { config_key : "dry_run", cli_flag :
+                }, ::caesura_options::FieldDoc { config_key : "dry_run", cli_flag :
                 "--dry-run", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
@@ -146,13 +147,13 @@ impl crate::options::Documented for UploadOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<UploadOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < UploadOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < UploadOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

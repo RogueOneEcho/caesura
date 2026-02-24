@@ -74,7 +74,7 @@ impl FileOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         FileOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let no_image_compression = self.no_image_compression;
@@ -101,7 +101,7 @@ impl FileOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for FileOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for FileOptionsPartial {
     type Resolved = FileOptions;
     fn merge(&mut self, other: Self) {
         if self.no_image_compression.is_none() {
@@ -130,7 +130,7 @@ impl crate::options::OptionsPartialContract for FileOptionsPartial {
         self,
     ) -> ::std::result::Result<
         FileOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -147,38 +147,39 @@ impl ::std::default::Default for FileOptions {
         }
     }
 }
-impl crate::options::Documented for FileOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for FileOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "FileOptions",
             description: "Options for image resizing",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "no_image_compression", cli_flag
-                : "--no-image-compression", field_type : "bool", default_value :
+                ::caesura_options::FieldDoc { config_key : "no_image_compression",
+                cli_flag : "--no-image-compression", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
-                "Should compression of images be disabled?", }, crate ::options::FieldDoc
-                { config_key : "rename_tracks", cli_flag : "--rename-tracks", field_type
-                : "bool", default_value : ::std::option::Option::Some("false"
-                .to_owned()), default_doc : ::std::option::Option::None, description :
+                "Should compression of images be disabled?", },
+                ::caesura_options::FieldDoc { config_key : "rename_tracks", cli_flag :
+                "--rename-tracks", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
                 "Should transcoded files be renamed?<br>If enabled then tracks are renamed into a standardized format: `{number} {title}.{ext}`.<br>Multi-disc releases will be organized into `CD1/`, `CD2/` subfolders.<br>- `1 Example track title.flac`<br>- `CD1/10 Example track title.mp3`",
-                }, crate ::options::FieldDoc { config_key : "max_file_size", cli_flag :
+                }, ::caesura_options::FieldDoc { config_key : "max_file_size", cli_flag :
                 "--max-file-size", field_type : "u64", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (750_000))
                 .unwrap()), default_doc : ::std::option::Option::None, description :
                 "Maximum file size in bytes beyond which images are compressed.<br>Only applies to image files.",
-                }, crate ::options::FieldDoc { config_key : "max_pixel_size", cli_flag :
-                "--max-pixel-size", field_type : "u32", default_value :
+                }, ::caesura_options::FieldDoc { config_key : "max_pixel_size", cli_flag
+                : "--max-pixel-size", field_type : "u32", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (1280)).unwrap()),
                 default_doc : ::std::option::Option::None, description :
                 "Maximum size in pixels for images.<br>Only applied if the image is greater than `max_file_size`.",
-                }, crate ::options::FieldDoc { config_key : "jpg_quality", cli_flag :
+                }, ::caesura_options::FieldDoc { config_key : "jpg_quality", cli_flag :
                 "--jpg-quality", field_type : "u8", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (80)).unwrap()),
                 default_doc : ::std::option::Option::None, description :
                 "Quality percentage to apply for jpg compression.<br>Only applied if the image is greater than `max_file_size`.",
-                }, crate ::options::FieldDoc { config_key : "no_png_to_jpg", cli_flag :
+                }, ::caesura_options::FieldDoc { config_key : "no_png_to_jpg", cli_flag :
                 "--no-png-to-jpg", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
@@ -191,13 +192,13 @@ impl crate::options::Documented for FileOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<FileOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < FileOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < FileOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

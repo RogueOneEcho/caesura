@@ -25,7 +25,7 @@ impl RunnerOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         RunnerOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let defaults = self.clone();
@@ -41,7 +41,7 @@ impl RunnerOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for RunnerOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for RunnerOptionsPartial {
     type Resolved = RunnerOptions;
     fn merge(&mut self, other: Self) {
         if self.cpus.is_none() {
@@ -55,7 +55,7 @@ impl crate::options::OptionsPartialContract for RunnerOptionsPartial {
         self,
     ) -> ::std::result::Result<
         RunnerOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -67,14 +67,14 @@ impl ::std::default::Default for RunnerOptions {
         }
     }
 }
-impl crate::options::Documented for RunnerOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for RunnerOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "RunnerOptions",
             description: "Options for concurrency",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "cpus", cli_flag : "--cpus",
+                ::caesura_options::FieldDoc { config_key : "cpus", cli_flag : "--cpus",
                 field_type : "Option<u16>", default_value : ::std::option::Option::None,
                 default_doc : ::std::option::Option::Some("Total CPUs"), description :
                 "Number of cpus to use for processing.", }
@@ -85,13 +85,13 @@ impl crate::options::Documented for RunnerOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<RunnerOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < RunnerOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < RunnerOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

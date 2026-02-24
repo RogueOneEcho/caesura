@@ -63,7 +63,7 @@ impl BatchOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         BatchOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let spectrogram = self.spectrogram;
@@ -92,7 +92,7 @@ impl BatchOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for BatchOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for BatchOptionsPartial {
     type Resolved = BatchOptions;
     fn merge(&mut self, other: Self) {
         if self.spectrogram.is_none() {
@@ -124,7 +124,7 @@ impl crate::options::OptionsPartialContract for BatchOptionsPartial {
         self,
     ) -> ::std::result::Result<
         BatchOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -142,39 +142,41 @@ impl ::std::default::Default for BatchOptions {
         }
     }
 }
-impl crate::options::Documented for BatchOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for BatchOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "BatchOptions",
             description: "Options for batch processing",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "spectrogram", cli_flag :
+                ::caesura_options::FieldDoc { config_key : "spectrogram", cli_flag :
                 "--spectrogram", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
-                "Should the spectrogram command be executed?", }, crate
-                ::options::FieldDoc { config_key : "transcode", cli_flag : "--transcode",
-                field_type : "bool", default_value : ::std::option::Option::Some("false"
-                .to_owned()), default_doc : ::std::option::Option::None, description :
-                "Should the transcode command be executed?", }, crate ::options::FieldDoc
-                { config_key : "retry_transcode", cli_flag : "--retry-transcode",
-                field_type : "bool", default_value : ::std::option::Option::Some("false"
-                .to_owned()), default_doc : ::std::option::Option::None, description :
-                "Should failed transcodes be retried?", }, crate ::options::FieldDoc {
+                "Should the spectrogram command be executed?", },
+                ::caesura_options::FieldDoc { config_key : "transcode", cli_flag :
+                "--transcode", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should the transcode command be executed?", },
+                ::caesura_options::FieldDoc { config_key : "retry_transcode", cli_flag :
+                "--retry-transcode", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should failed transcodes be retried?", }, ::caesura_options::FieldDoc {
                 config_key : "upload", cli_flag : "--upload", field_type : "bool",
                 default_value : ::std::option::Option::Some("false".to_owned()),
                 default_doc : ::std::option::Option::None, description :
-                "Should the upload command be executed?", }, crate ::options::FieldDoc {
-                config_key : "limit", cli_flag : "--limit", field_type : "usize",
+                "Should the upload command be executed?", }, ::caesura_options::FieldDoc
+                { config_key : "limit", cli_flag : "--limit", field_type : "usize",
                 default_value : ::std::option::Option::Some(::serde_json::to_string(&
                 (3)).unwrap()), default_doc : ::std::option::Option::None, description :
                 "Limit the number of torrents to batch process.<br>If `no_limit` is set, this option is ignored.",
-                }, crate ::options::FieldDoc { config_key : "no_limit", cli_flag :
+                }, ::caesura_options::FieldDoc { config_key : "no_limit", cli_flag :
                 "--no-limit", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
-                "Should the `limit` option be ignored?", }, crate ::options::FieldDoc {
+                "Should the `limit` option be ignored?", }, ::caesura_options::FieldDoc {
                 config_key : "wait_before_upload", cli_flag : "--wait-before-upload",
                 field_type : "Option<String>", default_value :
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
@@ -188,13 +190,13 @@ impl crate::options::Documented for BatchOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<BatchOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < BatchOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < BatchOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

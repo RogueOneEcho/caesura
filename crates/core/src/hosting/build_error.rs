@@ -1,6 +1,6 @@
 //! Error types for host building.
 
-use crate::options::OptionRule;
+use caesura_options::OptionRule;
 use colored::Colorize;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult};

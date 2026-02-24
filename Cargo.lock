@@ -217,6 +217,7 @@ version = "0.0.0"
 dependencies = [
  "bytes",
  "caesura_macros",
+ "caesura_options",
  "chrono",
  "clap",
  "claxon",
@@ -261,6 +262,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "caesura_options"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "colored",
+ "inventory",
+ "log",
+ "more-di",
+ "serde",
+ "serde_yaml",
 ]
 
 [[package]]

@@ -21,7 +21,7 @@ pub fn generate_doc_metadata(
         let default_value_expr = generate_default_value_expr(f);
         let default_doc_expr = generate_default_doc_expr(f);
         quote! {
-            crate::options::FieldDoc {
+            ::caesura_options::FieldDoc {
                 config_key: #config_key,
                 cli_flag: #cli_flag,
                 field_type: #field_type,
@@ -33,10 +33,10 @@ pub fn generate_doc_metadata(
     });
 
     quote! {
-        impl crate::options::Documented for #struct_name {
-            fn doc_metadata() -> &'static crate::options::OptionsDoc {
-                static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> =
-                    ::std::sync::LazyLock::new(|| crate::options::OptionsDoc {
+        impl ::caesura_options::Documented for #struct_name {
+            fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+                static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> =
+                    ::std::sync::LazyLock::new(|| ::caesura_options::OptionsDoc {
                         name: #struct_name_str,
                         description: #struct_description,
                         fields: ::std::vec![#(#field_docs),*],

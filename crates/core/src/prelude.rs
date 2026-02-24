@@ -5,6 +5,7 @@ pub(crate) use crate::commands::*;
 pub(crate) use crate::dependencies::*;
 pub(crate) use crate::options::*;
 pub(crate) use crate::utils::*;
+pub(crate) use caesura_options::*;
 
 // External crates
 pub(crate) use colored::Colorize;

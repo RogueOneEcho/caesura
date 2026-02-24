@@ -6,7 +6,7 @@
 //! 2. Implement [`OptionsContract`] for it
 //! 3. Macro generates the partial struct and [`OptionsPartialContract`] impl
 
-use crate::options::OptionRule;
+use crate::OptionRule;
 use serde::de::DeserializeOwned;
 
 /// Contract for resolved options structs.

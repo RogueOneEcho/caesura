@@ -26,6 +26,7 @@ path = "src/lib.rs"
 
 [dependencies]
 caesura_macros = { workspace = true }
+caesura_options = { workspace = true }
 bytes = { workspace = true }
 chrono = { workspace = true }
 clap = { workspace = true }

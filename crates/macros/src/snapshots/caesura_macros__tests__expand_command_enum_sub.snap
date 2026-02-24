@@ -20,7 +20,7 @@ pub enum QueueCommandArgs {
         config_options: ConfigOptionsPartial,
     },
 }
-impl crate::commands::CommandEnumContract for QueueCommand {
+impl ::caesura_options::CommandEnumContract for QueueCommand {
     /// All sub-command variants.
     fn all() -> &'static [QueueCommand] {
         &[QueueCommand::Add, QueueCommand::Remove]
@@ -39,17 +39,18 @@ impl crate::commands::CommandEnumContract for QueueCommand {
             QueueCommand::Remove => &["QueueRemoveArgs", "ConfigOptions"],
         }
     }
-}
-impl QueueCommand {
-    /// Resolve a sub-command from a name and [`::clap::ArgMatches`].
-    #[must_use]
-    pub fn resolve_sub(
-        name: &str,
+    /// Resolve a sub-command variant from [`::clap::ArgMatches`].
+    fn resolve(
         matches: &::clap::ArgMatches,
     ) -> ::std::option::Option<(QueueCommand, ::clap::ArgMatches)> {
+        let (name, sub_matches) = matches.subcommand()?;
         match name {
-            "add" => ::std::option::Option::Some((QueueCommand::Add, matches.clone())),
-            "rm" => ::std::option::Option::Some((QueueCommand::Remove, matches.clone())),
+            "add" => {
+                ::std::option::Option::Some((QueueCommand::Add, sub_matches.clone()))
+            }
+            "rm" => {
+                ::std::option::Option::Some((QueueCommand::Remove, sub_matches.clone()))
+            }
             _ => ::std::option::Option::None,
         }
     }

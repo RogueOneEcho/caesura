@@ -22,7 +22,7 @@ impl CustomPartial {
         validate: bool,
     ) -> ::std::result::Result<
         CustomOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let value = self.value;
@@ -39,7 +39,7 @@ impl CustomPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for CustomPartial {
+impl ::caesura_options::OptionsPartialContract for CustomPartial {
     type Resolved = CustomOptions;
     fn merge(&mut self, other: Self) {
         if self.value.is_none() {
@@ -53,7 +53,7 @@ impl crate::options::OptionsPartialContract for CustomPartial {
         self,
     ) -> ::std::result::Result<
         CustomOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -65,14 +65,14 @@ impl ::std::default::Default for CustomOptions {
         }
     }
 }
-impl crate::options::Documented for CustomOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for CustomOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "CustomOptions",
             description: "",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "value", cli_flag : "--value",
+                ::caesura_options::FieldDoc { config_key : "value", cli_flag : "--value",
                 field_type : "u32", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& < u32 >
                 ::default()).unwrap()), default_doc : ::std::option::Option::None,
@@ -84,13 +84,13 @@ impl crate::options::Documented for CustomOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<CustomPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < CustomOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < CustomOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

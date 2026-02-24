@@ -5,6 +5,7 @@ use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
 use rogue_logging::InitLog;
+use std::fs::read_to_string;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
@@ -24,27 +25,32 @@ impl Default for HostBuilder {
 }
 
 impl HostBuilder {
-    /// Create a new [`HostBuilder`] with default service registrations.
+    /// Create a new [`HostBuilder`] without CLI arguments.
     #[must_use]
     pub(crate) fn new() -> Self {
-        Self::new_internal(false)
+        let options = OptionsProvider::default();
+        Self::new_internal(options, None)
     }
 
-    /// Create a new [`HostBuilder`] with default service registrations.
+    /// Create a new [`HostBuilder`] from CLI arguments and config file.
     #[must_use]
     pub fn new_cli() -> Self {
-        Self::new_internal(true)
+        let args = Arc::new(ArgumentsProvider::new());
+        let yaml = read_config_file(&args);
+        let options = OptionsProvider::from_args(args.clone(), yaml);
+        Self::new_internal(options, Some(args))
     }
 
-    /// Create a new [`HostBuilder`] with default service registrations.
+    /// Wire up all services and register options with DI.
     #[must_use]
-    #[allow(clippy::as_conversions)]
-    fn new_internal(is_cli: bool) -> Self {
-        let args = is_cli.then(|| Ref::new(ArgumentsProvider::new()));
-        let mut options = OptionsProvider::new(args.clone());
+    #[expect(
+        clippy::as_conversions,
+        reason = "required for Box<dyn GazelleClientTrait> and u16-to-usize coercions"
+    )]
+    fn new_internal(mut options: OptionsProvider, args: Option<Arc<ArgumentsProvider>>) -> Self {
         let mut services = ServiceCollection::new();
         services.register_options(&mut options);
-        if let Some(ref args) = args {
+        if let Some(args) = args {
             let args = args.clone();
             services.add(singleton_as_self().from(move |_| args.clone()));
         }
@@ -200,4 +206,21 @@ impl HostBuilder {
             Err(error) => panic!("{error}"),
         }
     }
+}
+
+/// Read the config file.
+///
+/// - Returns `None` if the command does not use config options
+/// - Returns `None` if the file does not exist (validation reports the error)
+/// - Falls back to the default config path if `--config` is not set
+fn read_config_file(args: &ArgumentsProvider) -> Option<String> {
+    if !args.get_command().uses_options("ConfigOptions") {
+        return None;
+    }
+    let options = args.get_args::<ConfigOptionsPartial>().ok()?;
+    let path = options
+        .config
+        .clone()
+        .unwrap_or_else(PathManager::default_config_path);
+    read_to_string(path).ok()
 }

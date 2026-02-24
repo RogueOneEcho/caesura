@@ -77,7 +77,7 @@ fn generate_sub_resolve_arms(def: &EnumDef) -> Vec<TokenStream2> {
             let vname = &v.name;
             let cli = v.effective_cli_name();
             quote! {
-                #cli => ::std::option::Option::Some((#name::#vname, matches.clone())),
+                #cli => ::std::option::Option::Some((#name::#vname, sub_matches.clone())),
             }
         })
         .collect()
@@ -113,7 +113,7 @@ fn generate_sub_impl(def: &EnumDef, parent_cli_name: &str) -> TokenStream2 {
         .collect();
     let resolve_arms = generate_sub_resolve_arms(def);
     quote! {
-        impl crate::commands::CommandEnumContract for #name {
+        impl ::caesura_options::CommandEnumContract for #name {
             /// All sub-command variants.
             fn all() -> &'static [#name] {
                 &[#(#all_items),*]
@@ -130,14 +130,11 @@ fn generate_sub_impl(def: &EnumDef, parent_cli_name: &str) -> TokenStream2 {
                     #(#options_arms)*
                 }
             }
-        }
-        impl #name {
-            /// Resolve a sub-command from a name and [`::clap::ArgMatches`].
-            #[must_use]
-            pub fn resolve_sub(
-                name: &str,
+            /// Resolve a sub-command variant from [`::clap::ArgMatches`].
+            fn resolve(
                 matches: &::clap::ArgMatches,
             ) -> ::std::option::Option<(#name, ::clap::ArgMatches)> {
+                let (name, sub_matches) = matches.subcommand()?;
                 match name {
                     #(#resolve_arms)*
                     _ => ::std::option::Option::None,
@@ -270,12 +267,10 @@ fn generate_primary_impl(def: &EnumDef) -> TokenStream2 {
     );
     let resolve_fn = generate_primary_resolve(def);
     quote! {
-        impl crate::commands::CommandEnumContract for #name {
+        impl ::caesura_options::CommandEnumContract for #name {
             #all_fn
             #doc_name_fn
             #options_names_fn
-        }
-        impl #name {
             #resolve_fn
         }
     }
@@ -372,8 +367,7 @@ fn generate_primary_resolve(def: &EnumDef) -> TokenStream2 {
             if let Some(sub) = &v.sub_enum {
                 quote! {
                     #cli => {
-                        let (sub_name, sub_sub_matches) = sub_matches.subcommand()?;
-                        #sub::resolve_sub(sub_name, sub_sub_matches)
+                        #sub::resolve(sub_matches)
                             .map(|(sub, m)| (#name::#vname(sub), m))
                     }
                 }
@@ -386,8 +380,7 @@ fn generate_primary_resolve(def: &EnumDef) -> TokenStream2 {
         .collect();
     quote! {
         /// Resolve a [`Command`] and subcommand-level [`::clap::ArgMatches`] from top-level matches.
-        #[must_use]
-        pub fn resolve(
+        fn resolve(
             matches: &::clap::ArgMatches,
         ) -> ::std::option::Option<(#name, ::clap::ArgMatches)> {
             let (name, sub_matches) = matches.subcommand()?;

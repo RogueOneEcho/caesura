@@ -24,7 +24,7 @@ impl NoCommandOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         NoCommandOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let limit = self.limit;
@@ -41,7 +41,7 @@ impl NoCommandOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for NoCommandOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for NoCommandOptionsPartial {
     type Resolved = NoCommandOptions;
     fn merge(&mut self, other: Self) {
         if self.limit.is_none() {
@@ -55,7 +55,7 @@ impl crate::options::OptionsPartialContract for NoCommandOptionsPartial {
         self,
     ) -> ::std::result::Result<
         NoCommandOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -65,14 +65,14 @@ impl ::std::default::Default for NoCommandOptions {
         Self { limit: 100 }
     }
 }
-impl crate::options::Documented for NoCommandOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for NoCommandOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "NoCommandOptions",
             description: "",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "limit", cli_flag : "--limit",
+                ::caesura_options::FieldDoc { config_key : "limit", cli_flag : "--limit",
                 field_type : "u32", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (100)).unwrap()),
                 default_doc : ::std::option::Option::None, description : "", }
@@ -83,13 +83,13 @@ impl crate::options::Documented for NoCommandOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<NoCommandOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < NoCommandOptions as crate
-        ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < NoCommandOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

@@ -3,8 +3,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::dependencies::{DETECTED_SOX_VARIANT, SoxVariant};
-use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
+use caesura_options::{OptionRule, OptionsContract};
 
 /// Options for sox binary selection
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

@@ -1,0 +1,21 @@
+[package]
+name = "caesura_options"
+version = "0.0.0"
+description = "Options framework for caesura"
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = true
+
+[dependencies]
+clap = { workspace = true }
+colored = { workspace = true }
+inventory = { workspace = true }
+log = { workspace = true }
+more-di = { workspace = true }
+serde = { workspace = true }
+serde_yaml = { workspace = true }
+
+[lints]
+workspace = true

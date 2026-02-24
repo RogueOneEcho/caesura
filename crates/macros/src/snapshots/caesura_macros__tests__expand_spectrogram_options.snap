@@ -25,7 +25,7 @@ impl SpectrogramOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         SpectrogramOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         let mut errors = ::std::vec::Vec::new();
         let spectrogram_size = self.spectrogram_size;
@@ -43,7 +43,7 @@ impl SpectrogramOptionsPartial {
         }
     }
 }
-impl crate::options::OptionsPartialContract for SpectrogramOptionsPartial {
+impl ::caesura_options::OptionsPartialContract for SpectrogramOptionsPartial {
     type Resolved = SpectrogramOptions;
     fn merge(&mut self, other: Self) {
         if self.spectrogram_size.is_none() {
@@ -57,7 +57,7 @@ impl crate::options::OptionsPartialContract for SpectrogramOptionsPartial {
         self,
     ) -> ::std::result::Result<
         SpectrogramOptions,
-        ::std::vec::Vec<crate::options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
     > {
         self.resolve_internal(true)
     }
@@ -69,14 +69,14 @@ impl ::std::default::Default for SpectrogramOptions {
         }
     }
 }
-impl crate::options::Documented for SpectrogramOptions {
-    fn doc_metadata() -> &'static crate::options::OptionsDoc {
-        static DOC: ::std::sync::LazyLock<crate::options::OptionsDoc> = ::std::sync::LazyLock::new(||
-        crate::options::OptionsDoc {
+impl ::caesura_options::Documented for SpectrogramOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
             name: "SpectrogramOptions",
             description: "Options for spectrograms",
             fields: ::std::vec![
-                crate ::options::FieldDoc { config_key : "spectrogram_size", cli_flag :
+                ::caesura_options::FieldDoc { config_key : "spectrogram_size", cli_flag :
                 "--spectrogram-size", field_type : "Vec<Size>", default_value :
                 ::std::option::Option::Some(::serde_json::to_string(& (vec![Size::Full,
                 Size::Zoom])).unwrap()), default_doc : ::std::option::Option::None,
@@ -88,13 +88,13 @@ impl crate::options::Documented for SpectrogramOptions {
 }
 const _: () = {
     fn __register(
-        provider: &mut crate::options::OptionsProvider,
+        provider: &mut ::caesura_options::OptionsProvider,
         services: &mut ::di::ServiceCollection,
     ) {
         provider.register::<SpectrogramOptionsPartial>(services);
     }
     ::inventory::submit!(
-        crate ::options::OptionsRegistration { doc_metadata : < SpectrogramOptions as
-        crate ::options::Documented > ::doc_metadata, register : __register, }
+        ::caesura_options::OptionsRegistration { doc_metadata : < SpectrogramOptions as
+        ::caesura_options::Documented > ::doc_metadata, register : __register, }
     );
 };

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
+use caesura_options::{OptionRule, OptionsContract};
 
 /// Options for verify
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
