@@ -45,5 +45,17 @@ pub(crate) fn derive(input: DeriveInput) -> syn::Result<TokenStream2> {
         }
         #default_impl
         #doc_metadata_impl
+        const _: () = {
+            fn __register(
+                provider: &mut crate::options::OptionsProvider,
+                services: &mut ::di::ServiceCollection,
+            ) {
+                provider.register::<#partial_name>(services);
+            }
+            ::inventory::submit!(crate::options::OptionsRegistration {
+                doc_metadata: <#struct_name as crate::options::Documented>::doc_metadata,
+                register: __register,
+            });
+        };
     })
 }

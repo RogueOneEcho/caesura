@@ -89,23 +89,8 @@ impl ConfigCommand {
     }
 
     fn get_docs_map() -> HashMap<&'static str, &'static FieldDoc> {
-        let all_docs: Vec<&OptionsDoc> = vec![
-            BatchOptions::doc_metadata(),
-            CacheOptions::doc_metadata(),
-            ConfigOptions::doc_metadata(),
-            CopyOptions::doc_metadata(),
-            FileOptions::doc_metadata(),
-            QueueAddArgs::doc_metadata(),
-            RunnerOptions::doc_metadata(),
-            SharedOptions::doc_metadata(),
-            SoxOptions::doc_metadata(),
-            SpectrogramOptions::doc_metadata(),
-            TargetOptions::doc_metadata(),
-            UploadOptions::doc_metadata(),
-            VerifyOptions::doc_metadata(),
-        ];
         let mut map = HashMap::new();
-        for doc in all_docs {
+        for doc in OptionsRegistration::get_all() {
             for field in &doc.fields {
                 map.insert(field.config_key, field);
             }

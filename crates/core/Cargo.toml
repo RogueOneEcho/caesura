@@ -38,6 +38,7 @@ gazelle_api = { workspace = true }
 html-escape = { workspace = true }
 humantime = { workspace = true }
 indicatif = { workspace = true }
+inventory = { workspace = true }
 lava_torrent = { workspace = true }
 lofty = { workspace = true }
 log = { workspace = true }

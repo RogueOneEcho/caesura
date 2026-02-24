@@ -1,5 +1,5 @@
 ---
-source: crates/macros/src/lib.rs
+source: crates/macros/src/tests.rs
 expression: expand_options_from_file(source)
 ---
 /// Partial options struct with optional fields for CLI/YAML parsing.
@@ -87,3 +87,15 @@ impl crate::options::Documented for CacheOptions {
         &DOC
     }
 }
+const _: () = {
+    fn __register(
+        provider: &mut crate::options::OptionsProvider,
+        services: &mut ::di::ServiceCollection,
+    ) {
+        provider.register::<CacheOptionsPartial>(services);
+    }
+    ::inventory::submit!(
+        crate ::options::OptionsRegistration { doc_metadata : < CacheOptions as crate
+        ::options::Documented > ::doc_metadata, register : __register, }
+    );
+};

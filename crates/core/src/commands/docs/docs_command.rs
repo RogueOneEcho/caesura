@@ -15,21 +15,7 @@ impl DocsCommand {
     /// Render all options documentation as markdown.
     #[must_use]
     pub fn render() -> String {
-        let docs: Vec<&OptionsDoc> = vec![
-            ConfigOptions::doc_metadata(),
-            SharedOptions::doc_metadata(),
-            VerifyOptions::doc_metadata(),
-            TargetOptions::doc_metadata(),
-            SpectrogramOptions::doc_metadata(),
-            SoxOptions::doc_metadata(),
-            CopyOptions::doc_metadata(),
-            FileOptions::doc_metadata(),
-            RunnerOptions::doc_metadata(),
-            UploadOptions::doc_metadata(),
-            CacheOptions::doc_metadata(),
-            BatchOptions::doc_metadata(),
-            QueueAddArgs::doc_metadata(),
-        ];
+        let docs = OptionsRegistration::get_all();
 
         let mut out = String::from(concat!(
             "# Options Reference\n\n",

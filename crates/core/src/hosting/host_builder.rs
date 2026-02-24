@@ -1,5 +1,6 @@
 use crate::hosting::*;
 use crate::prelude::*;
+#[cfg(test)]
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
@@ -42,11 +43,12 @@ impl HostBuilder {
         let args = is_cli.then(|| Ref::new(ArgumentsProvider::new()));
         let mut options = OptionsProvider::new(args.clone());
         let mut services = ServiceCollection::new();
-        if let Some(args) = args {
-            services.add(existing_as_self(args));
+        services.register_options(&mut options);
+        if let Some(ref args) = args {
+            let args = args.clone();
+            services.add(singleton_as_self().from(move |_| args.clone()));
         }
         services
-            .register_options(&mut options)
             // Add main services
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();

@@ -46,7 +46,7 @@ impl OptionsProvider {
     }
 
     /// Register a partial options type, extracting from [`ArgMatches`] if applicable.
-    fn register<P>(&mut self, services: &mut ServiceCollection)
+    pub(crate) fn register<P>(&mut self, services: &mut ServiceCollection)
     where
         P: OptionsPartialContract,
         P::Resolved: Documented + Send + Sync + 'static,
@@ -95,22 +95,9 @@ impl OptionsProvider {
 
     /// Validate all relevant options and register them with DI.
     fn register_all(&mut self, services: &mut ServiceCollection) {
-        self.register::<BatchOptionsPartial>(services);
-        self.register::<CacheOptionsPartial>(services);
-        self.register::<ConfigOptionsPartial>(services);
-        self.register::<CopyOptionsPartial>(services);
-        self.register::<FileOptionsPartial>(services);
-        self.register::<InspectArgPartial>(services);
-        self.register::<QueueAddArgsPartial>(services);
-        self.register::<QueueRemoveArgsPartial>(services);
-        self.register::<RunnerOptionsPartial>(services);
-        self.register::<SharedOptionsPartial>(services);
-        self.register::<SourceArgPartial>(services);
-        self.register::<SoxOptionsPartial>(services);
-        self.register::<SpectrogramOptionsPartial>(services);
-        self.register::<TargetOptionsPartial>(services);
-        self.register::<UploadOptionsPartial>(services);
-        self.register::<VerifyOptionsPartial>(services);
+        for entry in inventory::iter::<OptionsRegistration> {
+            (entry.register)(self, services);
+        }
     }
 
     /// Returns `true` if there are validation errors.
@@ -127,7 +114,11 @@ impl OptionsProvider {
 /// - Falls back to the default config path if `--config` is not set
 #[expect(clippy::ref_option, reason = "shared reference avoids cloning the Ref")]
 fn read_config_file(args: &Option<Ref<ArgumentsProvider>>) -> Option<String> {
-    let options = args.as_deref()?.get_args::<ConfigOptionsPartial>().ok()?;
+    let args = args.as_deref()?;
+    if !args.get_command().uses_options("ConfigOptions") {
+        return None;
+    }
+    let options = args.get_args::<ConfigOptionsPartial>().ok()?;
     let path = options
         .config
         .clone()
