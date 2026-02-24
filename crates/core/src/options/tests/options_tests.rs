@@ -448,3 +448,58 @@ fn shared_options_validate_no_errors_when_valid() {
     .resolve();
     assert!(result.is_ok());
 }
+
+/// Verify invalid hash format is rejected by `QueueRemoveArgs` validation.
+#[test]
+fn queue_rm_args_rejects_invalid_hash() {
+    let result = QueueRemoveArgsPartial {
+        queue_rm_hash: Some("not-a-valid-hash".to_owned()),
+    }
+    .resolve();
+    let errors = result.expect_err("should reject invalid hash");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::HashInvalid(_, _)))
+    );
+}
+
+/// Verify missing hash (defaults to empty string) is rejected.
+#[test]
+fn queue_rm_args_rejects_missing_hash() {
+    let result = QueueRemoveArgsPartial {
+        queue_rm_hash: None,
+    }
+    .resolve();
+    let errors = result.expect_err("should reject missing hash");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::HashInvalid(_, _)))
+    );
+}
+
+/// Verify valid 40-character hex hash is accepted.
+#[test]
+fn queue_rm_args_accepts_valid_hash() {
+    let result = QueueRemoveArgsPartial {
+        queue_rm_hash: Some("a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2".to_owned()),
+    }
+    .resolve();
+    assert!(result.is_ok());
+}
+
+/// Verify nonexistent path is rejected by `InspectArg` validation.
+#[test]
+fn inspect_arg_rejects_nonexistent_path() {
+    let result = InspectArgPartial {
+        inspect_path: Some(PathBuf::from("/nonexistent/path/that/does/not/exist")),
+    }
+    .resolve();
+    let errors = result.expect_err("should reject nonexistent path");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::DoesNotExist(_, _)))
+    );
+}

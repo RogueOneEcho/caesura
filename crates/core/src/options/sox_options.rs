@@ -2,9 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::{self, *};
 use crate::dependencies::{DETECTED_SOX_VARIANT, SoxVariant};
-use crate::options::{FromArgs, OptionRule, OptionsContract};
+use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
 
 /// Options for sox binary selection
@@ -29,18 +28,4 @@ fn default_sox_variant(_partial: &SoxOptionsPartial) -> Option<SoxVariant> {
 impl OptionsContract for SoxOptions {
     type Partial = SoxOptionsPartial;
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}
-}
-
-impl FromArgs for SoxOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(
-                Batch { sox, .. }
-                | Spectrogram { sox, .. }
-                | Transcode { sox, .. }
-                | Version { sox, .. },
-            ) => Some(sox.clone()),
-            _ => None,
-        }
-    }
 }

@@ -11,14 +11,7 @@ pub(crate) struct QueueRemoveCommand {
 impl QueueRemoveCommand {
     /// Remove an item from the queue by its hash.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
-        if !self.args.validate() {
-            return Ok(false);
-        }
-        let hash = self
-            .args
-            .queue_rm_hash
-            .clone()
-            .expect("source should be set");
+        let hash = self.args.queue_rm_hash.clone();
         let hash = Hash::from_string(&hash).expect("hash should be valid");
         let status = self.execute(hash).await?;
         Ok(status)

@@ -1,5 +1,6 @@
 //! Configuration structs loaded from CLI args and YAML config.
 
+pub use arguments_provider::*;
 pub use batch_options::*;
 pub use cache_options::*;
 pub use config_options::*;
@@ -7,7 +8,7 @@ pub use copy_options::*;
 pub use doc_metadata::*;
 pub use file_options::*;
 pub(crate) use options_provider::*;
-pub(crate) use options_trait::{FromArgs, OptionsContract, OptionsPartialContract};
+pub(crate) use options_trait::{OptionsContract, OptionsPartialContract};
 pub(crate) use queue_add_args::*;
 pub(crate) use queue_rm_args::*;
 pub(crate) use rules::OptionRule::*;
@@ -21,6 +22,7 @@ pub use target_options::*;
 pub use upload_options::*;
 pub use verify_options::*;
 
+mod arguments_provider;
 mod batch_options;
 mod cache_options;
 mod config_options;

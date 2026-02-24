@@ -1,3 +1,5 @@
+//! Setup helper for resolving, validating, and registering options with DI.
+
 use crate::prelude::*;
 use di::{ServiceCollection, existing_as_self};
 use std::fs::read_to_string;
@@ -11,17 +13,18 @@ use std::fs::read_to_string;
 /// 4. Collect errors for checking before host is built
 /// 5. Register valid options with the DI container
 pub struct OptionsProvider {
+    args: Option<Ref<ArgumentsProvider>>,
     yaml: Option<String>,
     pub(crate) errors: Vec<OptionRule>,
 }
 
 impl OptionsProvider {
     /// Create a new [`OptionsProvider`] by reading CLI args and the config file.
-    pub fn new() -> Self {
-        let args = ArgumentsParser::get();
-        let cli_options = ConfigOptionsPartial::from_args(&args);
+    pub fn new(args: Option<Ref<ArgumentsProvider>>) -> Self {
+        let yaml = read_config_file(&args);
         Self {
-            yaml: read_config_file(&cli_options),
+            args,
+            yaml,
             errors: Vec::new(),
         }
     }
@@ -42,44 +45,72 @@ impl OptionsProvider {
         }
     }
 
-    fn register<P>(&mut self, partial: Option<P>, services: &mut ServiceCollection)
+    /// Register a partial options type, extracting from [`ArgMatches`] if applicable.
+    fn register<P>(&mut self, services: &mut ServiceCollection)
     where
         P: OptionsPartialContract,
-        P::Resolved: Send + Sync + 'static,
+        P::Resolved: Documented + Send + Sync + 'static,
     {
-        let is_applicable = partial.is_some();
-        let mut partial = partial.unwrap_or_default();
+        let name = P::Resolved::doc_metadata().name;
+        let validate = self
+            .args
+            .as_ref()
+            .is_some_and(|a| a.get_command().uses_options(name));
+        let mut partial = self.parse_cli_or_default::<P>(validate);
         self.merge_from_yaml(&mut partial);
-        let resolved = if is_applicable {
+        if validate {
             match partial.resolve() {
-                Ok(resolved) => resolved,
-                Err(mut errors) => {
-                    self.errors.append(&mut errors);
-                    return;
+                Ok(resolved) => {
+                    services.add(existing_as_self(resolved));
                 }
+                Err(mut errors) => self.errors.append(&mut errors),
             }
         } else {
-            partial.resolve_without_validation()
+            services.add(existing_as_self(partial.resolve_without_validation()));
+        }
+    }
+
+    /// Parse CLI arguments into a partial, or return defaults if not applicable.
+    fn parse_cli_or_default<P>(&self, applicable: bool) -> P
+    where
+        P: OptionsPartialContract,
+        P::Resolved: Documented,
+    {
+        if !applicable {
+            return P::default();
+        }
+        let Some(args) = self.args.as_ref() else {
+            return P::default();
         };
-        services.add(existing_as_self(resolved));
+        args.get_args::<P>().unwrap_or_else(|error| {
+            error!(
+                "{} to extract {} from CLI arguments: {}",
+                "Failed".bold(),
+                P::Resolved::doc_metadata().name,
+                error,
+            );
+            P::default()
+        })
     }
 
     /// Validate all relevant options and register them with DI.
     fn register_all(&mut self, services: &mut ServiceCollection) {
-        let args = ArgumentsParser::get();
-        self.register(SharedOptionsPartial::from_args(&args), services);
-        self.register(BatchOptionsPartial::from_args(&args), services);
-        self.register(CacheOptionsPartial::from_args(&args), services);
-        self.register(ConfigOptionsPartial::from_args(&args), services);
-        self.register(CopyOptionsPartial::from_args(&args), services);
-        self.register(FileOptionsPartial::from_args(&args), services);
-        self.register(QueueAddArgsPartial::from_args(&args), services);
-        self.register(RunnerOptionsPartial::from_args(&args), services);
-        self.register(SoxOptionsPartial::from_args(&args), services);
-        self.register(SpectrogramOptionsPartial::from_args(&args), services);
-        self.register(TargetOptionsPartial::from_args(&args), services);
-        self.register(UploadOptionsPartial::from_args(&args), services);
-        self.register(VerifyOptionsPartial::from_args(&args), services);
+        self.register::<BatchOptionsPartial>(services);
+        self.register::<CacheOptionsPartial>(services);
+        self.register::<ConfigOptionsPartial>(services);
+        self.register::<CopyOptionsPartial>(services);
+        self.register::<FileOptionsPartial>(services);
+        self.register::<InspectArgPartial>(services);
+        self.register::<QueueAddArgsPartial>(services);
+        self.register::<QueueRemoveArgsPartial>(services);
+        self.register::<RunnerOptionsPartial>(services);
+        self.register::<SharedOptionsPartial>(services);
+        self.register::<SourceArgPartial>(services);
+        self.register::<SoxOptionsPartial>(services);
+        self.register::<SpectrogramOptionsPartial>(services);
+        self.register::<TargetOptionsPartial>(services);
+        self.register::<UploadOptionsPartial>(services);
+        self.register::<VerifyOptionsPartial>(services);
     }
 
     /// Returns `true` if there are validation errors.
@@ -91,12 +122,12 @@ impl OptionsProvider {
 
 /// Read the config file.
 ///
-/// - Returns `None` if the command does not use shared options
+/// - Returns `None` if the command does not use config options
 /// - Returns `None` if the file does not exist (validation reports the error)
 /// - Falls back to the default config path if `--config` is not set
-#[expect(clippy::ref_option, reason = "caller has Option<T>, not &T")]
-fn read_config_file(options: &Option<ConfigOptionsPartial>) -> Option<String> {
-    let options = options.as_ref()?;
+#[expect(clippy::ref_option, reason = "shared reference avoids cloning the Ref")]
+fn read_config_file(args: &Option<Ref<ArgumentsProvider>>) -> Option<String> {
+    let options = args.as_deref()?.get_args::<ConfigOptionsPartial>().ok()?;
     let path = options
         .config
         .clone()

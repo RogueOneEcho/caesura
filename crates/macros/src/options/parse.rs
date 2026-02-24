@@ -72,7 +72,7 @@ pub struct ParsedField {
     pub default_value: Option<Expr>,
     /// Function to compute default from `#[options(default_fn = ...)]`.
     pub default_fn: Option<Path>,
-    /// Documentation for computed defaults from `#[options(default_doc = ...)]`.
+    /// Documentation for computed defaults from `#[options(default_doc = "...")]`.
     pub default_doc: Option<String>,
     /// Forwarded `#[arg(...)]` attributes.
     pub arg_attrs: Vec<Attribute>,

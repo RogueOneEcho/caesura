@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::{self, *};
-use crate::options::{FromArgs, OptionRule, OptionsContract};
+use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
 
 /// Options for image resizing
@@ -62,13 +61,4 @@ impl FileOptions {
 impl OptionsContract for FileOptions {
     type Partial = FileOptionsPartial;
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}
-}
-
-impl FromArgs for FileOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Batch { file, .. } | Transcode { file, .. }) => Some(file.clone()),
-            _ => None,
-        }
-    }
 }

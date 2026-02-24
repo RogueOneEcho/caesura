@@ -1,8 +1,8 @@
 //! CLI command implementations.
 
-pub use arguments_parser::*;
 pub(crate) use batch::*;
-pub(crate) use command_arguments::*;
+pub use command::*;
+pub(crate) use command_trait::*;
 pub(crate) use config::*;
 pub(crate) use docs::*;
 pub(crate) use inspect::*;
@@ -13,9 +13,9 @@ pub(crate) use upload::*;
 pub(crate) use verify::*;
 pub(crate) use version::*;
 
-mod arguments_parser;
 mod batch;
-mod command_arguments;
+mod command;
+mod command_trait;
 mod config;
 mod docs;
 mod inspect;

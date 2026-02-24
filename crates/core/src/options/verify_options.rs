@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::{self, *};
-use crate::options::{FromArgs, OptionRule, OptionsContract};
+use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
 
 /// Options for verify
@@ -21,13 +20,4 @@ pub struct VerifyOptions {
 impl OptionsContract for VerifyOptions {
     type Partial = VerifyOptionsPartial;
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}
-}
-
-impl FromArgs for VerifyOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Batch { verify, .. } | Verify { verify, .. }) => Some(verify.clone()),
-            _ => None,
-        }
-    }
 }

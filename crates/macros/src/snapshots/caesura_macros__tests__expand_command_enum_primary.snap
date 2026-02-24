@@ -1,0 +1,119 @@
+---
+source: crates/macros/src/tests.rs
+expression: format_tokens(tokens)
+---
+#[derive(::clap::Subcommand, ::std::clone::Clone, ::std::fmt::Debug)]
+pub enum CommandArgs {
+    /// Run batch processing
+    Batch {
+        #[command(flatten)]
+        config_options: ConfigOptionsPartial,
+        #[command(flatten)]
+        shared_options: SharedOptionsPartial,
+    },
+    /// Show configuration
+    Config { #[command(flatten)] config_options: ConfigOptionsPartial },
+    /// Generate docs
+    Docs {},
+    /// Inspect files
+    Inspect { #[command(flatten)] inspect_arg: InspectArgPartial },
+    /// Queue commands
+    #[command(subcommand_required = true, arg_required_else_help = true)]
+    Queue { #[command(subcommand)] command: QueueCommandArgs },
+    /// Transcode files
+    Transcode {
+        #[command(flatten)]
+        source_arg: SourceArgPartial,
+        #[command(flatten)]
+        config_options: ConfigOptionsPartial,
+        #[command(flatten)]
+        shared_options: SharedOptionsPartial,
+    },
+    /// Show version
+    #[command(short_flag = 'V', long_flag = "version")]
+    Version { #[command(flatten)] sox_options: SoxOptionsPartial },
+}
+#[derive(::clap::Parser, ::std::clone::Clone, ::std::fmt::Debug)]
+#[command(about = "App description")]
+pub struct Cli {
+    /// The command to run.
+    #[command(subcommand)]
+    pub command: Option<CommandArgs>,
+}
+impl crate::commands::CommandEnumContract for Command {
+    /// All command variants, with sub-commands expanded.
+    fn all() -> &'static [Command] {
+        static ALL: ::std::sync::OnceLock<::std::vec::Vec<Command>> = ::std::sync::OnceLock::new();
+        ALL.get_or_init(|| {
+            let mut v = ::std::vec::Vec::new();
+            v.push(Command::Batch);
+            v.push(Command::Config);
+            v.push(Command::Docs);
+            v.push(Command::Inspect);
+            for sub in QueueCommand::all() {
+                v.push(Command::Queue(*sub));
+            }
+            v.push(Command::Transcode);
+            v.push(Command::Version);
+            v
+        })
+    }
+    fn doc_name(&self) -> &'static str {
+        match self {
+            Command::Batch => "batch",
+            Command::Config => "config",
+            Command::Docs => "docs",
+            Command::Inspect => "inspect",
+            Command::Queue(sub) => sub.doc_name(),
+            Command::Transcode => "transcode",
+            Command::Version => "version",
+        }
+    }
+    fn options_names(&self) -> &'static [&'static str] {
+        match self {
+            Command::Batch => &["ConfigOptions", "SharedOptions"],
+            Command::Config => &["ConfigOptions"],
+            Command::Docs => &[],
+            Command::Inspect => &["InspectArg"],
+            Command::Queue(sub) => sub.options_names(),
+            Command::Transcode => &["SourceArg", "ConfigOptions", "SharedOptions"],
+            Command::Version => &["SoxOptions"],
+        }
+    }
+}
+impl Command {
+    /// Resolve a [`Command`] and subcommand-level [`::clap::ArgMatches`] from top-level matches.
+    #[must_use]
+    pub fn resolve(
+        matches: &::clap::ArgMatches,
+    ) -> ::std::option::Option<(Command, ::clap::ArgMatches)> {
+        let (name, sub_matches) = matches.subcommand()?;
+        match name {
+            "batch" => ::std::option::Option::Some((Command::Batch, sub_matches.clone())),
+            "config" => {
+                ::std::option::Option::Some((Command::Config, sub_matches.clone()))
+            }
+            "docs" => ::std::option::Option::Some((Command::Docs, sub_matches.clone())),
+            "inspect" => {
+                ::std::option::Option::Some((Command::Inspect, sub_matches.clone()))
+            }
+            "queue" => {
+                let (sub_name, sub_sub_matches) = sub_matches.subcommand()?;
+                QueueCommand::resolve_sub(sub_name, sub_sub_matches)
+                    .map(|(sub, m)| (Command::Queue(sub), m))
+            }
+            "transcode" => {
+                ::std::option::Option::Some((Command::Transcode, sub_matches.clone()))
+            }
+            "version" => {
+                ::std::option::Option::Some((Command::Version, sub_matches.clone()))
+            }
+            _ => ::std::option::Option::None,
+        }
+    }
+}
+impl ::std::fmt::Display for Command {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        f.write_str(self.doc_name())
+    }
+}

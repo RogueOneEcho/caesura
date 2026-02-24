@@ -40,9 +40,28 @@ impl DocsCommand {
         for doc in docs {
             out.push_str(&render_options_table(doc));
         }
-
+        out.truncate(out.trim_end().len());
+        out.push('\n');
         out
     }
+}
+
+/// Find which commands use a given options type name.
+fn commands_for_options(name: &str) -> Vec<Command> {
+    Command::all()
+        .iter()
+        .filter(|cmd| cmd.uses_options(name))
+        .copied()
+        .collect()
+}
+
+/// Format a list of commands as a bulleted markdown list.
+fn format_commands(commands: &[Command]) -> String {
+    commands
+        .iter()
+        .map(|cmd| format!("- `{}`", cmd.doc_name()))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn render_options_table(doc: &OptionsDoc) -> String {
@@ -51,6 +70,7 @@ fn render_options_table(doc: &OptionsDoc) -> String {
     } else {
         doc.description
     };
+    let commands = commands_for_options(doc.name);
     let mut table = TableBuilder::new().markdown().headers([
         "YAML Key",
         "CLI Flag",
@@ -79,5 +99,10 @@ fn render_options_table(doc: &OptionsDoc) -> String {
             field.description.to_owned(),
         ]);
     }
-    format!("## {header}\n\n{}\n", table.build())
+    let mut output = format!("## {header}\n\n");
+    if !commands.is_empty() {
+        let _ = writeln!(output, "Commands:\n{}\n", format_commands(&commands));
+    }
+    let _ = writeln!(output, "{}", table.build());
+    output
 }

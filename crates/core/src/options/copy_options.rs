@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::{self, *};
-use crate::options::{FromArgs, OptionRule, OptionsContract};
+use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
 
 /// Options for copying files
@@ -17,15 +16,4 @@ pub struct CopyOptions {
 impl OptionsContract for CopyOptions {
     type Partial = CopyOptionsPartial;
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}
-}
-
-impl FromArgs for CopyOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Batch { copy, .. } | Transcode { copy, .. } | Upload { copy, .. }) => {
-                Some(copy.clone())
-            }
-            _ => None,
-        }
-    }
 }

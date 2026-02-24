@@ -149,7 +149,7 @@ async fn id_provider_missing_torrent_file_returns_not_found() {
 fn create_host_with_source(source: &str) -> Host {
     HostBuilder::new()
         .with_options(SourceArg {
-            source: Some(source.to_owned()),
+            source: source.to_owned(),
         })
         .expect_build()
 }

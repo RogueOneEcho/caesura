@@ -6,7 +6,6 @@ use tokio::io::AsyncWriteExt;
 /// Verify a FLAC source is suitable for transcoding.
 #[injectable]
 pub(crate) struct VerifyCommand {
-    arg: Ref<SourceArg>,
     verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
@@ -23,9 +22,6 @@ impl VerifyCommand {
     ///
     /// Returns `true` if the source is verified.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<VerifyAction>> {
-        if !self.arg.validate() {
-            return Ok(false);
-        }
         let source = match self.source_provider.get_from_options().await {
             Ok(Ok(source)) => source,
             Ok(Err(issue)) => {

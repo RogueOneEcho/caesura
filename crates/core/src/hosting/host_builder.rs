@@ -1,6 +1,5 @@
 use crate::hosting::*;
 use crate::prelude::*;
-#[cfg(test)]
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
@@ -26,14 +25,28 @@ impl Default for HostBuilder {
 impl HostBuilder {
     /// Create a new [`HostBuilder`] with default service registrations.
     #[must_use]
+    pub(crate) fn new() -> Self {
+        Self::new_internal(false)
+    }
+
+    /// Create a new [`HostBuilder`] with default service registrations.
+    #[must_use]
+    pub fn new_cli() -> Self {
+        Self::new_internal(true)
+    }
+
+    /// Create a new [`HostBuilder`] with default service registrations.
+    #[must_use]
     #[allow(clippy::as_conversions)]
-    pub fn new() -> HostBuilder {
-        let mut options = OptionsProvider::new();
+    fn new_internal(is_cli: bool) -> Self {
+        let args = is_cli.then(|| Ref::new(ArgumentsProvider::new()));
+        let mut options = OptionsProvider::new(args.clone());
         let mut services = ServiceCollection::new();
+        if let Some(args) = args {
+            services.add(existing_as_self(args));
+        }
         services
             .register_options(&mut options)
-            .add(SourceArg::singleton())
-            .add(QueueRemoveArgs::singleton())
             // Add main services
             .add(singleton_as_self().from(|provider| {
                 let options = provider.get_required::<SharedOptions>();
@@ -76,7 +89,6 @@ impl HostBuilder {
             .add(DocsCommand::transient())
             // Add inspect services
             .add(InspectCommand::transient())
-            .add(InspectArg::singleton())
             // Add queue services
             .add(QueueAddCommand::transient())
             .add(QueueListCommand::transient())

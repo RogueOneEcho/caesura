@@ -1,5 +1,3 @@
-use crate::commands::CommandArguments::{self, *};
-use crate::commands::QueueCommandArguments;
 use crate::prelude::*;
 use caesura_macros::Options;
 use serde::{Deserialize, Serialize};
@@ -41,21 +39,6 @@ impl OptionsContract for CacheOptions {
                     format!("In v0.27.0 the default cache path changed to {}.\nPass the option: --cache {LEGACY_CACHE_DIR} to use the previous cache path.", default_dir.display()),
                 ));
             }
-        }
-    }
-}
-
-impl FromArgs for CacheOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Batch { cache, .. }) => Some(cache.clone()),
-            Some(CommandArguments::Queue { command }) => match command {
-                QueueCommandArguments::Add { cache, .. }
-                | QueueCommandArguments::List { cache, .. }
-                | QueueCommandArguments::Remove { cache, .. }
-                | QueueCommandArguments::Summary { cache, .. } => Some(cache.clone()),
-            },
-            _ => None,
         }
     }
 }

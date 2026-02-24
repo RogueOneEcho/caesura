@@ -1,4 +1,3 @@
-use crate::commands::CommandArguments::{self, *};
 use crate::prelude::*;
 use caesura_macros::Options;
 use serde::{Deserialize, Serialize};
@@ -48,15 +47,6 @@ impl OptionsContract for UploadOptions {
                 "Copy torrent to directory".to_owned(),
                 dir.to_string_lossy().to_string(),
             ));
-        }
-    }
-}
-
-impl FromArgs for UploadOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Batch { upload, .. } | Upload { upload, .. }) => Some(upload.clone()),
-            _ => None,
         }
     }
 }

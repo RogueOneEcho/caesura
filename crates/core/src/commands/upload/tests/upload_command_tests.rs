@@ -86,7 +86,7 @@ async fn upload_command_missing_transcode_returns_error() -> Result<(), TestErro
             ..UploadOptions::default()
         })
         .with_options(SourceArg {
-            source: Some(AlbumConfig::TORRENT_ID.to_string()),
+            source: AlbumConfig::TORRENT_ID.to_string(),
         })
         .expect_build();
 

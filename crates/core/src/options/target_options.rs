@@ -1,4 +1,3 @@
-use crate::commands::CommandArguments::{self, *};
 use crate::prelude::*;
 use caesura_macros::Options;
 use serde::{Deserialize, Serialize};
@@ -50,20 +49,6 @@ impl OptionsContract for TargetOptions {
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if self.target.is_empty() {
             errors.push(IsEmpty("Target format".to_owned()));
-        }
-    }
-}
-
-impl FromArgs for TargetOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(
-                Batch { target, .. }
-                | Transcode { target, .. }
-                | Upload { target, .. }
-                | Verify { target, .. },
-            ) => Some(target.clone()),
-            _ => None,
         }
     }
 }

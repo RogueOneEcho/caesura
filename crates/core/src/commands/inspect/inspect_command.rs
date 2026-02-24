@@ -11,7 +11,7 @@ pub(crate) struct InspectCommand {
 impl InspectCommand {
     /// Execute [`InspectCommand`] from the CLI.
     pub(crate) fn execute_cli(&self) -> Result<bool, Failure<InspectAction>> {
-        let output = get_details(&self.arg.path, true)?;
+        let output = get_details(&self.arg.inspect_path, true)?;
         println!("{output}");
         Ok(true)
     }

@@ -1,5 +1,3 @@
-use crate::commands::CommandArguments::{self, *};
-use crate::commands::QueueCommandArguments;
 use crate::prelude::*;
 use caesura_macros::Options;
 use rogue_logging::{TimeFormat, Verbosity};
@@ -162,27 +160,6 @@ impl OptionsContract for SharedOptions {
                     format!("In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.", default_dir.display()),
                 ));
             }
-        }
-    }
-}
-
-impl FromArgs for SharedOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(
-                Batch { shared, .. }
-                | Spectrogram { shared, .. }
-                | Transcode { shared, .. }
-                | Upload { shared, .. }
-                | Verify { shared, .. },
-            ) => Some(shared.clone()),
-            Some(CommandArguments::Queue { command }) => match command {
-                QueueCommandArguments::Add { shared, .. }
-                | QueueCommandArguments::List { shared, .. }
-                | QueueCommandArguments::Remove { shared, .. }
-                | QueueCommandArguments::Summary { shared, .. } => Some(shared.clone()),
-            },
-            _ => None,
         }
     }
 }

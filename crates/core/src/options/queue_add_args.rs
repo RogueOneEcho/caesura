@@ -1,6 +1,4 @@
-use crate::commands::CommandArguments::{self, *};
-use crate::commands::QueueCommandArguments;
-use crate::options::{FromArgs, OptionRule, OptionsContract};
+use crate::prelude::*;
 use caesura_macros::Options;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -36,18 +34,6 @@ impl OptionsContract for QueueAddArgs {
             }
         } else {
             errors.push(OptionRule::NotSet("Queue add path".to_owned()));
-        }
-    }
-}
-
-impl FromArgs for QueueAddArgsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Queue {
-                command: QueueCommandArguments::Add { args, .. },
-                ..
-            }) => Some(args.clone()),
-            _ => None,
         }
     }
 }

@@ -4,7 +4,7 @@ use std::process::ExitCode;
 
 #[tokio::main]
 async fn main() -> ExitCode {
-    let host = match HostBuilder::new().build() {
+    let host = match HostBuilder::new_cli().build() {
         Ok(host) => host,
         Err(error) => {
             init_logger();

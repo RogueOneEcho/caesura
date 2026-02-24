@@ -6,7 +6,6 @@ use tokio::fs::{copy, hard_link};
 /// Transcode each track of a FLAC source to the target formats.
 #[injectable]
 pub(crate) struct TranscodeCommand {
-    arg: Ref<SourceArg>,
     shared_options: Ref<SharedOptions>,
     source_provider: Ref<SourceProvider>,
     copy_options: Ref<CopyOptions>,
@@ -25,9 +24,6 @@ impl TranscodeCommand {
     ///
     /// Returns `true` if all the transcodes succeed.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<TranscodeAction>> {
-        if !self.arg.validate() {
-            return Ok(false);
-        }
         let source = self
             .source_provider
             .get_from_options()

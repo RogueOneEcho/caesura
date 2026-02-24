@@ -34,7 +34,7 @@ async fn queue_rm_command_removes_item() -> Result<(), TestError> {
         .with_test_options(&test_dir)
         .await
         .with_options(QueueRemoveArgs {
-            queue_rm_hash: Some(hash.to_string()),
+            queue_rm_hash: hash.to_string(),
         })
         .expect_build();
 
@@ -65,35 +65,7 @@ async fn queue_rm_command_nonexistent_hash() -> Result<(), TestError> {
         .with_test_options(&test_dir)
         .await
         .with_options(QueueRemoveArgs {
-            queue_rm_hash: Some("0000000000000000000000000000000000000000".to_owned()),
-        })
-        .expect_build();
-
-    let command = host.services.get_required::<QueueRemoveCommand>();
-
-    // Act
-    let result = command.execute_cli().await;
-
-    // Assert
-    assert!(matches!(result, Ok(false)));
-
-    Ok(())
-}
-
-/// Test that `QueueRemoveCommand` rejects invalid hash format.
-#[tokio::test]
-async fn queue_rm_command_invalid_hash_format() -> Result<(), TestError> {
-    // Arrange
-    init_logger();
-    let album = AlbumProvider::get(SampleFormat::default()).await;
-    let test_dir = TestDirectory::new();
-
-    let host = HostBuilder::new()
-        .with_mock_api(album)
-        .with_test_options(&test_dir)
-        .await
-        .with_options(QueueRemoveArgs {
-            queue_rm_hash: Some("invalid-hash".to_owned()),
+            queue_rm_hash: "0000000000000000000000000000000000000000".to_owned(),
         })
         .expect_build();
 

@@ -1,5 +1,3 @@
-use crate::commands::CommandArguments::{self, *};
-use crate::commands::QueueCommandArguments;
 use crate::prelude::*;
 use caesura_macros::Options;
 use serde::{Deserialize, Serialize};
@@ -77,20 +75,6 @@ impl OptionsContract for BatchOptions {
                 "Upload".to_owned(),
                 "Transcode".to_owned(),
             ));
-        }
-    }
-}
-
-impl FromArgs for BatchOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(
-                Batch { batch, .. }
-                | CommandArguments::Queue {
-                    command: QueueCommandArguments::List { batch, .. },
-                },
-            ) => Some(batch.clone()),
-            _ => None,
         }
     }
 }

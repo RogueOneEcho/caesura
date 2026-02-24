@@ -1,6 +1,3 @@
-use crate::commands::CommandArguments::Queue;
-use crate::commands::CommandArguments::*;
-use crate::commands::QueueCommandArguments::*;
 use crate::prelude::*;
 use di::ServiceProvider;
 use miette::Report;
@@ -29,81 +26,74 @@ impl Host {
     /// 3. Execute the command
     pub async fn execute(&self) -> Result<bool, Report> {
         let _ = self.services.get_required::<Logger>();
-        match ArgumentsParser::get_or_show_help() {
-            Config { .. } => self
-                .services
-                .get_required::<ConfigCommand>()
-                .execute()
-                .map_err(Report::new),
-            Docs => Ok(self.services.get_required::<DocsCommand>().execute()),
-            Inspect { .. } => self
-                .services
-                .get_required::<InspectCommand>()
-                .execute_cli()
-                .map_err(Report::new),
-            Batch { .. } => self
+        let args = self.services.get_required::<ArgumentsProvider>();
+        match args.get_command() {
+            Command::Batch => self
                 .services
                 .get_required::<BatchCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Queue {
-                command: Add { .. },
-            } => self
+            Command::Config => self
+                .services
+                .get_required::<ConfigCommand>()
+                .execute()
+                .map_err(Report::new),
+            Command::Docs => Ok(self.services.get_required::<DocsCommand>().execute()),
+            Command::Inspect => self
+                .services
+                .get_required::<InspectCommand>()
+                .execute_cli()
+                .map_err(Report::new),
+            Command::Queue(QueueCommand::Add) => self
                 .services
                 .get_required::<QueueAddCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Queue {
-                command: List { .. },
-            } => self
+            Command::Queue(QueueCommand::List) => self
                 .services
                 .get_required::<QueueListCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Queue {
-                command: Remove { .. },
-            } => self
+            Command::Queue(QueueCommand::Remove) => self
                 .services
                 .get_required::<QueueRemoveCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Queue {
-                command: Summary { .. },
-            } => self
+            Command::Queue(QueueCommand::Summary) => self
                 .services
                 .get_required::<QueueSummaryCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Spectrogram { .. } => self
+            Command::Spectrogram => self
                 .services
                 .get_required::<SpectrogramCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Transcode { .. } => self
+            Command::Transcode => self
                 .services
                 .get_required::<TranscodeCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Upload { .. } => self
+            Command::Upload => self
                 .services
                 .get_required::<UploadCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Verify { .. } => self
+            Command::Verify => self
                 .services
                 .get_required::<VerifyCommand>()
                 .execute_cli()
                 .await
                 .map_err(Report::new),
-            Version { .. } => Ok(self
+            Command::Version => Ok(self
                 .services
                 .get_required::<VersionCommand>()
                 .execute()

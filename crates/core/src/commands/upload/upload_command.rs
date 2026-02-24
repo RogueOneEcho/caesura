@@ -9,7 +9,6 @@ const MUSIC_CATEGORY_ID: u8 = 0;
 /// Upload transcodes of a FLAC source.
 #[injectable]
 pub(crate) struct UploadCommand {
-    arg: Ref<SourceArg>,
     shared_options: Ref<SharedOptions>,
     upload_options: Ref<UploadOptions>,
     copy_options: Ref<CopyOptions>,
@@ -27,9 +26,6 @@ impl UploadCommand {
     ///
     /// Returns `true` if all the uploads succeed.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<UploadAction>> {
-        if !self.arg.validate() {
-            return Ok(false);
-        }
         let source = self
             .source_provider
             .get_from_options()

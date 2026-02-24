@@ -1,7 +1,7 @@
 //! Code generation for the Options derive macro.
 
-use crate::docs::field_default_to_string;
-use crate::parse::{ParsedField, StructOptions};
+use super::docs::field_default_to_string;
+use super::parse::{ParsedField, StructOptions};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::Ident;

@@ -3,7 +3,6 @@ use crate::prelude::*;
 /// Generate spectrograms for each track of a FLAC source.
 #[injectable]
 pub(crate) struct SpectrogramCommand {
-    arg: Ref<SourceArg>,
     source_provider: Ref<SourceProvider>,
     paths: Ref<PathManager>,
     factory: Ref<SpectrogramJobFactory>,
@@ -17,9 +16,6 @@ impl SpectrogramCommand {
     ///
     /// Returns `true` if the spectrogram generation succeeds.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<SpectrogramAction>> {
-        if !self.arg.validate() {
-            return Ok(false);
-        }
         let source = self
             .source_provider
             .get_from_options()

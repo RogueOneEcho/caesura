@@ -1,0 +1,64 @@
+---
+source: crates/macros/src/tests.rs
+expression: format_tokens(tokens)
+---
+#[derive(::clap::Subcommand, ::std::clone::Clone, ::std::fmt::Debug)]
+pub enum QueueCommandArgs {
+    /// Add to queue
+    Add {
+        #[command(flatten)]
+        config_options: ConfigOptionsPartial,
+        #[command(flatten)]
+        queue_add_args: QueueAddArgsPartial,
+    },
+    /// Remove from queue
+    #[command(name = "rm")]
+    Remove {
+        #[command(flatten)]
+        queue_remove_args: QueueRemoveArgsPartial,
+        #[command(flatten)]
+        config_options: ConfigOptionsPartial,
+    },
+}
+impl crate::commands::CommandEnumContract for QueueCommand {
+    /// All sub-command variants.
+    fn all() -> &'static [QueueCommand] {
+        &[QueueCommand::Add, QueueCommand::Remove]
+    }
+    /// Display name for documentation (includes parent command name).
+    fn doc_name(&self) -> &'static str {
+        match self {
+            QueueCommand::Add => "queue add",
+            QueueCommand::Remove => "queue rm",
+        }
+    }
+    /// Option type names used by this sub-command.
+    fn options_names(&self) -> &'static [&'static str] {
+        match self {
+            QueueCommand::Add => &["ConfigOptions", "QueueAddArgs"],
+            QueueCommand::Remove => &["QueueRemoveArgs", "ConfigOptions"],
+        }
+    }
+}
+impl QueueCommand {
+    /// Resolve a sub-command from a name and [`::clap::ArgMatches`].
+    #[must_use]
+    pub fn resolve_sub(
+        name: &str,
+        matches: &::clap::ArgMatches,
+    ) -> ::std::option::Option<(QueueCommand, ::clap::ArgMatches)> {
+        match name {
+            "add" => ::std::option::Option::Some((QueueCommand::Add, matches.clone())),
+            "rm" => ::std::option::Option::Some((QueueCommand::Remove, matches.clone())),
+            _ => ::std::option::Option::None,
+        }
+    }
+}
+impl ::std::fmt::Display for QueueCommand {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            QueueCommand::Add => f.write_str("add"),
+            QueueCommand::Remove => f.write_str("rm"),
+        }
+    }
+}

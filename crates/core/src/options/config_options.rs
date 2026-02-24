@@ -1,5 +1,3 @@
-use crate::commands::CommandArguments::{self, *};
-use crate::commands::QueueCommandArguments;
 use crate::prelude::*;
 use caesura_macros::Options;
 use serde::{Deserialize, Serialize};
@@ -41,28 +39,6 @@ impl OptionsContract for ConfigOptions {
                 default_path.to_string_lossy().to_string(),
                 format!("In v0.27.0 the default config path changed to {}.\nPass the option: --config {LEGACY_CONFIG_PATH} to use the previous config path.", default_path.display()),
             ));
-        }
-    }
-}
-
-impl FromArgs for ConfigOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(
-                Batch { config, .. }
-                | Config { config, .. }
-                | Spectrogram { config, .. }
-                | Transcode { config, .. }
-                | Upload { config, .. }
-                | Verify { config, .. },
-            ) => Some(config.clone()),
-            Some(CommandArguments::Queue { command }) => match command {
-                QueueCommandArguments::Add { config, .. }
-                | QueueCommandArguments::List { config, .. }
-                | QueueCommandArguments::Remove { config, .. }
-                | QueueCommandArguments::Summary { config, .. } => Some(config.clone()),
-            },
-            _ => None,
         }
     }
 }

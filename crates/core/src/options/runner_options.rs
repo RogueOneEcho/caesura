@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::commands::CommandArguments::{self, *};
-use crate::options::{FromArgs, OptionRule, OptionsContract};
+use crate::options::{OptionRule, OptionsContract};
 use caesura_macros::Options;
 
 /// Options for concurrency
@@ -25,15 +24,4 @@ fn default_cpus(_partial: &RunnerOptionsPartial) -> Option<u16> {
 impl OptionsContract for RunnerOptions {
     type Partial = RunnerOptionsPartial;
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}
-}
-
-impl FromArgs for RunnerOptionsPartial {
-    fn from_args(args: &Option<CommandArguments>) -> Option<Self> {
-        match args {
-            Some(Batch { runner, .. } | Spectrogram { runner, .. } | Transcode { runner, .. }) => {
-                Some(runner.clone())
-            }
-            _ => None,
-        }
-    }
 }

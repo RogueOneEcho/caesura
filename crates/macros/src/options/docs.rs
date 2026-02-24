@@ -1,6 +1,6 @@
 //! Documentation metadata generation for the Options derive macro.
 
-use crate::parse::ParsedField;
+use super::parse::ParsedField;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{Attribute, Expr, ExprLit, Ident, Lit, Meta, Type};

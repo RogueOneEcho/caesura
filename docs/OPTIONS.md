@@ -5,11 +5,34 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Configuration file path.
 
+Commands:
+- `batch`
+- `config`
+- `queue add`
+- `queue list`
+- `queue rm`
+- `queue summary`
+- `spectrogram`
+- `transcode`
+- `upload`
+- `verify`
+
 | YAML Key | CLI Flag   | Type              | Default                                               | Description                     |
 | -------- | ---------- | ----------------- | ----------------------------------------------------- | ------------------------------- |
 | `config` | `--config` | `Option<PathBuf>` | `~/.config/caesura/config.yml` or platform equivalent | Path to the configuration file. |
 
 ## Options shared by all commands
+
+Commands:
+- `batch`
+- `queue add`
+- `queue list`
+- `queue rm`
+- `queue summary`
+- `spectrogram`
+- `transcode`
+- `upload`
+- `verify`
 
 | YAML Key       | CLI Flag         | Type           | Default                                                 | Description                                                                                                                             |
 | -------------- | ---------------- | -------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -24,12 +47,22 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for verify
 
+Commands:
+- `batch`
+- `verify`
+
 | YAML Key        | CLI Flag          | Type                  | Default | Description                                                                                                                     |
 | --------------- | ----------------- | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `no_hash_check` | `--no-hash-check` | `bool`                | `false` | Should the hash check of source files be skipped?<br>Note: This is only useful for development and should probably not be used. |
 | `exclude_tags`  | `--exclude-tags`  | `Option<Vec<String>>` | ~       | Should sources with specific tags be excluded?                                                                                  |
 
 ## Options for transcoding
+
+Commands:
+- `batch`
+- `transcode`
+- `upload`
+- `verify`
 
 | YAML Key                  | CLI Flag                    | Type                | Default                                 | Description                                                                                                                                                                                                                                                       |
 | ------------------------- | --------------------------- | ------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -40,11 +73,21 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for spectrograms
 
+Commands:
+- `batch`
+- `spectrogram`
+
 | YAML Key           | CLI Flag             | Type        | Default           | Description                        |
 | ------------------ | -------------------- | ----------- | ----------------- | ---------------------------------- |
 | `spectrogram_size` | `--spectrogram-size` | `Vec<Size>` | `["full","zoom"]` | Sizes of spectrograms to generate. |
 
 ## Options for sox binary selection
+
+Commands:
+- `batch`
+- `spectrogram`
+- `transcode`
+- `version`
 
 | YAML Key      | CLI Flag        | Type         | Default       | Description                                        |
 | ------------- | --------------- | ------------ | ------------- | -------------------------------------------------- |
@@ -52,11 +95,20 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for copying files
 
+Commands:
+- `batch`
+- `transcode`
+- `upload`
+
 | YAML Key    | CLI Flag      | Type   | Default | Description                                                                                                                                                |
 | ----------- | ------------- | ------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hard_link` | `--hard-link` | `bool` | `false` | Should files be hard linked instead of copied?<br>Enabling this option requires the source and destination to be on the same filesystem or mounted volume. |
 
 ## Options for image resizing
+
+Commands:
+- `batch`
+- `transcode`
 
 | YAML Key               | CLI Flag                 | Type   | Default  | Description                                                                                                                                                                                                                                                                      |
 | ---------------------- | ------------------------ | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -69,11 +121,20 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for concurrency
 
+Commands:
+- `batch`
+- `spectrogram`
+- `transcode`
+
 | YAML Key | CLI Flag | Type          | Default    | Description                           |
 | -------- | -------- | ------------- | ---------- | ------------------------------------- |
 | `cpus`   | `--cpus` | `Option<u16>` | Total CPUs | Number of cpus to use for processing. |
 
 ## Options for upload
+
+Commands:
+- `batch`
+- `upload`
 
 | YAML Key                        | CLI Flag                          | Type              | Default | Description                                                                                                         |
 | ------------------------------- | --------------------------------- | ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -84,11 +145,22 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for queue cache
 
+Commands:
+- `batch`
+- `queue add`
+- `queue list`
+- `queue rm`
+- `queue summary`
+
 | YAML Key | CLI Flag  | Type      | Default                                    | Description              |
 | -------- | --------- | --------- | ------------------------------------------ | ------------------------ |
 | `cache`  | `--cache` | `PathBuf` | `~/.cache/caesura/` or platform equivalent | Path to cache directory. |
 
 ## Options for batch processing
+
+Commands:
+- `batch`
+- `queue list`
 
 | YAML Key             | CLI Flag               | Type             | Default | Description                                                                                                                         |
 | -------------------- | ---------------------- | ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -102,7 +174,9 @@ Options can be set via CLI flags or in `config.yml`.
 
 ## Options for `queue add` command.
 
+Commands:
+- `queue add`
+
 | YAML Key         | CLI Flag | Type              | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------- | -------- | ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `queue_add_path` | ~        | `Option<PathBuf>` | ~       | A path to either a directory of `.torrent` files or a single YAML queue file.<br>If you set this to the directory your torrent client stores `.torrent` files then caesura<br>will automatically load everything from your client.<br>- For qBittorrent use the `BT_backup` directory<br>- For deluge use the `state` directory<br>Examples:<br>- `/srv/qBittorrent/BT_backup`<br>- `/srv/deluge/state`<br>- `./queue.yml` |
-
