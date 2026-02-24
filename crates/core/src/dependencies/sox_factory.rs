@@ -1,22 +1,22 @@
 //! Factory for building sox commands with the correct binary and flags.
 
-use std::process::Command;
-use std::sync::LazyLock;
-
-use clap::ValueEnum;
-use serde::{Deserialize, Serialize};
-
 use crate::prelude::*;
 
 /// Factory for creating sox [`CommandInfo`] with the correct binary and flags.
 ///
-/// Uses the configured [`SoxVariant`] variant to select the binary and base arguments.
+/// Uses the configured `sox_path` and `sox_ng` options to select the binary and base arguments.
 #[injectable]
 pub(crate) struct SoxFactory {
     options: Ref<SoxOptions>,
 }
 
 impl SoxFactory {
+    /// Create a new [`SoxFactory`] from sox options.
+    #[cfg(test)]
+    pub(crate) fn new(options: Ref<SoxOptions>) -> Self {
+        Self { options }
+    }
+
     /// Create a [`CommandInfo`] with the correct sox binary and base flags.
     #[must_use]
     pub(crate) fn create(&self) -> CommandInfo {
@@ -26,48 +26,23 @@ impl SoxFactory {
         }
     }
 
-    /// Return the sox binary name for display purposes.
+    /// Return the sox binary name for display and invocation.
     #[must_use]
     pub(crate) fn binary(&self) -> &str {
-        self.options.sox_variant.binary()
+        if let Some(path) = &self.options.sox_path {
+            path.to_str().expect("sox_path should be valid UTF-8")
+        } else if self.options.sox_ng {
+            SOX_NG
+        } else {
+            SOX
+        }
     }
 
     fn base_args(&self) -> Vec<String> {
-        match self.options.sox_variant {
-            SoxVariant::Sox => Vec::new(),
-            SoxVariant::SoxNg => vec!["--single-threaded".to_owned()],
+        if self.options.sox_ng {
+            vec!["--single-threaded".to_owned()]
+        } else {
+            Vec::new()
         }
     }
 }
-
-/// Sox binary variant.
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize, ValueEnum)]
-#[serde(rename_all = "snake_case")]
-#[clap(rename_all = "snake_case")]
-pub enum SoxVariant {
-    Sox,
-    #[serde(alias = "ng", alias = "soxng", alias = "sox-ng")]
-    #[value(alias = "ng", alias = "soxng", alias = "sox-ng")]
-    #[default]
-    SoxNg,
-}
-
-impl SoxVariant {
-    /// Binary name for this variant.
-    #[must_use]
-    pub(crate) fn binary(self) -> &'static str {
-        match self {
-            Self::Sox => SOX,
-            Self::SoxNg => SOX_NG,
-        }
-    }
-}
-
-/// Auto-detected sox variant, determined once by checking if `sox_ng` is available.
-pub(crate) static DETECTED_SOX_VARIANT: LazyLock<SoxVariant> = LazyLock::new(|| {
-    if Command::new("sox_ng").arg("--version").output().is_ok() {
-        SoxVariant::SoxNg
-    } else {
-        SoxVariant::Sox
-    }
-});

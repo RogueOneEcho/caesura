@@ -5,3 +5,5 @@ pub(crate) use sox_factory::*;
 
 mod binaries;
 mod sox_factory;
+#[cfg(test)]
+mod tests;

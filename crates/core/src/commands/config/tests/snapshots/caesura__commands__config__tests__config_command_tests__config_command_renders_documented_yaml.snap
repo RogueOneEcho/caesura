@@ -116,16 +116,19 @@ rename_tracks: false
 # Should failed transcodes be retried?
 # Default: false
 retry_transcode: false
+# Whether to use `sox_ng` behavior (`--single-threaded` flag).
+# Default: auto-detected
+sox_ng: true
+# Custom path to the sox binary.
+# When not set, uses `sox_ng` or `sox` from PATH based on the `sox_ng` flag.
+# Default: auto-detected
+sox_path: null
 # Use random dithering when resampling with `SoX`.
 # By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither
 # random number generator with a fixed value, producing deterministic output.
 # Set this to `true` to use random dithering instead.
 # Default: false
 sox_random_dither: false
-# `SoX` binary to use.
-# Options: `sox` or `sox_ng`
-# Default: auto-detected
-sox_variant: sox_ng
 # Should the spectrogram command be executed?
 # Default: false
 spectrogram: false
