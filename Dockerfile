@@ -23,8 +23,8 @@ RUN apk add --no-cache build-base autoconf automake \
     libpng-dev fftw-dev libogg-dev
 COPY --from=flac /artifacts/usr/lib/ /usr/lib/
 COPY --from=flac /artifacts/usr/include/ /usr/include/
-ARG SOX_NG_VERSION=14.7.0.7
-ARG SOX_NG_SHA256=c494658ef29ebe84eddf525fcdcfe7ba67fca3ee778402cf46f1ec1178086b61
+ARG SOX_NG_VERSION=14.7.1
+ARG SOX_NG_SHA256=255872ac397213d330f4633871b697d70e86242dff95d66016555a45ef1c58a1
 RUN wget -q "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-${SOX_NG_VERSION}/sox_ng-${SOX_NG_VERSION}.tar.gz" \
     && echo "${SOX_NG_SHA256}  sox_ng-${SOX_NG_VERSION}.tar.gz" | sha256sum -c - \
     && tar xf "sox_ng-${SOX_NG_VERSION}.tar.gz" \
@@ -72,7 +72,7 @@ CMD ["test", "--release", "--all-features"]
 # - Remove docs and man pages to reduce image size
 # - Run as non-root user (65532 matches the DHI nonroot convention)
 FROM alpine:latest
-RUN apk add --no-cache libogg lame libpng fftw \
+RUN apk add --no-cache ca-certificates-bundle libogg lame libpng fftw \
     && apk del apk-tools \
     && rm -rf /var/cache/apk /etc/apk /lib/apk /usr/share/apk \
     && rm -rf /usr/share/man /usr/share/doc

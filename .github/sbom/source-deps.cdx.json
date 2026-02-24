@@ -29,8 +29,8 @@
     {
       "type": "library",
       "name": "sox_ng",
-      "version": "14.7.0.7",
-      "purl": "pkg:generic/sox_ng/sox_ng@14.7.0.7?download_url=https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.7.0.7/sox_ng-14.7.0.7.tar.gz",
+      "version": "14.7.1",
+      "purl": "pkg:generic/sox_ng/sox_ng@14.7.1?download_url=https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.7.1/sox_ng-14.7.1.tar.gz",
       "licenses": [
         {
           "license": {
@@ -45,7 +45,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.7.0.7/sox_ng-14.7.0.7.tar.gz"
+          "url": "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.7.1/sox_ng-14.7.1.tar.gz"
         }
       ]
     }
