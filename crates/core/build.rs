@@ -12,6 +12,7 @@
 //!
 //! - <https://git-scm.com/docs/git-describe>
 
+use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
@@ -28,10 +29,28 @@ fn main() {
 ///   catching new tags and branches.
 /// - `.git/packed-refs` changes when git packs loose refs or updates
 ///   an existing packed ref (e.g. a new commit on the current branch).
+///
+/// Paths are resolved from the workspace root because `rerun-if-changed`
+/// is relative to the crate's `Cargo.toml` directory (`crates/core/`),
+/// not the workspace root where `.git/` lives.
 fn set_rerun_triggers() {
-    println!("cargo:rerun-if-changed=.git/HEAD");
-    println!("cargo:rerun-if-changed=.git/refs");
-    println!("cargo:rerun-if-changed=.git/packed-refs");
+    let git_dir = workspace_root().join(".git");
+    println!("cargo:rerun-if-changed={}", git_dir.join("HEAD").display());
+    println!("cargo:rerun-if-changed={}", git_dir.join("refs").display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        git_dir.join("packed-refs").display()
+    );
+}
+
+/// Resolve the workspace root from `CARGO_MANIFEST_DIR`.
+fn workspace_root() -> PathBuf {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    manifest_dir
+        .ancestors()
+        .find(|p| p.join("Cargo.lock").exists())
+        .expect("workspace root should contain Cargo.lock")
+        .to_path_buf()
 }
 
 /// Run `git describe --tags --dirty --always` and return the trimmed output.
