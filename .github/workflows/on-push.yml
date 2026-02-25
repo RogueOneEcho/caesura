@@ -36,7 +36,7 @@ jobs:
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
       if: steps.release.outputs.version != ''
 
-    - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version -p caesura ${{ steps.release.outputs.version }}
+    - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version --workspace ${{ steps.release.outputs.version }}
       if: steps.release.outputs.version != ''
 
     - run: git --no-pager diff --color
@@ -48,6 +48,8 @@ jobs:
           Cargo.toml
           Cargo.lock
           crates/core/Cargo.toml
+          crates/macros/Cargo.toml
+          crates/options/Cargo.toml
 
 
   cargo-build:
@@ -228,7 +230,7 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - run: cargo publish --allow-dirty --locked --no-verify
+    - run: cargo publish --allow-dirty --locked --no-verify --workspace
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
