@@ -7,9 +7,10 @@ use rogue_logging::{InitLog, LoggerBuilder};
 #[must_use]
 pub fn default_logger() -> LoggerBuilder {
     LoggerBuilder::new()
-        .with_exclude_filter("reqwest".to_owned())
         .with_exclude_filter("cookie".to_owned())
         .with_exclude_filter("lofty".to_owned())
+        .with_exclude_filter("reqwest".to_owned())
+        .with_exclude_filter("rustls_platform_verifier".to_owned())
         .with_verbosity(Trace)
 }
 
