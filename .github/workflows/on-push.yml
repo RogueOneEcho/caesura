@@ -108,9 +108,11 @@ jobs:
 
     - run: rustup target add ${{ matrix.target }}
 
+    - run: cargo build --release --locked --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
+
     - run: brew install cargo-auditable
 
-    - run: cargo auditable build --release --locked --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
+    - run: cargo auditable build --release --locked --target ${{ matrix.target }} --bins
 
     - name: Clean cargo cache
       if: github.ref_name == 'main'
@@ -163,18 +165,18 @@ jobs:
         EOF
 
     - if: matrix.test
-      run: cargo auditable test --release --locked --no-fail-fast --target ${{ matrix.target }}
+      run: cargo test --release --locked --no-fail-fast --target ${{ matrix.target }}
       env:
         CAESURA_DETERMINISTIC_TESTS: ${{ matrix.target == 'x86_64-unknown-linux-gnu' && '1' || '' }}
         CLICOLOR_FORCE: 1
 
     - name: Run macro tests
       if: matrix.test
-      run: cargo auditable test --release --locked --no-fail-fast --target ${{ matrix.target }} -p caesura_macros
+      run: cargo test --release --locked --no-fail-fast --target ${{ matrix.target }} -p caesura_macros
 
     - name: Run determinism tests
       if: matrix.test && matrix.os == 'ubuntu-24.04'
-      run: cargo auditable test --release --locked --target ${{ matrix.target }} -- --ignored sample_flac
+      run: cargo test --release --locked --target ${{ matrix.target }} -- --ignored sample_flac
 
     - name: Run cargo check
       if: matrix.target == 'x86_64-unknown-linux-gnu'

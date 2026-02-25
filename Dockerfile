@@ -50,7 +50,8 @@ RUN cargo chef cook --release --locked --recipe-path recipe.json
 COPY . .
 ARG VERSION=0.0.0
 RUN cargo set-version -p caesura $VERSION
-RUN cargo auditable build --release --locked
+RUN cargo build --release --locked
+RUN cargo auditable build --release --locked --bins
 
 # Dev target for running tests
 FROM builder AS dev
