@@ -137,6 +137,81 @@ If you haven't already then add the `*.red.torrent` or `*.ops.torrent` file to y
 
 Go to your indexer and check your uploads to make sure everything has gone to plan.
 
+## `publish`
+
+Publish a source FLAC release from a local directory using a YAML manifest.
+
+> [!WARNING]
+> This command is currently RED-only.
+>
+> You are responsible for everything you upload.
+
+```bash
+caesura publish /path/to/publish.yml
+```
+
+### New group example
+
+```yaml
+source_path: /path/to/source
+torrent_path: /optional/path/to/output.torrent
+manual_checks_ack: true
+dry_run: false
+mode: new_group
+release_desc: "Uploader notes shown on torrent"
+
+new_group:
+  title: "Album Title"
+  year: 2024
+  release_type: 1
+  media: WEB
+  tags: ["electronic", "ambient"]
+  album_desc: "Group description"
+  request_id: 364781
+  image: "https://example.com/cover.jpg"
+  artists:
+    - name: "Artist Name"
+      role: 1
+  edition:
+    unknown_release: false
+    remaster: true
+    year: 2024
+    title: "Digital"
+    record_label: "Label"
+    catalogue_number: "CAT-001"
+    format: "FLAC"
+    bitrate: "Lossless"
+```
+
+### Existing group example
+
+```yaml
+source_path: /path/to/source
+torrent_path: /optional/path/to/output.torrent
+manual_checks_ack: true
+dry_run: false
+mode: existing_group
+release_desc: "Uploader notes shown on torrent"
+
+existing_group:
+  group_id: 123456
+  remaster_year: 2024
+  remaster_title: "Digital"
+  remaster_record_label: "Label"
+  remaster_catalogue_number: "CAT-001"
+  media: "WEB"
+  format: "FLAC"
+  bitrate: "Lossless"
+```
+
+The command uploads only the source FLAC and then stops.
+After success, run:
+
+```bash
+caesura transcode <torrent_id>
+caesura upload <torrent_id>
+```
+
 ## `batch`
 
 Batch processing with queue management.

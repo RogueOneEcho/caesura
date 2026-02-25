@@ -772,9 +772,8 @@ dependencies = [
 
 [[package]]
 name = "gazelle_api"
-version = "0.14.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c39fb54439ffc6b523db7810ddb16b9a5b2b1c8df1723225bc13f6538dc6740"
+version = "0.0.0"
+source = "git+https://github.com/tomerh2001/gazelle_api.git?rev=a73bb20cde3a93d3d4f0f9779c821a76ee108f6d#a73bb20cde3a93d3d4f0f9779c821a76ee108f6d"
 dependencies = [
  "async-trait",
  "log",
