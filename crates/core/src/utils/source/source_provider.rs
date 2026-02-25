@@ -71,7 +71,7 @@ impl SourceProvider {
         let path = decode_html_entities(&torrent.file_path).to_string();
         let result = Sanitizer::libtorrent().execute(path.clone());
         if !result.found.is_empty() {
-            warn!("Source path contains: {}", result.humanize());
+            warn!("Invisible characters in source path: {}", result.humanize());
         }
         let safe_path = result.output;
         let mut paths = vec![&path];

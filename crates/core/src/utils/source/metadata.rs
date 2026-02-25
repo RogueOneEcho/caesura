@@ -49,7 +49,7 @@ fn show_issues(field: &str, result: &SanitizerResult) {
     if result.found.is_empty() {
         return;
     }
-    debug!("{field} field contains: {}", result.humanize());
+    debug!("Invisible characters in {field}: {}", result.humanize());
 }
 
 fn get_artist(group: &Group) -> String {
