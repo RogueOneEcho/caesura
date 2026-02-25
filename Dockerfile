@@ -46,11 +46,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 # Build caesura binary
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --release --locked --recipe-path recipe.json
 COPY . .
 ARG VERSION=0.0.0
 RUN cargo set-version -p caesura $VERSION
-RUN cargo auditable build --release
+RUN cargo auditable build --release --locked
 
 # Dev target for running tests
 FROM builder AS dev
@@ -61,7 +61,7 @@ COPY --from=flac /artifacts/usr/lib/libFLAC.so* /usr/lib/
 COPY --from=sox /artifacts/usr/bin/sox_ng /usr/bin/sox_ng
 COPY --from=sox /artifacts/usr/lib/libsox_ng.so* /usr/lib/
 ENV CAESURA_DOCKER=1
-RUN cargo build --release --tests --all-features
+RUN cargo build --release --locked --tests --all-features
 ENTRYPOINT ["cargo"]
 CMD ["test", "--release", "--all-features"]
 

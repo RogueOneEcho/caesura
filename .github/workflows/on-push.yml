@@ -108,7 +108,7 @@ jobs:
 
     - run: brew install cargo-auditable
 
-    - run: cargo auditable build --release --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
+    - run: cargo auditable build --release --locked --target ${{ matrix.target }} --bins ${{ matrix.test && '--tests' || '' }}
 
     - name: Clean cargo cache
       if: github.ref_name == 'main'
@@ -161,23 +161,23 @@ jobs:
         EOF
 
     - if: matrix.test
-      run: cargo auditable test --release --no-fail-fast --target ${{ matrix.target }}
+      run: cargo auditable test --release --locked --no-fail-fast --target ${{ matrix.target }}
       env:
         CAESURA_DETERMINISTIC_TESTS: ${{ matrix.target == 'x86_64-unknown-linux-gnu' && '1' || '' }}
         CLICOLOR_FORCE: 1
 
     - name: Run macro tests
       if: matrix.test
-      run: cargo auditable test --release --no-fail-fast --target ${{ matrix.target }} -p caesura_macros
+      run: cargo auditable test --release --locked --no-fail-fast --target ${{ matrix.target }} -p caesura_macros
 
     - name: Run determinism tests
       if: matrix.test && matrix.os == 'ubuntu-24.04'
-      run: cargo auditable test --release --target ${{ matrix.target }} -- --ignored sample_flac
+      run: cargo auditable test --release --locked --target ${{ matrix.target }} -- --ignored sample_flac
 
     - name: Run cargo check
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
-        if ! cargo check --quiet --all-targets --message-format short
+        if ! cargo check --quiet --locked --all-targets --message-format short
         then
           echo "::warning title=Cargo Check Failed::Please review the output for details."
         fi
@@ -185,7 +185,7 @@ jobs:
     - name: Run cargo clippy
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
-        if ! cargo clippy --quiet --all-targets --message-format short
+        if ! cargo clippy --quiet --locked --all-targets --message-format short
         then
           echo "::warning title=Clippy Check Failed::Please review the output for details."
         fi
@@ -228,7 +228,7 @@ jobs:
 
     - run: git --no-pager diff --color
 
-    - run: cargo publish --allow-dirty --no-verify
+    - run: cargo publish --allow-dirty --locked --no-verify
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
