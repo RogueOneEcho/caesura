@@ -28,7 +28,7 @@ pub(super) struct TagEntry {
 }
 
 /// Per-track metadata collected from an audio file.
-pub(super) struct TrackInfo {
+pub(crate) struct TrackInfo {
     /// Path relative to the inspected directory.
     pub(super) sub_path: String,
     /// File type (e.g. "FLAC", "MP3").

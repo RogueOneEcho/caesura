@@ -221,7 +221,8 @@ impl UploadCommand {
             ));
         }
         let path = self.paths.get_transcode_target_dir(source, target);
-        let details = get_details_split(&path, false);
+        let factory = InspectFactory::new(false);
+        let details = factory.create_split(&path);
         match details {
             Ok((properties, tags)) => {
                 lines.push(format!(

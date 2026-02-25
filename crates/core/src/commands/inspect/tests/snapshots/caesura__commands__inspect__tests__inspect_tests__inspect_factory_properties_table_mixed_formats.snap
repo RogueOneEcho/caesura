@@ -1,5 +1,5 @@
 ---
-source: crates/core/src/commands/inspect/tests/format_tests.rs
+source: crates/core/src/commands/inspect/tests/inspect_tests.rs
 expression: output
 ---
                                   Bit    Sample
