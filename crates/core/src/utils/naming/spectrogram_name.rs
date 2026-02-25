@@ -10,6 +10,6 @@ impl SpectrogramName {
         let prefix = SourceName::get(metadata);
         let media = metadata.media.clone();
         let name = format!("{prefix} [{media} SPECTROGRAMS]");
-        Sanitizer::execute(name)
+        Sanitizer::name().execute(name).output
     }
 }

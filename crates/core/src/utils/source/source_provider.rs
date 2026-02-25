@@ -69,7 +69,11 @@ impl SourceProvider {
 
     fn get_source_directory(&self, torrent: &Torrent) -> Result<PathBuf, SourceIssue> {
         let path = decode_html_entities(&torrent.file_path).to_string();
-        let safe_path = libtorrent_safe_path(&path);
+        let result = Sanitizer::libtorrent().execute(path.clone());
+        if !result.found.is_empty() {
+            warn!("Source path contains: {}", result.humanize());
+        }
+        let safe_path = result.output;
         let mut paths = vec![&path];
         if safe_path != path {
             paths.push(&safe_path);
@@ -110,36 +114,5 @@ impl SourceProvider {
             Ok(id) => self.get(id).await,
             Err(issue) => Ok(Err(issue)),
         }
-    }
-}
-
-/// Strip characters that libtorrent removes from torrent file paths.
-///
-/// - <https://github.com/arvidn/libtorrent/blob/9c1897645265c6a450930e766ab46c02a240891f/src/torrent_info.cpp#L100>
-fn libtorrent_safe_path(path: &str) -> String {
-    path.replace(
-        [
-            '/', '\\', '\u{200e}', '\u{200f}', '\u{202a}', '\u{202b}', '\u{202c}', '\u{202d}',
-            '\u{202e}',
-        ],
-        "",
-    )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn _libtorrent_safe_path() {
-        assert_eq!(libtorrent_safe_path("no change"), "no change");
-        assert_eq!(libtorrent_safe_path("AC/DC"), "ACDC");
-        assert_eq!(libtorrent_safe_path(r"back\slash"), "backslash");
-        assert_eq!(libtorrent_safe_path("a\u{200e}b\u{200f}c"), "abc");
-        assert_eq!(
-            libtorrent_safe_path("Hello\u{202a}\u{202b}\u{202c}\u{202d}\u{202e}World"),
-            "HelloWorld"
-        );
-        assert_eq!(libtorrent_safe_path(""), "");
     }
 }

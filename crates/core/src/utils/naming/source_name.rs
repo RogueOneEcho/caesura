@@ -8,7 +8,7 @@ impl SourceName {
     #[must_use]
     pub fn get(metadata: &Metadata) -> String {
         let name = Self::get_unsanitized(metadata);
-        Sanitizer::execute(name)
+        Sanitizer::name().execute(name).output
     }
 
     /// Directory name for a source without sanitization.

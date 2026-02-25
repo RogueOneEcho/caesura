@@ -45,7 +45,7 @@ fn format_track_name(flac: &FlacFile, padding: usize, max_length: Option<usize>)
     let tags = flac.id3_tags().ok()?;
     let track_number = tags.track()?;
     let title = tags.title()?;
-    let sanitized_title = Sanitizer::execute(title.to_string());
+    let sanitized_title = Sanitizer::name().execute(title.to_string()).output;
     let max_len = max_length.unwrap_or(DEFAULT_MAX_FILESTEM_LENGTH);
     let max_title_len = max_len.saturating_sub(padding + 1);
     let truncated_title: String = if sanitized_title.chars().count() > max_title_len {

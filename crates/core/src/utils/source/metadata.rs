@@ -25,14 +25,31 @@ impl Metadata {
     /// Create [`Metadata`] from API response.
     #[must_use]
     pub fn new(group: &Group, torrent: &Torrent) -> Self {
+        let sanitizer = Sanitizer::invisible();
+        let artist = sanitizer.execute(get_artist(group));
+        let album = sanitizer.execute(get_album(group));
+        let remaster_title = sanitizer.execute(get_remaster_title(torrent));
+        let year = get_year(group, torrent);
+        let media = sanitizer.execute(torrent.media.clone());
+        show_issues("artist", &artist);
+        show_issues("album", &album);
+        show_issues("remaster_title", &remaster_title);
+        show_issues("media", &media);
         Metadata {
-            artist: get_artist(group),
-            album: get_album(group),
-            remaster_title: get_remaster_title(torrent),
-            year: get_year(group, torrent),
-            media: torrent.media.clone(),
+            artist: artist.output,
+            album: album.output,
+            remaster_title: remaster_title.output,
+            year,
+            media: media.output,
         }
     }
+}
+
+fn show_issues(field: &str, result: &SanitizerResult) {
+    if result.found.is_empty() {
+        return;
+    }
+    debug!("{field} field contains: {}", result.humanize());
 }
 
 fn get_artist(group: &Group) -> String {
@@ -103,7 +120,6 @@ fn get_year(group: &Group, torrent: &Torrent) -> u16 {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use gazelle_api::{Credit, Credits, Group};
 

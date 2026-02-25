@@ -11,6 +11,6 @@ impl TranscodeName {
         let format = target.get_name();
         let media = metadata.media.clone();
         let name = format!("{prefix} [{media} {format}]");
-        Sanitizer::execute(name)
+        Sanitizer::name().execute(name).output
     }
 }
