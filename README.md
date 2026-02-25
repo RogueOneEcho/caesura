@@ -1,27 +1,32 @@
 # <p style="text-align: center">caesura 𝄓</p>
 
-A versatile command line tool for automated verifying and transcoding of all your torrents.
+A versatile command line tool for fully automated transcoding of FLAC sources.
+
+*`caesura` will crunch through your torrent directory and automatically transcode any suitable FLAC sources.*
 
 ## Features
 
-Most gazelle based indexers/trackers are supported
-- RED
-- **[[new](https://github.com/RogueOneEcho/caesura/issues/7)]** OPS.
-
-Tested on Linux, theoretically works on Windows.
-
-Fully configurable, if there's something hard coded that you think should be configurable then [open a discussion on GitHub](https://github.com/RogueOneEcho/caesura/discussions).
+- RED and OPS fully supported.
+- Runs on Linux and macOS. Windows via WSL or Docker.
+- Fully configurable, if there's something hard coded that you think should be configurable then [open a discussion on GitHub](https://github.com/RogueOneEcho/caesura/discussions).
+- Install via [Docker](docs/DOCKER.md), [Homebrew](docs/INSTALL.md#homebrew-linux-and-macos), [Nix](docs/INSTALL.md#nix-linux-and-macos) and [standalone binaries](docs/INSTALL.md#github-releases-linux-and-macos).
+- Minimal CLI tools required. Only FLAC, LAME and SoX. Image resizing, torrent creation and audio metadata inspection are handled natively.
 
 ### Source Verification
 
 Each source is verified to ensure:
 - A lossless FLAC
-- Not a scene, lossy, unconfirmed, or trumpable release
+- Not a scene, lossy, unconfirmed or trumpable release
 - Files match the torrent hash
 - Audio tags for artist, album, title and track number are set
-- **[[fixed](https://github.com/RogueOneEcho/caesura/issues/47)]** Classical sources have a composer tag.
-- **[[fixed](https://github.com/RogueOneEcho/caesura/issues/18)]** Vinyl track numbering is converted to numeric
+- Classical sources have a composer tag
+- Vinyl track numbering is converted to numeric
 - Sample rate and channels are suitable
+
+### Inspect
+
+- Display audio properties, tags and embedded pictures for every track in a directory
+- Supports FLAC and MP3
 
 ### Spectrogram Generation
 
@@ -29,28 +34,27 @@ Each source is verified to ensure:
 
 ### Transcoding
 
-- **[fixed]** Multi-threaded transcoding with optional CPU limit
+- Multi-threaded transcoding with optional CPU limit
 - FLAC and FLAC 24 bit sources are supported
 - FLAC, MP3 320 (CBR) and MP3 V0 (VBR) target formats
 - Existing formats are skipped
-- **[[fixed](https://github.com/RogueOneEcho/caesura/issues/21)]** Nested sub directories are fully supported (i.e. CD1, and CD2 etc)
-- **[[fixed](https://github.com/RogueOneEcho/caesura/issues/22)]** Automatic naming following established conventions, with decoding of HTML entities.
-- **[[fixed](https://github.com/RogueOneEcho/caesura/issues/24)]** Shorter file names.
+- Nested sub directories are fully supported (i.e. CD1 and CD2 etc)
+- Automatic naming following established conventions, with decoding of HTML entities
 - Automatic torrent file creation
-- **[new]** Images in the root and first nested directory are included and all other files ignored.
-- **[new]** Images larger than 750 KB are reduced to less than 1280 px, converted to JPG and compressed.
+- Images in the root and first nested directory are included and all other files ignored
+- Images larger than 750 KB are reduced to less than 1280 px, converted to JPG and compressed
+- Optional track renaming to standardized filenames
+- Optional stripping of Vorbis comments from transcoded output
 
 ### Upload
 
 - Copy transcodes to content directory
-- Copy torrent file to client auto-add directory
+- Torrent injection via client auto-add directory
 
 ### Batch / Queue
 
-- **[new]** Verify, transcode and upload with one command for every torrent file in a directory.
-- **[new]** Source torrents are added to a queue to track their progress reducing duplicate work and speeding up subsequent runs.
-
-*The application will crunch through your torrent directory and automatically determine which are FLAC sources suitable for transcoding.*
+- Verify, transcode and upload with one command for every torrent file in a directory
+- Source torrents are added to a queue to track their progress, reducing duplicate work and speeding up subsequent runs
 
 ## Documentation
 
