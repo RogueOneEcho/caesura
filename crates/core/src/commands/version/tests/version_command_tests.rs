@@ -42,7 +42,7 @@ async fn get_version_lame() {
 #[tokio::test]
 async fn get_version_sox() {
     // Arrange
-    let binary = DETECTED_SOX_VARIANT.binary();
+    let binary = if detect_sox_ng() { SOX_NG } else { SOX };
 
     // Act
     let info = get_version(binary, SOX_VERSION_PATTERN)

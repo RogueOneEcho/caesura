@@ -94,6 +94,14 @@ queue_add_path: /srv/qBittorrent/BT_backup
 # - `CD1/10 Example track title.mp3`
 # Default: false
 rename_tracks: true
+# Is `SoX_ng` in use?
+# If `true` then `sox_ng` specific CLI options are used.
+# Default: Detected based on binary name or --version info
+sox_ng: true
+# Name or path to the sox binary.
+# Examples: `sox`, `sox_ng`, `/usr/bin/sox`
+# Default: Detected based on sox_ng flag
+sox_path: sox_ng
 # Formats to attempt to transcode to.
 # Default: ["flac","320","v0"]
 target:

@@ -67,6 +67,8 @@ configs:
       output: /srv/shared/caesura
       queue_add_path: /srv/qBittorrent/BT_backup
       rename_tracks: true
+      sox_ng: true
+      sox_path: sox_ng
       target:
       - flac
       - v0

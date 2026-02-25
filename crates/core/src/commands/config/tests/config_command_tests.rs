@@ -20,7 +20,8 @@ fn config_command_renders_documented_yaml() {
         })
         .with_options(RunnerOptions { cpus: Some(4) })
         .with_options(SoxOptions {
-            sox_variant: SoxVariant::SoxNg,
+            sox_path: None,
+            sox_ng: true,
         })
         .expect_build();
     let config_command = host.services.get_required::<ConfigCommand>();
