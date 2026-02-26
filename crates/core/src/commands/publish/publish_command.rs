@@ -85,17 +85,16 @@ impl PublishCommand {
                 .expect("source_path should have a file name")
                 .to_string_lossy()
                 .to_string();
-            self.paths.get_output_dir().join(format!(
-                "{source_name}.{}.source.torrent",
-                self.shared_options.indexer_lowercase()
-            ))
+            self.paths
+                .get_output_dir()
+                .join(format!("{source_name}.{indexer}.source.torrent"))
         });
 
         TorrentCreator::create(
             &manifest.source_path,
             &torrent_path,
             self.shared_options.announce_url.clone(),
-            self.shared_options.indexer.clone(),
+            indexer,
         )
         .await
         .map_err(Failure::wrap(PublishAction::CreateTorrent))?;
@@ -110,7 +109,7 @@ impl PublishCommand {
             .first()
             .expect("content should contain at least one directory")
             .join(source_dir_name);
-        let mut seeding_source = manifest.source_path.clone();
+        let mut seeding_source: &Path = &manifest.source_path;
         let source_already_staged = manifest.source_path == seeding_destination;
         if manifest.dry_run {
             if source_already_staged {
@@ -177,10 +176,10 @@ impl PublishCommand {
                         .await
                         .map_err(Failure::wrap(PublishAction::StageSource))?;
                 }
-                seeding_source = seeding_destination.clone();
+                seeding_source = &seeding_destination;
             }
 
-            self.verify_seed_content(&torrent_path, &seeding_source)
+            self.verify_seed_content(&torrent_path, seeding_source)
                 .await?;
 
             if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to {
@@ -218,16 +217,13 @@ impl PublishCommand {
                 format!("{} {}", existing_group.format, existing_group.bitrate)
             }
         };
-        let release_description = Self::create_release_description(
-            &seeding_source,
-            &manifest.release_desc,
-            &source_title,
-        );
+        let release_description =
+            Self::create_release_description(seeding_source, &manifest.release_desc, &source_title);
 
         match manifest.mode {
             PublishMode::NewGroup => {
                 let mut form = manifest.to_new_source_form(torrent_path);
-                form.release_desc = release_description.clone();
+                form.release_desc = release_description;
                 if manifest.dry_run {
                     info!("{} upload as this is a dry run", "Skipping".bold());
                     info!("{} data for source upload:", "Upload".bold());

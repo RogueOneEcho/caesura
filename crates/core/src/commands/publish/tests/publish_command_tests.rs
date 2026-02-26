@@ -121,9 +121,7 @@ async fn publish_rejects_non_red_indexer() -> Result<(), TestError> {
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .with_options(PublishArg {
-            publish_path: publish_path.clone(),
-        })
+        .with_options(PublishArg { publish_path })
         .with_options(SharedOptions {
             announce_url: "https://home.opsfet.ch/test/announce".to_owned(),
             indexer: "ops".to_owned(),
@@ -162,9 +160,7 @@ async fn publish_dry_run_new_group_skips_api_call() -> Result<(), TestError> {
         .with_mock_client(mock)
         .with_test_options(&test_dir)
         .await
-        .with_options(PublishArg {
-            publish_path: publish_path.clone(),
-        })
+        .with_options(PublishArg { publish_path })
         .expect_build();
     let command = host.services.get_required::<PublishCommand>();
 
@@ -192,7 +188,9 @@ async fn publish_new_group_returns_response_and_next_steps() -> Result<(), TestE
         torrent_id: 500_001,
         group_id: 600_001,
     };
-    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response.clone()));
+    let expected_group_id = response.group_id;
+    let expected_torrent_id = response.torrent_id;
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
     let host = HostBuilder::new()
         .with_mock_client(mock)
         .with_test_options(&test_dir)
@@ -208,23 +206,23 @@ async fn publish_new_group_returns_response_and_next_steps() -> Result<(), TestE
 
     // Assert
     let actual = result.response.expect("response should be present");
-    assert_eq!(actual.group_id, response.group_id);
-    assert_eq!(actual.torrent_id, response.torrent_id);
+    assert_eq!(actual.group_id, expected_group_id);
+    assert_eq!(actual.torrent_id, expected_torrent_id);
     assert_eq!(
         result.permalink,
         Some(get_permalink(
             &"https://redacted.sh".to_owned(),
-            response.group_id,
-            response.torrent_id
+            expected_group_id,
+            expected_torrent_id
         ))
     );
     assert_eq!(
         result.next_transcode,
-        Some(format!("caesura transcode {}", response.torrent_id))
+        Some(format!("caesura transcode {expected_torrent_id}"))
     );
     assert_eq!(
         result.next_upload,
-        Some(format!("caesura upload {}", response.torrent_id))
+        Some(format!("caesura upload {expected_torrent_id}"))
     );
     Ok(())
 }
@@ -290,6 +288,8 @@ async fn publish_existing_group_non_duplicate_uploads() -> Result<(), TestError>
         torrent_id: 700_001,
         group_id: 123_456,
     };
+    let expected_group_id = response.group_id;
+    let expected_torrent_id = response.torrent_id;
     let mock = MockGazelleClient::new()
         .with_get_torrent_group(Ok(GroupResponse {
             group: Group {
@@ -307,7 +307,7 @@ async fn publish_existing_group_non_duplicate_uploads() -> Result<(), TestError>
                 ..Torrent::default()
             }],
         }))
-        .with_upload_torrent(Ok(response.clone()));
+        .with_upload_torrent(Ok(response));
     let host = HostBuilder::new()
         .with_mock_client(mock)
         .with_test_options(&test_dir)
@@ -323,23 +323,23 @@ async fn publish_existing_group_non_duplicate_uploads() -> Result<(), TestError>
 
     // Assert
     let actual = result.response.expect("response should be present");
-    assert_eq!(actual.group_id, response.group_id);
-    assert_eq!(actual.torrent_id, response.torrent_id);
+    assert_eq!(actual.group_id, expected_group_id);
+    assert_eq!(actual.torrent_id, expected_torrent_id);
     assert_eq!(
         result.permalink,
         Some(get_permalink(
             &"https://redacted.sh".to_owned(),
-            response.group_id,
-            response.torrent_id
+            expected_group_id,
+            expected_torrent_id
         ))
     );
     assert_eq!(
         result.next_transcode,
-        Some(format!("caesura transcode {}", response.torrent_id))
+        Some(format!("caesura transcode {expected_torrent_id}"))
     );
     assert_eq!(
         result.next_upload,
-        Some(format!("caesura upload {}", response.torrent_id))
+        Some(format!("caesura upload {expected_torrent_id}"))
     );
     Ok(())
 }
