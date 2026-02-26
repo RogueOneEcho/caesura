@@ -80,7 +80,7 @@ impl UploadCommand {
             };
             if self.upload_options.dry_run {
                 warn!(
-                    "{} upload and torrent client actions as this is a dry run",
+                    "{} upload and transfer actions as this is a dry run",
                     "Skipping".bold()
                 );
                 info!("{} data of {target} for {source}:", "Upload".bold());
