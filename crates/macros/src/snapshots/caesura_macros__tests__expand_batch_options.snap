@@ -56,6 +56,18 @@ pub struct BatchOptionsPartial {
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub wait_before_upload: Option<String>,
+    /// Path to a bash script to run after each successful transcode target.
+    ///
+    /// The script receives one argument: a YAML payload file path.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub post_transcode_hook: Option<PathBuf>,
+    /// Path to a bash script to run after each successful upload target.
+    ///
+    /// The script receives one argument: a YAML payload file path.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub post_upload_hook: Option<PathBuf>,
 }
 impl BatchOptionsPartial {
     fn resolve_internal(
@@ -73,6 +85,8 @@ impl BatchOptionsPartial {
         let limit = self.limit;
         let no_limit = self.no_limit;
         let wait_before_upload = self.wait_before_upload;
+        let post_transcode_hook = self.post_transcode_hook;
+        let post_upload_hook = self.post_upload_hook;
         let resolved = BatchOptions {
             spectrogram: spectrogram.unwrap_or_default(),
             transcode: transcode.unwrap_or_default(),
@@ -81,6 +95,8 @@ impl BatchOptionsPartial {
             limit: limit.unwrap_or_else(|| 3),
             no_limit: no_limit.unwrap_or_default(),
             wait_before_upload,
+            post_transcode_hook,
+            post_upload_hook,
         };
         if validate {
             resolved.validate(&mut errors);
@@ -116,6 +132,12 @@ impl ::caesura_options::OptionsPartialContract for BatchOptionsPartial {
         if self.wait_before_upload.is_none() {
             self.wait_before_upload = other.wait_before_upload;
         }
+        if self.post_transcode_hook.is_none() {
+            self.post_transcode_hook = other.post_transcode_hook;
+        }
+        if self.post_upload_hook.is_none() {
+            self.post_upload_hook = other.post_upload_hook;
+        }
     }
     fn resolve_without_validation(self) -> BatchOptions {
         self.resolve_internal(false).expect("validation disabled")
@@ -139,6 +161,8 @@ impl ::std::default::Default for BatchOptions {
             limit: 3,
             no_limit: ::std::default::Default::default(),
             wait_before_upload: ::std::option::Option::None,
+            post_transcode_hook: ::std::option::Option::None,
+            post_upload_hook: ::std::option::Option::None,
         }
     }
 }
@@ -182,6 +206,16 @@ impl ::caesura_options::Documented for BatchOptions {
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
                 description :
                 "Wait for a duration before uploading the torrent.<br>The duration is a string that can be parsed such as `500ms`, `5m`, `1h30m15s`.",
+                }, ::caesura_options::FieldDoc { config_key : "post_transcode_hook",
+                cli_flag : "--post-transcode-hook", field_type : "Option<PathBuf>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Path to a bash script to run after each successful transcode target.<br>The script receives one argument: a YAML payload file path.",
+                }, ::caesura_options::FieldDoc { config_key : "post_upload_hook",
+                cli_flag : "--post-upload-hook", field_type : "Option<PathBuf>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Path to a bash script to run after each successful upload target.<br>The script receives one argument: a YAML payload file path.",
                 }
             ],
         });

@@ -96,6 +96,12 @@ no_png_to_jpg: false
 # Directory where transcodes and spectrograms will be written.
 # Default: `~/.local/share/caesura/output/` or platform equivalent
 output: /test/output
+# Path to a bash script to run after each successful transcode target.
+# The script receives one argument: a YAML payload file path.
+post_transcode_hook: null
+# Path to a bash script to run after each successful upload target.
+# The script receives one argument: a YAML payload file path.
+post_upload_hook: null
 # A path to either a directory of `.torrent` files or a single YAML queue file.
 # If you set this to the directory your torrent client stores `.torrent` files then caesura
 # will automatically load everything from your client.

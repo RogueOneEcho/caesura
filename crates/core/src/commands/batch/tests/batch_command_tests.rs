@@ -1,5 +1,6 @@
 use crate::testing_prelude::*;
 use flat_db::Hash;
+use std::fs;
 
 /// Test that `BatchCommand` succeeds with an empty queue.
 #[tokio::test]
@@ -426,6 +427,290 @@ async fn batch_command_upload_saves_status() -> Result<(), TestError> {
     assert!(updated.transcode.is_some());
     assert!(updated.upload.is_some(), "upload status should be saved");
     assert!(updated.upload.as_ref().expect("checked").success);
+
+    Ok(())
+}
+
+/// Test that `BatchCommand` executes `post_transcode_hook` with a payload.
+#[tokio::test]
+async fn batch_command_post_transcode_hook_receives_payload() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
+    let hook_dir = TempDirectory::create("batch_post_transcode_hook");
+    let hook_path = hook_dir.join("post-transcode-hook.sh");
+    let hook_payload_path = hook_dir.join("post-transcode-payload.yml");
+    let script = format!(
+        "#!/usr/bin/env bash\nset -euo pipefail\ncp \"$1\" \"{}\"\n",
+        hook_payload_path.display()
+    );
+    fs::write(&hook_path, script)?;
+
+    let host = HostBuilder::new()
+        .with_mock_api(album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(BatchOptions {
+            transcode: true,
+            post_transcode_hook: Some(hook_path),
+            ..BatchOptions::default()
+        })
+        .with_options(TargetOptions {
+            target: vec![TargetFormat::_320],
+            ..TargetOptions::default()
+        })
+        .with_options(QueueAddArgs {
+            queue_add_path: Some(torrent_dir.to_path_buf()),
+        })
+        .expect_build();
+
+    let add_command = host.services.get_required::<QueueAddCommand>();
+    add_command.execute_cli().await?;
+
+    let queue = host.services.get_required::<Queue>();
+    let items = queue.get_all().await?;
+    let (hash, _) = items.iter().next().expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
+    item.id = Some(AlbumConfig::TORRENT_ID);
+    item.verify = Some(VerifyStatus::verified());
+    queue.set(item).await?;
+
+    let batch_command = host.services.get_required::<BatchCommand>();
+
+    // Act
+    let result = batch_command.execute_cli().await;
+
+    // Assert
+    assert!(matches!(result, Ok(true)));
+    assert!(
+        hook_payload_path.is_file(),
+        "post-transcode hook should write payload file"
+    );
+    let payload_yaml = fs::read_to_string(&hook_payload_path)?;
+    let payload: serde_yaml::Value = serde_yaml::from_str(&payload_yaml)?;
+    assert!(
+        payload
+            .get("torrent_id")
+            .is_some_and(serde_yaml::Value::is_null)
+    );
+    assert!(
+        payload
+            .get("group_id")
+            .and_then(serde_yaml::Value::as_u64)
+            .is_some()
+    );
+    assert!(
+        payload
+            .get("permalink")
+            .is_some_and(serde_yaml::Value::is_null)
+    );
+    assert!(
+        payload
+            .get("source_name")
+            .and_then(serde_yaml::Value::as_str)
+            .is_some()
+    );
+    assert!(
+        payload
+            .get("source_path")
+            .and_then(serde_yaml::Value::as_str)
+            .is_some()
+    );
+    let transcode_path = payload
+        .get("transcode_path")
+        .and_then(serde_yaml::Value::as_str)
+        .expect("transcode_path should be set");
+    assert!(
+        Path::new(transcode_path).is_dir(),
+        "transcode_path should exist: {transcode_path}"
+    );
+    let torrent_path = payload
+        .get("torrent_path")
+        .and_then(serde_yaml::Value::as_str)
+        .expect("torrent_path should be set");
+    assert!(
+        Path::new(torrent_path).is_file(),
+        "torrent_path should exist: {torrent_path}"
+    );
+
+    Ok(())
+}
+
+/// Test that `BatchCommand` executes `post_upload_hook` with upload metadata.
+#[tokio::test]
+async fn batch_command_post_upload_hook_receives_payload() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
+    let hook_dir = TempDirectory::create("batch_post_upload_hook");
+    let hook_path = hook_dir.join("post-upload-hook.sh");
+    let hook_payload_path = hook_dir.join("post-upload-payload.yml");
+    let script = format!(
+        "#!/usr/bin/env bash\nset -euo pipefail\ncp \"$1\" \"{}\"\n",
+        hook_payload_path.display()
+    );
+    fs::write(&hook_path, script)?;
+
+    let host = HostBuilder::new()
+        .with_mock_api(album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(BatchOptions {
+            transcode: true,
+            upload: true,
+            post_upload_hook: Some(hook_path),
+            ..BatchOptions::default()
+        })
+        .with_options(TargetOptions {
+            target: vec![TargetFormat::_320],
+            ..TargetOptions::default()
+        })
+        .with_options(QueueAddArgs {
+            queue_add_path: Some(torrent_dir.to_path_buf()),
+        })
+        .expect_build();
+
+    let add_command = host.services.get_required::<QueueAddCommand>();
+    add_command.execute_cli().await?;
+
+    let queue = host.services.get_required::<Queue>();
+    let items = queue.get_all().await?;
+    let (hash, _) = items.iter().next().expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
+    item.id = Some(AlbumConfig::TORRENT_ID);
+    item.verify = Some(VerifyStatus::verified());
+    queue.set(item).await?;
+
+    let batch_command = host.services.get_required::<BatchCommand>();
+
+    // Act
+    let result = batch_command.execute_cli().await;
+
+    // Assert
+    assert!(matches!(result, Ok(true)));
+    assert!(
+        hook_payload_path.is_file(),
+        "post-upload hook should write payload file"
+    );
+    let payload_yaml = fs::read_to_string(&hook_payload_path)?;
+    let payload: serde_yaml::Value = serde_yaml::from_str(&payload_yaml)?;
+    assert!(
+        payload
+            .get("torrent_id")
+            .and_then(serde_yaml::Value::as_u64)
+            .is_some()
+    );
+    assert!(
+        payload
+            .get("group_id")
+            .and_then(serde_yaml::Value::as_u64)
+            .is_some()
+    );
+    let permalink = payload
+        .get("permalink")
+        .and_then(serde_yaml::Value::as_str)
+        .expect("permalink should be set after upload");
+    assert!(permalink.contains("torrentid="));
+    let transcode_path = payload
+        .get("transcode_path")
+        .and_then(serde_yaml::Value::as_str)
+        .expect("transcode_path should be set");
+    assert!(
+        Path::new(transcode_path).is_dir(),
+        "transcode_path should exist: {transcode_path}"
+    );
+    let torrent_path = payload
+        .get("torrent_path")
+        .and_then(serde_yaml::Value::as_str)
+        .expect("torrent_path should be set");
+    assert!(
+        Path::new(torrent_path).is_file(),
+        "torrent_path should exist: {torrent_path}"
+    );
+
+    Ok(())
+}
+
+/// Test that dry-run batch upload skips hook side effects.
+#[tokio::test]
+async fn batch_command_dry_run_skips_hook_side_effects() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let test_dir = TestDirectory::new();
+    let torrent_dir = album.single_torrent_dir();
+    let hook_dir = TempDirectory::create("batch_dry_run_hooks");
+
+    let post_transcode_hook_path = hook_dir.join("post-transcode-hook.sh");
+    let post_transcode_payload = hook_dir.join("post-transcode-payload.yml");
+    let post_transcode_script = format!(
+        "#!/usr/bin/env bash\nset -euo pipefail\ncp \"$1\" \"{}\"\n",
+        post_transcode_payload.display()
+    );
+    fs::write(&post_transcode_hook_path, post_transcode_script)?;
+
+    let post_upload_hook_path = hook_dir.join("post-upload-hook.sh");
+    let post_upload_payload = hook_dir.join("post-upload-payload.yml");
+    let post_upload_script = format!(
+        "#!/usr/bin/env bash\nset -euo pipefail\ncp \"$1\" \"{}\"\n",
+        post_upload_payload.display()
+    );
+    fs::write(&post_upload_hook_path, post_upload_script)?;
+
+    let host = HostBuilder::new()
+        .with_mock_api(album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(BatchOptions {
+            transcode: true,
+            upload: true,
+            post_transcode_hook: Some(post_transcode_hook_path),
+            post_upload_hook: Some(post_upload_hook_path),
+            ..BatchOptions::default()
+        })
+        .with_options(UploadOptions {
+            dry_run: true,
+            ..UploadOptions::default()
+        })
+        .with_options(TargetOptions {
+            target: vec![TargetFormat::_320],
+            ..TargetOptions::default()
+        })
+        .with_options(QueueAddArgs {
+            queue_add_path: Some(torrent_dir.to_path_buf()),
+        })
+        .expect_build();
+
+    let add_command = host.services.get_required::<QueueAddCommand>();
+    add_command.execute_cli().await?;
+
+    let queue = host.services.get_required::<Queue>();
+    let items = queue.get_all().await?;
+    let (hash, _) = items.iter().next().expect("should have item");
+    let mut item = queue.get(*hash).await?.expect("should have item");
+    item.id = Some(AlbumConfig::TORRENT_ID);
+    item.verify = Some(VerifyStatus::verified());
+    queue.set(item).await?;
+
+    let batch_command = host.services.get_required::<BatchCommand>();
+
+    // Act
+    let result = batch_command.execute_cli().await;
+
+    // Assert
+    assert!(matches!(result, Ok(true)));
+    assert!(
+        !post_transcode_payload.exists(),
+        "post-transcode hook should be skipped during dry run"
+    );
+    assert!(
+        !post_upload_payload.exists(),
+        "post-upload hook should be skipped during dry run"
+    );
 
     Ok(())
 }

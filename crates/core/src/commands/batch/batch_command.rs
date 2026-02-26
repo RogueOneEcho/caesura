@@ -1,7 +1,11 @@
 use crate::prelude::*;
 use gazelle_api::{ApiResponseKind, GazelleError, GazelleOperation};
+use serde::Serialize;
 use std::error::Error;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{env, process};
+use tokio::fs::{remove_file, write};
+use tokio::process::Command;
 use tokio::time::sleep;
 
 const PAUSE_DURATION: u64 = 10;
@@ -17,6 +21,7 @@ pub(crate) struct BatchCommand {
     spectrogram: Ref<SpectrogramCommand>,
     transcode: Ref<TranscodeCommand>,
     upload: Ref<UploadCommand>,
+    paths: Ref<PathManager>,
     queue: Ref<Queue>,
 }
 
@@ -30,6 +35,7 @@ impl BatchCommand {
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;
         let upload_enabled = self.batch_options.upload;
+        let dry_run = upload_enabled && self.upload_options.dry_run;
         let indexer = self.shared_options.indexer.clone();
         let limit = self.batch_options.get_limit();
         let items = self
@@ -149,31 +155,87 @@ impl BatchCommand {
                 item.spectrogram = Some(SpectrogramStatus::new(result));
             }
             if transcode_enabled {
-                let result = self.transcode.execute(&source).await;
-                let success = result.is_ok();
-                if let Err(e) = &result {
+                let transcode_result = self.transcode.execute(&source).await;
+                let transcode_formats = transcode_result
+                    .as_ref()
+                    .ok()
+                    .map(|success| success.formats.clone())
+                    .unwrap_or_default();
+                let transcode_success = transcode_result.is_ok();
+                if let Err(e) = &transcode_result {
                     error!("{}", e.render());
                 }
-                let status = TranscodeStatus::new(result);
+                let status = TranscodeStatus::new(transcode_result);
                 item.transcode = Some(status);
-                if !success {
+                if !transcode_success {
                     self.queue
                         .set(item)
                         .await
                         .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                     continue;
                 }
+                if let Some(post_transcode_hook) = &self.batch_options.post_transcode_hook {
+                    if dry_run {
+                        info!(
+                            "{} post-transcode hook as upload dry run is enabled",
+                            "Skipping".bold()
+                        );
+                    } else {
+                        for format in &transcode_formats {
+                            let torrent_path = self.paths.get_torrent_path(&source, format.format);
+                            let payload = self.create_hook_payload(
+                                &source,
+                                &format.path,
+                                &torrent_path,
+                                None,
+                            );
+                            if let Err(e) = self.execute_hook(post_transcode_hook, &payload).await {
+                                warn!("{}", e.render());
+                            }
+                        }
+                    }
+                }
                 if upload_enabled {
                     if let Some(wait_before_upload) = self.batch_options.get_wait_before_upload() {
                         info!("{} {wait_before_upload:?} before upload", "Waiting".bold());
                         sleep(wait_before_upload).await;
                     }
-                    let result = self.upload.execute(&source).await;
-                    if let Err(e) = &result {
+                    let upload_result = self.upload.execute(&source).await;
+                    let upload_formats = upload_result
+                        .as_ref()
+                        .ok()
+                        .map(|success| success.formats.clone())
+                        .unwrap_or_default();
+                    if let Err(e) = &upload_result {
                         error!("{}", e.render());
                     }
-                    if !self.upload_options.dry_run {
-                        item.upload = Some(UploadStatus::new(result));
+                    if let Some(post_upload_hook) = &self.batch_options.post_upload_hook {
+                        if dry_run {
+                            info!(
+                                "{} post-upload hook as upload dry run is enabled",
+                                "Skipping".bold()
+                            );
+                        } else {
+                            for format in upload_formats {
+                                let transcode_path =
+                                    self.paths.get_transcode_target_dir(&source, format.format);
+                                let torrent_path =
+                                    self.paths.get_torrent_path(&source, format.format);
+                                let payload = self.create_hook_payload(
+                                    &source,
+                                    &transcode_path,
+                                    &torrent_path,
+                                    Some(format.id),
+                                );
+                                if let Err(e) = self.execute_hook(post_upload_hook, &payload).await
+                                {
+                                    warn!("{}", e.render());
+                                }
+                            }
+                        }
+                    }
+                    if !dry_run {
+                        item.upload = Some(UploadStatus::new(upload_result));
                     }
                 }
             }
@@ -192,6 +254,76 @@ impl BatchCommand {
         info!("{} batch process of {count} items", "Completed".bold());
         Ok(true)
     }
+
+    fn create_hook_payload(
+        &self,
+        source: &Source,
+        transcode_path: &Path,
+        torrent_path: &Path,
+        torrent_id: Option<u32>,
+    ) -> BatchHookPayload {
+        let permalink = torrent_id
+            .map(|id| get_permalink(&self.shared_options.indexer_url, source.group.id, id));
+        BatchHookPayload {
+            torrent_id,
+            group_id: Some(source.group.id),
+            permalink,
+            source_name: SourceName::get(&source.metadata),
+            source_path: source.directory.to_string_lossy().to_string(),
+            transcode_path: transcode_path.to_string_lossy().to_string(),
+            torrent_path: torrent_path.to_string_lossy().to_string(),
+        }
+    }
+
+    async fn execute_hook(
+        &self,
+        hook_path: &Path,
+        payload: &BatchHookPayload,
+    ) -> Result<(), Failure<BatchAction>> {
+        let payload_yaml = serde_yaml::to_string(payload)
+            .map_err(Failure::wrap(BatchAction::SerializeHookPayload))?;
+        let payload_path = Self::get_hook_payload_path();
+        write(&payload_path, payload_yaml)
+            .await
+            .map_err(Failure::wrap_with_path(
+                BatchAction::WriteHookPayload,
+                &payload_path,
+            ))?;
+        let mut command = Command::new("bash");
+        command.arg(hook_path).arg(&payload_path);
+        let result = command
+            .run()
+            .await
+            .map_err(Failure::wrap_with_path(BatchAction::ExecuteHook, hook_path));
+        if let Err(error) = remove_file(&payload_path).await {
+            warn!(
+                "{} to remove hook payload {}: {error}",
+                "Failed".bold(),
+                payload_path.display()
+            );
+        }
+        result?;
+        trace!("{} hook {}", "Executed".bold(), hook_path.display());
+        Ok(())
+    }
+
+    fn get_hook_payload_path() -> PathBuf {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_or(0, |value| value.as_nanos());
+        env::temp_dir().join(format!("caesura-hook-{}-{timestamp}.yml", process::id()))
+    }
+}
+
+#[derive(Serialize)]
+struct BatchHookPayload {
+    torrent_id: Option<u32>,
+    group_id: Option<u32>,
+    permalink: Option<String>,
+    source_name: String,
+    source_path: String,
+    transcode_path: String,
+    torrent_path: String,
 }
 
 async fn pause() {

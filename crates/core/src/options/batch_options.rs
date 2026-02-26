@@ -39,6 +39,18 @@ pub struct BatchOptions {
     /// The duration is a string that can be parsed such as `500ms`, `5m`, `1h30m15s`.
     #[arg(long)]
     pub wait_before_upload: Option<String>,
+
+    /// Path to a bash script to run after each successful transcode target.
+    ///
+    /// The script receives one argument: a YAML payload file path.
+    #[arg(long)]
+    pub post_transcode_hook: Option<PathBuf>,
+
+    /// Path to a bash script to run after each successful upload target.
+    ///
+    /// The script receives one argument: a YAML payload file path.
+    #[arg(long)]
+    pub post_upload_hook: Option<PathBuf>,
 }
 
 impl BatchOptions {
@@ -74,6 +86,22 @@ impl OptionsContract for BatchOptions {
             errors.push(OptionRule::Dependent(
                 "Upload".to_owned(),
                 "Transcode".to_owned(),
+            ));
+        }
+        if let Some(path) = &self.post_transcode_hook
+            && !path.is_file()
+        {
+            errors.push(OptionRule::DoesNotExist(
+                "Post transcode hook".to_owned(),
+                path.to_string_lossy().to_string(),
+            ));
+        }
+        if let Some(path) = &self.post_upload_hook
+            && !path.is_file()
+        {
+            errors.push(OptionRule::DoesNotExist(
+                "Post upload hook".to_owned(),
+                path.to_string_lossy().to_string(),
             ));
         }
     }

@@ -11,6 +11,12 @@ pub enum BatchAction {
     UpdateQueueItem,
     #[error("get source")]
     GetSource,
+    #[error("serialize hook payload")]
+    SerializeHookPayload,
+    #[error("write hook payload")]
+    WriteHookPayload,
+    #[error("execute hook")]
+    ExecuteHook,
 }
 
 /// Errors that can occur during batch processing.

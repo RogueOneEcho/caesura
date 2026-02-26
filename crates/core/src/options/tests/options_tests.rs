@@ -211,6 +211,28 @@ fn batch_options_accepts_valid_wait_duration() {
     assert!(result.is_ok());
 }
 
+/// Verify invalid post-hook paths are rejected.
+#[test]
+fn batch_options_rejects_missing_hook_paths() {
+    let result = BatchOptionsPartial {
+        post_transcode_hook: Some(PathBuf::from("/does/not/exist/transcode-hook.sh")),
+        post_upload_hook: Some(PathBuf::from("/does/not/exist/upload-hook.sh")),
+        ..BatchOptionsPartial::default()
+    }
+    .resolve();
+    let errors = result.expect_err("should reject missing hook paths");
+    assert!(
+        errors.iter().any(
+            |e| matches!(e, OptionRule::DoesNotExist(name, _) if name == "Post transcode hook")
+        )
+    );
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::DoesNotExist(name, _) if name == "Post upload hook"))
+    );
+}
+
 /// Verify explicitly empty `target` list is rejected.
 #[test]
 fn target_options_rejects_empty_target_list() {
@@ -245,6 +267,8 @@ fn batch_options_yaml_round_trip() {
         limit: Some(5),
         no_limit: Some(false),
         wait_before_upload: Some("10m".to_owned()),
+        post_transcode_hook: Some(PathBuf::from("/tmp/transcode-hook.sh")),
+        post_upload_hook: Some(PathBuf::from("/tmp/upload-hook.sh")),
         ..BatchOptionsPartial::default()
     };
 
@@ -258,6 +282,8 @@ fn batch_options_yaml_round_trip() {
     assert_eq!(original.upload, parsed.upload);
     assert_eq!(original.limit, parsed.limit);
     assert_eq!(original.wait_before_upload, parsed.wait_before_upload);
+    assert_eq!(original.post_transcode_hook, parsed.post_transcode_hook);
+    assert_eq!(original.post_upload_hook, parsed.post_upload_hook);
 }
 
 /// Verify `TargetOptionsPartial` round-trips through YAML.

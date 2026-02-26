@@ -9,3 +9,5 @@ upload: false
 limit: 3
 no_limit: false
 wait_before_upload: ~
+post_transcode_hook: ~
+post_upload_hook: ~
