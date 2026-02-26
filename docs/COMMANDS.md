@@ -159,7 +159,9 @@ caesura publish /path/to/publish.yml
 >
 > If `copy_torrent_to` is set, the source `.torrent` is copied to that autoadd directory.
 >
-> If source staging, verification, or torrent injection fails then `publish` fails before upload.
+> If source staging or verification fails then `publish` fails before upload.
+>
+> If torrent injection fails then `publish` logs a warning and continues the upload.
 >
 > In dry-run mode no source staging or torrent injection is performed.
 >

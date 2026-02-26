@@ -632,6 +632,64 @@ async fn publish_copies_torrent_to_injection_directory() -> Result<(), TestError
 }
 
 #[tokio::test]
+async fn publish_injection_failure_is_non_fatal() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = create_new_group_manifest(source_path);
+    manifest.validate()?;
+    let content_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_content");
+    let output_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_output");
+    let injection_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_injection");
+    let injection_path = injection_dir.to_path_buf();
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_115,
+        group_id: 600_115,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(TorrentInjectionOptions {
+            copy_torrent_to: Some(injection_path.clone()),
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+    fs::remove_dir_all(&injection_path)?;
+
+    // Act
+    let result = command.execute(&manifest).await;
+
+    // Assert
+    assert!(
+        result.is_ok(),
+        "publish should continue when torrent injection fails"
+    );
+    let success = result.expect("checked");
+    assert!(success.response.is_some(), "publish should still upload");
+    assert!(
+        !success.warnings.is_empty(),
+        "publish should record injection warning"
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn publish_dry_run_does_not_stage_or_inject() -> Result<(), TestError> {
     // Arrange
     init_logger();

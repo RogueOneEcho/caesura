@@ -2,7 +2,6 @@ use std::collections::HashSet;
 
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
-use tokio::fs::{copy, hard_link};
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
@@ -88,11 +87,16 @@ impl UploadCommand {
                     warnings.push(e.to_error());
                 }
             }
-            if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to
-                && let Err(e) = self.copy_torrent(source, &target, torrent_dir).await
-            {
-                warn!("{}", e.render());
-                warnings.push(e.to_error());
+            if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to {
+                inject_torrent_or_warn(
+                    &torrent_path,
+                    torrent_dir,
+                    self.copy_options.hard_link,
+                    UploadAction::HardLinkTorrent,
+                    UploadAction::CopyTorrent,
+                    &mut warnings,
+                )
+                .await;
             }
             let form = UploadForm {
                 path: torrent_path,
@@ -161,43 +165,6 @@ impl UploadCommand {
             verb.bold(),
             source_path.display(),
             target_dir.display()
-        );
-        Ok(())
-    }
-
-    async fn copy_torrent(
-        &self,
-        source: &Source,
-        target: &TargetFormat,
-        target_dir: &Path,
-    ) -> Result<(), Failure<UploadAction>> {
-        let source_path = self.paths.get_torrent_path(source, *target);
-        let source_file_name = source_path
-            .file_name()
-            .expect("torrent path should have a name");
-        let target_path = target_dir.join(source_file_name);
-        let verb = if self.copy_options.hard_link {
-            hard_link(&source_path, &target_path)
-                .await
-                .map_err(Failure::wrap_with_path(
-                    UploadAction::HardLinkTorrent,
-                    &target_path,
-                ))?;
-            "Hard Linked"
-        } else {
-            copy(&source_path, &target_path)
-                .await
-                .map_err(Failure::wrap_with_path(
-                    UploadAction::CopyTorrent,
-                    &target_path,
-                ))?;
-            "Copied"
-        };
-        trace!(
-            "{} {} to {}",
-            verb.bold(),
-            source_path.display(),
-            target_path.display()
         );
         Ok(())
     }

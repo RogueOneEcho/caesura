@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadResponse};
-use tokio::fs::{copy, rename};
+use tokio::fs::rename;
 
 /// Result of a publish operation.
 #[derive(Debug)]
@@ -9,6 +9,7 @@ pub(crate) struct PublishSuccess {
     pub permalink: Option<String>,
     pub next_transcode: Option<String>,
     pub next_upload: Option<String>,
+    pub warnings: Vec<rogue_logging::Error>,
 }
 
 /// Publish a source FLAC torrent from a local directory using a manifest.
@@ -18,6 +19,7 @@ pub(crate) struct PublishCommand {
     shared_options: Ref<SharedOptions>,
     publish_seeding_options: Ref<PublishSeedingOptions>,
     torrent_injection_options: Ref<TorrentInjectionOptions>,
+    copy_options: Ref<CopyOptions>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     paths: Ref<PathManager>,
 }
@@ -40,6 +42,12 @@ impl PublishCommand {
             .map_err(Failure::wrap(PublishAction::ValidateManifest))?;
 
         let result = self.execute(&manifest).await?;
+        if !result.warnings.is_empty() {
+            trace!(
+                "Publish completed with {} warning(s)",
+                result.warnings.len()
+            );
+        }
         if let Some(response) = result.response {
             info!("{} source FLAC", "Published".bold());
             if let Some(link) = result.permalink {
@@ -70,6 +78,7 @@ impl PublishCommand {
         &self,
         manifest: &PublishManifest,
     ) -> Result<PublishSuccess, Failure<PublishAction>> {
+        let mut warnings = Vec::new();
         let indexer = self.shared_options.indexer_lowercase();
         if indexer != "red" {
             return Err(Failure::new(
@@ -132,7 +141,11 @@ impl PublishCommand {
                 );
             }
             if self.torrent_injection_options.copy_torrent_to.is_some() {
-                trace!("Dry run: torrent would be copied to autoadd directory");
+                if self.copy_options.hard_link {
+                    trace!("Dry run: torrent would be hard linked to autoadd directory");
+                } else {
+                    trace!("Dry run: torrent would be copied to autoadd directory");
+                }
             }
         } else {
             if source_already_staged {
@@ -183,22 +196,15 @@ impl PublishCommand {
                 .await?;
 
             if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to {
-                let torrent_file_name = torrent_path
-                    .file_name()
-                    .expect("torrent path should have a file name");
-                let target_path = torrent_dir.join(torrent_file_name);
-                copy(&torrent_path, &target_path)
-                    .await
-                    .map_err(Failure::wrap_with_path(
-                        PublishAction::InjectTorrent,
-                        &target_path,
-                    ))?;
-                trace!(
-                    "{} {} to {}",
-                    "Copied".bold(),
-                    torrent_path.display(),
-                    target_path.display()
-                );
+                inject_torrent_or_warn(
+                    &torrent_path,
+                    torrent_dir,
+                    self.copy_options.hard_link,
+                    PublishAction::InjectTorrent,
+                    PublishAction::InjectTorrent,
+                    &mut warnings,
+                )
+                .await;
             }
         }
         let source_title = match manifest.mode {
@@ -232,6 +238,7 @@ impl PublishCommand {
                         permalink: None,
                         next_transcode: None,
                         next_upload: None,
+                        warnings,
                     });
                 }
                 let response = self
@@ -251,6 +258,7 @@ impl PublishCommand {
                     permalink: Some(permalink),
                     next_transcode: Some(next_transcode),
                     next_upload: Some(next_upload),
+                    warnings,
                 })
             }
             PublishMode::ExistingGroup => {
@@ -298,6 +306,7 @@ impl PublishCommand {
                         permalink: None,
                         next_transcode: None,
                         next_upload: None,
+                        warnings,
                     });
                 }
                 let response = self
@@ -317,6 +326,7 @@ impl PublishCommand {
                     permalink: Some(permalink),
                     next_transcode: Some(next_transcode),
                     next_upload: Some(next_upload),
+                    warnings,
                 })
             }
         }
