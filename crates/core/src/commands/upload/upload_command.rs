@@ -2,7 +2,12 @@ use std::collections::HashSet;
 
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
-use tokio::fs::{copy, hard_link};
+use qbit_rs::Qbit;
+use qbit_rs::model::{
+    AddTorrentArg, Credential, GetTorrentListArg, State, TorrentFile, TorrentSource,
+};
+use tokio::fs::{copy, hard_link, read};
+use tokio::time::{Duration, sleep};
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
@@ -94,7 +99,7 @@ impl UploadCommand {
                 warnings.push(e.to_error());
             }
             let form = UploadForm {
-                path: torrent_path,
+                path: torrent_path.clone(),
                 category_id: MUSIC_CATEGORY_ID,
                 remaster_year: source.metadata.year,
                 remaster_title: source.torrent.remaster_title.clone(),
@@ -122,9 +127,118 @@ impl UploadCommand {
             let id = response.torrent_id;
             let link = get_permalink(base, response.group_id, id);
             info!("{link}");
+            if let Err(e) = self.inject_torrent(&torrent_path).await {
+                warn!("{}", e.render());
+                warnings.push(e.to_error());
+            }
             formats.push(UploadFormatStatus { format: target, id });
         }
         Ok(UploadSuccess { formats, warnings })
+    }
+
+    async fn inject_torrent(&self, torrent_path: &Path) -> Result<(), Failure<UploadAction>> {
+        let Some(client) = self.upload_options.torrent_client else {
+            return Ok(());
+        };
+        match client {
+            TorrentClient::Qbittorrent => self.inject_qbittorrent_torrent(torrent_path).await,
+        }
+    }
+
+    async fn inject_qbittorrent_torrent(
+        &self,
+        torrent_path: &Path,
+    ) -> Result<(), Failure<UploadAction>> {
+        let (Some(url), Some(username), Some(password)) = (
+            &self.upload_options.torrent_client_url,
+            &self.upload_options.torrent_client_username,
+            &self.upload_options.torrent_client_password,
+        ) else {
+            return Ok(());
+        };
+        let data = read(torrent_path).await.map_err(Failure::wrap_with_path(
+            UploadAction::ReadTorrentForClientInjection,
+            torrent_path,
+        ))?;
+        let filename = torrent_path
+            .file_name()
+            .expect("torrent path should have a filename")
+            .to_string_lossy()
+            .to_string();
+        let mut add = AddTorrentArg {
+            source: TorrentSource::TorrentFiles {
+                torrents: vec![TorrentFile { filename, data }],
+            },
+            savepath: self.upload_options.torrent_client_savepath.clone(),
+            category: self.upload_options.torrent_client_category.clone(),
+            tags: self
+                .upload_options
+                .torrent_client_tags
+                .as_ref()
+                .and_then(|tags| {
+                    let tags = tags
+                        .iter()
+                        .map(|tag| tag.trim())
+                        .filter(|tag| !tag.is_empty())
+                        .collect::<Vec<_>>();
+                    (!tags.is_empty()).then(|| tags.join(","))
+                }),
+            ..AddTorrentArg::default()
+        };
+        if self.upload_options.torrent_client_paused {
+            add.paused = Some("true".to_owned());
+        }
+        if self.upload_options.torrent_client_skip_checking {
+            add.skip_checking = Some("true".to_owned());
+        }
+        let endpoint =
+            reqwest::Url::parse(url).map_err(Failure::wrap(UploadAction::InjectTorrentClient))?;
+        let client = Qbit::new(
+            endpoint,
+            Credential::new(username.clone(), password.clone()),
+        );
+        client
+            .add_torrent(&add)
+            .await
+            .map_err(Failure::wrap(UploadAction::InjectTorrentClient))?;
+        let info_hash = match TorrentReader::execute(torrent_path).await {
+            Ok(torrent) => torrent.info_hash(),
+            Err(e) => {
+                warn!(
+                    "{} to verify injected torrent state in qBittorrent: {}",
+                    "Failed".bold(),
+                    e.render()
+                );
+                trace!(
+                    "{} {} via qBittorrent API",
+                    "Injected".bold(),
+                    torrent_path.display()
+                );
+                return Ok(());
+            }
+        };
+        sleep(Duration::from_millis(500)).await;
+        let state = client
+            .get_torrent_list(GetTorrentListArg {
+                hashes: Some(info_hash),
+                ..GetTorrentListArg::default()
+            })
+            .await
+            .map_err(Failure::wrap(UploadAction::InjectTorrentClient))?
+            .first()
+            .and_then(|torrent| torrent.state.clone());
+        if state == Some(State::MissingFiles) {
+            warn!(
+                "Torrent injected into qBittorrent but data files are missing for seeding. \
+Set `torrent_client_savepath` to a path qBittorrent can access and copy transcodes there (for example with `copy_transcode_to`)."
+            );
+        }
+        trace!(
+            "{} {} via qBittorrent API",
+            "Injected".bold(),
+            torrent_path.display()
+        );
+        Ok(())
     }
 
     async fn copy_transcode(
