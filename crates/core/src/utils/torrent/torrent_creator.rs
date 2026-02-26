@@ -40,13 +40,24 @@ impl TorrentCreator {
         announce_url: String,
         source: String,
     ) -> Result<(), Failure<TorrentCreateAction>> {
+        Self::create_with_name(content_dir, output_path, announce_url, source, None).await
+    }
+
+    /// Create a `.torrent` file for the given content directory, optionally overriding `info.name`.
+    pub async fn create_with_name(
+        content_dir: &Path,
+        output_path: &Path,
+        announce_url: String,
+        source: String,
+        torrent_name: Option<String>,
+    ) -> Result<(), Failure<TorrentCreateAction>> {
         let content_dir = content_dir.to_path_buf();
         let output_path = output_path.to_path_buf();
         spawn_blocking(move || {
             let content_size = dir_size(&content_dir)?;
             let pl = piece_length(content_size);
             let created_by = format!("{APP_NAME} {}", app_version_or_describe());
-            let torrent = TorrentBuilder::new(&content_dir, pl)
+            let builder = TorrentBuilder::new(&content_dir, pl)
                 .set_num_threads(num_threads())
                 .set_announce(Some(announce_url))
                 .set_privacy(true)
@@ -55,12 +66,16 @@ impl TorrentCreator {
                 .add_extra_info_field(
                     "source".to_owned(),
                     BencodeElem::String(source.to_uppercase()),
-                )
-                .build()
-                .map_err(Failure::wrap_with_path(
-                    TorrentCreateAction::BuildTorrent,
-                    &content_dir,
-                ))?;
+                );
+            let builder = if let Some(name) = torrent_name {
+                builder.set_name(name)
+            } else {
+                builder
+            };
+            let torrent = builder.build().map_err(Failure::wrap_with_path(
+                TorrentCreateAction::BuildTorrent,
+                &content_dir,
+            ))?;
             torrent
                 .write_into_file(&output_path)
                 .map_err(Failure::wrap_with_path(
