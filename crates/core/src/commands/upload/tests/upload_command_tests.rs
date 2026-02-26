@@ -34,12 +34,15 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
     init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
+    let content_target = TempDirectory::create("dry_run_content_target");
+    let copy_target = TempDirectory::create("dry_run_copy_target");
+    let torrent_copy_target = TempDirectory::create("dry_run_torrent_copy_target");
     let host = HostBuilder::new()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            content: vec![content_target.to_path_buf(), SAMPLE_SOURCES_DIR.clone()],
             output: SAMPLE_TRANSCODES_DIR.clone(),
             ..SharedOptions::mock()
         })
@@ -53,6 +56,9 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
             torrent_client_url: Some("http://127.0.0.1:1".to_owned()),
             torrent_client_username: Some("admin".to_owned()),
             torrent_client_password: Some("secret".to_owned()),
+            copy_transcode_to_content_dir: true,
+            copy_transcode_to: Some(copy_target.to_path_buf()),
+            copy_torrent_to: Some(torrent_copy_target.to_path_buf()),
             ..UploadOptions::default()
         })
         .expect_build();
@@ -69,6 +75,27 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
         "dry run should not record formats"
     );
     assert!(status.errors.is_none(), "dry run should have no errors");
+    assert!(
+        fs::read_dir(&*content_target)
+            .expect("read content target")
+            .next()
+            .is_none(),
+        "dry run should not copy transcodes to content directory"
+    );
+    assert!(
+        fs::read_dir(&*copy_target)
+            .expect("read custom copy target")
+            .next()
+            .is_none(),
+        "dry run should not copy transcodes to custom directory"
+    );
+    assert!(
+        fs::read_dir(&*torrent_copy_target)
+            .expect("read torrent copy target")
+            .next()
+            .is_none(),
+        "dry run should not copy torrent files"
+    );
 
     Ok(())
 }
