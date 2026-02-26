@@ -691,6 +691,41 @@ async fn publish_dry_run_does_not_stage_or_inject() -> Result<(), TestError> {
     Ok(())
 }
 
+#[tokio::test]
+async fn publish_generates_structured_release_description_for_new_group() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+
+    // Act
+    let description =
+        PublishCommand::create_release_description(&source_path, "Release notes", "FLAC Lossless");
+
+    // Assert
+    assert!(
+        description.contains("Published and uploaded with [url="),
+        "release description should include tool/version header"
+    );
+    assert!(
+        description.contains("Release notes"),
+        "release description should include manifest notes"
+    );
+    assert!(
+        description.contains("[pad=0|10|0|20]Source[/pad] FLAC Lossless"),
+        "release description should include source format/bitrate"
+    );
+    assert!(
+        description.contains("[pad=0|10|0|19]Details[/pad] [pre]"),
+        "release description should include Details section"
+    );
+    assert!(
+        description.contains("[pad=0|10|0|31]Tags[/pad] [hide][pre]"),
+        "release description should include hidden Tags section"
+    );
+    Ok(())
+}
+
 fn create_new_group_manifest(source_path: PathBuf) -> PublishManifest {
     PublishManifest {
         source_path,

@@ -202,10 +202,32 @@ impl PublishCommand {
                 );
             }
         }
+        let source_title = match manifest.mode {
+            PublishMode::NewGroup => {
+                let new_group = manifest
+                    .new_group
+                    .as_ref()
+                    .expect("new_group should be present after validation");
+                format!("{} {}", new_group.edition.format, new_group.edition.bitrate)
+            }
+            PublishMode::ExistingGroup => {
+                let existing_group = manifest
+                    .existing_group
+                    .as_ref()
+                    .expect("existing_group should be present after validation");
+                format!("{} {}", existing_group.format, existing_group.bitrate)
+            }
+        };
+        let release_description = Self::create_release_description(
+            &seeding_source,
+            &manifest.release_desc,
+            &source_title,
+        );
 
         match manifest.mode {
             PublishMode::NewGroup => {
-                let form = manifest.to_new_source_form(torrent_path);
+                let mut form = manifest.to_new_source_form(torrent_path);
+                form.release_desc = release_description.clone();
                 if manifest.dry_run {
                     info!("{} upload as this is a dry run", "Skipping".bold());
                     info!("{} data for source upload:", "Upload".bold());
@@ -271,7 +293,8 @@ impl PublishCommand {
                     ));
                 }
 
-                let form = manifest.to_existing_group_form(torrent_path);
+                let mut form = manifest.to_existing_group_form(torrent_path);
+                form.release_desc = release_description;
                 if manifest.dry_run {
                     info!("{} upload as this is a dry run", "Skipping".bold());
                     info!("{} data for source upload:", "Upload".bold());
@@ -303,6 +326,48 @@ impl PublishCommand {
                 })
             }
         }
+    }
+
+    #[allow(clippy::uninlined_format_args)]
+    pub(crate) fn create_release_description(
+        source_path: &Path,
+        release_notes: &str,
+        source_title: &str,
+    ) -> String {
+        let mut lines = vec![format!(
+            "Published and uploaded with [url={}][b]{}[/b] {}[/url]",
+            APP_HOMEPAGE,
+            APP_NAME,
+            app_version_or_describe()
+        )];
+        lines.push(format!("[pad=0|10|0|20]Source[/pad] {source_title}"));
+        let release_notes = release_notes.trim();
+        if !release_notes.is_empty() {
+            lines.push(format!("[pad=0|10|0|21]Notes[/pad] {release_notes}"));
+        }
+        let factory = InspectFactory::new(false);
+        match factory.create_split(source_path) {
+            Ok((properties, tags)) => {
+                lines.push(format!(
+                    "[pad=0|10|0|19]Details[/pad] [pre]{properties}[/pre]"
+                ));
+                lines.push(format!(
+                    "[pad=0|10|0|31]Tags[/pad] [hide][pre]{tags}[/pre][/hide]"
+                ));
+            }
+            Err(e) => {
+                warn!(
+                    "Unable to add source details to publish description\n{}",
+                    e.render()
+                );
+            }
+        }
+        lines.into_iter().fold(String::new(), |mut output, line| {
+            output.push_str("[quote]");
+            output.push_str(&line);
+            output.push_str("[/quote]");
+            output
+        })
     }
 
     pub(crate) async fn verify_seed_content(

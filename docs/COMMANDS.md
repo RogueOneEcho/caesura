@@ -162,6 +162,9 @@ caesura publish /path/to/publish.yml
 > If source staging, verification, or torrent injection fails then `publish` fails before upload.
 >
 > In dry-run mode no source staging or torrent injection is performed.
+>
+> `publish` auto-generates BBCode release notes (tool/version, source format, details, hidden tags).
+> The `release_desc` value in the manifest is included as the `Notes` line.
 
 ### New group example
 
@@ -171,7 +174,7 @@ torrent_path: /optional/path/to/output.torrent
 manual_checks_ack: true
 dry_run: false
 mode: new_group
-release_desc: "Uploader notes shown on torrent"
+release_desc: "Uploader notes to include under Notes in generated BBCode"
 
 new_group:
   title: "Album Title"
@@ -204,7 +207,7 @@ torrent_path: /optional/path/to/output.torrent
 manual_checks_ack: true
 dry_run: false
 mode: existing_group
-release_desc: "Uploader notes shown on torrent"
+release_desc: "Uploader notes to include under Notes in generated BBCode"
 
 existing_group:
   group_id: 123456
