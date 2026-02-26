@@ -49,6 +49,10 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
         })
         .with_options(UploadOptions {
             dry_run: true,
+            torrent_client: Some(TorrentClient::Qbittorrent),
+            torrent_client_url: Some("http://127.0.0.1:1".to_owned()),
+            torrent_client_username: Some("admin".to_owned()),
+            torrent_client_password: Some("secret".to_owned()),
             ..UploadOptions::default()
         })
         .expect_build();
@@ -65,6 +69,55 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
         "dry run should not record formats"
     );
     assert!(status.errors.is_none(), "dry run should have no errors");
+
+    Ok(())
+}
+
+/// Test that torrent client injection failure is surfaced as a warning.
+#[tokio::test]
+async fn upload_command_torrent_client_injection_failure_is_warning() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+    let test_dir = TestDirectory::new();
+    let host = HostBuilder::new()
+        .with_mock_api(transcode.album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
+        })
+        .with_options(TargetOptions {
+            target: vec![transcode.target],
+            ..TargetOptions::default()
+        })
+        .with_options(UploadOptions {
+            torrent_client: Some(TorrentClient::Qbittorrent),
+            torrent_client_url: Some("http://127.0.0.1:1".to_owned()),
+            torrent_client_username: Some("admin".to_owned()),
+            torrent_client_password: Some("secret".to_owned()),
+            ..UploadOptions::default()
+        })
+        .expect_build();
+    let (source, command) = get_source_and_command(&host).await;
+
+    // Act
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
+
+    // Assert
+    assert!(status.success, "upload should still succeed");
+    let warnings = status
+        .errors
+        .expect("torrent client failure should become warning");
+    assert!(
+        warnings
+            .iter()
+            .any(|warning| warning.action.contains("inject torrent via client API")),
+        "expected torrent client injection warning"
+    );
 
     Ok(())
 }

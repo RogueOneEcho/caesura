@@ -5,4 +5,13 @@ expression: result
 copy_transcode_to_content_dir: false
 copy_transcode_to: ~
 copy_torrent_to: ~
+torrent_client: ~
+torrent_client_url: ~
+torrent_client_username: ~
+torrent_client_password: ~
+torrent_client_savepath: ~
+torrent_client_category: ~
+torrent_client_tags: ~
+torrent_client_paused: false
+torrent_client_skip_checking: false
 dry_run: false
