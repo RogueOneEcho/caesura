@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use gazelle_api::{GazelleClientTrait, GroupResponse};
+use gazelle_api::{Credit, Credits, GazelleClientTrait, Group, GroupResponse};
 use tokio::fs::rename;
 
 /// Result of a publish operation.
@@ -92,25 +92,30 @@ impl PublishCommand {
                 PublishError::UnsupportedIndexer { indexer },
             ));
         }
+        let dry_run = self.arg.dry_run;
+        let existing_group_response = match &manifest.group {
+            PublishGroup::ExistingGroup(existing_group) if !dry_run => Some(
+                self.api
+                    .get_torrent_group(existing_group.group_id)
+                    .await
+                    .map_err(Failure::wrap(PublishAction::GetTorrentGroup))?,
+            ),
+            _ => None,
+        };
+        let source_name = Self::source_torrent_name(manifest, existing_group_response.as_ref());
 
         let torrent_path = manifest.torrent_path.clone().unwrap_or_else(|| {
-            let source_name = manifest
-                .source_path
-                .file_name()
-                .expect("source_path should have a file name")
-                .to_string_lossy()
-                .to_string();
             self.paths
                 .get_output_dir()
                 .join(format!("{source_name}.{indexer}.source.torrent"))
         });
-        let dry_run = self.arg.dry_run;
 
-        TorrentCreator::create(
+        TorrentCreator::create_with_name(
             &manifest.source_path,
             &torrent_path,
             self.shared_options.announce_url.clone(),
             indexer,
+            Some(source_name),
         )
         .await
         .map_err(Failure::wrap(PublishAction::CreateTorrent))?;
@@ -139,6 +144,7 @@ impl PublishCommand {
             PublishGroup::ExistingGroup(existing_group) => {
                 self.publish_existing_group(
                     existing_group,
+                    existing_group_response,
                     torrent_path,
                     release_description,
                     dry_run,
@@ -295,6 +301,7 @@ impl PublishCommand {
     async fn publish_existing_group(
         &self,
         existing_group: &PublishExistingGroup,
+        existing_group_response: Option<GroupResponse>,
         torrent_path: PathBuf,
         release_description: String,
         dry_run: bool,
@@ -315,11 +322,14 @@ impl PublishCommand {
                 warnings,
             });
         }
-        let group = self
-            .api
-            .get_torrent_group(existing_group.group_id)
-            .await
-            .map_err(Failure::wrap(PublishAction::GetTorrentGroup))?;
+        let group = if let Some(group) = existing_group_response {
+            group
+        } else {
+            self.api
+                .get_torrent_group(existing_group.group_id)
+                .await
+                .map_err(Failure::wrap(PublishAction::GetTorrentGroup))?
+        };
         if Self::is_duplicate_existing_group_source(existing_group, &group)? {
             return Err(Failure::new(
                 PublishAction::CheckDuplicate,
@@ -343,16 +353,7 @@ impl PublishCommand {
         existing_group: &PublishExistingGroup,
         group: &GroupResponse,
     ) -> Result<bool, Failure<PublishAction>> {
-        let probe_torrent = gazelle_api::Torrent {
-            media: existing_group.media.to_string(),
-            format: existing_group.format.clone(),
-            encoding: existing_group.bitrate.clone(),
-            remaster_year: Some(existing_group.remaster_year),
-            remaster_title: existing_group.remaster_title.clone(),
-            remaster_record_label: existing_group.remaster_record_label.clone(),
-            remaster_catalogue_number: existing_group.remaster_catalogue_number.clone(),
-            ..gazelle_api::Torrent::default()
-        };
+        let probe_torrent = Self::existing_group_probe_torrent(existing_group);
         let existing = ExistingFormatProvider::get(&probe_torrent, &group.torrents);
         let source_format = ExistingFormat::from_torrent(&probe_torrent).ok_or_else(|| {
             Failure::new(
@@ -361,6 +362,77 @@ impl PublishCommand {
             )
         })?;
         Ok(existing.contains(&source_format))
+    }
+
+    fn source_torrent_name(
+        manifest: &PublishManifest,
+        existing_group_response: Option<&GroupResponse>,
+    ) -> String {
+        let metadata = match (&manifest.group, existing_group_response) {
+            (PublishGroup::NewGroup(new_group), _) => Some(Self::new_group_metadata(new_group)),
+            (PublishGroup::ExistingGroup(existing_group), Some(group)) => {
+                Some(Self::existing_group_metadata(existing_group, group))
+            }
+            (PublishGroup::ExistingGroup(_), None) => None,
+        };
+        metadata.map_or_else(
+            || {
+                manifest
+                    .source_path
+                    .file_name()
+                    .expect("source_path should have a file name")
+                    .to_string_lossy()
+                    .to_string()
+            },
+            |x| TranscodeName::get(&x, TargetFormat::Flac),
+        )
+    }
+
+    fn new_group_metadata(new_group: &PublishNewGroup) -> Metadata {
+        let group = Group {
+            name: new_group.title.clone(),
+            year: new_group.year,
+            music_info: Some(Credits {
+                artists: new_group
+                    .artists
+                    .iter()
+                    .map(|x| Credit {
+                        id: 0,
+                        name: x.name.clone(),
+                    })
+                    .collect(),
+                ..Credits::default()
+            }),
+            ..Group::default()
+        };
+        let torrent = gazelle_api::Torrent {
+            media: new_group.media.to_string(),
+            remaster_year: Some(new_group.edition.year),
+            remaster_title: new_group.edition.title.clone(),
+            ..gazelle_api::Torrent::default()
+        };
+        Metadata::new(&group, &torrent)
+    }
+
+    fn existing_group_metadata(
+        existing_group: &PublishExistingGroup,
+        group: &GroupResponse,
+    ) -> Metadata {
+        let torrent = Self::existing_group_probe_torrent(existing_group);
+        Metadata::new(&group.group, &torrent)
+    }
+
+    fn existing_group_probe_torrent(existing_group: &PublishExistingGroup) -> gazelle_api::Torrent {
+        gazelle_api::Torrent {
+            media: existing_group.media.to_string(),
+            format: existing_group.format.clone(),
+            encoding: existing_group.bitrate.clone(),
+            remaster_year: Some(existing_group.remaster_year),
+            remaster_title: existing_group.remaster_title.clone(),
+            remaster_record_label: existing_group.remaster_record_label.clone(),
+            remaster_catalogue_number: existing_group.remaster_catalogue_number.clone(),
+            ..gazelle_api::Torrent::default()
+        }
     }
 
     #[allow(clippy::uninlined_format_args)]

@@ -295,6 +295,71 @@ async fn publish_new_group_returns_response_and_next_steps() -> Result<(), TestE
 }
 
 #[tokio::test]
+async fn publish_uses_upload_naming_for_source_torrent_name() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_parent = TempDirectory::create("publish_uses_upload_naming_source_parent");
+    let source_path = source_parent.join("incoming-unstructured-source-directory");
+    fs::create_dir_all(&source_path)?;
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path);
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_uses_upload_naming_content");
+    let output_dir = TempDirectory::create("publish_uses_upload_naming_output");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_099,
+        group_id: 600_099,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_some(), "publish should succeed");
+    let torrent_path = fs::read_dir(&*output_dir)?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .find(|path| path.extension().is_some_and(|ext| ext == "torrent"))
+        .expect("publish should create a torrent file");
+    let torrent = TorrentReader::execute(&torrent_path).await?;
+    let expected = TranscodeName::get(
+        &Metadata {
+            artist: "Artist Name".to_owned(),
+            album: "Album Title".to_owned(),
+            remaster_title: "Digital".to_owned(),
+            year: 2024,
+            media: "WEB".to_owned(),
+        },
+        TargetFormat::Flac,
+    );
+    assert_eq!(
+        torrent.name, expected,
+        "publish should use upload naming instead of raw source directory name"
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn publish_existing_group_duplicate_detected_fails() -> Result<(), TestError> {
     // Arrange
     init_logger();
