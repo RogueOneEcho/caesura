@@ -145,9 +145,18 @@ Publish a source FLAC release from a local directory using a YAML manifest.
 > This command is currently RED-only.
 >
 > You are responsible for everything you upload.
+>
+> Before running `publish`, manually verify:
+> - metadata fields are correct for the edition/media you are uploading,
+> - the release is not on RED's DNU list,
+> - source files and logs (if applicable) meet tracker rules.
 
 ```bash
 caesura publish /path/to/publish.yml
+```
+
+```bash
+caesura publish /path/to/publish.yml --dry-run
 ```
 
 > [!TIP]
@@ -163,7 +172,7 @@ caesura publish /path/to/publish.yml
 >
 > If torrent injection fails then `publish` logs a warning and continues the upload.
 >
-> In dry-run mode no source staging or torrent injection is performed.
+> In `--dry-run` mode no source staging or torrent injection is performed.
 >
 > `publish` auto-generates BBCode release notes (tool/version, source format, details, hidden tags).
 > The `release_desc` value in the manifest is included as the `Notes` line.
@@ -173,18 +182,15 @@ caesura publish /path/to/publish.yml
 ```yaml
 source_path: /path/to/source
 torrent_path: /optional/path/to/output.torrent
-manual_checks_ack: true
-dry_run: false
-mode: new_group
 release_desc: "Uploader notes to include under Notes in generated BBCode"
-
-new_group:
+group:
+  type: new_group
   title: "Album Title"
   year: 2024
   release_type: 1
   media: WEB
   tags: ["electronic", "ambient"]
-  album_desc: "Group description"
+  album_description: "Group description"
   request_id: 364781
   image: "https://example.com/cover.jpg"
   artists:
@@ -206,12 +212,9 @@ new_group:
 ```yaml
 source_path: /path/to/source
 torrent_path: /optional/path/to/output.torrent
-manual_checks_ack: true
-dry_run: false
-mode: existing_group
 release_desc: "Uploader notes to include under Notes in generated BBCode"
-
-existing_group:
+group:
+  type: existing_group
   group_id: 123456
   remaster_year: 2024
   remaster_title: "Digital"
