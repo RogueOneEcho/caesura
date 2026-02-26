@@ -7,6 +7,52 @@ use std::io::BufReader;
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
+/// RED media values accepted in publish manifests.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum PublishMedia {
+    #[serde(rename = "CD")]
+    Cd,
+    #[serde(rename = "DVD")]
+    Dvd,
+    #[serde(rename = "Vinyl")]
+    Vinyl,
+    #[serde(rename = "Soundboard")]
+    Soundboard,
+    #[serde(rename = "SACD")]
+    Sacd,
+    #[serde(rename = "DAT")]
+    Dat,
+    #[serde(rename = "Cassette")]
+    Cassette,
+    #[serde(rename = "WEB")]
+    Web,
+    #[serde(rename = "Blu-Ray", alias = "Blu-ray")]
+    BluRay,
+}
+
+impl PublishMedia {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Cd => "CD",
+            Self::Dvd => "DVD",
+            Self::Vinyl => "Vinyl",
+            Self::Soundboard => "Soundboard",
+            Self::Sacd => "SACD",
+            Self::Dat => "DAT",
+            Self::Cassette => "Cassette",
+            Self::Web => "WEB",
+            Self::BluRay => "Blu-Ray",
+        }
+    }
+}
+
+impl Display for PublishMedia {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
+        formatter.write_str(self.as_str())
+    }
+}
+
 /// Artist credit entry for new-group publish mode.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PublishArtist {
@@ -36,7 +82,7 @@ pub struct PublishNewGroup {
     pub year: u16,
     /// Gazelle numeric release type index.
     pub release_type: u8,
-    pub media: String,
+    pub media: PublishMedia,
     pub tags: Vec<String>,
     /// Group description in plain text.
     ///
@@ -57,7 +103,7 @@ pub struct PublishExistingGroup {
     pub remaster_title: String,
     pub remaster_record_label: String,
     pub remaster_catalogue_number: String,
-    pub media: String,
+    pub media: PublishMedia,
     pub format: String,
     pub bitrate: String,
 }
@@ -207,7 +253,7 @@ impl PublishManifest {
             title: new_group.title.clone(),
             year: new_group.year,
             release_type: new_group.release_type,
-            media: new_group.media.clone(),
+            media: new_group.media.to_string(),
             tags: new_group.tags.clone(),
             album_desc: new_group.album_description.clone(),
             release_desc,
@@ -249,7 +295,7 @@ impl PublishManifest {
             remaster_catalogue_number: existing_group.remaster_catalogue_number.clone(),
             format: existing_group.format.clone(),
             bitrate: existing_group.bitrate.clone(),
-            media: existing_group.media.clone(),
+            media: existing_group.media.to_string(),
             release_desc,
             group_id: existing_group.group_id,
         }
@@ -265,7 +311,7 @@ impl PublishManifest {
                 title: "Album Title".to_owned(),
                 year: 2024,
                 release_type: 1,
-                media: "WEB".to_owned(),
+                media: PublishMedia::Web,
                 tags: vec!["electronic".to_owned(), "ambient".to_owned()],
                 album_description: "Group description".to_owned(),
                 request_id: Some(364_781),
@@ -300,7 +346,7 @@ impl PublishManifest {
                 remaster_title: "Digital".to_owned(),
                 remaster_record_label: "Label".to_owned(),
                 remaster_catalogue_number: "CAT-001".to_owned(),
-                media: "WEB".to_owned(),
+                media: PublishMedia::Web,
                 format: "FLAC".to_owned(),
                 bitrate: "Lossless".to_owned(),
             }),

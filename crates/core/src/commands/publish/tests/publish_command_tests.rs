@@ -43,6 +43,31 @@ fn publish_manifest_valid_existing_group_parses() -> Result<(), TestError> {
 }
 
 #[test]
+fn publish_manifest_media_alias_blu_ray_normalizes() -> Result<(), TestError> {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_media_alias_blu_ray_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test")?;
+    let manifest = PublishManifest::mock_new(source_path);
+    let manifest_yaml = serde_yaml::to_string(&manifest)?.replace("media: WEB", "media: Blu-ray");
+    let manifest_dir = TempDirectory::create("publish_manifest_media_alias_blu_ray");
+    let file = manifest_dir.join("publish.new-group.yml");
+    fs::write(&file, manifest_yaml)?;
+
+    // Act
+    let parsed = PublishManifest::read(&file)?;
+
+    // Assert
+    match parsed.group {
+        PublishGroup::NewGroup(new_group) => {
+            assert_eq!(new_group.media.to_string(), "Blu-Ray");
+        }
+        PublishGroup::ExistingGroup(_) => unreachable!("expected new group"),
+    }
+    Ok(())
+}
+
+#[test]
 fn publish_manifest_missing_artists_fails() {
     // Arrange
     let source_dir = TempDirectory::create("publish_manifest_missing_artists_source");

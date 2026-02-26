@@ -345,7 +345,7 @@ impl PublishCommand {
         group: &GroupResponse,
     ) -> Result<bool, Failure<PublishAction>> {
         let probe_torrent = gazelle_api::Torrent {
-            media: existing_group.media.clone(),
+            media: existing_group.media.to_string(),
             format: existing_group.format.clone(),
             encoding: existing_group.bitrate.clone(),
             remaster_year: Some(existing_group.remaster_year),
