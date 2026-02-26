@@ -49,7 +49,7 @@ once_cell = { workspace = true }
 num_cpus = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
-qbit-rs = { workspace = true }
+qbittorrent_api = { workspace = true }
 rogue_logging = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
