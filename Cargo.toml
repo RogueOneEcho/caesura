@@ -30,7 +30,7 @@ dirs = "6.0.0"
 flat_db = "0.5.1"
 futures = "0.3.32"
 # TODO(PR2): Replace with crates.io `gazelle_api` release once PR #3 is merged and published.
-gazelle_api = { git = "https://github.com/tomerh2001/gazelle_api.git", rev = "a73bb20cde3a93d3d4f0f9779c821a76ee108f6d" }
+gazelle_api = { git = "https://github.com/tomerh2001/gazelle_api.git", rev = "867ee710a2df11e8dea98186d41a04bfee57798a" }
 html-escape = "0.2.13"
 humantime = "2.3.0"
 indicatif = "0.18.4"
