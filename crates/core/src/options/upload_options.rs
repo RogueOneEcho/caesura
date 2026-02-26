@@ -21,6 +21,18 @@ pub struct UploadOptions {
     #[arg(long)]
     pub copy_torrent_to: Option<PathBuf>,
 
+    /// Rsync destination for transcoded files.
+    ///
+    /// Supports local destinations and SSH destinations such as `user@host:/path`.
+    #[arg(long)]
+    pub rsync_transcode_to: Option<String>,
+
+    /// Rsync destination for torrent files.
+    ///
+    /// Supports local destinations and SSH destinations such as `user@host:/path`.
+    #[arg(long)]
+    pub rsync_torrent_to: Option<String>,
+
     /// Is this a dry run?
     ///
     /// If enabled data won't be uploaded and will instead be printed to the console.

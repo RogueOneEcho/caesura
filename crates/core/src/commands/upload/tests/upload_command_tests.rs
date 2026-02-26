@@ -34,12 +34,17 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
     init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
+    let content_target = TempDirectory::create("dry_run_content_target");
+    let copy_target = TempDirectory::create("dry_run_copy_target");
+    let torrent_copy_target = TempDirectory::create("dry_run_torrent_copy_target");
+    let rsync_transcode_target = TempDirectory::create("dry_run_rsync_transcode_target");
+    let rsync_torrent_target = TempDirectory::create("dry_run_rsync_torrent_target");
     let host = HostBuilder::new()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
         .with_options(SharedOptions {
-            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            content: vec![content_target.to_path_buf(), SAMPLE_SOURCES_DIR.clone()],
             output: SAMPLE_TRANSCODES_DIR.clone(),
             ..SharedOptions::mock()
         })
@@ -49,7 +54,11 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
         })
         .with_options(UploadOptions {
             dry_run: true,
-            ..UploadOptions::default()
+            copy_transcode_to_content_dir: true,
+            copy_transcode_to: Some(copy_target.to_path_buf()),
+            copy_torrent_to: Some(torrent_copy_target.to_path_buf()),
+            rsync_transcode_to: Some(rsync_transcode_target.to_string_lossy().to_string()),
+            rsync_torrent_to: Some(rsync_torrent_target.to_string_lossy().to_string()),
         })
         .expect_build();
     let (source, command) = get_source_and_command(&host).await;
@@ -65,6 +74,41 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
         "dry run should not record formats"
     );
     assert!(status.errors.is_none(), "dry run should have no errors");
+    assert!(
+        fs::read_dir(&*content_target)
+            .expect("read content target")
+            .next()
+            .is_none(),
+        "dry run should not copy transcodes to content directory"
+    );
+    assert!(
+        fs::read_dir(&*copy_target)
+            .expect("read custom copy target")
+            .next()
+            .is_none(),
+        "dry run should not copy transcodes to custom directory"
+    );
+    assert!(
+        fs::read_dir(&*torrent_copy_target)
+            .expect("read torrent copy target")
+            .next()
+            .is_none(),
+        "dry run should not copy torrent files"
+    );
+    assert!(
+        fs::read_dir(&*rsync_transcode_target)
+            .expect("read rsync transcode target")
+            .next()
+            .is_none(),
+        "dry run should not rsync transcodes"
+    );
+    assert!(
+        fs::read_dir(&*rsync_torrent_target)
+            .expect("read rsync torrent target")
+            .next()
+            .is_none(),
+        "dry run should not rsync torrent files"
+    );
 
     Ok(())
 }
@@ -244,6 +288,46 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
     Ok(())
 }
 
+/// Test that `UploadCommand` rsyncs transcodes to specified destination.
+#[tokio::test]
+async fn upload_command_rsyncs_transcode_to_custom_destination() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+    let test_dir = TestDirectory::new();
+    let rsync_target = TempDirectory::create("rsync_transcode_target");
+    let host = HostBuilder::new()
+        .with_mock_api(transcode.album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
+        })
+        .with_options(TargetOptions {
+            target: vec![transcode.target],
+            ..TargetOptions::default()
+        })
+        .with_options(UploadOptions {
+            rsync_transcode_to: Some(rsync_target.to_string_lossy().to_string()),
+            ..UploadOptions::default()
+        })
+        .expect_build();
+    let (source, command) = get_source_and_command(&host).await;
+
+    // Act
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
+
+    // Assert
+    assert!(status.success, "upload should succeed");
+    let entries: Vec<_> = fs::read_dir(&*rsync_target).expect("read dir").collect();
+    assert!(!entries.is_empty(), "should have rsynced transcodes");
+
+    Ok(())
+}
+
 /// Test that `UploadCommand` copies torrent file to specified directory.
 #[tokio::test]
 
@@ -285,6 +369,50 @@ async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
         .filter(|e| e.path().extension().is_some_and(|ext| ext == "torrent"))
         .collect();
     assert!(!torrent_files.is_empty(), "should have copied torrents");
+
+    Ok(())
+}
+
+/// Test that `UploadCommand` rsyncs torrent file to specified destination.
+#[tokio::test]
+async fn upload_command_rsyncs_torrent_file() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+    let test_dir = TestDirectory::new();
+    let torrent_target = TempDirectory::create("torrent_rsync_target");
+    let host = HostBuilder::new()
+        .with_mock_api(transcode.album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
+        })
+        .with_options(TargetOptions {
+            target: vec![transcode.target],
+            ..TargetOptions::default()
+        })
+        .with_options(UploadOptions {
+            rsync_torrent_to: Some(torrent_target.to_string_lossy().to_string()),
+            ..UploadOptions::default()
+        })
+        .expect_build();
+    let (source, command) = get_source_and_command(&host).await;
+
+    // Act
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
+
+    // Assert
+    assert!(status.success, "upload should succeed");
+    let torrent_files: Vec<_> = fs::read_dir(&*torrent_target)
+        .expect("read dir")
+        .filter_map(Result::ok)
+        .filter(|e| e.path().extension().is_some_and(|ext| ext == "torrent"))
+        .collect();
+    assert!(!torrent_files.is_empty(), "should have rsynced torrents");
 
     Ok(())
 }

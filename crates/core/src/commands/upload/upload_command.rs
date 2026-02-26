@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
 use tokio::fs::{copy, hard_link};
+use tokio::process::Command;
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
@@ -64,6 +65,28 @@ impl UploadCommand {
             TorrentVerifier::execute(&torrent_path, &target_dir)
                 .await
                 .map_err(Failure::wrap(UploadAction::VerifyContent))?;
+            let form = UploadForm {
+                path: torrent_path,
+                category_id: MUSIC_CATEGORY_ID,
+                remaster_year: source.metadata.year,
+                remaster_title: source.torrent.remaster_title.clone(),
+                remaster_record_label: source.torrent.remaster_record_label.clone(),
+                remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
+                format: target.get_file_extension().to_uppercase(),
+                bitrate: target.get_bitrate().to_owned(),
+                media: source.torrent.media.clone(),
+                release_desc: self.create_description(source, target),
+                group_id: source.group.id,
+            };
+            if self.upload_options.dry_run {
+                warn!(
+                    "{} upload and torrent client actions as this is a dry run",
+                    "Skipping".bold()
+                );
+                info!("{} data of {target} for {source}:", "Upload".bold());
+                info!("\n{form}");
+                continue;
+            }
             if self.upload_options.copy_transcode_to_content_dir {
                 trace!("{} transcode to content directory", "Copying".bold());
                 let destination = self
@@ -87,30 +110,28 @@ impl UploadCommand {
                     warnings.push(e.to_error());
                 }
             }
+            if let Some(destination) = &self.upload_options.rsync_transcode_to {
+                trace!(
+                    "{} transcode with rsync to: {}",
+                    "Syncing".bold(),
+                    destination
+                );
+                if let Err(e) = self.rsync_transcode(&target_dir, destination).await {
+                    warn!("{}", e.render());
+                    warnings.push(e.to_error());
+                }
+            }
             if let Some(torrent_dir) = &self.upload_options.copy_torrent_to
                 && let Err(e) = self.copy_torrent(source, &target, torrent_dir).await
             {
                 warn!("{}", e.render());
                 warnings.push(e.to_error());
             }
-            let form = UploadForm {
-                path: torrent_path,
-                category_id: MUSIC_CATEGORY_ID,
-                remaster_year: source.metadata.year,
-                remaster_title: source.torrent.remaster_title.clone(),
-                remaster_record_label: source.torrent.remaster_record_label.clone(),
-                remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
-                format: target.get_file_extension().to_uppercase(),
-                bitrate: target.get_bitrate().to_owned(),
-                media: source.torrent.media.clone(),
-                release_desc: self.create_description(source, target),
-                group_id: source.group.id,
-            };
-            if self.upload_options.dry_run {
-                warn!("{} upload as this is a dry run", "Skipping".bold());
-                info!("{} data of {target} for {source}:", "Upload".bold());
-                info!("\n{form}");
-                continue;
+            if let Some(destination) = &self.upload_options.rsync_torrent_to
+                && let Err(e) = self.rsync_torrent(source, &target, destination).await
+            {
+                warn!("{}", e.render());
+                warnings.push(e.to_error());
             }
             let response = self
                 .api
@@ -164,6 +185,28 @@ impl UploadCommand {
         Ok(())
     }
 
+    async fn rsync_transcode(
+        &self,
+        source_path: &Path,
+        target_parent: &str,
+    ) -> Result<(), Failure<UploadAction>> {
+        let source = source_path.display().to_string();
+        let destination = format!("{target_parent}/");
+        let mut process = Command::new("rsync");
+        process.arg("-az").arg(&source).arg(&destination);
+        process.run().await.map_err(Failure::wrap_with_path(
+            UploadAction::RsyncTranscode,
+            source_path,
+        ))?;
+        trace!(
+            "{} {} to {}",
+            "Synced".bold(),
+            source_path.display(),
+            destination
+        );
+        Ok(())
+    }
+
     async fn copy_torrent(
         &self,
         source: &Source,
@@ -197,6 +240,29 @@ impl UploadCommand {
             verb.bold(),
             source_path.display(),
             target_path.display()
+        );
+        Ok(())
+    }
+
+    async fn rsync_torrent(
+        &self,
+        source: &Source,
+        target: &TargetFormat,
+        target_dir: &str,
+    ) -> Result<(), Failure<UploadAction>> {
+        let source_path = self.paths.get_torrent_path(source, *target);
+        let destination = format!("{target_dir}/");
+        let mut process = Command::new("rsync");
+        process.arg("-az").arg(&source_path).arg(&destination);
+        process.run().await.map_err(Failure::wrap_with_path(
+            UploadAction::RsyncTorrent,
+            &source_path,
+        ))?;
+        trace!(
+            "{} {} to {}",
+            "Synced".bold(),
+            source_path.display(),
+            destination
         );
         Ok(())
     }

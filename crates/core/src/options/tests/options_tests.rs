@@ -36,6 +36,18 @@ fn upload_options_default_values() {
     assert_yaml_snapshot!(result);
 }
 
+/// Verify rsync destinations are accepted for upload options.
+#[test]
+fn upload_options_accepts_rsync_destinations() {
+    let result = UploadOptionsPartial {
+        rsync_transcode_to: Some("user@host:/srv/music".to_owned()),
+        rsync_torrent_to: Some("user@host:/srv/watch".to_owned()),
+        ..UploadOptionsPartial::default()
+    }
+    .resolve();
+    assert!(result.is_ok());
+}
+
 /// Verify `VerifyOptions` default values.
 #[test]
 fn verify_options_default_values() {

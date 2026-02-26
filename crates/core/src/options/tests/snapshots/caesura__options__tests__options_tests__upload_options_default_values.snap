@@ -5,4 +5,6 @@ expression: result
 copy_transcode_to_content_dir: false
 copy_transcode_to: ~
 copy_torrent_to: ~
+rsync_transcode_to: ~
+rsync_torrent_to: ~
 dry_run: false

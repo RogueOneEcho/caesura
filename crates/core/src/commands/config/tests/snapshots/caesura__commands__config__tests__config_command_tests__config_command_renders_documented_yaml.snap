@@ -116,6 +116,12 @@ rename_tracks: false
 # Should failed transcodes be retried?
 # Default: false
 retry_transcode: false
+# Rsync destination for torrent files.
+# Supports local destinations and SSH destinations such as `user@host:/path`.
+rsync_torrent_to: null
+# Rsync destination for transcoded files.
+# Supports local destinations and SSH destinations such as `user@host:/path`.
+rsync_transcode_to: null
 # Is `SoX_ng` in use?
 # If `true` then `sox_ng` specific CLI options are used.
 # Default: Detected based on binary name or --version info

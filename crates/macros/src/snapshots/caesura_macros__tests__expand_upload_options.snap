@@ -34,6 +34,18 @@ pub struct UploadOptionsPartial {
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub copy_torrent_to: Option<PathBuf>,
+    /// Rsync destination for transcoded files.
+    ///
+    /// Supports local destinations and SSH destinations such as `user@host:/path`.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub rsync_transcode_to: Option<String>,
+    /// Rsync destination for torrent files.
+    ///
+    /// Supports local destinations and SSH destinations such as `user@host:/path`.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub rsync_torrent_to: Option<String>,
     /// Is this a dry run?
     ///
     /// If enabled data won't be uploaded and will instead be printed to the console.
@@ -55,12 +67,16 @@ impl UploadOptionsPartial {
         let copy_transcode_to_content_dir = self.copy_transcode_to_content_dir;
         let copy_transcode_to = self.copy_transcode_to;
         let copy_torrent_to = self.copy_torrent_to;
+        let rsync_transcode_to = self.rsync_transcode_to;
+        let rsync_torrent_to = self.rsync_torrent_to;
         let dry_run = self.dry_run;
         let resolved = UploadOptions {
             copy_transcode_to_content_dir: copy_transcode_to_content_dir
                 .unwrap_or_default(),
             copy_transcode_to,
             copy_torrent_to,
+            rsync_transcode_to,
+            rsync_torrent_to,
             dry_run: dry_run.unwrap_or_default(),
         };
         if validate {
@@ -85,6 +101,12 @@ impl ::caesura_options::OptionsPartialContract for UploadOptionsPartial {
         if self.copy_torrent_to.is_none() {
             self.copy_torrent_to = other.copy_torrent_to;
         }
+        if self.rsync_transcode_to.is_none() {
+            self.rsync_transcode_to = other.rsync_transcode_to;
+        }
+        if self.rsync_torrent_to.is_none() {
+            self.rsync_torrent_to = other.rsync_torrent_to;
+        }
         if self.dry_run.is_none() {
             self.dry_run = other.dry_run;
         }
@@ -107,6 +129,8 @@ impl ::std::default::Default for UploadOptions {
             copy_transcode_to_content_dir: ::std::default::Default::default(),
             copy_transcode_to: ::std::option::Option::None,
             copy_torrent_to: ::std::option::Option::None,
+            rsync_transcode_to: ::std::option::Option::None,
+            rsync_torrent_to: ::std::option::Option::None,
             dry_run: ::std::default::Default::default(),
         }
     }
@@ -134,6 +158,16 @@ impl ::caesura_options::Documented for UploadOptions {
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
                 description :
                 "Directory the torrent file is copied to.<br>This should be set if you wish to auto-add to your torrent client.",
+                }, ::caesura_options::FieldDoc { config_key : "rsync_transcode_to",
+                cli_flag : "--rsync-transcode-to", field_type : "Option<String>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Rsync destination for transcoded files.<br>Supports local destinations and SSH destinations such as `user@host:/path`.",
+                }, ::caesura_options::FieldDoc { config_key : "rsync_torrent_to",
+                cli_flag : "--rsync-torrent-to", field_type : "Option<String>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Rsync destination for torrent files.<br>Supports local destinations and SSH destinations such as `user@host:/path`.",
                 }, ::caesura_options::FieldDoc { config_key : "dry_run", cli_flag :
                 "--dry-run", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :

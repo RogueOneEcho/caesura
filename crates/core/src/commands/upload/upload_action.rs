@@ -15,8 +15,12 @@ pub enum UploadAction {
     HardLinkTorrent,
     #[error("copy torrent")]
     CopyTorrent,
+    #[error("rsync torrent")]
+    RsyncTorrent,
     #[error("copy transcode")]
     CopyTranscode,
+    #[error("rsync transcode")]
+    RsyncTranscode,
     #[error("get transcode command")]
     GetTranscodeCommand,
 }
