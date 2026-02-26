@@ -211,7 +211,7 @@ async fn publish_new_group_returns_response_and_next_steps() -> Result<(), TestE
     assert_eq!(
         result.permalink,
         Some(get_permalink(
-            &"https://redacted.sh".to_owned(),
+            "https://redacted.sh",
             expected_group_id,
             expected_torrent_id
         ))
@@ -328,7 +328,7 @@ async fn publish_existing_group_non_duplicate_uploads() -> Result<(), TestError>
     assert_eq!(
         result.permalink,
         Some(get_permalink(
-            &"https://redacted.sh".to_owned(),
+            "https://redacted.sh",
             expected_group_id,
             expected_torrent_id
         ))

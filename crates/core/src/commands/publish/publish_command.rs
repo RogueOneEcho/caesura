@@ -222,8 +222,7 @@ impl PublishCommand {
 
         match manifest.mode {
             PublishMode::NewGroup => {
-                let mut form = manifest.to_new_source_form(torrent_path);
-                form.release_desc = release_description;
+                let form = manifest.to_new_source_form(torrent_path, release_description);
                 if manifest.dry_run {
                     info!("{} upload as this is a dry run", "Skipping".bold());
                     info!("{} data for source upload:", "Upload".bold());
@@ -289,8 +288,7 @@ impl PublishCommand {
                     ));
                 }
 
-                let mut form = manifest.to_existing_group_form(torrent_path);
-                form.release_desc = release_description;
+                let form = manifest.to_existing_group_form(torrent_path, release_description);
                 if manifest.dry_run {
                     info!("{} upload as this is a dry run", "Skipping".bold());
                     info!("{} data for source upload:", "Upload".bold());

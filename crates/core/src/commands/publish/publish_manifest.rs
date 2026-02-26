@@ -153,7 +153,11 @@ impl PublishManifest {
     }
 
     /// Build `gazelle_api` new-source upload payload.
-    pub fn to_new_source_form(&self, torrent_path: PathBuf) -> NewSourceUploadForm {
+    pub fn to_new_source_form(
+        &self,
+        torrent_path: PathBuf,
+        release_desc: String,
+    ) -> NewSourceUploadForm {
         let new_group = self
             .new_group
             .as_ref()
@@ -167,7 +171,7 @@ impl PublishManifest {
             media: new_group.media.clone(),
             tags: new_group.tags.clone(),
             album_desc: new_group.album_desc.clone(),
-            release_desc: self.release_desc.clone(),
+            release_desc,
             request_id: new_group.request_id,
             image: new_group.image.clone(),
             edition: NewSourceUploadEdition {
@@ -192,7 +196,11 @@ impl PublishManifest {
     }
 
     /// Build `gazelle_api` existing-group upload payload.
-    pub fn to_existing_group_form(&self, torrent_path: PathBuf) -> UploadForm {
+    pub fn to_existing_group_form(
+        &self,
+        torrent_path: PathBuf,
+        release_desc: String,
+    ) -> UploadForm {
         let existing_group = self
             .existing_group
             .as_ref()
@@ -207,7 +215,7 @@ impl PublishManifest {
             format: existing_group.format.clone(),
             bitrate: existing_group.bitrate.clone(),
             media: existing_group.media.clone(),
-            release_desc: self.release_desc.clone(),
+            release_desc,
             group_id: existing_group.group_id,
         }
     }
