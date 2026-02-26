@@ -20,6 +20,12 @@ pub struct PublishSeedingOptionsPartial {
     #[arg(long = "move-source", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub move_source: Option<bool>,
+    /// Directory the source torrent file is copied to.
+    ///
+    /// This should be set if you wish to auto-add to your torrent client.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub copy_torrent_to: Option<PathBuf>,
 }
 impl PublishSeedingOptionsPartial {
     fn resolve_internal(
@@ -31,8 +37,10 @@ impl PublishSeedingOptionsPartial {
     > {
         let mut errors = ::std::vec::Vec::new();
         let move_source = self.move_source;
+        let copy_torrent_to = self.copy_torrent_to;
         let resolved = PublishSeedingOptions {
             move_source: move_source.unwrap_or_default(),
+            copy_torrent_to,
         };
         if validate {
             resolved.validate(&mut errors);
@@ -49,6 +57,9 @@ impl ::caesura_options::OptionsPartialContract for PublishSeedingOptionsPartial 
     fn merge(&mut self, other: Self) {
         if self.move_source.is_none() {
             self.move_source = other.move_source;
+        }
+        if self.copy_torrent_to.is_none() {
+            self.copy_torrent_to = other.copy_torrent_to;
         }
     }
     fn resolve_without_validation(self) -> PublishSeedingOptions {
@@ -67,6 +78,7 @@ impl ::std::default::Default for PublishSeedingOptions {
     fn default() -> Self {
         Self {
             move_source: ::std::default::Default::default(),
+            copy_torrent_to: ::std::option::Option::None,
         }
     }
 }
@@ -82,6 +94,11 @@ impl ::caesura_options::Documented for PublishSeedingOptions {
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
                 "Should source files be moved to the seeding destination?<br>If disabled, source files are hard linked into the destination.",
+                }, ::caesura_options::FieldDoc { config_key : "copy_torrent_to", cli_flag
+                : "--copy-torrent-to", field_type : "Option<PathBuf>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description :
+                "Directory the source torrent file is copied to.<br>This should be set if you wish to auto-add to your torrent client.",
                 }
             ],
         });

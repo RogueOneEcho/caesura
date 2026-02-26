@@ -15,6 +15,12 @@ pub struct UploadOptions {
     #[arg(long)]
     pub copy_transcode_to: Option<PathBuf>,
 
+    /// Directory the torrent file is copied to.
+    ///
+    /// This should be set if you wish to auto-add to your torrent client.
+    #[arg(long)]
+    pub copy_torrent_to: Option<PathBuf>,
+
     /// Is this a dry run?
     ///
     /// If enabled data won't be uploaded and will instead be printed to the console.
@@ -31,6 +37,14 @@ impl OptionsContract for UploadOptions {
         {
             errors.push(DoesNotExist(
                 "Copy transcode to directory".to_owned(),
+                dir.to_string_lossy().to_string(),
+            ));
+        }
+        if let Some(dir) = &self.copy_torrent_to
+            && !dir.is_dir()
+        {
+            errors.push(DoesNotExist(
+                "Copy torrent to directory".to_owned(),
                 dir.to_string_lossy().to_string(),
             ));
         }

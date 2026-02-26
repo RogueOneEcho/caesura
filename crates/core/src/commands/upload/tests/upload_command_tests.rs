@@ -81,8 +81,9 @@ async fn upload_command_missing_transcode_returns_error() -> Result<(), TestErro
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
-        .with_options(TorrentInjectionOptions {
+        .with_options(UploadOptions {
             copy_torrent_to: Some(PathBuf::from("/nonexistent/path")),
+            ..UploadOptions::default()
         })
         .with_options(SourceArg {
             source: AlbumConfig::TORRENT_ID.to_string(),
@@ -265,8 +266,9 @@ async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
             target: vec![transcode.target],
             ..TargetOptions::default()
         })
-        .with_options(TorrentInjectionOptions {
+        .with_options(UploadOptions {
             copy_torrent_to: Some(torrent_target.to_path_buf()),
+            ..UploadOptions::default()
         })
         .expect_build();
     let (source, command) = get_source_and_command(&host).await;

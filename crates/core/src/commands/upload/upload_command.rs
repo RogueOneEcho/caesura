@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
+use tokio::fs::{copy, hard_link};
 
 const MUSIC_CATEGORY_ID: u8 = 0;
 
@@ -10,7 +11,6 @@ const MUSIC_CATEGORY_ID: u8 = 0;
 pub(crate) struct UploadCommand {
     shared_options: Ref<SharedOptions>,
     upload_options: Ref<UploadOptions>,
-    torrent_injection_options: Ref<TorrentInjectionOptions>,
     copy_options: Ref<CopyOptions>,
     source_provider: Ref<SourceProvider>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
@@ -87,16 +87,11 @@ impl UploadCommand {
                     warnings.push(e.to_error());
                 }
             }
-            if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to {
-                inject_torrent_or_warn(
-                    &torrent_path,
-                    torrent_dir,
-                    self.copy_options.hard_link,
-                    UploadAction::HardLinkTorrent,
-                    UploadAction::CopyTorrent,
-                    &mut warnings,
-                )
-                .await;
+            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to
+                && let Err(e) = self.copy_torrent(source, &target, torrent_dir).await
+            {
+                warn!("{}", e.render());
+                warnings.push(e.to_error());
             }
             let form = UploadForm {
                 path: torrent_path,
@@ -169,6 +164,43 @@ impl UploadCommand {
         Ok(())
     }
 
+    async fn copy_torrent(
+        &self,
+        source: &Source,
+        target: &TargetFormat,
+        target_dir: &Path,
+    ) -> Result<(), Failure<UploadAction>> {
+        let source_path = self.paths.get_torrent_path(source, *target);
+        let source_file_name = source_path
+            .file_name()
+            .expect("torrent path should have a name");
+        let target_path = target_dir.join(source_file_name);
+        let verb = if self.copy_options.hard_link {
+            hard_link(&source_path, &target_path)
+                .await
+                .map_err(Failure::wrap_with_path(
+                    UploadAction::HardLinkTorrent,
+                    &target_path,
+                ))?;
+            "Hard Linked"
+        } else {
+            copy(&source_path, &target_path)
+                .await
+                .map_err(Failure::wrap_with_path(
+                    UploadAction::CopyTorrent,
+                    &target_path,
+                ))?;
+            "Copied"
+        };
+        trace!(
+            "{} {} to {}",
+            verb.bold(),
+            source_path.display(),
+            target_path.display()
+        );
+        Ok(())
+    }
+
     #[allow(clippy::uninlined_format_args)]
     fn create_description(&self, source: &Source, target: TargetFormat) -> String {
         let base = &self.shared_options.indexer_url;
@@ -189,12 +221,30 @@ impl UploadCommand {
             ));
         }
         let path = self.paths.get_transcode_target_dir(source, target);
-        append_inspect_sections(
-            &mut lines,
-            &path,
-            "Unable to add track details to upload description",
-        );
-        to_quote_blocks(lines)
+        let factory = InspectFactory::new(false);
+        let details = factory.create_split(&path);
+        match details {
+            Ok((properties, tags)) => {
+                lines.push(format!(
+                    "[pad=0|10|0|19]Details[/pad] [pre]{properties}[/pre]"
+                ));
+                lines.push(format!(
+                    "[pad=0|10|0|31]Tags[/pad] [hide][pre]{tags}[/pre][/hide]"
+                ));
+            }
+            Err(e) => {
+                warn!(
+                    "Unable to add track details to upload description\n{}",
+                    e.render()
+                );
+            }
+        }
+        lines.into_iter().fold(String::new(), |mut output, line| {
+            output.push_str("[quote]");
+            output.push_str(&line);
+            output.push_str("[/quote]");
+            output
+        })
     }
 
     /// Collect unique transcode commands for a source and target format.

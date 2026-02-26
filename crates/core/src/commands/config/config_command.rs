@@ -18,7 +18,6 @@ pub struct ConfigCommand {
     sox_options: Ref<SoxOptions>,
     spectrogram_options: Ref<SpectrogramOptions>,
     target_options: Ref<TargetOptions>,
-    torrent_injection_options: Ref<TorrentInjectionOptions>,
     upload_options: Ref<UploadOptions>,
     verify_options: Ref<VerifyOptions>,
 }
@@ -75,7 +74,6 @@ impl ConfigCommand {
             serde_yaml::to_value(&*self.sox_options)?,
             serde_yaml::to_value(&*self.spectrogram_options)?,
             serde_yaml::to_value(&*self.target_options)?,
-            serde_yaml::to_value(&*self.torrent_injection_options)?,
             serde_yaml::to_value(&*self.upload_options)?,
             serde_yaml::to_value(&*self.verify_options)?,
         ];

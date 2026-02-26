@@ -496,7 +496,10 @@ async fn publish_move_source_moves_source_directory() -> Result<(), TestError> {
             output: output_dir.to_path_buf(),
             ..SharedOptions::mock()
         })
-        .with_options(PublishSeedingOptions { move_source: true })
+        .with_options(PublishSeedingOptions {
+            move_source: true,
+            ..PublishSeedingOptions::default()
+        })
         .with_options(PublishArg {
             publish_path: PathBuf::from("/tmp/unused.yml"),
             dry_run: false,
@@ -549,7 +552,10 @@ async fn publish_source_already_staged_is_not_moved() -> Result<(), TestError> {
             output: output_dir.to_path_buf(),
             ..SharedOptions::mock()
         })
-        .with_options(PublishSeedingOptions { move_source: true })
+        .with_options(PublishSeedingOptions {
+            move_source: true,
+            ..PublishSeedingOptions::default()
+        })
         .with_options(PublishArg {
             publish_path: PathBuf::from("/tmp/unused.yml"),
             dry_run: false,
@@ -682,8 +688,9 @@ async fn publish_copies_torrent_to_injection_directory() -> Result<(), TestError
             output: output_dir.to_path_buf(),
             ..SharedOptions::mock()
         })
-        .with_options(TorrentInjectionOptions {
+        .with_options(PublishSeedingOptions {
             copy_torrent_to: Some(injection_dir.to_path_buf()),
+            ..PublishSeedingOptions::default()
         })
         .with_options(PublishArg {
             publish_path: PathBuf::from("/tmp/unused.yml"),
@@ -736,8 +743,9 @@ async fn publish_injection_failure_is_non_fatal() -> Result<(), TestError> {
             output: output_dir.to_path_buf(),
             ..SharedOptions::mock()
         })
-        .with_options(TorrentInjectionOptions {
+        .with_options(PublishSeedingOptions {
             copy_torrent_to: Some(injection_path.clone()),
+            ..PublishSeedingOptions::default()
         })
         .with_options(PublishArg {
             publish_path: PathBuf::from("/tmp/unused.yml"),
@@ -786,8 +794,9 @@ async fn publish_dry_run_does_not_stage_or_inject() -> Result<(), TestError> {
             output: output_dir.to_path_buf(),
             ..SharedOptions::mock()
         })
-        .with_options(TorrentInjectionOptions {
+        .with_options(PublishSeedingOptions {
             copy_torrent_to: Some(injection_dir.to_path_buf()),
+            ..PublishSeedingOptions::default()
         })
         .with_options(PublishArg {
             publish_path: PathBuf::from("/tmp/unused.yml"),

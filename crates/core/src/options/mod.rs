@@ -14,7 +14,6 @@ pub(crate) use source_arg::*;
 pub(crate) use sox_options::*;
 pub use spectrogram_options::*;
 pub use target_options::*;
-pub use torrent_injection_options::*;
 pub use upload_options::*;
 pub use verify_options::*;
 
@@ -34,6 +33,5 @@ mod spectrogram_options;
 mod target_options;
 #[cfg(test)]
 mod tests;
-mod torrent_injection_options;
 mod upload_options;
 mod verify_options;

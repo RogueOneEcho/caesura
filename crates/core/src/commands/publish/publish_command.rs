@@ -37,7 +37,6 @@ pub(crate) struct PublishCommand {
     arg: Ref<PublishArg>,
     shared_options: Ref<SharedOptions>,
     publish_seeding_options: Ref<PublishSeedingOptions>,
-    torrent_injection_options: Ref<TorrentInjectionOptions>,
     copy_options: Ref<CopyOptions>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     paths: Ref<PathManager>,
@@ -188,7 +187,7 @@ impl PublishCommand {
                     seeding_destination.display()
                 );
             }
-            if self.torrent_injection_options.copy_torrent_to.is_some() {
+            if self.publish_seeding_options.copy_torrent_to.is_some() {
                 if self.copy_options.hard_link {
                     trace!("Dry run: torrent would be hard linked to autoadd directory");
                 } else {
@@ -246,7 +245,7 @@ impl PublishCommand {
         self.verify_seed_content(torrent_path, &seeding_source)
             .await?;
 
-        if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to {
+        if let Some(torrent_dir) = &self.publish_seeding_options.copy_torrent_to {
             inject_torrent_or_warn(
                 torrent_path,
                 torrent_dir,
