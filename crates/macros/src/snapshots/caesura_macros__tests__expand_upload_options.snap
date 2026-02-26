@@ -34,6 +34,63 @@ pub struct UploadOptionsPartial {
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub copy_torrent_to: Option<PathBuf>,
+    /// Torrent client for direct API injection.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client: Option<TorrentClient>,
+    /// Torrent client API base URL.
+    ///
+    /// Example: `http://127.0.0.1:8080`
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_url: Option<String>,
+    /// Torrent client username.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_username: Option<String>,
+    /// Torrent client password.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_password: Option<String>,
+    /// Torrent client save path for injected torrents.
+    ///
+    /// This is currently used for qBittorrent.
+    /// For remote clients, this must be a path visible to the client host.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_savepath: Option<String>,
+    /// Torrent client category for injected torrents.
+    ///
+    /// This is currently used for qBittorrent.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_category: Option<String>,
+    /// Torrent client tags for injected torrents.
+    ///
+    /// This is currently used for qBittorrent.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_tags: Option<Vec<String>>,
+    /// Add injected torrents in paused state.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "torrent-client-paused",
+        num_args = 0..= 1,
+        default_missing_value = "true"
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_paused: Option<bool>,
+    /// Skip hash checking when injecting torrents.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "torrent-client-skip-checking",
+        num_args = 0..= 1,
+        default_missing_value = "true"
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub torrent_client_skip_checking: Option<bool>,
     /// Is this a dry run?
     ///
     /// If enabled data won't be uploaded and will instead be printed to the console.
@@ -55,12 +112,31 @@ impl UploadOptionsPartial {
         let copy_transcode_to_content_dir = self.copy_transcode_to_content_dir;
         let copy_transcode_to = self.copy_transcode_to;
         let copy_torrent_to = self.copy_torrent_to;
+        let torrent_client = self.torrent_client;
+        let torrent_client_url = self.torrent_client_url;
+        let torrent_client_username = self.torrent_client_username;
+        let torrent_client_password = self.torrent_client_password;
+        let torrent_client_savepath = self.torrent_client_savepath;
+        let torrent_client_category = self.torrent_client_category;
+        let torrent_client_tags = self.torrent_client_tags;
+        let torrent_client_paused = self.torrent_client_paused;
+        let torrent_client_skip_checking = self.torrent_client_skip_checking;
         let dry_run = self.dry_run;
         let resolved = UploadOptions {
             copy_transcode_to_content_dir: copy_transcode_to_content_dir
                 .unwrap_or_default(),
             copy_transcode_to,
             copy_torrent_to,
+            torrent_client,
+            torrent_client_url,
+            torrent_client_username,
+            torrent_client_password,
+            torrent_client_savepath,
+            torrent_client_category,
+            torrent_client_tags,
+            torrent_client_paused: torrent_client_paused.unwrap_or_default(),
+            torrent_client_skip_checking: torrent_client_skip_checking
+                .unwrap_or_default(),
             dry_run: dry_run.unwrap_or_default(),
         };
         if validate {
@@ -85,6 +161,33 @@ impl ::caesura_options::OptionsPartialContract for UploadOptionsPartial {
         if self.copy_torrent_to.is_none() {
             self.copy_torrent_to = other.copy_torrent_to;
         }
+        if self.torrent_client.is_none() {
+            self.torrent_client = other.torrent_client;
+        }
+        if self.torrent_client_url.is_none() {
+            self.torrent_client_url = other.torrent_client_url;
+        }
+        if self.torrent_client_username.is_none() {
+            self.torrent_client_username = other.torrent_client_username;
+        }
+        if self.torrent_client_password.is_none() {
+            self.torrent_client_password = other.torrent_client_password;
+        }
+        if self.torrent_client_savepath.is_none() {
+            self.torrent_client_savepath = other.torrent_client_savepath;
+        }
+        if self.torrent_client_category.is_none() {
+            self.torrent_client_category = other.torrent_client_category;
+        }
+        if self.torrent_client_tags.is_none() {
+            self.torrent_client_tags = other.torrent_client_tags;
+        }
+        if self.torrent_client_paused.is_none() {
+            self.torrent_client_paused = other.torrent_client_paused;
+        }
+        if self.torrent_client_skip_checking.is_none() {
+            self.torrent_client_skip_checking = other.torrent_client_skip_checking;
+        }
         if self.dry_run.is_none() {
             self.dry_run = other.dry_run;
         }
@@ -107,6 +210,15 @@ impl ::std::default::Default for UploadOptions {
             copy_transcode_to_content_dir: ::std::default::Default::default(),
             copy_transcode_to: ::std::option::Option::None,
             copy_torrent_to: ::std::option::Option::None,
+            torrent_client: ::std::option::Option::None,
+            torrent_client_url: ::std::option::Option::None,
+            torrent_client_username: ::std::option::Option::None,
+            torrent_client_password: ::std::option::Option::None,
+            torrent_client_savepath: ::std::option::Option::None,
+            torrent_client_category: ::std::option::Option::None,
+            torrent_client_tags: ::std::option::Option::None,
+            torrent_client_paused: ::std::default::Default::default(),
+            torrent_client_skip_checking: ::std::default::Default::default(),
             dry_run: ::std::default::Default::default(),
         }
     }
@@ -134,7 +246,49 @@ impl ::caesura_options::Documented for UploadOptions {
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
                 description :
                 "Directory the torrent file is copied to.<br>This should be set if you wish to auto-add to your torrent client.",
-                }, ::caesura_options::FieldDoc { config_key : "dry_run", cli_flag :
+                }, ::caesura_options::FieldDoc { config_key : "torrent_client", cli_flag
+                : "--torrent-client", field_type : "Option<TorrentClient>", default_value
+                : ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description : "Torrent client for direct API injection.", },
+                ::caesura_options::FieldDoc { config_key : "torrent_client_url", cli_flag
+                : "--torrent-client-url", field_type : "Option<String>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description :
+                "Torrent client API base URL.<br>Example: `http://127.0.0.1:8080`", },
+                ::caesura_options::FieldDoc { config_key : "torrent_client_username",
+                cli_flag : "--torrent-client-username", field_type : "Option<String>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description : "Torrent client username.", },
+                ::caesura_options::FieldDoc { config_key : "torrent_client_password",
+                cli_flag : "--torrent-client-password", field_type : "Option<String>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description : "Torrent client password.", },
+                ::caesura_options::FieldDoc { config_key : "torrent_client_savepath",
+                cli_flag : "--torrent-client-savepath", field_type : "Option<String>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Torrent client save path for injected torrents.<br>This is currently used for qBittorrent.<br>For remote clients, this must be a path visible to the client host.",
+                }, ::caesura_options::FieldDoc { config_key : "torrent_client_category",
+                cli_flag : "--torrent-client-category", field_type : "Option<String>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Torrent client category for injected torrents.<br>This is currently used for qBittorrent.",
+                }, ::caesura_options::FieldDoc { config_key : "torrent_client_tags",
+                cli_flag : "--torrent-client-tags", field_type : "Option<Vec<String>>",
+                default_value : ::std::option::Option::None, default_doc :
+                ::std::option::Option::None, description :
+                "Torrent client tags for injected torrents.<br>This is currently used for qBittorrent.",
+                }, ::caesura_options::FieldDoc { config_key : "torrent_client_paused",
+                cli_flag : "--torrent-client-paused", field_type : "bool", default_value
+                : ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Add injected torrents in paused state.", }, ::caesura_options::FieldDoc
+                { config_key : "torrent_client_skip_checking", cli_flag :
+                "--torrent-client-skip-checking", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Skip hash checking when injecting torrents.", },
+                ::caesura_options::FieldDoc { config_key : "dry_run", cli_flag :
                 "--dry-run", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :

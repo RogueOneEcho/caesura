@@ -64,7 +64,7 @@ impl UploadCommand {
                 .await
                 .map_err(Failure::wrap(UploadAction::VerifyContent))?;
             let form = UploadForm {
-                path: torrent_path,
+                path: torrent_path.clone(),
                 category_id: Category::Music,
                 remaster_year: source.metadata.year,
                 remaster_title: source.torrent.remaster_title.clone(),
@@ -122,6 +122,16 @@ impl UploadCommand {
             let id = response.torrent_id;
             let link = get_permalink(base, response.group_id, id);
             info!("{link}");
+            if let Err(e) = inject_torrent_with_client(
+                &torrent_path,
+                &self.upload_options,
+                UploadAction::InjectTorrentClient,
+            )
+            .await
+            {
+                warn!("{}", e.render());
+                warnings.push(e.to_error());
+            }
             formats.push(UploadFormatStatus { format: target, id });
         }
         Ok(UploadSuccess { formats, warnings })

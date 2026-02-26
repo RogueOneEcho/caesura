@@ -37,6 +37,58 @@ fn upload_options_default_values() {
     assert_yaml_snapshot!(result);
 }
 
+/// Verify torrent injection configuration requires a client.
+#[test]
+fn upload_options_rejects_injection_without_client() {
+    let result = UploadOptionsPartial {
+        torrent_client_url: Some("http://127.0.0.1:8080".to_owned()),
+        ..UploadOptionsPartial::default()
+    }
+    .resolve();
+    let errors = result.expect_err("should reject missing torrent client");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::NotSet(name) if name == "Torrent client"))
+    );
+}
+
+/// Verify torrent injection requires URL, username, and password together.
+#[test]
+fn upload_options_rejects_partial_torrent_client_credentials() {
+    let result = UploadOptionsPartial {
+        torrent_client: Some(TorrentClient::Qbittorrent),
+        torrent_client_url: Some("http://127.0.0.1:8080".to_owned()),
+        ..UploadOptionsPartial::default()
+    }
+    .resolve();
+    let errors = result.expect_err("should reject incomplete torrent client credentials");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::NotSet(name) if name == "Torrent client username"))
+    );
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::NotSet(name) if name == "Torrent client password"))
+    );
+}
+
+/// Verify complete torrent client credentials are accepted.
+#[test]
+fn upload_options_accept_complete_torrent_client_credentials() {
+    let result = UploadOptionsPartial {
+        torrent_client: Some(TorrentClient::Qbittorrent),
+        torrent_client_url: Some("http://127.0.0.1:8080".to_owned()),
+        torrent_client_username: Some("admin".to_owned()),
+        torrent_client_password: Some("secret".to_owned()),
+        ..UploadOptionsPartial::default()
+    }
+    .resolve();
+    assert!(result.is_ok());
+}
+
 /// Verify `VerifyOptions` default values.
 #[test]
 fn verify_options_default_values() {
