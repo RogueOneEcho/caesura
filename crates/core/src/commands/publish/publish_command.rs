@@ -345,29 +345,12 @@ impl PublishCommand {
         if !release_notes.is_empty() {
             lines.push(format!("[pad=0|10|0|21]Notes[/pad] {release_notes}"));
         }
-        let factory = InspectFactory::new(false);
-        match factory.create_split(source_path) {
-            Ok((properties, tags)) => {
-                lines.push(format!(
-                    "[pad=0|10|0|19]Details[/pad] [pre]{properties}[/pre]"
-                ));
-                lines.push(format!(
-                    "[pad=0|10|0|31]Tags[/pad] [hide][pre]{tags}[/pre][/hide]"
-                ));
-            }
-            Err(e) => {
-                warn!(
-                    "Unable to add source details to publish description\n{}",
-                    e.render()
-                );
-            }
-        }
-        lines.into_iter().fold(String::new(), |mut output, line| {
-            output.push_str("[quote]");
-            output.push_str(&line);
-            output.push_str("[/quote]");
-            output
-        })
+        append_inspect_sections(
+            &mut lines,
+            source_path,
+            "Unable to add source details to publish description",
+        );
+        to_quote_blocks(lines)
     }
 
     pub(crate) async fn verify_seed_content(
