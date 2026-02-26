@@ -18,11 +18,18 @@ docker pull ghcr.io/rogueoneecho/caesura
 
 The repository includes a ready-to-use [`docker-compose.yml`](docker-compose.yml) with security hardening and inline comments explaining each setting.
 
-Copy it to your working directory and edit the volumes and config values to match your setup:
+Copy it to your working directory and edit the volumes, config values, and user `UID:GID` to match your setup:
 
 ```bash
 curl -O https://raw.githubusercontent.com/RogueOneEcho/caesura/main/docker-compose.yml
 ```
+
+> [!TIP]
+> The image runs as a non-root user by default so you will need update `user: "1000:1000"` to your `UID:GID` pair which can be found with:
+>
+> ```bash
+> echo "$(id -u):$(id -g)"
+> ```
 
 The `docker-compose.yml` makes a few assumptions:
 - `/srv/caesura/cache` will be your caesura cache

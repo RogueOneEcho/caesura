@@ -2,6 +2,9 @@ services:
   caesura:
     container_name: caesura
     image: ghcr.io/rogueoneecho/caesura:latest
+    # Run as host user so mounted volumes are accessible.
+    # Replace with your own UID:GID
+    user: "1000:1000"
     volumes:
     # Persistent cache for queue state and downloaded .torrent files
     - /srv/caesura/cache:/cache
