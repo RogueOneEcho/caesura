@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadResponse};
+use tokio::fs::{copy, rename};
 
 /// Result of a publish operation.
 #[derive(Debug)]
@@ -15,6 +16,8 @@ pub(crate) struct PublishSuccess {
 pub(crate) struct PublishCommand {
     arg: Ref<PublishArg>,
     shared_options: Ref<SharedOptions>,
+    publish_seeding_options: Ref<PublishSeedingOptions>,
+    torrent_injection_options: Ref<TorrentInjectionOptions>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     paths: Ref<PathManager>,
 }
@@ -96,6 +99,109 @@ impl PublishCommand {
         )
         .await
         .map_err(Failure::wrap(PublishAction::CreateTorrent))?;
+
+        let source_dir_name = manifest
+            .source_path
+            .file_name()
+            .expect("source_path should have a file name");
+        let seeding_destination = self
+            .shared_options
+            .content
+            .first()
+            .expect("content should contain at least one directory")
+            .join(source_dir_name);
+        let mut seeding_source = manifest.source_path.clone();
+        let source_already_staged = manifest.source_path == seeding_destination;
+        if manifest.dry_run {
+            if source_already_staged {
+                trace!(
+                    "{} source staging because source already at destination: {}",
+                    "Skipping".bold(),
+                    seeding_destination.display()
+                );
+            } else if self.publish_seeding_options.move_source {
+                trace!(
+                    "Dry run: source would be moved from {} to {}",
+                    manifest.source_path.display(),
+                    seeding_destination.display()
+                );
+            } else {
+                trace!(
+                    "Dry run: source would be hard linked from {} to {}",
+                    manifest.source_path.display(),
+                    seeding_destination.display()
+                );
+            }
+            if self.torrent_injection_options.copy_torrent_to.is_some() {
+                trace!("Dry run: torrent would be copied to autoadd directory");
+            }
+        } else {
+            if source_already_staged {
+                trace!(
+                    "{} source staging because source already at destination: {}",
+                    "Skipping".bold(),
+                    seeding_destination.display()
+                );
+            } else {
+                if seeding_destination.exists() {
+                    return Err(Failure::new(
+                        PublishAction::StageSource,
+                        IoError::new(
+                            ErrorKind::AlreadyExists,
+                            "seeding destination already exists",
+                        ),
+                    )
+                    .with_path(&seeding_destination));
+                }
+                if self.publish_seeding_options.move_source {
+                    trace!(
+                        "{} source from {} to {}",
+                        "Moving".bold(),
+                        manifest.source_path.display(),
+                        seeding_destination.display()
+                    );
+                    rename(&manifest.source_path, &seeding_destination)
+                        .await
+                        .map_err(Failure::wrap_with_path(
+                            PublishAction::StageSource,
+                            &seeding_destination,
+                        ))?;
+                } else {
+                    trace!(
+                        "{} source from {} to {}",
+                        "Hard Linking".bold(),
+                        manifest.source_path.display(),
+                        seeding_destination.display()
+                    );
+                    copy_dir(&manifest.source_path, &seeding_destination, true)
+                        .await
+                        .map_err(Failure::wrap(PublishAction::StageSource))?;
+                }
+                seeding_source = seeding_destination.clone();
+            }
+
+            self.verify_seed_content(&torrent_path, &seeding_source)
+                .await?;
+
+            if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to {
+                let torrent_file_name = torrent_path
+                    .file_name()
+                    .expect("torrent path should have a file name");
+                let target_path = torrent_dir.join(torrent_file_name);
+                copy(&torrent_path, &target_path)
+                    .await
+                    .map_err(Failure::wrap_with_path(
+                        PublishAction::InjectTorrent,
+                        &target_path,
+                    ))?;
+                trace!(
+                    "{} {} to {}",
+                    "Copied".bold(),
+                    torrent_path.display(),
+                    target_path.display()
+                );
+            }
+        }
 
         match manifest.mode {
             PublishMode::NewGroup => {
@@ -197,5 +303,25 @@ impl PublishCommand {
                 })
             }
         }
+    }
+
+    pub(crate) async fn verify_seed_content(
+        &self,
+        torrent_path: &Path,
+        seeding_source: &Path,
+    ) -> Result<(), Failure<PublishAction>> {
+        let verification = TorrentVerifier::execute(torrent_path, seeding_source)
+            .await
+            .map_err(Failure::wrap(PublishAction::VerifySeedContent))?;
+        if let Some(issue) = verification {
+            return Err(Failure::new(
+                PublishAction::VerifySeedContent,
+                PublishError::SeedContentVerification {
+                    issue: issue.to_string(),
+                },
+            )
+            .with_path(seeding_source));
+        }
+        Ok(())
     }
 }

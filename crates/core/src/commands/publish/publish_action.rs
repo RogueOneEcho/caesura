@@ -11,6 +11,12 @@ pub enum PublishAction {
     ValidateManifest,
     #[error("create source torrent")]
     CreateTorrent,
+    #[error("stage source for seeding")]
+    StageSource,
+    #[error("verify seeding content")]
+    VerifySeedContent,
+    #[error("inject torrent into client")]
+    InjectTorrent,
     #[error("get torrent group")]
     GetTorrentGroup,
     #[error("check duplicate source")]
@@ -30,4 +36,6 @@ pub enum PublishError {
     DuplicateSource,
     #[error("source format must be FLAC/Lossless or FLAC/24bit Lossless")]
     UnsupportedSourceFormat,
+    #[error("staged content failed torrent verification: {issue}")]
+    SeedContentVerification { issue: String },
 }

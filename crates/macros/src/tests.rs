@@ -256,6 +256,18 @@ fn expand_upload_options() {
 }
 
 #[test]
+fn expand_torrent_injection_options() {
+    let source = include_str!("../../core/src/options/torrent_injection_options.rs");
+    assert_snapshot!(expand_options_from_file(source));
+}
+
+#[test]
+fn expand_publish_seeding_options() {
+    let source = include_str!("../../core/src/options/publish_seeding_options.rs");
+    assert_snapshot!(expand_options_from_file(source));
+}
+
+#[test]
 fn expand_verify_options() {
     let source = include_str!("../../core/src/options/verify_options.rs");
     assert_snapshot!(expand_options_from_file(source));

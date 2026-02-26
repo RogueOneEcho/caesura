@@ -11,6 +11,7 @@ const MUSIC_CATEGORY_ID: u8 = 0;
 pub(crate) struct UploadCommand {
     shared_options: Ref<SharedOptions>,
     upload_options: Ref<UploadOptions>,
+    torrent_injection_options: Ref<TorrentInjectionOptions>,
     copy_options: Ref<CopyOptions>,
     source_provider: Ref<SourceProvider>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
@@ -87,7 +88,7 @@ impl UploadCommand {
                     warnings.push(e.to_error());
                 }
             }
-            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to
+            if let Some(torrent_dir) = &self.torrent_injection_options.copy_torrent_to
                 && let Err(e) = self.copy_torrent(source, &target, torrent_dir).await
             {
                 warn!("{}", e.render());

@@ -150,6 +150,19 @@ Publish a source FLAC release from a local directory using a YAML manifest.
 caesura publish /path/to/publish.yml
 ```
 
+> [!TIP]
+> `publish` prepares source seeding before upload.
+>
+> By default the source directory is hard-linked into the first `content` directory.
+>
+> Use `--move-source` if you want to move files instead of hard-linking.
+>
+> If `copy_torrent_to` is set, the source `.torrent` is copied to that autoadd directory.
+>
+> If source staging, verification, or torrent injection fails then `publish` fails before upload.
+>
+> In dry-run mode no source staging or torrent injection is performed.
+
 ### New group example
 
 ```yaml

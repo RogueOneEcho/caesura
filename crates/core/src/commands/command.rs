@@ -22,6 +22,7 @@ pub enum Command {
         FileOptions,
         RunnerOptions,
         UploadOptions,
+        TorrentInjectionOptions,
         CacheOptions,
         BatchOptions
     )]
@@ -39,7 +40,13 @@ pub enum Command {
     Inspect,
 
     /// Publish a source FLAC torrent from a local directory using a YAML manifest.
-    #[options(PublishArg, ConfigOptions, SharedOptions)]
+    #[options(
+        PublishArg,
+        ConfigOptions,
+        SharedOptions,
+        PublishSeedingOptions,
+        TorrentInjectionOptions
+    )]
     Publish,
 
     /// Add FLAC sources to the queue without transcoding
@@ -77,6 +84,7 @@ pub enum Command {
         SharedOptions,
         TargetOptions,
         UploadOptions,
+        TorrentInjectionOptions,
         CopyOptions
     )]
     Upload,
