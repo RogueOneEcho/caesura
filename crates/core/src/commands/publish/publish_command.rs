@@ -301,18 +301,6 @@ impl PublishCommand {
         dry_run: bool,
         warnings: Vec<rogue_logging::Error>,
     ) -> Result<PublishSuccess, Failure<PublishAction>> {
-        let group = self
-            .api
-            .get_torrent_group(existing_group.group_id)
-            .await
-            .map_err(Failure::wrap(PublishAction::GetTorrentGroup))?;
-        if Self::is_duplicate_existing_group_source(existing_group, &group)? {
-            return Err(Failure::new(
-                PublishAction::CheckDuplicate,
-                PublishError::DuplicateSource,
-            ));
-        }
-
         let form = PublishManifest::to_existing_group_form(
             existing_group,
             torrent_path,
@@ -328,6 +316,18 @@ impl PublishCommand {
                 warnings,
             });
         }
+        let group = self
+            .api
+            .get_torrent_group(existing_group.group_id)
+            .await
+            .map_err(Failure::wrap(PublishAction::GetTorrentGroup))?;
+        if Self::is_duplicate_existing_group_source(existing_group, &group)? {
+            return Err(Failure::new(
+                PublishAction::CheckDuplicate,
+                PublishError::DuplicateSource,
+            ));
+        }
+
         let response = self
             .api
             .upload_torrent(form)

@@ -100,6 +100,22 @@ fn publish_manifest_source_without_flac_fails() {
     assert!(result.is_err());
 }
 
+#[test]
+fn publish_manifest_relative_torrent_path_is_valid() {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_relative_torrent_path_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test").expect("should write flac file");
+    let mut manifest = PublishManifest::mock_new(source_path);
+    manifest.torrent_path = Some(PathBuf::from("relative-source.torrent"));
+
+    // Act
+    let result = manifest.validate();
+
+    // Assert
+    assert!(result.is_ok(), "relative torrent_path should be accepted");
+}
+
 #[tokio::test]
 async fn publish_rejects_non_red_indexer() -> Result<(), TestError> {
     // Arrange
@@ -166,6 +182,35 @@ async fn publish_dry_run_new_group_skips_api_call() -> Result<(), TestError> {
 
     // Assert
     assert!(result.is_ok());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_dry_run_existing_group_skips_api_call() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_existing(source_path);
+    let test_dir = TestDirectory::new();
+    let mock = MockGazelleClient::new();
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: true,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.group_id.is_none(), "dry run should skip upload");
+    assert!(result.torrent_id.is_none(), "dry run should skip upload");
     Ok(())
 }
 

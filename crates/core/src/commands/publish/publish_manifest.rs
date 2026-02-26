@@ -181,6 +181,7 @@ impl PublishManifest {
 
         if let Some(torrent_path) = &self.torrent_path
             && let Some(parent) = torrent_path.parent()
+            && !parent.as_os_str().is_empty()
             && !parent.is_dir()
         {
             errors.push(PublishValidationError::TorrentPathParentMissing(
