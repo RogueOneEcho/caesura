@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 use std::process::Command;
+use std::sync::LazyLock;
 
 use serde::{Deserialize, Serialize};
 
@@ -56,14 +57,21 @@ impl OptionsContract for SoxOptions {
     fn validate(&self, _errors: &mut Vec<OptionRule>) {}
 }
 
-/// Detect whether the `sox` binary on PATH is actually `sox_ng`.
+/// Cached result of `sox_ng` detection.
 ///
-/// - Returns `true` if `sox` is not found (assumes `sox_ng` is installed separately).
-/// - Returns `true` if `sox --version` identifies itself as `sox_ng`.
-pub(crate) fn detect_sox_ng() -> bool {
+/// Spawns `sox --version` once per process and caches the result.
+static IS_SOX_NG: LazyLock<bool> = LazyLock::new(|| {
     let Ok(output) = Command::new(SOX).arg("--version").output() else {
         return true;
     };
     let stdout = String::from_utf8_lossy(&output.stdout);
     stdout.contains("SoX_ng")
+});
+
+/// Detect whether the `sox` binary on PATH is actually `sox_ng`.
+///
+/// - Returns `true` if `sox` is not found (assumes `sox_ng` is installed separately).
+/// - Returns `true` if `sox --version` identifies itself as `sox_ng`.
+pub(crate) fn detect_sox_ng() -> bool {
+    *IS_SOX_NG
 }
