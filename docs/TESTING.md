@@ -19,6 +19,16 @@ The following tools must be installed to run tests. Version numbers are those us
 | metaflac    | 1.5.0    | Test sample tag injection           | Included with FLAC        |
 | LAME        | 3.100    | MP3 encoding for transcode tests    | `brew install lame`       |
 
+### Testing with classic SoX
+
+The test suite auto-detects whether `sox_ng` or classic `sox` is available. To verify tests pass with classic SoX:
+
+```bash
+brew unlink sox_ng && brew link sox
+./samples/rm-samples && cargo test --quiet --all-features
+brew unlink sox && brew link sox_ng   # restore
+```
+
 ## Running Tests
 
 ```bash
