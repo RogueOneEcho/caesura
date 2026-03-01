@@ -1,0 +1,62 @@
+name: CI
+on: workflow_call
+jobs:
+  ci:
+    uses: RogueOneEcho/ci/.github/workflows/rust-bin.yml@v1
+    secrets: inherit
+    with:
+      binary-name: caesura
+      workspace: true
+      cargo-manifests: |
+        Cargo.toml
+        Cargo.lock
+        crates/core/Cargo.toml
+        crates/macros/Cargo.toml
+        crates/options/Cargo.toml
+      targets: |
+        [
+          {"os":"ubuntu-24.04","target":"x86_64-unknown-linux-gnu","test":true},
+          {"os":"ubuntu-24.04","target":"x86_64-unknown-linux-musl"},
+          {"os":"macos-15-intel","target":"x86_64-apple-darwin"},
+          {"os":"macos-15","target":"aarch64-apple-darwin","test":true},
+          {"os":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu","test":true}
+        ]
+      pre-test: |
+        brew install flac lame sox_ng
+        if [[ "$TARGET" == "x86_64-unknown-linux-gnu" ]]; then
+          echo "CAESURA_DETERMINISTIC_TESTS=1" >> $GITHUB_ENV
+        fi
+      post-test: |
+        cargo auditable test --release --locked --no-fail-fast --target $TARGET -p caesura_macros
+        if [[ "$TARGET" == "x86_64-unknown-linux-gnu" ]]; then
+          cargo auditable test --release --locked --target $TARGET -- --ignored sample_flac
+        fi
+      config-path: config.yml
+      docker-image: rogueoneecho/caesura
+      sbom: .github/sbom/source-deps.cdx.json
+
+  update-homebrew:
+    needs: ci
+    if: needs.ci.outputs.version != '' && contains(needs.ci.outputs.version, '-') == false
+    runs-on: ubuntu-24.04
+    steps:
+    - env:
+        GH_TOKEN: ${{ secrets.BREW_TAP_TOKEN }}
+      run: >
+        gh workflow run update-formula.yml
+        -R RogueOneEcho/homebrew-tap
+        -f name=caesura
+        -f version=${{ needs.ci.outputs.version }}
+
+  update-nix:
+    needs: ci
+    if: needs.ci.outputs.version != '' && contains(needs.ci.outputs.version, '-') == false
+    runs-on: ubuntu-24.04
+    steps:
+    - env:
+        GH_TOKEN: ${{ secrets.NIX_TOKEN }}
+      run: >
+        gh workflow run update-package.yml
+        -R RogueOneEcho/nix
+        -f name=caesura
+        -f version=${{ needs.ci.outputs.version }}
