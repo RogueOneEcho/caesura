@@ -1,0 +1,24 @@
+name: CI on PR Labeled
+on:
+  pull_request:
+    types:
+    - labeled
+permissions:
+  actions: write
+  contents: write
+  packages: write
+  id-token: write
+  pull-requests: write
+jobs:
+  ci:
+    if: github.event.label.name == 'run-ci'
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+  remove-label:
+    runs-on: ubuntu-24.04
+    needs: ci
+    if: always() && github.event.label.name == 'run-ci'
+    steps:
+    - env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh pr edit ${{ github.event.pull_request.number }} --remove-label run-ci -R ${{ github.repository }}
