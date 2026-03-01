@@ -1,0 +1,16 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        required: true
+        description: Commit SHA or version tag (e.g. v1.0.0-alpha.1)
+permissions:
+  contents: write
+  actions: read
+jobs:
+  release:
+    uses: RogueOneEcho/ci/.github/workflows/fast-forward-release.yml@v1
+    with:
+      ref: ${{ inputs.ref }}
