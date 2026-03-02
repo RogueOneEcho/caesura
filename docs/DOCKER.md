@@ -16,7 +16,7 @@ docker pull ghcr.io/rogueoneecho/caesura
 
 ## 3. Set up `docker-compose.yml`
 
-The repository includes a ready-to-use [`docker-compose.yml`](docker-compose.yml) with security hardening and inline comments explaining each setting.
+The repository includes a ready-to-use [`docker-compose.yml`](blob/main/docker-compose.yml) with security hardening and inline comments explaining each setting.
 
 Copy it to your working directory and edit the volumes, config values, and user `UID:GID` to match your setup:
 
