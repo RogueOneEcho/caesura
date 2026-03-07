@@ -38,6 +38,10 @@ pub enum Command {
     #[options(InspectArg)]
     Inspect,
 
+    /// Publish a source FLAC torrent from a local directory using a YAML manifest.
+    #[options(PublishArg, ConfigOptions, SharedOptions, PublishSeedingOptions)]
+    Publish,
+
     /// Add FLAC sources to the queue without transcoding
     #[command(subcommand_required = true, arg_required_else_help = true)]
     Queue(QueueCommand),

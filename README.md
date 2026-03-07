@@ -51,6 +51,13 @@ Each source is verified to ensure:
 - Copy transcodes to content directory
 - Torrent injection via client auto-add directory
 
+### Publish
+
+- Source FLAC publish workflow for RED via manifest
+- Optional source seeding prep (hard-link by default, `--move-source` to move)
+- Auto-generated BBCode release description with notes, details and hidden tags
+- Optional source torrent injection via client auto-add directory
+
 ### Batch / Queue
 
 - Verify, transcode and upload with one command for every torrent file in a directory

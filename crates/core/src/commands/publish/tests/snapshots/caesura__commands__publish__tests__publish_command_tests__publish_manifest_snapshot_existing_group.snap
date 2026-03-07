@@ -1,0 +1,17 @@
+---
+source: crates/core/src/commands/publish/tests/publish_command_tests.rs
+expression: manifest
+---
+source_path: /path/to/source
+torrent_path: ~
+release_desc: Release notes
+group:
+  type: existing_group
+  group_id: 123456
+  remaster_year: 2024
+  remaster_title: Digital
+  remaster_record_label: Label
+  remaster_catalogue_number: CAT-001
+  media: WEB
+  format: FLAC
+  bitrate: Lossless

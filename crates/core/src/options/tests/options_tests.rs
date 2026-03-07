@@ -36,6 +36,13 @@ fn upload_options_default_values() {
     assert_yaml_snapshot!(result);
 }
 
+/// Verify `PublishSeedingOptions` default values.
+#[test]
+fn publish_seeding_options_default_values() {
+    let result = PublishSeedingOptionsPartial::default().resolve_without_validation();
+    assert_yaml_snapshot!(result);
+}
+
 /// Verify `VerifyOptions` default values.
 #[test]
 fn verify_options_default_values() {

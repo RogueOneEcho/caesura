@@ -79,6 +79,10 @@ max_file_size: 750000
 # Only applied if the image is greater than `max_file_size`.
 # Default: 1280
 max_pixel_size: 1280
+# Should source files be moved to the seeding destination?
+# If disabled, source files are hard linked into the destination.
+# Default: false
+move_source: false
 # Should the hash check of source files be skipped?
 # Note: This is only useful for development and should probably not be used.
 # Default: false

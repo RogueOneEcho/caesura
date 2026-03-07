@@ -1,0 +1,119 @@
+---
+source: crates/macros/src/tests.rs
+expression: expand_options_from_file(source)
+---
+/// Partial options struct with optional fields for CLI/YAML parsing.
+#[derive(
+    ::clap::Args,
+    ::std::clone::Clone,
+    ::std::fmt::Debug,
+    ::std::default::Default,
+    ::serde::Deserialize,
+    ::serde::Serialize
+)]
+pub struct PublishSeedingOptionsPartial {
+    /// Should source files be moved to the seeding destination?
+    ///
+    /// If disabled, source files are hard linked into the destination.
+    ///
+    /// Default: `false`
+    #[arg(long = "move-source", num_args = 0..= 1, default_missing_value = "true")]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub move_source: Option<bool>,
+    /// Directory the source torrent file is copied to.
+    ///
+    /// This should be set if you wish to auto-add to your torrent client.
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub copy_torrent_to: Option<PathBuf>,
+}
+impl PublishSeedingOptionsPartial {
+    fn resolve_internal(
+        self,
+        validate: bool,
+    ) -> ::std::result::Result<
+        PublishSeedingOptions,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
+    > {
+        let mut errors = ::std::vec::Vec::new();
+        let move_source = self.move_source;
+        let copy_torrent_to = self.copy_torrent_to;
+        let resolved = PublishSeedingOptions {
+            move_source: move_source.unwrap_or_default(),
+            copy_torrent_to,
+        };
+        if validate {
+            resolved.validate(&mut errors);
+        }
+        if errors.is_empty() {
+            ::std::result::Result::Ok(resolved)
+        } else {
+            ::std::result::Result::Err(errors)
+        }
+    }
+}
+impl ::caesura_options::OptionsPartialContract for PublishSeedingOptionsPartial {
+    type Resolved = PublishSeedingOptions;
+    fn merge(&mut self, other: Self) {
+        if self.move_source.is_none() {
+            self.move_source = other.move_source;
+        }
+        if self.copy_torrent_to.is_none() {
+            self.copy_torrent_to = other.copy_torrent_to;
+        }
+    }
+    fn resolve_without_validation(self) -> PublishSeedingOptions {
+        self.resolve_internal(false).expect("validation disabled")
+    }
+    fn resolve(
+        self,
+    ) -> ::std::result::Result<
+        PublishSeedingOptions,
+        ::std::vec::Vec<::caesura_options::OptionRule>,
+    > {
+        self.resolve_internal(true)
+    }
+}
+impl ::std::default::Default for PublishSeedingOptions {
+    fn default() -> Self {
+        Self {
+            move_source: ::std::default::Default::default(),
+            copy_torrent_to: ::std::option::Option::None,
+        }
+    }
+}
+impl ::caesura_options::Documented for PublishSeedingOptions {
+    fn doc_metadata() -> &'static ::caesura_options::OptionsDoc {
+        static DOC: ::std::sync::LazyLock<::caesura_options::OptionsDoc> = ::std::sync::LazyLock::new(||
+        ::caesura_options::OptionsDoc {
+            name: "PublishSeedingOptions",
+            description: "Options for publish seeding behavior.",
+            fields: ::std::vec![
+                ::caesura_options::FieldDoc { config_key : "move_source", cli_flag :
+                "--move-source", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Should source files be moved to the seeding destination?<br>If disabled, source files are hard linked into the destination.",
+                }, ::caesura_options::FieldDoc { config_key : "copy_torrent_to", cli_flag
+                : "--copy-torrent-to", field_type : "Option<PathBuf>", default_value :
+                ::std::option::Option::None, default_doc : ::std::option::Option::None,
+                description :
+                "Directory the source torrent file is copied to.<br>This should be set if you wish to auto-add to your torrent client.",
+                }
+            ],
+        });
+        &DOC
+    }
+}
+const _: () = {
+    fn __register(
+        provider: &mut ::caesura_options::OptionsProvider,
+        services: &mut ::di::ServiceCollection,
+    ) {
+        provider.register::<PublishSeedingOptionsPartial>(services);
+    }
+    ::inventory::submit!(
+        ::caesura_options::OptionsRegistration { doc_metadata : < PublishSeedingOptions
+        as ::caesura_options::Documented > ::doc_metadata, register : __register, }
+    );
+};

@@ -45,6 +45,12 @@ impl Host {
                 .get_required::<InspectCommand>()
                 .execute_cli()
                 .map_err(Report::new),
+            Command::Publish => self
+                .services
+                .get_required::<PublishCommand>()
+                .execute_cli()
+                .await
+                .map_err(Report::new),
             Command::Queue(QueueCommand::Add) => self
                 .services
                 .get_required::<QueueAddCommand>()

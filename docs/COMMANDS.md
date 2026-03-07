@@ -137,6 +137,102 @@ If you haven't already then add the `*.red.torrent` or `*.ops.torrent` file to y
 
 Go to your indexer and check your uploads to make sure everything has gone to plan.
 
+## `publish`
+
+Publish a source FLAC release from a local directory using a YAML manifest.
+
+> [!WARNING]
+> This command is currently RED-only.
+>
+> You are responsible for everything you upload.
+>
+> Before running `publish`, manually verify:
+> - metadata fields are correct for the edition/media you are uploading,
+> - the release is not on RED's DNU list,
+> - source files and logs (if applicable) meet tracker rules.
+
+```bash
+caesura publish /path/to/publish.yml
+```
+
+```bash
+caesura publish /path/to/publish.yml --dry-run
+```
+
+> [!TIP]
+> `publish` prepares source seeding before upload.
+>
+> By default the source directory is hard-linked into the first `content` directory.
+>
+> Use `--move-source` if you want to move files instead of hard-linking.
+>
+> If `copy_torrent_to` is set, the source `.torrent` is copied to that autoadd directory.
+>
+> If source staging or verification fails then `publish` fails before upload.
+>
+> If torrent injection fails then `publish` logs a warning and continues the upload.
+>
+> In `--dry-run` mode no source staging or torrent injection is performed.
+>
+> `publish` auto-generates BBCode release notes (tool/version, source format, details, hidden tags).
+> The `release_desc` value in the manifest is included as the `Notes` line.
+
+### New group example
+
+```yaml
+source_path: /path/to/source
+torrent_path: /optional/path/to/output.torrent
+release_desc: "Uploader notes to include under Notes in generated BBCode"
+group:
+  type: new_group
+  title: "Album Title"
+  year: 2024
+  release_type: 1
+  media: WEB
+  tags: ["electronic", "ambient"]
+  album_description: "Group description"
+  request_id: 364781
+  image: "https://example.com/cover.jpg"
+  artists:
+    - name: "Artist Name"
+      role: 1
+  edition:
+    unknown_release: false
+    remaster: true
+    year: 2024
+    title: "Digital"
+    record_label: "Label"
+    catalogue_number: "CAT-001"
+    format: "FLAC"
+    bitrate: "Lossless"
+```
+
+### Existing group example
+
+```yaml
+source_path: /path/to/source
+torrent_path: /optional/path/to/output.torrent
+release_desc: "Uploader notes to include under Notes in generated BBCode"
+group:
+  type: existing_group
+  group_id: 123456
+  remaster_year: 2024
+  remaster_title: "Digital"
+  remaster_record_label: "Label"
+  remaster_catalogue_number: "CAT-001"
+  media: "WEB"
+  format: "FLAC"
+  bitrate: "Lossless"
+```
+
+The command uploads only the source FLAC and then stops.
+After success, run:
+
+```bash
+caesura transcode <torrent_id>
+caesura upload <torrent_id>
+```
+
 ## `batch`
 
 Batch processing with queue management.

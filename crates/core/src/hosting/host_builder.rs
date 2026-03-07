@@ -97,6 +97,8 @@ impl HostBuilder {
             .add(DocsCommand::transient())
             // Add inspect services
             .add(InspectCommand::transient())
+            // Add publish services
+            .add(PublishCommand::transient())
             // Add queue services
             .add(QueueAddCommand::transient())
             .add(QueueListCommand::transient())

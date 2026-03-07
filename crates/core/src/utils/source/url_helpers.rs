@@ -60,6 +60,6 @@ pub fn get_group_id_from_url(url: &str) -> Option<u32> {
 
 /// Generate a permalink URL for a torrent.
 #[must_use]
-pub fn get_permalink(base: &String, group_id: u32, torrent_id: u32) -> String {
+pub fn get_permalink(base: &str, group_id: u32, torrent_id: u32) -> String {
     format!(r"{base}/torrents.php?id={group_id}&torrentid={torrent_id}#torrent{torrent_id}")
 }

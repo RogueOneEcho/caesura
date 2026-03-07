@@ -1,0 +1,932 @@
+use crate::testing_prelude::*;
+use gazelle_api::{Group, GroupResponse, MockGazelleClient, Torrent, UploadResponse};
+use std::fs;
+
+#[test]
+fn publish_manifest_valid_new_group_parses() -> Result<(), TestError> {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_valid_new_group_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test")?;
+    let manifest = PublishManifest::mock_new(source_path);
+    let manifest_dir = TempDirectory::create("publish_manifest_valid_new_group");
+    let file = manifest_dir.join("publish.new-group.yml");
+    fs::write(&file, serde_yaml::to_string(&manifest)?)?;
+
+    // Act
+    let parsed = PublishManifest::read(&file)?;
+
+    // Assert
+    assert!(matches!(parsed.group, PublishGroup::NewGroup(_)));
+    parsed.validate().expect("manifest should be valid");
+    Ok(())
+}
+
+#[test]
+fn publish_manifest_valid_existing_group_parses() -> Result<(), TestError> {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_valid_existing_group_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test")?;
+    let manifest = PublishManifest::mock_existing(source_path);
+    let manifest_dir = TempDirectory::create("publish_manifest_valid_existing_group");
+    let file = manifest_dir.join("publish.existing-group.yml");
+    fs::write(&file, serde_yaml::to_string(&manifest)?)?;
+
+    // Act
+    let parsed = PublishManifest::read(&file)?;
+
+    // Assert
+    assert!(matches!(parsed.group, PublishGroup::ExistingGroup(_)));
+    parsed.validate().expect("manifest should be valid");
+    Ok(())
+}
+
+#[test]
+fn publish_manifest_media_alias_blu_ray_normalizes() -> Result<(), TestError> {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_media_alias_blu_ray_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test")?;
+    let manifest = PublishManifest::mock_new(source_path);
+    let manifest_yaml = serde_yaml::to_string(&manifest)?.replace("media: WEB", "media: Blu-ray");
+    let manifest_dir = TempDirectory::create("publish_manifest_media_alias_blu_ray");
+    let file = manifest_dir.join("publish.new-group.yml");
+    fs::write(&file, manifest_yaml)?;
+
+    // Act
+    let parsed = PublishManifest::read(&file)?;
+
+    // Assert
+    match parsed.group {
+        PublishGroup::NewGroup(new_group) => {
+            assert_eq!(new_group.media.to_string(), "Blu-Ray");
+        }
+        PublishGroup::ExistingGroup(_) => unreachable!("expected new group"),
+    }
+    Ok(())
+}
+
+#[test]
+fn publish_manifest_missing_artists_fails() {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_missing_artists_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test").expect("should write flac file");
+    let mut manifest = PublishManifest::mock_new(source_path);
+    if let PublishGroup::NewGroup(new_group) = &mut manifest.group {
+        new_group.artists.clear();
+    } else {
+        unreachable!("expected new group");
+    }
+
+    // Act
+    let result = manifest.validate();
+
+    // Assert
+    assert!(result.is_err());
+}
+
+#[test]
+fn publish_manifest_snapshot_new_group() {
+    let manifest = PublishManifest::mock_new(PathBuf::from("/path/to/source"));
+    assert_yaml_snapshot!(manifest);
+}
+
+#[test]
+fn publish_manifest_snapshot_existing_group() {
+    let manifest = PublishManifest::mock_existing(PathBuf::from("/path/to/source"));
+    assert_yaml_snapshot!(manifest);
+}
+
+#[test]
+fn publish_manifest_invalid_source_path_fails() {
+    // Arrange
+    let source_path = PathBuf::from("/path/that/does/not/exist");
+    let manifest = PublishManifest::mock_new(source_path);
+
+    // Act
+    let result = manifest.validate();
+
+    // Assert
+    assert!(result.is_err());
+}
+
+#[test]
+fn publish_manifest_source_without_flac_fails() {
+    // Arrange
+    let dir = TempDirectory::create("publish_manifest_empty_source");
+    let manifest = PublishManifest::mock_new(dir.to_path_buf());
+
+    // Act
+    let result = manifest.validate();
+
+    // Assert
+    assert!(result.is_err());
+}
+
+#[test]
+fn publish_manifest_relative_torrent_path_is_valid() {
+    // Arrange
+    let source_dir = TempDirectory::create("publish_manifest_relative_torrent_path_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "test").expect("should write flac file");
+    let mut manifest = PublishManifest::mock_new(source_path);
+    manifest.torrent_path = Some(PathBuf::from("relative-source.torrent"));
+
+    // Act
+    let result = manifest.validate();
+
+    // Assert
+    assert!(result.is_ok(), "relative torrent_path should be accepted");
+}
+
+#[tokio::test]
+async fn publish_rejects_non_red_indexer() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_new(source_path);
+    let publish_dir = TempDirectory::create("publish_rejects_non_red_indexer");
+    let publish_path = publish_dir.join("publish.yml");
+    fs::write(&publish_path, serde_yaml::to_string(&manifest)?)?;
+    let test_dir = TestDirectory::new();
+    let host = HostBuilder::new()
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path,
+            dry_run: false,
+        })
+        .with_options(SharedOptions {
+            announce_url: "https://home.opsfet.ch/test/announce".to_owned(),
+            indexer: "ops".to_owned(),
+            indexer_url: "https://orpheus.network".to_owned(),
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: test_dir.output(),
+            ..SharedOptions::mock()
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute_cli().await;
+
+    // Assert
+    assert!(result.is_err());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_dry_run_new_group_skips_api_call() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_new(source_path);
+    let publish_dir = TempDirectory::create("publish_dry_run_new_group_skips_api_call");
+    let publish_path = publish_dir.join("publish.yml");
+    fs::write(&publish_path, serde_yaml::to_string(&manifest)?)?;
+    let test_dir = TestDirectory::new();
+    let mock = MockGazelleClient::new();
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path,
+            dry_run: true,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute_cli().await;
+
+    // Assert
+    assert!(result.is_ok());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_dry_run_existing_group_skips_api_call() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_existing(source_path);
+    let test_dir = TestDirectory::new();
+    let mock = MockGazelleClient::new();
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: true,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.group_id.is_none(), "dry run should skip upload");
+    assert!(result.torrent_id.is_none(), "dry run should skip upload");
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_new_group_returns_response_and_next_steps() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_new(source_path);
+    manifest.validate().expect("manifest should be valid");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: Some(364_781),
+        torrent_id: 500_001,
+        group_id: 600_001,
+    };
+    let expected_group_id = response.group_id;
+    let expected_torrent_id = response.torrent_id;
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert_eq!(result.group_id, Some(expected_group_id));
+    assert_eq!(result.torrent_id, Some(expected_torrent_id));
+    assert_eq!(
+        result.permalink("https://redacted.sh"),
+        Some(get_permalink(
+            "https://redacted.sh",
+            expected_group_id,
+            expected_torrent_id
+        ))
+    );
+    assert_eq!(
+        result.next_transcode_command(),
+        Some(format!("caesura transcode {expected_torrent_id}"))
+    );
+    assert_eq!(
+        result.next_upload_command(),
+        Some(format!("caesura upload {expected_torrent_id}"))
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_uses_upload_naming_for_source_torrent_name() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_parent = TempDirectory::create("publish_uses_upload_naming_source_parent");
+    let source_path = source_parent.join("incoming-unstructured-source-directory");
+    fs::create_dir_all(&source_path)?;
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path);
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_uses_upload_naming_content");
+    let output_dir = TempDirectory::create("publish_uses_upload_naming_output");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_099,
+        group_id: 600_099,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_some(), "publish should succeed");
+    let torrent_path = fs::read_dir(&*output_dir)?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .find(|path| path.extension().is_some_and(|ext| ext == "torrent"))
+        .expect("publish should create a torrent file");
+    let torrent = TorrentReader::execute(&torrent_path).await?;
+    let expected = TranscodeName::get(
+        &Metadata {
+            artist: "Artist Name".to_owned(),
+            album: "Album Title".to_owned(),
+            remaster_title: "Digital".to_owned(),
+            year: 2024,
+            media: "WEB".to_owned(),
+        },
+        TargetFormat::Flac,
+    );
+    assert_eq!(
+        torrent.name, expected,
+        "publish should use upload naming instead of raw source directory name"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_existing_group_duplicate_detected_fails() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_existing(source_path);
+    manifest.validate().expect("manifest should be valid");
+    let test_dir = TestDirectory::new();
+    let mock = MockGazelleClient::new().with_get_torrent_group(Ok(GroupResponse {
+        group: Group {
+            id: 123_456,
+            ..Group::default()
+        },
+        torrents: vec![Torrent {
+            media: "WEB".to_owned(),
+            format: "FLAC".to_owned(),
+            encoding: "Lossless".to_owned(),
+            remaster_year: Some(2024),
+            remaster_title: "Digital".to_owned(),
+            remaster_record_label: "Label".to_owned(),
+            remaster_catalogue_number: "CAT-001".to_owned(),
+            ..Torrent::default()
+        }],
+    }));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await;
+
+    // Assert
+    assert!(result.is_err());
+    let error = result.expect_err("should fail");
+    assert!(error.render().contains("duplicate"));
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_existing_group_non_duplicate_uploads() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+    let manifest = PublishManifest::mock_existing(source_path);
+    manifest.validate().expect("manifest should be valid");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 700_001,
+        group_id: 123_456,
+    };
+    let expected_group_id = response.group_id;
+    let expected_torrent_id = response.torrent_id;
+    let mock = MockGazelleClient::new()
+        .with_get_torrent_group(Ok(GroupResponse {
+            group: Group {
+                id: 123_456,
+                ..Group::default()
+            },
+            torrents: vec![Torrent {
+                media: "WEB".to_owned(),
+                format: "MP3".to_owned(),
+                encoding: "320".to_owned(),
+                remaster_year: Some(2024),
+                remaster_title: "Digital".to_owned(),
+                remaster_record_label: "Label".to_owned(),
+                remaster_catalogue_number: "CAT-001".to_owned(),
+                ..Torrent::default()
+            }],
+        }))
+        .with_upload_torrent(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert_eq!(result.group_id, Some(expected_group_id));
+    assert_eq!(result.torrent_id, Some(expected_torrent_id));
+    assert_eq!(
+        result.permalink("https://redacted.sh"),
+        Some(get_permalink(
+            "https://redacted.sh",
+            expected_group_id,
+            expected_torrent_id
+        ))
+    );
+    assert_eq!(
+        result.next_transcode_command(),
+        Some(format!("caesura transcode {expected_torrent_id}"))
+    );
+    assert_eq!(
+        result.next_upload_command(),
+        Some(format!("caesura upload {expected_torrent_id}"))
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_stages_source_with_hard_links_by_default() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_stages_source_with_hard_links_by_default");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path.clone());
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_hard_link_content");
+    let output_dir = TempDirectory::create("publish_hard_link_output");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_111,
+        group_id: 600_111,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_some(), "publish should succeed");
+    let staged_path = content_dir.join(
+        source_path
+            .file_name()
+            .expect("source path should have file name"),
+    );
+    assert!(source_path.is_dir(), "original source should remain");
+    assert!(staged_path.is_dir(), "staged source should exist");
+    assert_eq!(
+        fs::read(source_path.join("01 Track.flac"))?,
+        fs::read(staged_path.join("01 Track.flac"))?
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_move_source_moves_source_directory() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_move_source_moves_source_directory");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path.clone());
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_move_source_content");
+    let output_dir = TempDirectory::create("publish_move_source_output");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_112,
+        group_id: 600_112,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishSeedingOptions {
+            move_source: true,
+            ..PublishSeedingOptions::default()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_some(), "publish should succeed");
+    let staged_path = content_dir.join(
+        source_path
+            .file_name()
+            .expect("source path should have file name"),
+    );
+    assert!(!source_path.exists(), "source should be moved");
+    assert!(staged_path.is_dir(), "staged source should exist");
+    assert!(staged_path.join("01 Track.flac").is_file());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_source_already_staged_is_not_moved() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let content_dir = TempDirectory::create("publish_source_already_staged_content");
+    let source_path = content_dir.join("already-staged-source");
+    fs::create_dir_all(&source_path)?;
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path.clone());
+    manifest.validate().expect("manifest should be valid");
+    let output_dir = TempDirectory::create("publish_source_already_staged_output");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_113,
+        group_id: 600_113,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishSeedingOptions {
+            move_source: true,
+            ..PublishSeedingOptions::default()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_some(), "publish should succeed");
+    assert!(source_path.is_dir(), "source should still exist");
+    assert!(source_path.join("01 Track.flac").is_file());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_existing_staging_target_fails_before_upload() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_parent = TempDirectory::create("publish_existing_staging_target_source_parent");
+    let source_path = source_parent.join("source-for-staging-collision");
+    fs::create_dir_all(&source_path)?;
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path.clone());
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_existing_staging_target_content");
+    let output_dir = TempDirectory::create("publish_existing_staging_target_output");
+    let collision_path = content_dir.join("source-for-staging-collision");
+    fs::create_dir_all(&collision_path)?;
+    fs::write(collision_path.join("01 Track.flac"), "existing")?;
+    let test_dir = TestDirectory::new();
+    let host = HostBuilder::new()
+        .with_mock_client(MockGazelleClient::new())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await;
+
+    // Assert
+    let error = result.expect_err("publish should fail before upload");
+    assert_eq!(error.action(), &PublishAction::StageSource);
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_verify_seed_content_failure_is_reported() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_verify_seed_content_failure_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let mismatched_dir = TempDirectory::create("publish_verify_seed_content_failure_mismatch");
+    let mismatched_path = mismatched_dir.to_path_buf();
+    fs::write(mismatched_path.join("01 Track.flac"), "different track")?;
+    let output_dir = TempDirectory::create("publish_verify_seed_content_failure_output");
+    let torrent_path = output_dir.join("source.red.source.torrent");
+    TorrentCreator::create(
+        &source_path,
+        &torrent_path,
+        "https://flacsfor.me/test/announce".to_owned(),
+        "red".to_owned(),
+    )
+    .await?;
+    let test_dir = TestDirectory::new();
+    let host = HostBuilder::new()
+        .with_mock_client(MockGazelleClient::new())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command
+        .verify_seed_content(&torrent_path, &mismatched_path)
+        .await;
+
+    // Assert
+    let error = result.expect_err("verification should fail");
+    assert_eq!(error.action(), &PublishAction::VerifySeedContent);
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_copies_torrent_to_injection_directory() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_copies_torrent_to_injection_directory_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path.clone());
+    manifest.validate().expect("manifest should be valid");
+    let content_dir =
+        TempDirectory::create("publish_copies_torrent_to_injection_directory_content");
+    let output_dir = TempDirectory::create("publish_copies_torrent_to_injection_directory_output");
+    let injection_dir =
+        TempDirectory::create("publish_copies_torrent_to_injection_directory_injection");
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_114,
+        group_id: 600_114,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishSeedingOptions {
+            copy_torrent_to: Some(injection_dir.to_path_buf()),
+            ..PublishSeedingOptions::default()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_some(), "publish should succeed");
+    let copied_torrents: Vec<_> = fs::read_dir(&*injection_dir)?
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "torrent"))
+        .collect();
+    assert_eq!(copied_torrents.len(), 1, "one torrent should be injected");
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_injection_failure_is_non_fatal() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path);
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_content");
+    let output_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_output");
+    let injection_dir = TempDirectory::create("publish_injection_failure_is_non_fatal_injection");
+    let injection_path = injection_dir.to_path_buf();
+    let test_dir = TestDirectory::new();
+    let response = UploadResponse {
+        private: true,
+        source: true,
+        request_id: None,
+        torrent_id: 500_115,
+        group_id: 600_115,
+    };
+    let mock = MockGazelleClient::new().with_upload_new_source(Ok(response));
+    let host = HostBuilder::new()
+        .with_mock_client(mock)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishSeedingOptions {
+            copy_torrent_to: Some(injection_path.clone()),
+            ..PublishSeedingOptions::default()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: false,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+    fs::remove_dir_all(&injection_path)?;
+
+    // Act
+    let result = command.execute(&manifest).await;
+
+    // Assert
+    assert!(
+        result.is_ok(),
+        "publish should continue when torrent injection fails"
+    );
+    let success = result.expect("checked");
+    assert!(success.torrent_id.is_some(), "publish should still upload");
+    assert!(
+        !success.warnings.is_empty(),
+        "publish should record injection warning"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_dry_run_does_not_stage_or_inject() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let source_dir = TempDirectory::create("publish_dry_run_does_not_stage_or_inject_source");
+    let source_path = source_dir.to_path_buf();
+    fs::write(source_path.join("01 Track.flac"), "source track")?;
+    let manifest = PublishManifest::mock_new(source_path.clone());
+    manifest.validate().expect("manifest should be valid");
+    let content_dir = TempDirectory::create("publish_dry_run_does_not_stage_or_inject_content");
+    let output_dir = TempDirectory::create("publish_dry_run_does_not_stage_or_inject_output");
+    let injection_dir = TempDirectory::create("publish_dry_run_does_not_stage_or_inject_injection");
+    let test_dir = TestDirectory::new();
+    let host = HostBuilder::new()
+        .with_mock_client(MockGazelleClient::new())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![content_dir.to_path_buf()],
+            output: output_dir.to_path_buf(),
+            ..SharedOptions::mock()
+        })
+        .with_options(PublishSeedingOptions {
+            copy_torrent_to: Some(injection_dir.to_path_buf()),
+            ..PublishSeedingOptions::default()
+        })
+        .with_options(PublishArg {
+            publish_path: PathBuf::from("/tmp/unused.yml"),
+            dry_run: true,
+        })
+        .expect_build();
+    let command = host.services.get_required::<PublishCommand>();
+
+    // Act
+    let result = command.execute(&manifest).await?;
+
+    // Assert
+    assert!(result.torrent_id.is_none(), "dry run should skip upload");
+    let staged_path = content_dir.join(
+        source_path
+            .file_name()
+            .expect("source path should have file name"),
+    );
+    assert!(source_path.is_dir(), "source should remain in place");
+    assert!(
+        !staged_path.exists(),
+        "dry run should not create staged source directory"
+    );
+    let copied_torrents: Vec<_> = fs::read_dir(&*injection_dir)?
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "torrent"))
+        .collect();
+    assert!(
+        copied_torrents.is_empty(),
+        "dry run should not inject torrents"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_generates_structured_release_description_for_new_group() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let source_path = SAMPLE_SOURCES_DIR.join(album.dir_name());
+
+    // Act
+    let description =
+        PublishCommand::create_release_description(&source_path, "Release notes", "FLAC Lossless");
+
+    // Assert
+    assert!(
+        description.contains("Published and uploaded with [url="),
+        "release description should include tool/version header"
+    );
+    assert!(
+        description.contains("Release notes"),
+        "release description should include manifest notes"
+    );
+    assert!(
+        description.contains("[pad=0|10|0|20]Source[/pad] FLAC Lossless"),
+        "release description should include source format/bitrate"
+    );
+    assert!(
+        description.contains("[pad=0|10|0|19]Details[/pad] [pre]"),
+        "release description should include Details section"
+    );
+    assert!(
+        description.contains("[pad=0|10|0|31]Tags[/pad] [hide][pre]"),
+        "release description should include hidden Tags section"
+    );
+    Ok(())
+}
