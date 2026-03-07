@@ -15,6 +15,8 @@ pub enum UploadAction {
     HardLinkTorrent,
     #[error("copy torrent")]
     CopyTorrent,
+    #[error("inject torrent via client API")]
+    InjectTorrentClient,
     #[error("copy transcode")]
     CopyTranscode,
     #[error("get transcode command")]

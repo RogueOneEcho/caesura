@@ -43,6 +43,7 @@ num_cpus = "1.17.0"
 miette = { version = "7.6.0", features = ["fancy"] }
 regex = "1.12.3"
 reqwest = { version = "0.13.2", features = ["rustls", "json", "multipart", "stream"], default-features = false }
+qbittorrent_api = "0.3.1"
 rogue_logging = { version = "0.7.1", features = ["log", "miette"] }
 thiserror = "2.0.18"
 serde = { version = "1.0.228", features = ["derive"] }
