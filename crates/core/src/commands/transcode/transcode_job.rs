@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use lofty::config::WriteOptions;
-use lofty::prelude::TagExt;
 use lofty::tag::Tag;
 use std::fs::create_dir_all;
 use std::process::Stdio;
@@ -50,11 +48,10 @@ impl TranscodeJob {
         }
         if let Some(mut tags) = self.tags {
             exclude_tags(&mut tags, &vorbis_keys(&self.exclude_vorbis_comments));
-            tags.save_to_path(&output_path, WriteOptions::default())
-                .map_err(Failure::wrap_with_path(
-                    TranscodeAction::WriteTags,
-                    &output_path,
-                ))?;
+            save_id3v2_deterministic(tags, &output_path).map_err(Failure::wrap_with_path(
+                TranscodeAction::WriteTags,
+                &output_path,
+            ))?;
         }
         Ok(())
     }

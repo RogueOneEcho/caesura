@@ -3,7 +3,6 @@ use crate::commands::inspect::picture_info::PictureInfo;
 use crate::commands::inspect::track_info::{TagEntry, TrackInfo};
 use crate::prelude::TableBuilder;
 use colored::Colorize;
-use lofty::prelude::ItemKey;
 use rogue_logging::Failure;
 use std::path::Path;
 
@@ -251,9 +250,6 @@ impl TrackInfo {
 impl TagEntry {
     /// Format the item key as a human-readable name.
     fn format_item(&self) -> String {
-        if let ItemKey::Unknown(raw) = &self.key {
-            return raw.clone();
-        }
         split_camel_case(&format!("{:?}", self.key))
     }
 }

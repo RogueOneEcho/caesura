@@ -13,7 +13,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD1"
   filename: 1 First Track.mp3
   size: 2604858
-  sha256: 25aadf099bb8d7cce9112838b30da45f9661b868c481896c9c26bf133b19e8d7
+  sha256: 95e71242b706f5cd29508b98201d99886110dcf0d5e5352c7a328f23726f0e95
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -39,7 +39,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD1"
   filename: 2 Second Track.mp3
   size: 2604859
-  sha256: 3591b2435b77e7de232dec0f962ee036111b61cef9ec073d2154da50691132b2
+  sha256: b47cfb3fabe9dc0e7aba0c1e236e4ef183116af19b7ccfee01a1f4784c718395
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -65,7 +65,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD2"
   filename: 1 Third Track.mp3
   size: 2604858
-  sha256: c2ef0cd9d82b81dc3d432d54c3bc137c31907cdc010828dcad7b48eec9a01a9a
+  sha256: c8f2cec65a26f70fe086ec285e91ecdac17e519a442b2da7a7b71da4cc41edbe
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -91,7 +91,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB 320]/CD2"
   filename: 2 Fourth Track.mp3
   size: 2604859
-  sha256: 90150387914d7a6fa5a82a6450dc70a1a013a92d2617b2393e124edd4a93439f
+  sha256: cd923a4ea47a1660c9cd181e1789f8587c2ffd00969e924aaba18dddd9012d2f
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -125,7 +125,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD1"
   filename: 1 First Track.mp3
   size: 786201
-  sha256: 27a80796e479eee87a8115a7d29159685be3242becb872e1b2cfaf85d73e2fbe
+  sha256: 1d63be48c6ca0cd238b5d88d01851ff5b6679d10b80169c37a00239af04dc544
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -151,7 +151,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD1"
   filename: 2 Second Track.mp3
   size: 764882
-  sha256: 69f730e486c3284c0e80b8914a3c9017e1e52de4fd3a65cb727f4a4c40000b2e
+  sha256: 5088d9d2d370d849deb5aa40b9b404c79d5fcc327f3b161a099fc741c3d20977
   audio:
     duration_ms: 65045
     overall_bitrate: 94
@@ -177,7 +177,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD2"
   filename: 1 Third Track.mp3
   size: 784928
-  sha256: fa221246be66bafd9e3e0a5db6e5b8e03a230948a7df82cd14807584103cf794
+  sha256: 71e50c6fcb8fbbefabe8157038dbdaf3a31bd8f6e2bb2f9d71a1305ea4cad94b
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -203,7 +203,7 @@ expression: snapshot
 - directory: "Rename Artist - Multi Disc Album [2024] [WEB V0]/CD2"
   filename: 2 Fourth Track.mp3
   size: 755705
-  sha256: 032d24e7ecdac188f4739a97a267fee470f72bfd1446635aaf774f3d6e597d2a
+  sha256: f2472da9f1b996d6b0af537faecfe159075607e10149925f0d841b1d269ff33c
   audio:
     duration_ms: 65045
     overall_bitrate: 92

@@ -5,7 +5,7 @@ expression: snapshot
 - directory: "Rename Artist - Single Disc Album [2024] [WEB 320]"
   filename: 1 Track One.mp3
   size: 2604845
-  sha256: fc218c4a470c22113082fcdc3dd457793dac35ba06c88af09cc81ac4d25e043c
+  sha256: f960555f47a19fa97082336bdcb8395aa118be4730923796d44b84213f124838
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -30,7 +30,7 @@ expression: snapshot
 - directory: "Rename Artist - Single Disc Album [2024] [WEB 320]"
   filename: 2 Track Two.mp3
   size: 2604845
-  sha256: 20b41ce860a369a704e48f1b7788e7dadc7f5c9e48f92cf0fcdef4c8e5c3d569
+  sha256: a29984b1a6069c82752ace863fddf291884c13ab49a048d250364fd33a80857e
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -63,7 +63,7 @@ expression: snapshot
 - directory: "Rename Artist - Single Disc Album [2024] [WEB V0]"
   filename: 1 Track One.mp3
   size: 786188
-  sha256: 506f81f8272ba1b2d689128bd304145bbe6ff982c43b3204ed4757e3c0d127e6
+  sha256: 8a418254dfdff50d3c887e5eeccae14798020ddda304996405d71cf8f36bbcb4
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -88,7 +88,7 @@ expression: snapshot
 - directory: "Rename Artist - Single Disc Album [2024] [WEB V0]"
   filename: 2 Track Two.mp3
   size: 737309
-  sha256: 9ece3191c785b74ba6a1afeee71ec32b1de5f3a1968c07ab5d76ec540cb528c4
+  sha256: 79dee5eb52cbcf238afcbbf2b453581cc8765c10f87d9f28dabc4812ebe5e623
   audio:
     duration_ms: 65045
     overall_bitrate: 90

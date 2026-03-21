@@ -15,12 +15,12 @@ D   T   Time    Size      kbps   kHz      Channels
 
 Disc 1/Rename Artist - Multi Disc Album - 01 First Track.mp3
 
-Track Artist     Rename Artist      TPE1
 Album Title      Multi Disc Album   TALB
-Track Title      First Track        TIT2
 Recording Date   2024               TDRC
-Track Number     1                  TRCK
+Track Title      First Track        TIT2
+Track Artist     Rename Artist      TPE1
 Disc Number      1                  TPOS
+Track Number     1                  TRCK
 
 Front Cover   0.8 KiB   image/png   APIC
 
@@ -28,12 +28,12 @@ Front Cover   0.8 KiB   image/png   APIC
 
 Disc 1/Rename Artist - Multi Disc Album - 02 Second Track.mp3
 
-Track Artist     Rename Artist      TPE1
 Album Title      Multi Disc Album   TALB
-Track Title      Second Track       TIT2
 Recording Date   2024               TDRC
-Track Number     2                  TRCK
+Track Title      Second Track       TIT2
+Track Artist     Rename Artist      TPE1
 Disc Number      1                  TPOS
+Track Number     2                  TRCK
 
 Front Cover   0.8 KiB   image/png   APIC
 
@@ -41,12 +41,12 @@ Front Cover   0.8 KiB   image/png   APIC
 
 Disc 2/Rename Artist - Multi Disc Album - 01 Third Track.mp3
 
-Track Artist     Rename Artist      TPE1
 Album Title      Multi Disc Album   TALB
-Track Title      Third Track        TIT2
 Recording Date   2024               TDRC
-Track Number     1                  TRCK
+Track Title      Third Track        TIT2
+Track Artist     Rename Artist      TPE1
 Disc Number      2                  TPOS
+Track Number     1                  TRCK
 
 Front Cover   0.8 KiB   image/png   APIC
 
@@ -54,11 +54,11 @@ Front Cover   0.8 KiB   image/png   APIC
 
 Disc 2/Rename Artist - Multi Disc Album - 02 Fourth Track.mp3
 
-Track Artist     Rename Artist      TPE1
 Album Title      Multi Disc Album   TALB
-Track Title      Fourth Track       TIT2
 Recording Date   2024               TDRC
-Track Number     2                  TRCK
+Track Title      Fourth Track       TIT2
+Track Artist     Rename Artist      TPE1
 Disc Number      2                  TPOS
+Track Number     2                  TRCK
 
 Front Cover   0.8 KiB   image/png   APIC

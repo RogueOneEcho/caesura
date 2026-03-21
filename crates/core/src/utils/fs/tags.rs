@@ -1,10 +1,13 @@
 //! Read and manipulate audio file tags for transcoding.
 
+use std::str::from_utf8;
 use std::sync::LazyLock;
 
 use crate::prelude::*;
 use lofty::config::WriteOptions;
+use lofty::error::LoftyError;
 use lofty::file::TaggedFileExt;
+use lofty::id3::v2::{Frame, Id3v2Tag};
 use lofty::prelude::TagExt;
 use lofty::probe::Probe;
 use lofty::tag::ItemKey::TrackNumber;
@@ -63,7 +66,7 @@ pub(crate) fn fix_track_numbering(tags: &mut Tag) -> bool {
 
 fn replace_vinyl_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
     let track = tags
-        .get_string(&TrackNumber)
+        .get_string(TrackNumber)
         .ok_or_else(|| Failure::new(TagsAction::ReadTags, TagsError::NoTrackNumber))?;
     let (disc_number, track_number) = get_numeric_from_vinyl_format(track).ok_or_else(|| {
         Failure::new(TagsAction::ReadTags, TagsError::InvalidFormat).with("track", track)
@@ -78,7 +81,7 @@ fn replace_vinyl_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsActio
 
 fn replace_total_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
     let track = tags
-        .get_string(&TrackNumber)
+        .get_string(TrackNumber)
         .ok_or_else(|| Failure::new(TagsAction::ReadTags, TagsError::NoTrackNumber))?;
     let (track_number, track_total) = get_numeric_from_total_format(track).ok_or_else(|| {
         Failure::new(TagsAction::ReadTags, TagsError::InvalidFormat).with("track", track)
@@ -117,20 +120,26 @@ pub(crate) fn get_numeric_from_total_format(input: &str) -> Option<(u32, u32)> {
 /// Remove tag items matching the given [`ItemKey`] list.
 pub(crate) fn exclude_tags(tags: &mut Tag, keys: &[ItemKey]) {
     for key in keys {
-        if let Some(value) = tags.get_string(key) {
+        if let Some(value) = tags.get_string(*key) {
             trace!("Excluding {key:?}: {value}");
-            tags.remove_key(key);
+            tags.remove_key(*key);
         }
     }
 }
 
 /// Map Vorbis comment names to [`ItemKey`] values.
 ///
-/// - Unrecognized names become [`ItemKey::Unknown`] and silently match nothing
+/// - Unrecognized names are logged as a warning and dropped
 pub(crate) fn vorbis_keys(names: &[String]) -> Vec<ItemKey> {
     names
         .iter()
-        .map(|name| ItemKey::from_key(TagType::VorbisComments, name))
+        .filter_map(|name| {
+            let key = ItemKey::from_key(TagType::VorbisComments, name);
+            if key.is_none() {
+                warn!("Ignoring unknown Vorbis key: {name}");
+            }
+            key
+        })
         .collect()
 }
 
@@ -157,6 +166,43 @@ pub(crate) fn exclude_vorbis_comments_from_flac(
             .map_err(Failure::wrap_with_path(TagsAction::WriteTags, path))?;
     }
     Ok(())
+}
+
+/// Convert a generic [`Tag`] to [`Id3v2Tag`] and save with deterministic frame ordering.
+///
+/// lofty 0.23's `Tag` to `Id3v2Tag` conversion collects frames into `HashSet`/`HashMap`,
+/// producing correct frames in non-deterministic order. Sorting by frame ID before writing
+/// ensures stable binary output.
+pub(crate) fn save_id3v2_deterministic(tags: Tag, path: &Path) -> Result<(), LoftyError> {
+    let id3 = Id3v2Tag::from(tags);
+    let mut frames: Vec<Frame<'static>> = id3.into_iter().collect();
+    frames.sort_by_key(frame_sort_key);
+    let mut sorted = Id3v2Tag::new();
+    for frame in frames {
+        sorted.insert(frame);
+    }
+    sorted.save_to_path(path, WriteOptions::default())
+}
+
+/// Deterministic sort key for an `ID3v2` frame.
+///
+/// Most frames are unique by ID. Multi-instance frames (TXXX, WXXX, COMM, USLT)
+/// are disambiguated by description and language.
+fn frame_sort_key(frame: &Frame<'_>) -> String {
+    let id = frame.id_str();
+    match frame {
+        Frame::UserText(f) => format!("{id}\0{}", f.description),
+        Frame::UserUrl(f) => format!("{id}\0{}", f.description),
+        Frame::Comment(f) => {
+            let lang = from_utf8(&f.language).unwrap_or_default();
+            format!("{id}\0{lang}\0{}", f.description)
+        }
+        Frame::UnsynchronizedText(f) => {
+            let lang = from_utf8(&f.language).unwrap_or_default();
+            format!("{id}\0{lang}\0{}", f.description)
+        }
+        _ => String::from(id),
+    }
 }
 
 /// Print all tag key-value pairs to stdout for debugging.

@@ -13,7 +13,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD1"
   filename: 1 Side A Track One.mp3
   size: 2604858
-  sha256: 7b1bb609e5d7fdea5060754f2863e827a82927d350f43acd5b27fd0e9a83a597
+  sha256: ad6957980afb56cfd249a08ceb37c255d50058bdd896f8ac1b661dce87f26657
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -39,7 +39,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD1"
   filename: 2 Side A Track Two.mp3
   size: 2604858
-  sha256: f098ae75b9dcf4e4e6c7cc7d40467aaa3f4d8eac31b0c04b25934bebbfb1f6af
+  sha256: 48e732b3eb05ff2afdaca50e06716dfc013b2fe7e016ce782ce4a70df565ef69
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -65,7 +65,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD2"
   filename: 1 Side B Track One.mp3
   size: 2604858
-  sha256: f25d3014038dd0d7ef4b9c7d9672c23546fa20bc19bd2d66dc4c43e7f3c0b6c4
+  sha256: bbb30c29879ce827ced451c98708061a9c904c08eb281acb5c10240a0129c7db
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -91,7 +91,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB 320]/CD2"
   filename: 2 Side B Track Two.mp3
   size: 2604858
-  sha256: ebae43d9db488173e457fca87a1a4f932bdec32cf58ce882f1739e16b01342e5
+  sha256: 8645a1e2fef0ac969160b31121717299f435ed8fca5d1cfb8b4e3f7093a3de6c
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -125,7 +125,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD1"
   filename: 1 Side A Track One.mp3
   size: 786201
-  sha256: 649ba7eb11a41d187b76512498d4ece0ad911156bf28ac75298b72c64e1b9598
+  sha256: cad5ba326fbb8c831926b0d4bc621ac66926ec7cd6cb954ef73638424206ad74
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -151,7 +151,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD1"
   filename: 2 Side A Track Two.mp3
   size: 764881
-  sha256: cddcd45c491ba4900250c694b6d2974a20a173d995977b69ba0faba5fefc7857
+  sha256: 512dd62e3665e3aaaa36faec7fd52e906a22628f86f8a10e7ee41844a204387b
   audio:
     duration_ms: 65045
     overall_bitrate: 94
@@ -177,7 +177,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD2"
   filename: 1 Side B Track One.mp3
   size: 784928
-  sha256: 73665f180a43baeaa70b4c19c1dfc3922818f1a65aed161cbb8e59243278951c
+  sha256: 20297c7f797ec68991c6f70766adf3ae7df78b83b6b4d4e646b648f38e924d6c
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -203,7 +203,7 @@ expression: snapshot
 - directory: "Rename Artist - Vinyl Album [2024] [WEB V0]/CD2"
   filename: 2 Side B Track Two.mp3
   size: 755704
-  sha256: 70dae82e95671cfb387c4f5d76dc67930d95281864afa8c113a70ee56c5829d4
+  sha256: ab74c5871b6e3f123e1ad3b1ca01f6756d237f2794d1e79b6785b29da0b24514
   audio:
     duration_ms: 65045
     overall_bitrate: 92

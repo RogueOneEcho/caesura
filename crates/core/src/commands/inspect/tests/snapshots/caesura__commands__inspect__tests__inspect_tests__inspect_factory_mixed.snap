@@ -28,11 +28,11 @@ Front Cover   0.8 KiB   image/png   METADATA_BLOCK_PICTURE
 
 Rename Artist - Multi Disc Album - 02 Second Track.mp3
 
-Track Artist     Rename Artist      TPE1
 Album Title      Multi Disc Album   TALB
-Track Title      Second Track       TIT2
 Recording Date   2024               TDRC
-Track Number     2                  TRCK
+Track Title      Second Track       TIT2
+Track Artist     Rename Artist      TPE1
 Disc Number      1                  TPOS
+Track Number     2                  TRCK
 
 Front Cover   0.8 KiB   image/png   APIC

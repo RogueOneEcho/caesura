@@ -22,7 +22,7 @@ impl TagVerifier {
             missing.push("title".to_owned());
         }
         let is_classical = source.group.tags.contains(&"classical".to_owned());
-        if is_classical && tags.get(&Composer).is_none() {
+        if is_classical && tags.get(Composer).is_none() {
             missing.push("composer".to_owned());
         }
         if tags.track().is_none() {

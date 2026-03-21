@@ -154,8 +154,8 @@ impl TrackInfo {
             sub_path: String::new(),
             file_type: "FLAC".to_owned(),
             file_size: 0,
-            track: get_tag_string(&tagged, &ItemKey::TrackNumber),
-            disc: get_tag_string(&tagged, &ItemKey::DiscNumber),
+            track: get_tag_string(&tagged, ItemKey::TrackNumber),
+            disc: get_tag_string(&tagged, ItemKey::DiscNumber),
             duration: props.duration(),
             bit_rate: props.audio_bitrate(),
             sample_rate: props.sample_rate(),
@@ -180,8 +180,8 @@ impl TrackInfo {
             sub_path: String::new(),
             file_type: "MP3".to_owned(),
             file_size: 0,
-            track: get_tag_string(&tagged, &ItemKey::TrackNumber),
-            disc: get_tag_string(&tagged, &ItemKey::DiscNumber),
+            track: get_tag_string(&tagged, ItemKey::TrackNumber),
+            disc: get_tag_string(&tagged, ItemKey::DiscNumber),
             duration: props.duration(),
             bit_rate: props.audio_bitrate(),
             sample_rate: props.sample_rate(),
@@ -199,10 +199,10 @@ fn collect_tags(file: &TaggedFile) -> Vec<TagEntry> {
     for tag in file.tags() {
         let tag_type = tag.tag_type();
         for item in tag.items() {
-            let native = item.key().map_key(tag_type, true).map(ToOwned::to_owned);
+            let native = item.key().map_key(tag_type).map(ToOwned::to_owned);
             if let ItemValue::Text(text) | ItemValue::Locator(text) = item.value() {
                 result.push(TagEntry {
-                    key: item.key().clone(),
+                    key: item.key(),
                     native,
                     value: text.clone(),
                 });
@@ -213,7 +213,7 @@ fn collect_tags(file: &TaggedFile) -> Vec<TagEntry> {
 }
 
 /// Get a tag value as a string across all tags in a file.
-fn get_tag_string(file: &TaggedFile, key: &ItemKey) -> Option<String> {
+fn get_tag_string(file: &TaggedFile, key: ItemKey) -> Option<String> {
     file.tags()
         .iter()
         .find_map(|t| t.get_string(key))
