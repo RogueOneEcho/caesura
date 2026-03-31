@@ -122,18 +122,25 @@ impl BatchCommand {
                     }
                 }
             };
-            let result = self.verify.execute(&source).await;
-            let verified = result.verified();
-            if verified {
+            let success = match self.verify.execute(&source).await {
+                Ok(success) => success,
+                Err(failure) => {
+                    debug!("{} {source}", "Skipping".bold());
+                    warn!("{}", failure.render());
+                    continue;
+                }
+            };
+            if success.verified() {
                 debug!("{} {}", "Verified".bold(), source);
             } else {
                 debug!("{} {source}", "Skipping".bold());
                 debug!("{} for transcoding {}", "Unsuitable".bold(), source);
-                for issue in &result.issues {
+                for issue in &success.issues {
                     debug!("{issue}");
                 }
             }
-            item.verify = Some(VerifyStatus::new(Ok(result)));
+            let verified = success.verified();
+            item.verify = Some(VerifyStatus::new(success));
             if !verified {
                 self.queue
                     .set(item)

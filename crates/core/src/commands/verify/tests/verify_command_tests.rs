@@ -1,5 +1,6 @@
 use crate::testing_prelude::*;
 use crate::utils::SourceIssue::UnnecessaryDirectory;
+use std::fs::{self, create_dir};
 
 #[tokio::test]
 async fn verify_command_mocked() -> Result<(), TestError> {
@@ -21,7 +22,7 @@ async fn verify_command_mocked() -> Result<(), TestError> {
         .await
         .expect("should not fail")
         .expect("should find source");
-    let result = verifier.execute(&source).await;
+    let result = verifier.execute(&source).await.expect("should not fail");
 
     // Assert
     if !result.verified() {
@@ -30,6 +31,96 @@ async fn verify_command_mocked() -> Result<(), TestError> {
         }
     }
     assert!(result.verified());
+    Ok(())
+}
+
+#[tokio::test]
+async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let host = HostBuilder::new()
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let verifier = host.services.get_required::<VerifyCommand>();
+    let source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+    let paths = host.services.get_required::<PathManager>();
+    let torrent_path = paths.get_source_torrent_path(&source);
+    assert!(!torrent_path.is_file(), "torrent should not be cached yet");
+
+    // Act
+    let result = verifier.get_source_torrent(&source).await?;
+
+    // Assert
+    assert_eq!(result, torrent_path);
+    assert!(
+        torrent_path.is_file(),
+        "torrent should be cached after download"
+    );
+    let metadata = fs::metadata(&torrent_path)?;
+    let first_modified = metadata.modified()?;
+
+    // Act
+    let result = verifier.get_source_torrent(&source).await?;
+
+    // Assert
+    assert_eq!(result, torrent_path);
+    let metadata = fs::metadata(&torrent_path)?;
+    let second_modified = metadata.modified()?;
+    assert_eq!(
+        first_modified, second_modified,
+        "cached file should not be rewritten"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn hash_check_returns_issue_on_mismatch() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let host = HostBuilder::new()
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let verifier = host.services.get_required::<VerifyCommand>();
+    let mut source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+    // Download the torrent first so the cache is populated
+    verifier
+        .get_source_torrent(&source)
+        .await
+        .expect("should download");
+    // Point directory at an empty dir so hashes won't match
+    let empty_dir = test_dir.join("empty");
+    create_dir(&empty_dir)?;
+    source.directory = empty_dir;
+
+    // Act
+    let result = verifier.hash_check(&source).await;
+
+    // Assert
+    let issue = result
+        .expect("hash check should not return infrastructure failure")
+        .expect("hash check should return an issue");
+    assert!(
+        matches!(issue, SourceIssue::MissingFile { .. }),
+        "expected MissingFile, got: {issue}"
+    );
     Ok(())
 }
 

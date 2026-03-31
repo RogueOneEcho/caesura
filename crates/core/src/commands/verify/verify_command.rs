@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use gazelle_api::GazelleClientTrait;
+use std::fs::create_dir;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
@@ -36,7 +37,7 @@ impl VerifyCommand {
             }
             Err(e) => return Err(Failure::new(VerifyAction::GetSource, e)),
         };
-        let result = self.execute(&source).await;
+        let result = self.execute(&source).await?;
         let id = source.to_string();
         if result.verified() {
             info!("{} {id}", "Verified".bold());
@@ -52,13 +53,18 @@ impl VerifyCommand {
     /// Execute [`VerifyCommand`] on a [`Source`].
     ///
     /// Returns a [`VerifySuccess`] containing any issues found.
-    pub(crate) async fn execute(&self, source: &Source) -> VerifySuccess {
+    pub(crate) async fn execute(
+        &self,
+        source: &Source,
+    ) -> Result<VerifySuccess, Failure<VerifyAction>> {
         debug!("{} {}", "Verifying".bold(), source);
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.append(&mut self.api_checks(source));
         issues.append(&mut self.flac_checks(source));
-        issues.append(&mut self.hash_check(source).await);
-        VerifySuccess { issues }
+        if let Some(issue) = self.hash_check(source).await? {
+            issues.push(issue);
+        }
+        Ok(VerifySuccess { issues })
     }
 
     /// Validate the source against the API.
@@ -174,57 +180,64 @@ impl VerifyCommand {
         issues
     }
 
-    async fn hash_check(&self, source: &Source) -> Vec<SourceIssue> {
+    pub(crate) async fn hash_check(
+        &self,
+        source: &Source,
+    ) -> Result<Option<SourceIssue>, Failure<VerifyAction>> {
         if self.verify_options.no_hash_check {
             debug!("{} hash check due to settings", "Skipped".bold());
-            return Vec::new();
+            return Ok(None);
         }
-        let torrent_path = self.paths.get_source_torrent_path(source);
-        if !torrent_path.is_file() {
-            trace!(
-                "{} torrent file as it's not cached: {}",
-                "Downloading".bold(),
-                torrent_path.display()
-            );
-            let mut file = match File::create_new(&torrent_path).await {
-                Ok(file) => file,
-                Err(e) => {
-                    return vec![SourceIssue::Error {
-                        domain: "File System".to_owned(),
-                        details: e.to_string(),
-                    }];
-                }
-            };
-            let buffer = match self.api.download_torrent(source.torrent.id).await {
-                Ok(buffer) => buffer,
-                #[expect(
-                    deprecated,
-                    reason = "SourceIssue::Api is kept for deserialization compatibility"
-                )]
-                Err(e) => return vec![SourceIssue::api(e.into())],
-            };
-            if let Err(e) = file.write_all(&buffer).await {
-                return vec![SourceIssue::Error {
-                    domain: "File System".to_owned(),
-                    details: e.to_string(),
-                }];
-            }
-            if let Err(e) = file.flush().await {
-                return vec![SourceIssue::Error {
-                    domain: "File System".to_owned(),
-                    details: e.to_string(),
-                }];
-            }
-        }
+        let torrent_path = self.get_source_torrent(source).await?;
         TorrentVerifier::execute(&torrent_path, &source.directory)
             .await
-            .unwrap_or_else(|e| {
-                Some(SourceIssue::Error {
-                    domain: "Torrent".to_owned(),
-                    details: e.to_string(),
-                })
-            })
-            .map_or_else(Vec::new, |x| vec![x])
+            .map_err(Failure::wrap(VerifyAction::VerifyHash))
+    }
+
+    /// Retrieve the source `.torrent` file, downloading from the API if not cached.
+    pub(crate) async fn get_source_torrent(
+        &self,
+        source: &Source,
+    ) -> Result<PathBuf, Failure<VerifyAction>> {
+        let path = self.paths.get_source_torrent_path(source);
+        if path.is_file() {
+            trace!("{} cached torrent file: {}", "Using".bold(), path.display());
+            return Ok(path);
+        }
+        trace!(
+            "{} torrent file as it's not cached: {}",
+            "Downloading".bold(),
+            path.display()
+        );
+        let torrents_dir = path.parent().expect("torrent path should have parent");
+        if !torrents_dir.is_dir() {
+            create_dir(torrents_dir).map_err(Failure::wrap_with_path(
+                VerifyAction::CreateTorrentDirectory,
+                torrents_dir,
+            ))?;
+        }
+        let mut file = File::create_new(&path)
+            .await
+            .map_err(Failure::wrap_with_path(
+                VerifyAction::CreateTorrentFile,
+                &path,
+            ))?;
+        let buffer = self
+            .api
+            .download_torrent(source.torrent.id)
+            .await
+            .map_err(Failure::wrap(VerifyAction::DownloadTorrent))?;
+        file.write_all(&buffer)
+            .await
+            .map_err(Failure::wrap_with_path(
+                VerifyAction::WriteTorrentFile,
+                &path,
+            ))?;
+        file.flush().await.map_err(Failure::wrap_with_path(
+            VerifyAction::FlushTorrentFile,
+            &path,
+        ))?;
+        Ok(path)
     }
 
     pub fn subdirectory_checks(flacs: &[FlacFile]) -> Vec<SourceIssue> {

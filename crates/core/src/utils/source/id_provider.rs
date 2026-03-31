@@ -13,9 +13,9 @@ pub struct IdProvider {
 ///
 /// ## Notes
 /// In v0.24.0 the keys were serialized as `PascalCase`.
-/// In v0.24.1 behaviour was fixed to serialize as `snake_case` therefore `alias` are necessary
+/// In v0.24.1 behavior was fixed to serialize as `snake_case` therefore `alias` are necessary
 /// to ensure backwards compatibility.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum IdProviderError {
     /// No ID was provided

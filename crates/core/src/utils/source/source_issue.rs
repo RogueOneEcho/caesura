@@ -13,7 +13,7 @@ pub const MIN_BIT_RATE_KBPS: u32 = 192;
 pub const MAX_DURATION: u32 = 12 * 60 * 60;
 
 /// Validation issues that prevent transcoding a source.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum SourceIssue {
     #[deprecated(since = "0.24.0", note = "use `Id` instead")]
@@ -121,14 +121,6 @@ pub enum SourceIssue {
         details: String,
     },
     Other(String),
-}
-
-impl SourceIssue {
-    #[deprecated(since = "0.25.0", note = "use `NotFound` instead")]
-    pub(crate) fn api(error: GazelleSerializableError) -> Self {
-        #[allow(deprecated)]
-        Self::Api { response: error }
-    }
 }
 
 impl Display for SourceIssue {

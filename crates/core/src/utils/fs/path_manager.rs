@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::fs::create_dir;
 
 /// Supported tracker suffixes for cross-tracker torrent duplication.
 const TRACKER_SUFFIXES: &[&str] = &["red", "ops", "pth"];
@@ -61,15 +60,14 @@ impl PathManager {
         self.cache_options.cache.clone()
     }
 
+    /// Path to the cached source `.torrent` file.
     #[must_use]
     pub fn get_source_torrent_path(&self, source: &Source) -> PathBuf {
         let id = source.torrent.id;
         let indexer = self.shared_options.indexer_lowercase();
-        let torrents_dir = self.get_cache_dir().join("torrents");
-        if !torrents_dir.is_dir() {
-            let _ = create_dir(&torrents_dir);
-        }
-        torrents_dir.join(format!("{id}.{indexer}.torrent"))
+        self.get_cache_dir()
+            .join("torrents")
+            .join(format!("{id}.{indexer}.torrent"))
     }
 
     #[must_use]

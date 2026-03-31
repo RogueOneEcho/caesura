@@ -27,32 +27,20 @@ pub(crate) struct VerifyStatus {
 }
 
 impl VerifyStatus {
-    /// Create a new [`VerifyStatus`] from a command result.
-    pub fn new(result: Result<VerifySuccess, Failure<VerifyAction>>) -> Self {
-        match result {
-            Ok(success) => {
-                if success.issues.is_empty() {
-                    Self {
-                        verified: true,
-                        issues: None,
-                        completed: TimeStamp::now(),
-                    }
-                } else {
-                    Self {
-                        verified: false,
-                        issues: Some(success.issues),
-                        completed: TimeStamp::now(),
-                    }
-                }
-            }
-            Err(failure) => Self {
-                verified: false,
-                issues: Some(vec![SourceIssue::Error {
-                    domain: "verify".to_owned(),
-                    details: failure.to_string(),
-                }]),
+    /// Create a new [`VerifyStatus`] from a [`VerifySuccess`].
+    pub fn new(success: VerifySuccess) -> Self {
+        if success.issues.is_empty() {
+            Self {
+                verified: true,
+                issues: None,
                 completed: TimeStamp::now(),
-            },
+            }
+        } else {
+            Self {
+                verified: false,
+                issues: Some(success.issues),
+                completed: TimeStamp::now(),
+            }
         }
     }
 
