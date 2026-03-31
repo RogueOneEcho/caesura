@@ -80,7 +80,7 @@ impl SourceProvider {
         }
         let directories: Vec<PathBuf> = self
             .options
-            .content
+            .content_paths()
             .iter()
             .flat_map(|x| paths.iter().map(|p| x.join(p)))
             .filter(|x| x.is_dir())

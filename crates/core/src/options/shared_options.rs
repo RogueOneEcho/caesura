@@ -102,6 +102,18 @@ impl SharedOptions {
         self.indexer.to_lowercase()
     }
 
+    /// Output directory path with tilde expansion applied.
+    #[must_use]
+    pub fn output_path(&self) -> PathBuf {
+        self.output.expand_tilde()
+    }
+
+    /// Content directory paths with tilde expansion applied.
+    #[must_use]
+    pub fn content_paths(&self) -> Vec<PathBuf> {
+        self.content.iter().map(ExpandTilde::expand_tilde).collect()
+    }
+
     #[cfg(test)]
     pub fn mock() -> Self {
         Self {
@@ -145,7 +157,7 @@ impl OptionsContract for SharedOptions {
         if self.content.is_empty() {
             errors.push(IsEmpty(CONTENT_DIR_LABEL.to_owned()));
         }
-        for dir in &self.content {
+        for dir in self.content_paths() {
             if !dir.exists() || !dir.is_dir() {
                 errors.push(DoesNotExist(
                     CONTENT_DIR_LABEL.to_owned(),
@@ -153,10 +165,11 @@ impl OptionsContract for SharedOptions {
                 ));
             }
         }
-        if !self.output.exists() || !self.output.is_dir() {
+        let output = self.output_path();
+        if !output.exists() || !output.is_dir() {
             errors.push(DoesNotExist(
                 OUTPUT_DIR_LABEL.to_owned(),
-                self.output.to_string_lossy().to_string(),
+                output.to_string_lossy().to_string(),
             ));
             if PathBuf::from(LEGACY_OUTPUT_DIR).is_dir() {
                 let default_dir = PathManager::default_output_dir();

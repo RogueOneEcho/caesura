@@ -25,14 +25,23 @@ fn default_cache(_partial: &CacheOptionsPartial) -> Option<PathBuf> {
     Some(PathManager::default_cache_dir())
 }
 
+impl CacheOptions {
+    /// Cache directory path with tilde expansion applied.
+    #[must_use]
+    pub fn path(&self) -> PathBuf {
+        self.cache.expand_tilde()
+    }
+}
+
 impl OptionsContract for CacheOptions {
     type Partial = CacheOptionsPartial;
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if !self.cache.is_dir() {
+        let cache = self.path();
+        if !cache.is_dir() {
             errors.push(DoesNotExist(
                 CACHE_DIR_LABEL.to_owned(),
-                self.cache.to_string_lossy().to_string(),
+                cache.to_string_lossy().to_string(),
             ));
             if PathBuf::from(LEGACY_CACHE_DIR).is_dir() {
                 let default_dir = PathManager::default_cache_dir();

@@ -17,11 +17,19 @@ pub struct ConfigOptions {
     pub config: Option<PathBuf>,
 }
 
+impl ConfigOptions {
+    /// Config file path with tilde expansion applied.
+    #[must_use]
+    pub fn path(&self) -> Option<PathBuf> {
+        self.config.as_ref().map(ExpandTilde::expand_tilde)
+    }
+}
+
 impl OptionsContract for ConfigOptions {
     type Partial = ConfigOptionsPartial;
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if let Some(config) = &self.config
+        if let Some(config) = self.path()
             && !config.is_file()
         {
             errors.push(DoesNotExist(

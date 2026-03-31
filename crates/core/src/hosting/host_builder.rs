@@ -222,5 +222,5 @@ fn read_config_file(args: &ArgumentsProvider) -> Option<String> {
         .config
         .clone()
         .unwrap_or_else(PathManager::default_config_path);
-    read_to_string(path).ok()
+    read_to_string(path.expand_tilde()).ok()
 }

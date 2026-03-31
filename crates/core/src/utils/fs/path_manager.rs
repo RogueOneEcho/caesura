@@ -57,7 +57,7 @@ impl PathManager {
 
     #[must_use]
     pub fn get_cache_dir(&self) -> PathBuf {
-        self.cache_options.cache.clone()
+        self.cache_options.path()
     }
 
     /// Path to the cached source `.torrent` file.
@@ -72,7 +72,7 @@ impl PathManager {
 
     #[must_use]
     pub fn get_output_dir(&self) -> PathBuf {
-        self.shared_options.output.clone()
+        self.shared_options.output_path()
     }
 
     #[must_use]

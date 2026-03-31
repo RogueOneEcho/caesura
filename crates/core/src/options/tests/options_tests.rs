@@ -510,24 +510,20 @@ fn cache_options_rejects_dollar_home() {
     );
 }
 
-/// Verify literal `~` in cache path fails validation.
+/// Verify `~` in cache path is expanded during validation.
+///
+/// Uses `~` alone because the home directory is guaranteed to exist.
+/// Subpath expansion is covered by `expand_tilde` unit tests.
 #[test]
-fn cache_options_rejects_tilde() {
+fn cache_options_expands_tilde() {
     // Arrange
-    let path = "~/.cache/caesura";
-
-    // Act
-    let errors = CacheOptionsPartial {
-        cache: Some(PathBuf::from(path)),
+    let result = CacheOptionsPartial {
+        cache: Some(PathBuf::from("~")),
     }
-    .resolve()
-    .expect_err("should reject");
+    .resolve();
 
     // Assert
-    assert_eq!(
-        errors,
-        vec![DoesNotExist(CACHE_DIR_LABEL.to_owned(), path.to_owned())]
-    );
+    assert!(result.is_ok(), "~ should expand to home directory");
 }
 
 /// Verify literal `$HOME` in output path fails validation.
@@ -548,22 +544,16 @@ fn shared_options_rejects_dollar_home_output() {
     );
 }
 
-/// Verify literal `~` in output path fails validation.
+/// Verify `~` in output path is expanded during validation.
+///
+/// Uses `~` alone because the home directory is guaranteed to exist.
 #[test]
-fn shared_options_rejects_tilde_output() {
+fn shared_options_expands_tilde_output() {
     // Arrange
-    let path = "~/.local/share/caesura/output";
-
-    // Act
-    let errors = valid_shared_options_with_output(path)
-        .resolve()
-        .expect_err("should reject");
+    let result = valid_shared_options_with_output("~").resolve();
 
     // Assert
-    assert_eq!(
-        errors,
-        vec![DoesNotExist(OUTPUT_DIR_LABEL.to_owned(), path.to_owned())]
-    );
+    assert!(result.is_ok(), "~ should expand to home directory");
 }
 
 /// Verify literal `$HOME` in content path fails validation.
@@ -584,22 +574,16 @@ fn shared_options_rejects_dollar_home_content() {
     );
 }
 
-/// Verify literal `~` in content path fails validation.
+/// Verify `~` in content path is expanded during validation.
+///
+/// Uses `~` alone because the home directory is guaranteed to exist.
 #[test]
-fn shared_options_rejects_tilde_content() {
+fn shared_options_expands_tilde_content() {
     // Arrange
-    let path = "~/music";
-
-    // Act
-    let errors = valid_shared_options_with_content(path)
-        .resolve()
-        .expect_err("should reject");
+    let result = valid_shared_options_with_content("~").resolve();
 
     // Assert
-    assert_eq!(
-        errors,
-        vec![DoesNotExist(CONTENT_DIR_LABEL.to_owned(), path.to_owned())]
-    );
+    assert!(result.is_ok(), "~ should expand to home directory");
 }
 
 /// Verify `read_to_string` fails on literal `~` config path.
@@ -637,24 +621,26 @@ fn config_options_rejects_dollar_home() {
     );
 }
 
-/// Verify literal `~` in config path fails validation.
+/// Verify `~` in config path is expanded during validation.
+///
+/// The file won't exist, but the error path should show the expanded
+/// absolute path rather than the literal `~`.
 #[test]
-fn config_options_rejects_tilde() {
+fn config_options_expands_tilde() {
     // Arrange
-    let path = "~/.config/caesura/config.yml";
+    let partial = ConfigOptionsPartial {
+        config: Some(PathBuf::from("~/.config/caesura/nonexistent.yml")),
+    };
 
     // Act
-    let errors = ConfigOptionsPartial {
-        config: Some(PathBuf::from(path)),
-    }
-    .resolve()
-    .expect_err("should reject");
+    let errors = partial.resolve().expect_err("file should not exist");
 
     // Assert
-    assert_eq!(
-        errors,
-        vec![DoesNotExist(CONFIG_FILE_LABEL.to_owned(), path.to_owned())]
-    );
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(
+        errors.first(),
+        Some(DoesNotExist(_, path)) if !path.starts_with('~')
+    ));
 }
 
 fn valid_shared_options_with_output(output: &str) -> SharedOptionsPartial {
