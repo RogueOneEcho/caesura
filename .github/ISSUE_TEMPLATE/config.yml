@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Unconfirmed Bugs
+    url: https://github.com/RogueOneEcho/caesura/discussions/new?category=support
+    about: Report bugs or unexpected behavior for discussion
+  - name: Support Request
+    url: https://github.com/RogueOneEcho/caesura/discussions/new?category=support
+    about: Get help with setup, configuration or use
+  - name: Feature Request
+    url: https://github.com/RogueOneEcho/caesura/discussions/new?category=ideas
+    about: Suggest new features or improvements

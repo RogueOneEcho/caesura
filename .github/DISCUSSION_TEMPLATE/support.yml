@@ -1,0 +1,63 @@
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        All fields are optional but filling them out helps resolve your issue faster.
+  - type: textarea
+    id: version
+    attributes:
+      label: Version
+      description: Output of `caesura version`
+      render: text
+  - type: textarea
+    id: config
+    attributes:
+      label: Config
+      description: |
+        Any relevant configuration.
+        Redact any secrets such as announce URL or API key.
+        Sensitive details can be [encrypted with age or GPG](https://github.com/RogueOneEcho/RogueOneEcho/blob/main/README.md#age) so only the maintainer can decrypt.
+      render: yaml
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The command being run
+  - type: textarea
+    id: logs
+    attributes:
+      label: Trace logs
+      description: |
+        Relevant trace logs.
+        Redact any secrets.
+        Sensitive details can be [encrypted with age or GPG](https://github.com/RogueOneEcho/RogueOneEcho/blob/main/README.md#age) so only the maintainer can decrypt.
+      render: text
+  - type: dropdown
+    id: indexer
+    attributes:
+      label: Indexer
+      options:
+        - RED
+        - OPS
+        - Other
+  - type: input
+    id: source_ids
+    attributes:
+      label: Source IDs
+      description: ID numbers of any sources that trigger the issue
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation method
+      options:
+        - Docker
+        - Homebrew
+        - Nix
+        - Built from source
+        - Other
+  - type: textarea
+    id: description
+    attributes:
+      label: Details
+      description: What's happening and what did you expect?

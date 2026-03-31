@@ -6,6 +6,7 @@ config.yaml
 config.*.yaml
 config.yml
 config.*.yml
+!.github/**/config.yml
 **/*.rs.bk
 *.pdb
 *.snap.new
