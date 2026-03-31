@@ -26,6 +26,7 @@ impl Host {
     /// 3. Execute the command
     pub async fn execute(&self) -> Result<bool, Report> {
         let _ = self.services.get_required::<Logger>();
+        trace!("{} {}", APP_NAME, app_version_or_describe());
         let args = self.services.get_required::<ArgumentsProvider>();
         match args.get_command() {
             Command::Batch => self
