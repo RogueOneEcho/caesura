@@ -4,7 +4,7 @@ use serde::Serialize;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 /// Validation rule violation for a configuration option.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub enum OptionRule {
     Changed(String, String, String),
     NotSet(String),

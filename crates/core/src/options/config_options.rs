@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 /// Legacy config path from before platform user directories.
 const LEGACY_CONFIG_PATH: &str = "./config.yml";
 
+/// Validation label for the config file.
+pub(crate) const CONFIG_FILE_LABEL: &str = "Config File";
+
 /// Configuration file path.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct ConfigOptions {
@@ -22,7 +25,7 @@ impl OptionsContract for ConfigOptions {
             && !config.is_file()
         {
             errors.push(DoesNotExist(
-                "Config File".to_owned(),
+                CONFIG_FILE_LABEL.to_owned(),
                 config.to_string_lossy().to_string(),
             ));
         }
@@ -35,7 +38,7 @@ impl OptionsContract for ConfigOptions {
         {
             let default_path = PathManager::default_config_path();
             errors.push(Changed(
-                "Config File".to_owned(),
+                CONFIG_FILE_LABEL.to_owned(),
                 default_path.to_string_lossy().to_string(),
                 format!("In v0.27.0 the default config path changed to {}.\nPass the option: --config {LEGACY_CONFIG_PATH} to use the previous config path.", default_path.display()),
             ));

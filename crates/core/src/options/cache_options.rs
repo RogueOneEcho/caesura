@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 /// Legacy cache path from before platform user directories.
 const LEGACY_CACHE_DIR: &str = "./cache";
 
+/// Validation label for the cache directory.
+pub(crate) const CACHE_DIR_LABEL: &str = "Cache Directory";
+
 /// Options for queue cache
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct CacheOptions {
@@ -28,13 +31,13 @@ impl OptionsContract for CacheOptions {
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if !self.cache.is_dir() {
             errors.push(DoesNotExist(
-                "Cache Directory".to_owned(),
+                CACHE_DIR_LABEL.to_owned(),
                 self.cache.to_string_lossy().to_string(),
             ));
             if PathBuf::from(LEGACY_CACHE_DIR).is_dir() {
                 let default_dir = PathManager::default_cache_dir();
                 errors.push(Changed(
-                    "Cache Directory".to_owned(),
+                    CACHE_DIR_LABEL.to_owned(),
                     self.cache.to_string_lossy().to_string(),
                     format!("In v0.27.0 the default cache path changed to {}.\nPass the option: --cache {LEGACY_CACHE_DIR} to use the previous cache path.", default_dir.display()),
                 ));

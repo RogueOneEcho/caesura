@@ -67,6 +67,12 @@ pub enum Command {
     Transcode,
 
     /// Upload transcodes of a FLAC source.
+    ///
+    /// `FileOptions` is not listed despite `TranscodeJobFactory` depending on
+    /// `PathManager` which injects it. Upload only uses `TranscodeJobFactory`
+    /// to generate command strings for the description, where the output paths
+    /// are overridden with placeholders (`output.{ext}`), so `rename_tracks`
+    /// has no effect.
     #[options(
         SourceArg,
         ConfigOptions,
@@ -78,7 +84,14 @@ pub enum Command {
     Upload,
 
     /// Verify a FLAC source is suitable for transcoding.
-    #[options(SourceArg, ConfigOptions, SharedOptions, TargetOptions, VerifyOptions)]
+    #[options(
+        SourceArg,
+        ConfigOptions,
+        SharedOptions,
+        CacheOptions,
+        TargetOptions,
+        VerifyOptions
+    )]
     Verify,
 
     /// Display version information for caesura and dependencies.

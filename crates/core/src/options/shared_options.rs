@@ -6,6 +6,12 @@ use serde::{Deserialize, Serialize};
 /// Legacy output path from before platform user directories.
 const LEGACY_OUTPUT_DIR: &str = "./output";
 
+/// Validation label for the content directory.
+pub(crate) const CONTENT_DIR_LABEL: &str = "Content Directory";
+
+/// Validation label for the output directory.
+pub(crate) const OUTPUT_DIR_LABEL: &str = "Output Directory";
+
 /// Options shared by all commands
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct SharedOptions {
@@ -137,25 +143,25 @@ impl OptionsContract for SharedOptions {
             ));
         }
         if self.content.is_empty() {
-            errors.push(IsEmpty("Content Directory".to_owned()));
+            errors.push(IsEmpty(CONTENT_DIR_LABEL.to_owned()));
         }
         for dir in &self.content {
             if !dir.exists() || !dir.is_dir() {
                 errors.push(DoesNotExist(
-                    "Content Directory".to_owned(),
+                    CONTENT_DIR_LABEL.to_owned(),
                     dir.to_string_lossy().to_string(),
                 ));
             }
         }
         if !self.output.exists() || !self.output.is_dir() {
             errors.push(DoesNotExist(
-                "Output Directory".to_owned(),
+                OUTPUT_DIR_LABEL.to_owned(),
                 self.output.to_string_lossy().to_string(),
             ));
             if PathBuf::from(LEGACY_OUTPUT_DIR).is_dir() {
                 let default_dir = PathManager::default_output_dir();
                 errors.push(Changed(
-                    "Output Directory".to_owned(),
+                    OUTPUT_DIR_LABEL.to_owned(),
                     self.output.to_string_lossy().to_string(),
                     format!("In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.", default_dir.display()),
                 ));

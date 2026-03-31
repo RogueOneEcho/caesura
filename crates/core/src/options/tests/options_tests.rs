@@ -1,5 +1,6 @@
 use crate::testing_prelude::*;
 use rogue_logging::{TimeFormat, Verbosity};
+use std::fs::read_to_string;
 
 /// Verify `BatchOptions` default values.
 #[test]
@@ -487,6 +488,193 @@ fn queue_rm_args_accepts_valid_hash() {
     }
     .resolve();
     assert!(result.is_ok());
+}
+
+/// Verify literal `$HOME` in cache path fails validation.
+#[test]
+fn cache_options_rejects_dollar_home() {
+    // Arrange
+    let path = "$HOME/.cache/caesura";
+
+    // Act
+    let errors = CacheOptionsPartial {
+        cache: Some(PathBuf::from(path)),
+    }
+    .resolve()
+    .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(CACHE_DIR_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify literal `~` in cache path fails validation.
+#[test]
+fn cache_options_rejects_tilde() {
+    // Arrange
+    let path = "~/.cache/caesura";
+
+    // Act
+    let errors = CacheOptionsPartial {
+        cache: Some(PathBuf::from(path)),
+    }
+    .resolve()
+    .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(CACHE_DIR_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify literal `$HOME` in output path fails validation.
+#[test]
+fn shared_options_rejects_dollar_home_output() {
+    // Arrange
+    let path = "$HOME/.local/share/caesura/output";
+
+    // Act
+    let errors = valid_shared_options_with_output(path)
+        .resolve()
+        .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(OUTPUT_DIR_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify literal `~` in output path fails validation.
+#[test]
+fn shared_options_rejects_tilde_output() {
+    // Arrange
+    let path = "~/.local/share/caesura/output";
+
+    // Act
+    let errors = valid_shared_options_with_output(path)
+        .resolve()
+        .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(OUTPUT_DIR_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify literal `$HOME` in content path fails validation.
+#[test]
+fn shared_options_rejects_dollar_home_content() {
+    // Arrange
+    let path = "$HOME/music";
+
+    // Act
+    let errors = valid_shared_options_with_content(path)
+        .resolve()
+        .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(CONTENT_DIR_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify literal `~` in content path fails validation.
+#[test]
+fn shared_options_rejects_tilde_content() {
+    // Arrange
+    let path = "~/music";
+
+    // Act
+    let errors = valid_shared_options_with_content(path)
+        .resolve()
+        .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(CONTENT_DIR_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify `read_to_string` fails on literal `~` config path.
+///
+/// Config file resolution in `read_config_file` uses `read_to_string(path).ok()`
+/// which silently swallows this error, meaning the config file is never loaded.
+#[test]
+fn config_read_to_string_fails_on_tilde() {
+    assert!(read_to_string("~/.config/caesura/config.yml").is_err());
+}
+
+/// Verify `read_to_string` fails on literal `$HOME` config path.
+#[test]
+fn config_read_to_string_fails_on_dollar_home() {
+    assert!(read_to_string("$HOME/.config/caesura/config.yml").is_err());
+}
+
+/// Verify literal `$HOME` in config path fails validation.
+#[test]
+fn config_options_rejects_dollar_home() {
+    // Arrange
+    let path = "$HOME/.config/caesura/config.yml";
+
+    // Act
+    let errors = ConfigOptionsPartial {
+        config: Some(PathBuf::from(path)),
+    }
+    .resolve()
+    .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(CONFIG_FILE_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+/// Verify literal `~` in config path fails validation.
+#[test]
+fn config_options_rejects_tilde() {
+    // Arrange
+    let path = "~/.config/caesura/config.yml";
+
+    // Act
+    let errors = ConfigOptionsPartial {
+        config: Some(PathBuf::from(path)),
+    }
+    .resolve()
+    .expect_err("should reject");
+
+    // Assert
+    assert_eq!(
+        errors,
+        vec![DoesNotExist(CONFIG_FILE_LABEL.to_owned(), path.to_owned())]
+    );
+}
+
+fn valid_shared_options_with_output(output: &str) -> SharedOptionsPartial {
+    SharedOptionsPartial {
+        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        api_key: Some("key".to_owned()),
+        content: Some(vec![PathBuf::from(".")]),
+        output: Some(PathBuf::from(output)),
+        ..SharedOptionsPartial::default()
+    }
+}
+
+fn valid_shared_options_with_content(content: &str) -> SharedOptionsPartial {
+    SharedOptionsPartial {
+        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        api_key: Some("key".to_owned()),
+        content: Some(vec![PathBuf::from(content)]),
+        output: Some(PathBuf::from(".")),
+        ..SharedOptionsPartial::default()
+    }
 }
 
 /// Verify nonexistent path is rejected by `InspectArg` validation.
