@@ -28,6 +28,7 @@ impl VersionCommand {
         }
         let table = build_table(dependencies);
         print!("{table}");
+        GitHubRelease::check_for_update().await;
         !any_error
     }
 }
