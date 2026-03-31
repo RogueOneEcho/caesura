@@ -36,12 +36,12 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
         },
         Api {
             response: Deserialization {
-                error: "A deserialization error occured".to_owned(),
+                error: "A deserialization error occurred".to_owned(),
             },
         },
         Api {
             response: Request {
-                error: "A request error occured".to_owned(),
+                error: "A request error occurred".to_owned(),
             },
         },
         Api {
@@ -83,11 +83,11 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
 - type: api
   response:
     type: deserialization
-    error: A deserialization error occured
+    error: A deserialization error occurred
 - type: api
   response:
     type: request
-    error: A request error occured
+    error: A request error occurred
 - type: api
   response:
     type: other
@@ -128,12 +128,12 @@ fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
         },
         Api {
             response: Deserialization {
-                error: "A deserialization error occured".to_owned(),
+                error: "A deserialization error occurred".to_owned(),
             },
         },
         Api {
             response: Request {
-                error: "A request error occured".to_owned(),
+                error: "A request error occurred".to_owned(),
             },
         },
         Api {
@@ -154,9 +154,9 @@ fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
 - type: provider
   NotFound: null
 - type: provider
-  Deserialization: A deserialization error occured
+  Deserialization: A deserialization error occurred
 - type: provider
-  Request: A request error occured
+  Request: A request error occurred
 - type: provider
   Unexpected:
   - 503
@@ -175,11 +175,11 @@ fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
 - type: api
   response:
     type: deserialization
-    error: A deserialization error occured
+    error: A deserialization error occurred
 - type: api
   response:
     type: request
-    error: A request error occured
+    error: A request error occurred
 - type: api
   response:
     type: other

@@ -225,7 +225,7 @@ impl Display for SourceIssue {
                 format!("Too many channels: {count}: {}", path.display())
             }
             FlacError { path, error } => format!("FLAC stream error: {error}: {}", path.display()),
-            Error { domain, details } => format!("A {domain} error occured:\n{details}"),
+            Error { domain, details } => format!("A {domain} error occurred:\n{details}"),
             Other(details) => details.clone(),
         };
         write!(formatter, "{message}")
