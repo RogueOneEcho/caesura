@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::prelude::*;
 use gazelle_api::{GazelleClientTrait, UploadForm};
+use html_escape::decode_html_entities;
 use tokio::fs::{copy, hard_link};
 
 const MUSIC_CATEGORY_ID: u8 = 0;
@@ -98,7 +99,8 @@ impl UploadCommand {
                 category_id: MUSIC_CATEGORY_ID,
                 remaster_year: source.metadata.year,
                 remaster_title: source.torrent.remaster_title.clone(),
-                remaster_record_label: source.torrent.remaster_record_label.clone(),
+                remaster_record_label: decode_html_entities(&source.torrent.remaster_record_label)
+                    .to_string(),
                 remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
                 format: target.get_file_extension().to_uppercase(),
                 bitrate: target.get_bitrate().to_owned(),
