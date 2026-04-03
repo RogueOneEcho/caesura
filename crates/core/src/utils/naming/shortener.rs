@@ -98,6 +98,7 @@ fn compare_char_count(before: &str, after: &str) -> isize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use gazelle_api::Media;
 
     #[test]
     fn compare_char_count_tests() {
@@ -164,7 +165,7 @@ mod tests {
             album: "This is a Long Title (With an Even Longer Paranthetical Statement)".to_owned(),
             remaster_title: "Remaster Title".to_owned(),
             year: 1234,
-            media: "Vinyl".to_owned(),
+            media: Media::Vinyl,
         };
 
         // Act

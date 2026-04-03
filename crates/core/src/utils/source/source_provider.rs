@@ -47,8 +47,8 @@ impl SourceProvider {
             ExistingFormat::from_torrent(&torrent).and_then(ExistingFormat::to_source)
         else {
             return Ok(Err(SourceIssue::NotSource {
-                format: torrent.format,
-                encoding: torrent.encoding,
+                format: torrent.format.to_string(),
+                encoding: torrent.encoding.to_string(),
             }));
         };
         let existing = ExistingFormatProvider::get(&torrent, &group_torrents);

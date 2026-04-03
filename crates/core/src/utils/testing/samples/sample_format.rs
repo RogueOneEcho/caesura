@@ -1,3 +1,5 @@
+use gazelle_api::Quality;
+
 /// Audio bit depth.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Depth {
@@ -97,11 +99,11 @@ impl SampleFormat {
         rate: Rate::_96000,
     };
 
-    /// Gazelle API encoding string (e.g. `"Lossless"` or `"24bit Lossless"`).
-    pub fn encoding(self) -> &'static str {
+    /// Gazelle API encoding quality.
+    pub fn encoding(self) -> Quality {
         match self.depth {
-            Depth::_24 => "24bit Lossless",
-            Depth::_16 => "Lossless",
+            Depth::_24 => Quality::Lossless24,
+            Depth::_16 => Quality::Lossless,
         }
     }
 

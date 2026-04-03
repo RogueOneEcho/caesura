@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use gazelle_api::{Group, Torrent};
+use gazelle_api::{Group, Media, Torrent};
 use html_escape::decode_html_entities;
 
 const MAX_ARTISTS: usize = 2;
@@ -18,7 +18,7 @@ pub struct Metadata {
     /// Release year.
     pub year: u16,
     /// Media type.
-    pub media: String,
+    pub media: Media,
 }
 
 impl Metadata {
@@ -30,17 +30,23 @@ impl Metadata {
         let album = sanitizer.execute(get_album(group));
         let remaster_title = sanitizer.execute(get_remaster_title(torrent));
         let year = get_year(group, torrent);
-        let media = sanitizer.execute(torrent.media.clone());
+        let media = match &torrent.media {
+            Media::Other(value) => {
+                let result = sanitizer.execute(value.clone());
+                show_issues("media", &result);
+                Media::Other(result.output)
+            }
+            known => known.clone(),
+        };
         show_issues("artist", &artist);
         show_issues("album", &album);
         show_issues("remaster_title", &remaster_title);
-        show_issues("media", &media);
         Metadata {
             artist: artist.output,
             album: album.output,
             remaster_title: remaster_title.output,
             year,
-            media: media.output,
+            media,
         }
     }
 }

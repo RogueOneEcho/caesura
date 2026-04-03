@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use TargetFormat::*;
 use clap::ValueEnum;
+use gazelle_api::{Format, Quality};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
@@ -44,13 +45,22 @@ impl TargetFormat {
         }
     }
 
-    /// Bitrate description for the API.
+    /// Audio format for the API.
     #[must_use]
-    pub fn get_bitrate(&self) -> &str {
+    pub fn to_format(self) -> Format {
         match self {
-            Flac => "Lossless",
-            _320 => "320",
-            V0 => "V0 (VBR)",
+            Flac => Format::FLAC,
+            _320 | V0 => Format::MP3,
+        }
+    }
+
+    /// Audio quality for the API.
+    #[must_use]
+    pub fn to_quality(self) -> Quality {
+        match self {
+            Flac => Quality::Lossless,
+            _320 => Quality::_320,
+            V0 => Quality::V0,
         }
     }
 }

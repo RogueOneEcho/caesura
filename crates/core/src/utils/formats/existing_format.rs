@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use ExistingFormat::*;
 use clap::ValueEnum;
-use gazelle_api::Torrent;
+use gazelle_api::{Format, Quality, Torrent};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 /// Format of an existing release.
@@ -18,11 +18,11 @@ pub enum ExistingFormat {
 impl ExistingFormat {
     /// Determine format from torrent metadata.
     pub fn from_torrent(torrent: &Torrent) -> Option<ExistingFormat> {
-        match (torrent.format.as_str(), torrent.encoding.as_str()) {
-            ("FLAC", "Lossless") => Some(Flac),
-            ("FLAC", "24bit Lossless") => Some(Flac24),
-            ("MP3", "320") => Some(_320),
-            ("MP3", "V0 (VBR)") => Some(V0),
+        match (&torrent.format, &torrent.encoding) {
+            (Format::FLAC, Quality::Lossless) => Some(Flac),
+            (Format::FLAC, Quality::Lossless24) => Some(Flac24),
+            (Format::MP3, Quality::_320) => Some(_320),
+            (Format::MP3, Quality::V0) => Some(V0),
             (format, encoding) => {
                 trace!(
                     "{} to determine ExistingFormat of `{format}` with encoding `{encoding}`",

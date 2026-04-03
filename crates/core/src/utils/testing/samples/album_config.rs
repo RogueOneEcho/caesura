@@ -1,7 +1,7 @@
 use crate::utils::{SAMPLE_SOURCES_DIR, SampleFormat, TempDirectory};
 use gazelle_api::{
-    Credit, Credits, Group, GroupResponse, MockGazelleClient, Torrent, TorrentResponse,
-    UploadResponse,
+    Credit, Credits, Format, Group, GroupResponse, Media, MockGazelleClient, Torrent,
+    TorrentResponse, UploadResponse,
 };
 use std::fs;
 
@@ -393,9 +393,9 @@ fn build_mock_client(
 ) -> MockGazelleClient {
     let torrent = Torrent {
         id: torrent_id,
-        format: "FLAC".to_owned(),
-        encoding: config.format.encoding().to_owned(),
-        media: "WEB".to_owned(),
+        format: Format::FLAC,
+        encoding: config.format.encoding(),
+        media: Media::WEB,
         remastered: Some(true),
         remaster_year: Some(config.year),
         file_path: config.dir_name(),

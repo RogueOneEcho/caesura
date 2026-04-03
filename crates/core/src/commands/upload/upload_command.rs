@@ -1,11 +1,9 @@
 use std::collections::HashSet;
 
 use crate::prelude::*;
-use gazelle_api::{GazelleClientTrait, UploadForm};
+use gazelle_api::{Category, GazelleClientTrait, UploadForm};
 use html_escape::decode_html_entities;
 use tokio::fs::{copy, hard_link};
-
-const MUSIC_CATEGORY_ID: u8 = 0;
 
 /// Upload transcodes of a FLAC source.
 #[injectable]
@@ -96,14 +94,14 @@ impl UploadCommand {
             }
             let form = UploadForm {
                 path: torrent_path,
-                category_id: MUSIC_CATEGORY_ID,
+                category_id: Category::Music,
                 remaster_year: source.metadata.year,
                 remaster_title: source.torrent.remaster_title.clone(),
                 remaster_record_label: decode_html_entities(&source.torrent.remaster_record_label)
                     .to_string(),
                 remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
-                format: target.get_file_extension().to_uppercase(),
-                bitrate: target.get_bitrate().to_owned(),
+                format: target.to_format(),
+                bitrate: target.to_quality(),
                 media: source.torrent.media.clone(),
                 release_desc: self.create_description(source, target),
                 group_id: source.group.id,

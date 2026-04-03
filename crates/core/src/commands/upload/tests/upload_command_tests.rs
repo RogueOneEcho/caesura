@@ -1,5 +1,5 @@
 use crate::testing_prelude::*;
-use gazelle_api::MockGazelleClient;
+use gazelle_api::{Format, Media, MockGazelleClient, Quality};
 use std::fs;
 
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
@@ -320,9 +320,9 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
             },
             torrent: gazelle_api::Torrent {
                 id: AlbumConfig::TORRENT_ID,
-                format: "FLAC".to_owned(),
-                encoding: "Lossless".to_owned(),
-                media: "WEB".to_owned(),
+                format: Format::FLAC,
+                encoding: Quality::Lossless,
+                media: Media::WEB,
                 ..gazelle_api::Torrent::default()
             },
         }))
@@ -336,9 +336,9 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
             },
             torrents: vec![gazelle_api::Torrent {
                 id: AlbumConfig::TORRENT_ID,
-                format: "FLAC".to_owned(),
-                encoding: "Lossless".to_owned(),
-                media: "WEB".to_owned(),
+                format: Format::FLAC,
+                encoding: Quality::Lossless,
+                media: Media::WEB,
                 ..gazelle_api::Torrent::default()
             }],
         }))
