@@ -64,6 +64,28 @@ impl UploadCommand {
             TorrentVerifier::execute(&torrent_path, &target_dir)
                 .await
                 .map_err(Failure::wrap(UploadAction::VerifyContent))?;
+            let form = UploadForm {
+                path: torrent_path.clone(),
+                category_id: MUSIC_CATEGORY_ID,
+                remaster_year: source.metadata.year,
+                remaster_title: source.torrent.remaster_title.clone(),
+                remaster_record_label: source.torrent.remaster_record_label.clone(),
+                remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
+                format: target.get_file_extension().to_uppercase(),
+                bitrate: target.get_bitrate().to_owned(),
+                media: source.torrent.media.clone(),
+                release_desc: self.create_description(source, target),
+                group_id: source.group.id,
+            };
+            if self.upload_options.dry_run {
+                warn!(
+                    "{} upload and transfer actions as this is a dry run",
+                    "Skipping".bold()
+                );
+                info!("{} data of {target} for {source}:", "Upload".bold());
+                info!("\n{form}");
+                continue;
+            }
             if self.upload_options.copy_transcode_to_content_dir {
                 trace!("{} transcode to content directory", "Copying".bold());
                 let destination = self
@@ -93,25 +115,6 @@ impl UploadCommand {
                 warn!("{}", e.render());
                 warnings.push(e.to_error());
             }
-            let form = UploadForm {
-                path: torrent_path,
-                category_id: MUSIC_CATEGORY_ID,
-                remaster_year: source.metadata.year,
-                remaster_title: source.torrent.remaster_title.clone(),
-                remaster_record_label: source.torrent.remaster_record_label.clone(),
-                remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
-                format: target.get_file_extension().to_uppercase(),
-                bitrate: target.get_bitrate().to_owned(),
-                media: source.torrent.media.clone(),
-                release_desc: self.create_description(source, target),
-                group_id: source.group.id,
-            };
-            if self.upload_options.dry_run {
-                warn!("{} upload as this is a dry run", "Skipping".bold());
-                info!("{} data of {target} for {source}:", "Upload".bold());
-                info!("\n{form}");
-                continue;
-            }
             let response = self
                 .api
                 .upload_torrent(form)
@@ -122,6 +125,16 @@ impl UploadCommand {
             let id = response.torrent_id;
             let link = get_permalink(base, response.group_id, id);
             info!("{link}");
+            if let Err(e) = inject_torrent_with_client(
+                &torrent_path,
+                &self.upload_options,
+                UploadAction::InjectTorrentClient,
+            )
+            .await
+            {
+                warn!("{}", e.render());
+                warnings.push(e.to_error());
+            }
             formats.push(UploadFormatStatus { format: target, id });
         }
         Ok(UploadSuccess { formats, warnings })
