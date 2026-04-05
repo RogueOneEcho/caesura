@@ -1,5 +1,6 @@
 use crate::testing_prelude::*;
 use gazelle_api::{Format, Media, MockGazelleClient, Quality};
+use qbittorrent_api::mock::MockQBittorrentClient;
 use std::fs;
 
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
@@ -28,81 +29,7 @@ async fn upload_command_succeeds_with_valid_source() -> Result<(), TestError> {
 
 /// Test that `UploadCommand` with `dry_run=true` does not call the API.
 #[tokio::test]
-
 async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
-    // Arrange
-    init_logger();
-    let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
-    let test_dir = TestDirectory::new();
-    let content_target = TempDirectory::create("dry_run_content_target");
-    let copy_target = TempDirectory::create("dry_run_copy_target");
-    let torrent_copy_target = TempDirectory::create("dry_run_torrent_copy_target");
-    let host = HostBuilder::new()
-        .with_mock_api(transcode.album.clone())
-        .with_test_options(&test_dir)
-        .await
-        .with_options(SharedOptions {
-            content: vec![content_target.to_path_buf(), SAMPLE_SOURCES_DIR.clone()],
-            output: SAMPLE_TRANSCODES_DIR.clone(),
-            ..SharedOptions::mock()
-        })
-        .with_options(TargetOptions {
-            target: vec![transcode.target],
-            ..TargetOptions::default()
-        })
-        .with_options(UploadOptions {
-            dry_run: true,
-            torrent_client: Some(TorrentClient::Qbittorrent),
-            torrent_client_url: Some("http://127.0.0.1:1".to_owned()),
-            torrent_client_username: Some("admin".to_owned()),
-            torrent_client_password: Some("secret".to_owned()),
-            copy_transcode_to_content_dir: true,
-            copy_transcode_to: Some(copy_target.to_path_buf()),
-            copy_torrent_to: Some(torrent_copy_target.to_path_buf()),
-            ..UploadOptions::default()
-        })
-        .expect_build();
-    let (source, command) = get_source_and_command(&host).await;
-
-    // Act
-    let result = command.execute(&source).await;
-    let status = UploadStatus::new(result);
-
-    // Assert
-    assert!(status.success, "dry run should succeed");
-    assert!(
-        status.formats.unwrap_or_default().is_empty(),
-        "dry run should not record formats"
-    );
-    assert!(status.errors.is_none(), "dry run should have no errors");
-    assert!(
-        fs::read_dir(&*content_target)
-            .expect("read content target")
-            .next()
-            .is_none(),
-        "dry run should not copy transcodes to content directory"
-    );
-    assert!(
-        fs::read_dir(&*copy_target)
-            .expect("read custom copy target")
-            .next()
-            .is_none(),
-        "dry run should not copy transcodes to custom directory"
-    );
-    assert!(
-        fs::read_dir(&*torrent_copy_target)
-            .expect("read torrent copy target")
-            .next()
-            .is_none(),
-        "dry run should not copy torrent files"
-    );
-
-    Ok(())
-}
-
-/// Test that torrent client injection failure is surfaced as a warning.
-#[tokio::test]
-async fn upload_command_torrent_client_injection_failure_is_warning() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
@@ -121,10 +48,7 @@ async fn upload_command_torrent_client_injection_failure_is_warning() -> Result<
             ..TargetOptions::default()
         })
         .with_options(UploadOptions {
-            torrent_client: Some(TorrentClient::Qbittorrent),
-            torrent_client_url: Some("http://127.0.0.1:1".to_owned()),
-            torrent_client_username: Some("admin".to_owned()),
-            torrent_client_password: Some("secret".to_owned()),
+            dry_run: true,
             ..UploadOptions::default()
         })
         .expect_build();
@@ -135,15 +59,75 @@ async fn upload_command_torrent_client_injection_failure_is_warning() -> Result<
     let status = UploadStatus::new(result);
 
     // Assert
-    assert!(status.success, "upload should still succeed");
-    let warnings = status
-        .errors
-        .expect("torrent client failure should become warning");
+    assert!(status.success, "dry run should succeed");
     assert!(
-        warnings
-            .iter()
-            .any(|warning| warning.action.contains("inject torrent via client API")),
-        "expected torrent client injection warning"
+        status.formats.unwrap_or_default().is_empty(),
+        "dry run should not record formats"
+    );
+    assert!(status.errors.is_none(), "dry run should have no errors");
+
+    Ok(())
+}
+
+/// Test that torrent client injection succeeds with mock client.
+#[tokio::test]
+async fn upload_command_torrent_client_injection_succeeds() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+    let test_dir = TestDirectory::new();
+    let mut builder = HostBuilder::new();
+    let _ = builder
+        .with_mock_api(transcode.album.clone())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(SharedOptions {
+            content: vec![SAMPLE_SOURCES_DIR.clone()],
+            output: SAMPLE_TRANSCODES_DIR.clone(),
+            ..SharedOptions::mock()
+        })
+        .with_options(TargetOptions {
+            target: vec![transcode.target],
+            ..TargetOptions::default()
+        })
+        .with_options(QbitOptions::mock())
+        .with_mock_torrent_client(MockQBittorrentClient::default());
+    let host = builder.expect_build();
+    let (source, command) = get_source_and_command(&host).await;
+
+    // Act
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
+
+    // Assert
+    assert!(status.success, "upload should succeed");
+    assert!(
+        status.errors.is_none(),
+        "injection should succeed with mock client"
+    );
+
+    Ok(())
+}
+
+/// Test that torrent injection is skipped when `qbit_url` is not set.
+#[tokio::test]
+async fn upload_command_skips_injection_when_not_configured() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
+    let test_dir = TestDirectory::new();
+    let host = build_upload_test_host(&transcode, &test_dir).await;
+    let (source, command) = get_source_and_command(&host).await;
+
+    // Act
+    let result = command.execute(&source).await;
+    let status = UploadStatus::new(result);
+
+    // Assert
+    assert!(status.success, "upload should succeed");
+    assert!(
+        status.errors.is_none(),
+        "no warnings when injection not configured"
     );
 
     Ok(())

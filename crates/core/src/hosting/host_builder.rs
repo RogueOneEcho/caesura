@@ -4,6 +4,7 @@ use crate::prelude::*;
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, ServiceProvider, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
+use qbittorrent_api::{QBittorrentClientFactory, QBittorrentClientOptions, QBittorrentClientTrait};
 use rogue_logging::InitLog;
 use std::fs::read_to_string;
 use std::sync::Arc;
@@ -68,6 +69,7 @@ impl HostBuilder {
             .add(IdProvider::transient())
             .add(SourceProvider::transient())
             .add(singleton_as_self().from(gazelle_factory))
+            .add(singleton_as_self().from(qbit_factory))
             .add(JobRunner::transient())
             .add(Publisher::transient())
             .add(DebugSubscriber::transient())
@@ -138,6 +140,28 @@ impl HostBuilder {
         self
     }
 
+    /// Register a mock qBittorrent client for testing.
+    #[must_use]
+    #[cfg(test)]
+    #[expect(
+        clippy::as_conversions,
+        reason = "required for DI trait object registration"
+    )]
+    #[expect(
+        clippy::absolute_paths,
+        reason = "mock type is behind a feature flag and not re-exported at crate root"
+    )]
+    pub fn with_mock_torrent_client(
+        &mut self,
+        client: qbittorrent_api::mock::MockQBittorrentClient,
+    ) -> &mut Self {
+        let client: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>> =
+            Ref::new(Box::new(client) as Box<dyn QBittorrentClientTrait + Send + Sync>);
+        self.services
+            .add(singleton_as_self().from(move |_| client.clone()));
+        self
+    }
+
     /// Configure test options for the builder.
     ///
     /// - Sets up content, output, and cache directories
@@ -200,6 +224,25 @@ fn read_config_file(args: &ArgumentsProvider) -> Option<String> {
         .clone()
         .unwrap_or_else(PathManager::default_config_path);
     read_to_string(path.expand_tilde()).ok()
+}
+
+#[expect(clippy::as_conversions, reason = "required for traits")]
+fn qbit_factory(provider: &ServiceProvider) -> Arc<Box<dyn QBittorrentClientTrait + Send + Sync>> {
+    let options = provider.get_required::<QbitOptions>();
+    let client_options = match &options.qbit_url {
+        Some(url) => QBittorrentClientOptions {
+            host: url.clone(),
+            username: options.qbit_username.clone().unwrap_or_default(),
+            password: options.qbit_password.clone().unwrap_or_default(),
+            user_agent: Some(app_user_agent(true)),
+            ..QBittorrentClientOptions::default()
+        },
+        None => QBittorrentClientOptions::default(),
+    };
+    let factory = QBittorrentClientFactory {
+        options: client_options,
+    };
+    Ref::new(Box::new(factory.create()) as Box<dyn QBittorrentClientTrait + Send + Sync>)
 }
 
 #[expect(clippy::as_conversions, reason = "required for traits")]

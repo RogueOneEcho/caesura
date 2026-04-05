@@ -144,31 +144,6 @@ target:
 - flac
 - '320'
 - v0
-# Torrent client for direct API injection.
-torrent_client: null
-# Torrent client category for injected torrents.
-# This is currently used for qBittorrent.
-torrent_client_category: null
-# Torrent client password.
-torrent_client_password: null
-# Add injected torrents in paused state.
-# Default: false
-torrent_client_paused: false
-# Torrent client save path for injected torrents.
-# This is currently used for qBittorrent.
-# For remote clients, this must be a path visible to the client host.
-torrent_client_savepath: null
-# Skip hash checking when injecting torrents.
-# Default: false
-torrent_client_skip_checking: false
-# Torrent client tags for injected torrents.
-# This is currently used for qBittorrent.
-torrent_client_tags: null
-# Torrent client API base URL.
-# Example: `http://127.0.0.1:8080`
-torrent_client_url: null
-# Torrent client username.
-torrent_client_username: null
 # Should the transcode command be executed?
 # Default: false
 transcode: false

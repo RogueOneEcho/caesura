@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use crate::prelude::*;
 use gazelle_api::{Category, GazelleClientTrait, UploadForm};
 use html_escape::decode_html_entities;
+use qbittorrent_api::QBittorrentClientTrait;
 use tokio::fs::{copy, hard_link};
 
 /// Upload transcodes of a FLAC source.
@@ -16,6 +17,8 @@ pub(crate) struct UploadCommand {
     paths: Ref<PathManager>,
     targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
+    qbit_options: Ref<QbitOptions>,
+    qbit: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>>,
 }
 
 impl UploadCommand {
@@ -122,15 +125,17 @@ impl UploadCommand {
             let id = response.torrent_id;
             let link = get_permalink(base, response.group_id, id);
             info!("{link}");
-            if let Err(e) = inject_torrent_with_client(
-                &torrent_path,
-                &self.upload_options,
-                UploadAction::InjectTorrentClient,
-            )
-            .await
-            {
-                warn!("{}", e.render());
-                warnings.push(e.to_error());
+            if self.qbit_options.inject_torrent {
+                let add_options = self.qbit_options.to_add_torrent_options();
+                if let Err(e) = self
+                    .qbit
+                    .add_torrent(add_options, torrent_path.clone())
+                    .await
+                    .map_err(Failure::wrap(UploadAction::InjectTorrent))
+                {
+                    warn!("{}", e.render());
+                    warnings.push(e.to_error());
+                }
             }
             formats.push(UploadFormatStatus { format: target, id });
         }

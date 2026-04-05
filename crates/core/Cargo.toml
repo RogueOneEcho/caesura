@@ -65,6 +65,7 @@ unicode-width = { workspace = true }
 gazelle_api = { workspace = true, features = ["mock"] }
 image = { workspace = true }
 insta = { workspace = true }
+qbittorrent_api = { workspace = true, features = ["mock"] }
 sha2 = { workspace = true }
 
 [lints]
