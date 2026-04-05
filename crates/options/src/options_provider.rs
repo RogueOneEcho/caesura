@@ -42,7 +42,7 @@ impl OptionsProvider {
         }
     }
 
-    fn merge_from_yaml<P>(&self, partial: &mut P)
+    fn merge_from_yaml<P>(&mut self, partial: &mut P)
     where
         P: OptionsPartialContract,
     {
@@ -52,7 +52,8 @@ impl OptionsProvider {
                 partial.merge(file_partial);
             }
             Err(error) => {
-                eprintln!("Failed to deserialize config file: {error}");
+                self.errors
+                    .push(OptionRule::ConfigDeserialize(error.to_string()));
             }
         }
     }
@@ -80,7 +81,7 @@ impl OptionsProvider {
     }
 
     /// Parse CLI arguments into a partial, or return defaults if not applicable.
-    fn parse_cli_or_default<P>(&self, applicable: bool) -> P
+    fn parse_cli_or_default<P>(&mut self, applicable: bool) -> P
     where
         P: OptionsPartialContract,
         P::Resolved: Documented,
@@ -92,10 +93,9 @@ impl OptionsProvider {
             return P::default();
         };
         P::from_arg_matches(args.arg_matches()).unwrap_or_else(|error| {
-            eprintln!(
-                "Failed to extract {} from CLI arguments: {error}",
-                P::Resolved::doc_metadata().name,
-            );
+            let name = String::from(P::Resolved::doc_metadata().name);
+            self.errors
+                .push(OptionRule::CliExtract(name, error.to_string()));
             P::default()
         })
     }
@@ -104,6 +104,16 @@ impl OptionsProvider {
     fn register_all(&mut self, services: &mut ServiceCollection) {
         for entry in inventory::iter::<OptionsRegistration> {
             (entry.register)(self, services);
+        }
+    }
+
+    /// Create an [`OptionsProvider`] from YAML content without CLI arguments.
+    #[must_use]
+    pub fn from_yaml(yaml: Option<String>) -> Self {
+        Self {
+            args: None,
+            yaml,
+            errors: Vec::new(),
         }
     }
 

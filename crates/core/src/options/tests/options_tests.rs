@@ -1,4 +1,5 @@
 use crate::testing_prelude::*;
+use di::ServiceCollection;
 use rogue_logging::{TimeFormat, Verbosity};
 use std::fs::read_to_string;
 
@@ -711,4 +712,56 @@ fn qbit_options_complete() {
     };
     let result = partial.resolve();
     assert!(result.is_ok());
+}
+
+/// Verify invalid YAML produces a config deserialization error.
+#[test]
+#[expect(non_snake_case, reason = "double underscore test qualifier convention")]
+fn options_provider_register__invalid_yaml() {
+    // Arrange
+    let yaml = "qbit_category:\n  - not\n  - a\n  - string\n".to_owned();
+    let mut provider = OptionsProvider::from_yaml(Some(yaml));
+    let mut services = ServiceCollection::new();
+
+    // Act
+    provider.register::<QbitOptionsPartial>(&mut services);
+
+    // Assert
+    assert!(provider.has_errors());
+    let error = provider.errors.first().expect("should have an error");
+    assert!(
+        matches!(error, OptionRule::ConfigDeserialize(_)),
+        "Expected ConfigDeserialize, got: {error}"
+    );
+}
+
+/// Verify valid YAML does not produce errors.
+#[test]
+#[expect(non_snake_case, reason = "double underscore test qualifier convention")]
+fn options_provider_register__valid_yaml() {
+    // Arrange
+    let yaml = "qbit_category: test\n".to_owned();
+    let mut provider = OptionsProvider::from_yaml(Some(yaml));
+    let mut services = di::ServiceCollection::new();
+
+    // Act
+    provider.register::<QbitOptionsPartial>(&mut services);
+
+    // Assert
+    assert!(!provider.has_errors());
+}
+
+/// Verify missing YAML does not produce errors.
+#[test]
+#[expect(non_snake_case, reason = "double underscore test qualifier convention")]
+fn options_provider_register__no_yaml() {
+    // Arrange
+    let mut provider = OptionsProvider::from_yaml(None);
+    let mut services = di::ServiceCollection::new();
+
+    // Act
+    provider.register::<QbitOptionsPartial>(&mut services);
+
+    // Assert
+    assert!(!provider.has_errors());
 }

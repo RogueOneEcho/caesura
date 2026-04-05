@@ -15,6 +15,8 @@ pub enum OptionRule {
     DoesNotExist(String, String),
     DurationInvalid(String, String),
     HashInvalid(String, String),
+    ConfigDeserialize(String),
+    CliExtract(String, String),
 }
 
 impl Display for OptionRule {
@@ -36,6 +38,12 @@ impl Display for OptionRule {
             Self::DurationInvalid(name, value) => format!("{name} could not be parsed: {value}"),
             Self::HashInvalid(name, value) => {
                 format!("{name} could not be parsed as a hash: {value}")
+            }
+            Self::ConfigDeserialize(details) => {
+                format!("config file could not be deserialized: {details}")
+            }
+            Self::CliExtract(name, details) => {
+                format!("{name} could not be extracted from CLI arguments: {details}")
             }
         };
         write!(formatter, "{output}")
