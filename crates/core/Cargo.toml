@@ -25,19 +25,21 @@ name = "caesura"
 path = "src/lib.rs"
 
 [dependencies]
+bytes = { workspace = true }
 caesura_macros = { workspace = true }
 caesura_options = { workspace = true }
-bytes = { workspace = true }
 chrono = { workspace = true }
 clap = { workspace = true }
 claxon = { workspace = true }
 colored = { workspace = true }
 dirs = { workspace = true }
+fast_image_resize = { workspace = true }
 flat_db = { workspace = true }
 futures = { workspace = true }
 gazelle_api = { workspace = true }
 html-escape = { workspace = true }
 humantime = { workspace = true }
+image = { workspace = true }
 indicatif = { workspace = true }
 inventory = { workspace = true }
 lava_torrent = { workspace = true }
@@ -45,18 +47,16 @@ lofty = { workspace = true }
 log = { workspace = true }
 miette = { workspace = true }
 more-di = { workspace = true }
-once_cell = { workspace = true }
 num_cpus = { workspace = true }
+once_cell = { workspace = true }
+qbittorrent_api = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
-qbittorrent_api = { workspace = true }
 rogue_logging = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
 sha1 = { workspace = true }
-fast_image_resize = { workspace = true }
-image = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 unicode-width = { workspace = true }
