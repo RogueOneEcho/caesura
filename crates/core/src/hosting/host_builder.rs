@@ -2,7 +2,7 @@ use crate::hosting::*;
 use crate::prelude::*;
 #[cfg(test)]
 use di::existing_as_self;
-use di::{Injectable, Mut, ServiceCollection, singleton_as_self};
+use di::{Injectable, Mut, ServiceCollection, ServiceProvider, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
 use rogue_logging::InitLog;
 use std::fs::read_to_string;
@@ -43,10 +43,6 @@ impl HostBuilder {
 
     /// Wire up all services and register options with DI.
     #[must_use]
-    #[expect(
-        clippy::as_conversions,
-        reason = "required for Box<dyn GazelleClientTrait> and u16-to-usize coercions"
-    )]
     fn new_internal(mut options: OptionsProvider, args: Option<Arc<ArgumentsProvider>>) -> Self {
         let mut services = ServiceCollection::new();
         services.register_options(&mut options);
@@ -71,19 +67,7 @@ impl HostBuilder {
             .add(PathManager::transient())
             .add(IdProvider::transient())
             .add(SourceProvider::transient())
-            .add(singleton_as_self().from(|provider| {
-                let options = provider.get_required::<SharedOptions>();
-                let factory = GazelleClientFactory {
-                    options: GazelleClientOptions {
-                        url: options.indexer_url.clone(),
-                        key: options.api_key.clone(),
-                        user_agent: app_user_agent(true),
-                        requests_allowed_per_duration: None,
-                        request_limit_duration: None,
-                    },
-                };
-                Ref::new(Box::new(factory.create()) as Box<dyn GazelleClientTrait + Send + Sync>)
-            }))
+            .add(singleton_as_self().from(gazelle_factory))
             .add(JobRunner::transient())
             .add(Publisher::transient())
             .add(DebugSubscriber::transient())
@@ -109,15 +93,8 @@ impl HostBuilder {
             // Add spectrogram services
             .add(SpectrogramCommand::transient())
             .add(SpectrogramJobFactory::transient())
-            .add(singleton_as_self().from(|provider| {
-                let options = provider.get_required::<RunnerOptions>();
-                let cpus = options.cpus.expect("cpus should be set") as usize;
-                Arc::new(Semaphore::new(cpus))
-            }))
-            .add(singleton_as_self().from(|_| {
-                let set: JoinSet<Result<(), Failure<JobAction>>> = JoinSet::new();
-                RefMut::new(Mut::new(set))
-            }))
+            .add(singleton_as_self().from(semaphore_factory))
+            .add(singleton_as_self().from(joinset_factory))
             // Add transcode services
             .add(TranscodeCommand::transient())
             .add(TranscodeJobFactory::transient())
@@ -223,4 +200,34 @@ fn read_config_file(args: &ArgumentsProvider) -> Option<String> {
         .clone()
         .unwrap_or_else(PathManager::default_config_path);
     read_to_string(path.expand_tilde()).ok()
+}
+
+#[expect(clippy::as_conversions, reason = "required for traits")]
+fn gazelle_factory(services: &ServiceProvider) -> Ref<Box<dyn GazelleClientTrait + Send + Sync>> {
+    let options = services.get_required::<SharedOptions>();
+    let factory = GazelleClientFactory {
+        options: GazelleClientOptions {
+            url: options.indexer_url.clone(),
+            key: options.api_key.clone(),
+            user_agent: app_user_agent(true),
+            requests_allowed_per_duration: None,
+            request_limit_duration: None,
+        },
+    };
+    Ref::new(Box::new(factory.create()) as Box<dyn GazelleClientTrait + Send + Sync>)
+}
+
+#[expect(clippy::type_complexity, reason = "collection of job results")]
+fn joinset_factory(
+    _services: &ServiceProvider,
+) -> Ref<Mut<JoinSet<Result<(), Failure<JobAction>>>>> {
+    let set: JoinSet<Result<(), Failure<JobAction>>> = JoinSet::new();
+    RefMut::new(Mut::new(set))
+}
+
+#[expect(clippy::as_conversions, reason = "u16 to usize is safe")]
+fn semaphore_factory(services: &ServiceProvider) -> Ref<Semaphore> {
+    let options = services.get_required::<RunnerOptions>();
+    let cpus = options.cpus.expect("cpus should be set") as usize;
+    Ref::new(Semaphore::new(cpus))
 }
