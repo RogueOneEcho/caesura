@@ -30,7 +30,7 @@ impl BatchCommand {
         let transcode_enabled = self.batch_options.transcode;
         let retry_failed_transcodes = self.batch_options.retry_transcode;
         let upload_enabled = self.batch_options.upload;
-        let indexer = self.shared_options.indexer.clone();
+        let indexer = self.shared_options.get_indexer();
         let limit = self.batch_options.get_limit();
         let items = self
             .queue
@@ -43,11 +43,7 @@ impl BatchCommand {
             .await
             .map_err(Failure::wrap(BatchAction::GetUnprocessed))?;
         if items.is_empty() {
-            info!(
-                "{} items in the queue for {}",
-                "No".bold(),
-                indexer.to_uppercase()
-            );
+            info!("{} items in the queue for {}", "No".bold(), indexer);
             info!("{} the `queue` command to add items", "Use".bold());
             return Ok(true);
         }
@@ -55,7 +51,7 @@ impl BatchCommand {
             "{} {} sources in the queue for {}",
             "Found".bold(),
             items.len(),
-            indexer.to_uppercase()
+            indexer
         );
         let mut count = 0;
         for hash in items {

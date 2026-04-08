@@ -67,12 +67,12 @@ impl Queue {
     /// Items are sorted by name
     pub(crate) async fn get_unprocessed(
         &self,
-        indexer: String,
+        indexer: Indexer,
         transcode_enabled: bool,
         upload_enabled: bool,
         retry_failed_transcodes: bool,
     ) -> Result<Vec<Hash<20>>, Failure<QueueAction>> {
-        let is_red = indexer == "red";
+        let is_red = indexer == Indexer::Red;
         let mut items = self
             .get_unprocessed_internal(
                 indexer,
@@ -84,7 +84,7 @@ impl Queue {
         if is_red {
             let mut pth_items = self
                 .get_unprocessed_internal(
-                    "pth".to_owned(),
+                    Indexer::Pth,
                     transcode_enabled,
                     upload_enabled,
                     retry_failed_transcodes,
@@ -108,7 +108,7 @@ impl Queue {
     /// Items are sorted by name
     async fn get_unprocessed_internal(
         &self,
-        indexer: String,
+        indexer: Indexer,
         transcode_enabled: bool,
         upload_enabled: bool,
         retry_failed_transcodes: bool,

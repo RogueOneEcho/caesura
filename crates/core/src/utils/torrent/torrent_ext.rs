@@ -1,5 +1,6 @@
 //! Extension trait for convenient access to `lava_torrent` torrent fields.
 
+use crate::prelude::Indexer;
 use lava_torrent::bencode::BencodeElem;
 use lava_torrent::torrent::v1::Torrent;
 use std::collections::HashMap;
@@ -19,7 +20,7 @@ pub(crate) trait TorrentExt {
     )]
     fn created_by(&self) -> Option<&str>;
     /// Check if the torrent source matches, with RED/PTH equivalence.
-    fn is_source_equal(&self, source: &str) -> bool;
+    fn is_source_equal(&self, source: &Indexer) -> bool;
 }
 
 impl TorrentExt for Torrent {
@@ -35,14 +36,12 @@ impl TorrentExt for Torrent {
         get_string(self.extra_fields.as_ref(), "created by")
     }
 
-    fn is_source_equal(&self, source: &str) -> bool {
-        match self.source() {
-            None => false,
-            Some(torrent) => {
-                source.eq_ignore_ascii_case(torrent)
-                    || (source.eq_ignore_ascii_case("red") && torrent.eq_ignore_ascii_case("pth"))
-            }
-        }
+    fn is_source_equal(&self, source: &Indexer) -> bool {
+        let Some(torrent_source) = self.source() else {
+            return false;
+        };
+        let torrent_source = Indexer::from(torrent_source);
+        source.match_with_alts(&torrent_source)
     }
 }
 
@@ -94,6 +93,7 @@ mod tests {
 
     fn test(source: &str, torrent_source: &str) -> bool {
         let torrent = torrent_with_source(Some(torrent_source));
-        torrent.is_source_equal(source)
+        let source = Indexer::from(source);
+        torrent.is_source_equal(&source)
     }
 }

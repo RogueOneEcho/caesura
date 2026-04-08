@@ -54,7 +54,7 @@ async fn verify_corrupted_content_returns_hash_check() {
         &source_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "TST".to_owned(),
+        Indexer::from("TST"),
     )
     .await
     .expect("should create torrent");
@@ -92,7 +92,7 @@ async fn verify_missing_file_returns_missing_file() {
         &source_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "TST".to_owned(),
+        Indexer::from("TST"),
     )
     .await
     .expect("should create torrent");
@@ -124,7 +124,7 @@ async fn verify_truncated_file_returns_hash_check() {
         &source_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "TST".to_owned(),
+        Indexer::from("TST"),
     )
     .await
     .expect("should create torrent");
@@ -170,7 +170,7 @@ async fn verify_excess_content_returns_excess_content() {
         &content_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "TST".to_owned(),
+        Indexer::from("TST"),
     )
     .await
     .expect("should create torrent");

@@ -16,7 +16,7 @@ async fn create_produces_valid_torrent() {
         &source_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "TST".to_owned(),
+        Indexer::from("TST"),
     )
     .await
     .expect("should create torrent");
@@ -54,7 +54,7 @@ async fn create_includes_all_files() {
         &source_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "TST".to_owned(),
+        Indexer::from("TST"),
     )
     .await
     .expect("should create torrent");
@@ -89,7 +89,7 @@ async fn create_uppercases_source() {
         &source_dir,
         &output_path,
         "https://example.com/announce".to_owned(),
-        "red".to_owned(),
+        Indexer::Red,
     )
     .await
     .expect("should create torrent");
@@ -115,7 +115,7 @@ async fn duplicate_copies_when_source_matches() {
     let announce = original.announce.clone().expect("should have announce");
 
     // Act
-    TorrentCreator::duplicate(&source_path, &dest_path, announce, "RED".to_owned())
+    TorrentCreator::duplicate(&source_path, &dest_path, announce, Indexer::Red)
         .await
         .expect("should duplicate torrent");
 
@@ -139,7 +139,7 @@ async fn duplicate_rewrites_when_source_differs() {
         &source_path,
         &dest_path,
         "https://other-tracker.example.com/announce".to_owned(),
-        "OPS".to_owned(),
+        Indexer::Ops,
     )
     .await
     .expect("should duplicate torrent");
@@ -176,7 +176,7 @@ async fn duplicate_preserves_pieces() {
         &source_path,
         &dest_path,
         "https://other.example.com/announce".to_owned(),
-        "OPS".to_owned(),
+        Indexer::Ops,
     )
     .await
     .expect("should duplicate torrent");

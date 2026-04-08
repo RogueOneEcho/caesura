@@ -38,8 +38,7 @@ async fn id_provider_parses_large_numeric_id() {
 #[tokio::test]
 async fn id_provider_parses_group_url() {
     // Arrange
-    let url =
-        format!("https://redacted.sh/torrents.php?id={TEST_GROUP_ID}&torrentid={TEST_TORRENT_ID}");
+    let url = format!("{RED_URL}/torrents.php?id={TEST_GROUP_ID}&torrentid={TEST_TORRENT_ID}");
     let host = create_host_with_source(&url);
     let provider = host.services.get_required::<IdProvider>();
 
@@ -55,7 +54,7 @@ async fn id_provider_parses_group_url() {
 #[tokio::test]
 async fn id_provider_parses_torrent_url() {
     // Arrange
-    let url = format!("https://redacted.sh/torrents.php?torrentid={TEST_TORRENT_ID}");
+    let url = format!("{RED_URL}/torrents.php?torrentid={TEST_TORRENT_ID}");
     let host = create_host_with_source(&url);
     let provider = host.services.get_required::<IdProvider>();
 
@@ -72,7 +71,7 @@ async fn id_provider_parses_torrent_url() {
 async fn id_provider_parses_url_with_hash() {
     // Arrange
     let url = format!(
-        "https://redacted.sh/torrents.php?id={TEST_GROUP_ID}&torrentid={TEST_TORRENT_ID}#torrent{TEST_TORRENT_ID}"
+        "{RED_URL}/torrents.php?id={TEST_GROUP_ID}&torrentid={TEST_TORRENT_ID}#torrent{TEST_TORRENT_ID}"
     );
     let host = create_host_with_source(&url);
     let provider = host.services.get_required::<IdProvider>();
@@ -119,7 +118,7 @@ async fn id_provider_random_text_returns_no_match() {
 #[tokio::test]
 async fn id_provider_malformed_url_returns_url_invalid() {
     // Arrange
-    let host = create_host_with_source("https://redacted.sh/torrents.php?invalid");
+    let host = create_host_with_source(&format!("{RED_URL}/torrents.php?invalid"));
     let provider = host.services.get_required::<IdProvider>();
 
     // Act

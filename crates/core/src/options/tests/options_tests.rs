@@ -71,31 +71,31 @@ fn copy_options_default_values() {
 #[test]
 fn shared_options_calculates_indexer_from_red_announce_url() {
     let resolved = SharedOptionsPartial {
-        announce_url: Some("https://flacsfor.me/abc123/announce".to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc123/announce")),
         ..SharedOptionsPartial::default()
     }
     .resolve_without_validation();
     assert_eq!(resolved.indexer, "red");
-    assert_eq!(resolved.indexer_url, "https://redacted.sh");
+    assert_eq!(resolved.indexer_url, RED_URL);
 }
 
 /// Verify `indexer` and `indexer_url` are calculated from OPS `announce_url`.
 #[test]
 fn shared_options_calculates_indexer_from_ops_announce_url() {
     let resolved = SharedOptionsPartial {
-        announce_url: Some("https://home.opsfet.ch/abc123/announce".to_owned()),
+        announce_url: Some(format!("{OPS_TRACKER_URL}/abc123/announce")),
         ..SharedOptionsPartial::default()
     }
     .resolve_without_validation();
     assert_eq!(resolved.indexer, "ops");
-    assert_eq!(resolved.indexer_url, "https://orpheus.network");
+    assert_eq!(resolved.indexer_url, OPS_URL);
 }
 
 /// Verify explicit `indexer` is not overridden by calculated default.
 #[test]
 fn shared_options_does_not_override_explicit_indexer() {
     let resolved = SharedOptionsPartial {
-        announce_url: Some("https://flacsfor.me/abc123/announce".to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc123/announce")),
         indexer: Some("custom".to_owned()),
         ..SharedOptionsPartial::default()
     }
@@ -109,7 +109,7 @@ fn shared_options_does_not_override_explicit_indexer() {
 #[test]
 fn shared_options_does_not_override_explicit_indexer_url() {
     let resolved = SharedOptionsPartial {
-        announce_url: Some("https://flacsfor.me/abc123/announce".to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc123/announce")),
         indexer_url: Some("https://custom.example.com".to_owned()),
         ..SharedOptionsPartial::default()
     }
@@ -139,7 +139,7 @@ fn shared_options_unknown_announce_url_leaves_indexer_empty() {
 #[test]
 fn shared_options_explicit_empty_indexer_bypasses_required() {
     let result = SharedOptionsPartial {
-        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc/announce")),
         api_key: Some("key".to_owned()),
         indexer: Some(String::new()), // Explicit empty string
         content: Some(vec![PathBuf::from(".")]),
@@ -295,7 +295,7 @@ fn shared_options_yaml_round_trip() {
         announce_url: Some("https://example.com/announce".to_owned()),
         api_key: Some("secret_key".to_owned()),
         indexer: Some("red".to_owned()),
-        indexer_url: Some("https://redacted.sh".to_owned()),
+        indexer_url: Some(RED_URL.to_owned()),
         content: Some(vec![PathBuf::from("/data/music")]),
         output: Some(PathBuf::from("/data/output")),
         verbosity: Some(Verbosity::Debug),
@@ -441,8 +441,8 @@ fn shared_options_validate_no_errors_when_valid() {
     let result = SharedOptionsPartial {
         api_key: Some("key".to_owned()),
         indexer: Some("red".to_owned()),
-        indexer_url: Some("https://redacted.sh".to_owned()),
-        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        indexer_url: Some(RED_URL.to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc/announce")),
         content: Some(vec![PathBuf::from(".")]),
         output: Some(PathBuf::from(".")),
         ..SharedOptionsPartial::default()
@@ -646,7 +646,7 @@ fn config_options_expands_tilde() {
 
 fn valid_shared_options_with_output(output: &str) -> SharedOptionsPartial {
     SharedOptionsPartial {
-        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc/announce")),
         api_key: Some("key".to_owned()),
         content: Some(vec![PathBuf::from(".")]),
         output: Some(PathBuf::from(output)),
@@ -656,7 +656,7 @@ fn valid_shared_options_with_output(output: &str) -> SharedOptionsPartial {
 
 fn valid_shared_options_with_content(content: &str) -> SharedOptionsPartial {
     SharedOptionsPartial {
-        announce_url: Some("https://flacsfor.me/abc/announce".to_owned()),
+        announce_url: Some(format!("{RED_TRACKER_URL}/abc/announce")),
         api_key: Some("key".to_owned()),
         content: Some(vec![PathBuf::from(content)]),
         output: Some(PathBuf::from(".")),

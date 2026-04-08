@@ -95,7 +95,6 @@ async fn batch_command_skips_item_without_id() -> Result<(), TestError> {
             name: "Item Without ID".to_owned(),
             path: PathBuf::from("/test/path.torrent"),
             hash,
-            indexer: "red".to_owned(),
             id: None,
             ..QueueItem::default()
         })
@@ -146,7 +145,6 @@ async fn batch_command_respects_limit() -> Result<(), TestError> {
                 name: format!("Item {i}"),
                 path: PathBuf::from(format!("/test/path{i}.torrent")),
                 hash,
-                indexer: "red".to_owned(),
                 id: Some(AlbumConfig::TORRENT_ID),
                 ..QueueItem::default()
             })
@@ -190,8 +188,6 @@ async fn batch_command_filters_by_indexer() -> Result<(), TestError> {
             name: "RED Item".to_owned(),
             path: PathBuf::from("/test/red.torrent"),
             hash: red_hash,
-            indexer: "red".to_owned(),
-            id: None,
             ..QueueItem::default()
         })
         .await?;
@@ -202,8 +198,7 @@ async fn batch_command_filters_by_indexer() -> Result<(), TestError> {
             name: "OPS Item".to_owned(),
             path: PathBuf::from("/test/ops.torrent"),
             hash: ops_hash,
-            indexer: "ops".to_owned(),
-            id: None,
+            indexer: Indexer::Ops,
             ..QueueItem::default()
         })
         .await?;
@@ -249,7 +244,6 @@ async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Te
             name: "Already Verified".to_owned(),
             path: PathBuf::from("/test/verified.torrent"),
             hash,
-            indexer: "red".to_owned(),
             id: Some(123),
             verify: Some(VerifyStatus::verified()),
             ..QueueItem::default()

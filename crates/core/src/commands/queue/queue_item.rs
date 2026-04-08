@@ -13,7 +13,7 @@ pub(crate) struct QueueItem {
     /// Source info hash
     pub hash: Hash<20>,
     /// Source indexer
-    pub indexer: String,
+    pub indexer: Indexer,
     /// Source id
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<u32>,
@@ -44,7 +44,7 @@ impl QueueItem {
             name: torrent.name.clone(),
             path,
             hash: Hash::from_string(&info_hash).expect("torrent hash should be valid"),
-            indexer: torrent.source().unwrap_or_default().to_lowercase(),
+            indexer: Indexer::from(torrent.source().unwrap_or_default().to_owned()),
             id,
             ..Self::default()
         }

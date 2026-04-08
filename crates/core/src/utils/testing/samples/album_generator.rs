@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use rogue_logging::Failure;
 
 use super::SampleAction;
+use crate::options::{Indexer, RED_TRACKER_URL};
 use crate::utils::AlbumConfig;
 use crate::utils::TorrentCreator;
 use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
@@ -71,8 +72,8 @@ impl AlbumGenerator {
         TorrentCreator::create(
             source_dir,
             &torrent_path,
-            "https://flacsfor.me/test/announce".to_owned(),
-            "RED".to_owned(),
+            format!("{RED_TRACKER_URL}/test/announce"),
+            Indexer::Red,
         )
         .await
         .map_err(Failure::wrap(SampleAction::CreateTorrent))?;

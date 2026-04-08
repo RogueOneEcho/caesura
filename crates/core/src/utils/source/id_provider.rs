@@ -66,14 +66,14 @@ impl IdProvider {
             warn!("{e}");
             IdProviderError::TorrentFileInvalid
         })?;
-        let tracker_id = self.options.indexer.clone();
-        if torrent.is_source_equal(&tracker_id) {
+        let indexer = self.options.get_indexer();
+        if torrent.is_source_equal(&indexer) {
             let url = torrent.comment().unwrap_or_default();
             get_torrent_id_from_url(url)
         } else {
             Err(IdProviderError::TorrentFileSource {
                 actual: torrent.source().unwrap_or_default().to_owned(),
-                expected: tracker_id.to_ascii_uppercase(),
+                expected: indexer.to_uppercase(),
             })
         }
     }

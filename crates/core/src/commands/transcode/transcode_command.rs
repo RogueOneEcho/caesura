@@ -198,7 +198,7 @@ impl TranscodeCommand {
             let content_dir = self.paths.get_transcode_target_dir(source, *target);
             let torrent_path = self.paths.get_torrent_path(source, *target);
             let announce_url = self.shared_options.announce_url.clone();
-            let indexer = self.shared_options.indexer.clone();
+            let indexer = self.shared_options.get_indexer();
             TorrentCreator::create(&content_dir, &torrent_path, announce_url, indexer).await?;
             trace!("{} torrent {}", "Created".bold(), torrent_path.display());
         }

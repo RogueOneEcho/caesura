@@ -21,12 +21,7 @@ impl QueueSummaryCommand {
         let mut summary = QueueSummary::default();
         for (_, item) in items {
             summary.total += 1;
-            match summary.indexer.get_mut(&item.indexer) {
-                Some(count) => *count += 1,
-                None => {
-                    summary.indexer.insert(item.indexer.clone(), 1);
-                }
-            }
+            *summary.indexer.entry(item.indexer.clone()).or_insert(0) += 1;
             match item.verify {
                 None => summary.verify_none += 1,
                 Some(VerifyStatus { verified: true, .. }) => summary.verify_verified_true += 1,

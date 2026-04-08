@@ -76,8 +76,8 @@ fn default_content(_partial: &SharedOptionsPartial) -> Option<Vec<PathBuf>> {
 
 fn default_indexer(partial: &SharedOptionsPartial) -> Option<String> {
     match partial.announce_url.as_deref() {
-        Some(url) if url.starts_with("https://flacsfor.me") => Some("red".to_owned()),
-        Some(url) if url.starts_with("https://home.opsfet.ch") => Some("ops".to_owned()),
+        Some(url) if url.starts_with(RED_TRACKER_URL) => Some("red".to_owned()),
+        Some(url) if url.starts_with(OPS_TRACKER_URL) => Some("ops".to_owned()),
         _ => None,
     }
 }
@@ -85,8 +85,8 @@ fn default_indexer(partial: &SharedOptionsPartial) -> Option<String> {
 fn default_indexer_url(partial: &SharedOptionsPartial) -> Option<String> {
     let indexer = partial.indexer.clone().or_else(|| default_indexer(partial));
     match indexer.as_deref() {
-        Some("red") => Some("https://redacted.sh".to_owned()),
-        Some("ops") => Some("https://orpheus.network".to_owned()),
+        Some("red") => Some(RED_URL.to_owned()),
+        Some("ops") => Some(OPS_URL.to_owned()),
         _ => None,
     }
 }
@@ -96,10 +96,10 @@ impl SharedOptions {
     #[cfg(test)]
     pub const MOCK_INDEXER: &'static str = "red";
 
-    /// Returns the indexer name, normalized to lowercase.
+    /// Parse the raw [`Self::indexer`] field as an [`Indexer`].
     #[must_use]
-    pub fn indexer_lowercase(&self) -> String {
-        self.indexer.to_lowercase()
+    pub fn get_indexer(&self) -> Indexer {
+        Indexer::from(self.indexer.as_str())
     }
 
     /// Output directory path with tilde expansion applied.
@@ -118,8 +118,8 @@ impl SharedOptions {
     pub fn mock() -> Self {
         Self {
             indexer: Self::MOCK_INDEXER.to_owned(),
-            indexer_url: "https://redacted.sh".to_owned(),
-            announce_url: "https://flacsfor.me/test/announce".to_owned(),
+            indexer_url: RED_URL.to_owned(),
+            announce_url: format!("{RED_TRACKER_URL}/test/announce"),
             api_key: "test_api_key".to_owned(),
             ..SharedOptions::default()
         }

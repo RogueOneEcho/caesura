@@ -15,7 +15,6 @@ async fn queue_set_adds_item() -> Result<(), TestError> {
         name: "Test Item".to_owned(),
         path: PathBuf::from("/test/path.torrent"),
         hash,
-        indexer: "red".to_owned(),
         ..QueueItem::default()
     };
 
@@ -27,7 +26,7 @@ async fn queue_set_adds_item() -> Result<(), TestError> {
     assert!(retrieved.is_some());
     let retrieved = retrieved.expect("should have item");
     assert_eq!(retrieved.name, "Test Item");
-    assert_eq!(retrieved.indexer, "red");
+    assert_eq!(retrieved.indexer, Indexer::Red);
     Ok(())
 }
 
@@ -47,7 +46,6 @@ async fn queue_set_many_adds_items() -> Result<(), TestError> {
                 name: "Item One".to_owned(),
                 path: PathBuf::from("/test/one.torrent"),
                 hash: hash1,
-                indexer: "red".to_owned(),
                 ..QueueItem::default()
             },
         ),
@@ -57,7 +55,6 @@ async fn queue_set_many_adds_items() -> Result<(), TestError> {
                 name: "Item Two".to_owned(),
                 path: PathBuf::from("/test/two.torrent"),
                 hash: hash2,
-                indexer: "red".to_owned(),
                 ..QueueItem::default()
             },
         ),
@@ -85,7 +82,6 @@ async fn queue_set_many_no_replace_skips_existing() -> Result<(), TestError> {
         name: "Original".to_owned(),
         path: PathBuf::from("/test/original.torrent"),
         hash,
-        indexer: "red".to_owned(),
         ..QueueItem::default()
     };
     queue.set(original).await?;
@@ -96,7 +92,6 @@ async fn queue_set_many_no_replace_skips_existing() -> Result<(), TestError> {
             name: "Updated".to_owned(),
             path: PathBuf::from("/test/updated.torrent"),
             hash,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         },
     )]);
@@ -123,7 +118,6 @@ async fn queue_set_many_with_replace_overwrites() -> Result<(), TestError> {
         name: "Original".to_owned(),
         path: PathBuf::from("/test/original.torrent"),
         hash,
-        indexer: "red".to_owned(),
         ..QueueItem::default()
     };
     queue.set(original).await?;
@@ -134,7 +128,6 @@ async fn queue_set_many_with_replace_overwrites() -> Result<(), TestError> {
             name: "Updated".to_owned(),
             path: PathBuf::from("/test/updated.torrent"),
             hash,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         },
     )]);
@@ -162,8 +155,6 @@ async fn queue_get_all_returns_all_items() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Item 1".to_owned(),
             hash: hash1,
-            path: PathBuf::new(),
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
@@ -171,8 +162,6 @@ async fn queue_get_all_returns_all_items() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Item 2".to_owned(),
             hash: hash2,
-            path: PathBuf::new(),
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
@@ -196,7 +185,6 @@ async fn queue_remove_removes_existing_item() -> Result<(), TestError> {
         name: "Test Item".to_owned(),
         path: PathBuf::from("/test/path.torrent"),
         hash,
-        indexer: "red".to_owned(),
         ..QueueItem::default()
     };
     queue.set(item).await?;
@@ -247,7 +235,6 @@ async fn queue_remove_only_affects_specified_item() -> Result<(), TestError> {
             name: "Item One".to_owned(),
             path: PathBuf::from("/test/one.torrent"),
             hash: hash1,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
@@ -256,7 +243,6 @@ async fn queue_remove_only_affects_specified_item() -> Result<(), TestError> {
             name: "Item Two".to_owned(),
             path: PathBuf::from("/test/two.torrent"),
             hash: hash2,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
@@ -388,23 +374,23 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
 
     // Assert
     let verify = queue
-        .get_unprocessed(String::new(), false, false, false)
+        .get_unprocessed(Indexer::Red, false, false, false)
         .await?;
     assert_eq!(verify, vec![new]);
     let transcode = queue
-        .get_unprocessed(String::new(), true, false, false)
+        .get_unprocessed(Indexer::Red, true, false, false)
         .await?;
     assert_eq!(transcode, vec![new, verified]);
     let transcode_with_failed = queue
-        .get_unprocessed(String::new(), true, false, true)
+        .get_unprocessed(Indexer::Red, true, false, true)
         .await?;
     assert_eq!(transcode_with_failed, vec![new, not_transcoded, verified]);
     let upload = queue
-        .get_unprocessed(String::new(), true, true, false)
+        .get_unprocessed(Indexer::Red, true, true, false)
         .await?;
     assert_eq!(upload, vec![new, transcoded, verified]);
     let upload_with_failed = queue
-        .get_unprocessed(String::new(), true, true, true)
+        .get_unprocessed(Indexer::Red, true, true, true)
         .await?;
     assert_eq!(
         upload_with_failed,
@@ -425,28 +411,25 @@ async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), TestError> {
     queue
         .set(QueueItem {
             name: "RED Item".to_owned(),
-            path: PathBuf::new(),
             hash: red_hash,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
     queue
         .set(QueueItem {
             name: "OPS Item".to_owned(),
-            path: PathBuf::new(),
             hash: ops_hash,
-            indexer: "ops".to_owned(),
+            indexer: Indexer::Ops,
             ..QueueItem::default()
         })
         .await?;
 
     // Act
     let red_items = queue
-        .get_unprocessed("red".to_owned(), false, false, false)
+        .get_unprocessed(Indexer::Red, false, false, false)
         .await?;
     let ops_items = queue
-        .get_unprocessed("ops".to_owned(), false, false, false)
+        .get_unprocessed(Indexer::Ops, false, false, false)
         .await?;
 
     // Assert
@@ -469,25 +452,22 @@ async fn queue_get_unprocessed_red_includes_pth() -> Result<(), TestError> {
     queue
         .set(QueueItem {
             name: "RED Item".to_owned(),
-            path: PathBuf::new(),
             hash: red_hash,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
     queue
         .set(QueueItem {
             name: "PTH Item".to_owned(),
-            path: PathBuf::new(),
             hash: pth_hash,
-            indexer: "pth".to_owned(),
+            indexer: Indexer::Pth,
             ..QueueItem::default()
         })
         .await?;
 
     // Act
     let items = queue
-        .get_unprocessed("red".to_owned(), false, false, false)
+        .get_unprocessed(Indexer::Red, false, false, false)
         .await?;
 
     // Assert - RED includes both RED and PTH items
@@ -509,34 +489,28 @@ async fn queue_get_unprocessed_sorts_by_name() -> Result<(), TestError> {
     queue
         .set(QueueItem {
             name: "Zebra Album".to_owned(),
-            path: PathBuf::new(),
             hash: hash_z,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
     queue
         .set(QueueItem {
             name: "Apple Album".to_owned(),
-            path: PathBuf::new(),
             hash: hash_a,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
     queue
         .set(QueueItem {
             name: "Mango Album".to_owned(),
-            path: PathBuf::new(),
             hash: hash_m,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
 
     // Act
     let items = queue
-        .get_unprocessed("red".to_owned(), false, false, false)
+        .get_unprocessed(Indexer::Red, false, false, false)
         .await?;
 
     // Assert - Should be sorted alphabetically: Apple, Mango, Zebra
@@ -559,9 +533,7 @@ async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), TestError> {
     queue
         .set(QueueItem {
             name: "Uploaded Item".to_owned(),
-            path: PathBuf::new(),
             hash: uploaded_hash,
-            indexer: "red".to_owned(),
             upload: Some(UploadStatus {
                 success: true,
                 completed: TimeStamp::now(),
@@ -574,16 +546,14 @@ async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), TestError> {
     queue
         .set(QueueItem {
             name: "Pending Item".to_owned(),
-            path: PathBuf::new(),
             hash: pending_hash,
-            indexer: "red".to_owned(),
             ..QueueItem::default()
         })
         .await?;
 
     // Act
     let items = queue
-        .get_unprocessed("red".to_owned(), true, true, false)
+        .get_unprocessed(Indexer::Red, true, true, false)
         .await?;
 
     // Assert - Should only return pending item
@@ -601,7 +571,7 @@ async fn queue_get_unprocessed_empty_queue() -> Result<(), TestError> {
 
     // Act
     let items = queue
-        .get_unprocessed("red".to_owned(), true, true, false)
+        .get_unprocessed(Indexer::Red, true, true, false)
         .await?;
 
     // Assert

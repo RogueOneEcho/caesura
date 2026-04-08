@@ -1,8 +1,9 @@
 use crate::prelude::*;
 
-/// Supported tracker suffixes for cross-tracker torrent duplication.
-const TRACKER_SUFFIXES: &[&str] = &["red", "ops", "pth"];
+/// Known indexers considered when looking for a fallback torrent from another tracker.
+const KNOWN_INDEXERS: [Indexer; 3] = [Indexer::Red, Indexer::Ops, Indexer::Pth];
 
+/// Resolve cache, output, and torrent paths from options.
 #[injectable]
 pub struct PathManager {
     shared_options: Ref<SharedOptions>,
@@ -55,6 +56,7 @@ impl PathManager {
             .join("output")
     }
 
+    /// Cache directory path.
     #[must_use]
     pub fn get_cache_dir(&self) -> PathBuf {
         self.cache_options.path()
@@ -64,29 +66,33 @@ impl PathManager {
     #[must_use]
     pub fn get_source_torrent_path(&self, source: &Source) -> PathBuf {
         let id = source.torrent.id;
-        let indexer = self.shared_options.indexer_lowercase();
+        let indexer = self.shared_options.get_indexer();
         self.get_cache_dir()
             .join("torrents")
-            .join(format!("{id}.{indexer}.torrent"))
+            .join(format!("{id}.{}.torrent", indexer.as_lowercase()))
     }
 
+    /// Output directory path with tilde expansion applied.
     #[must_use]
     pub fn get_output_dir(&self) -> PathBuf {
         self.shared_options.output_path()
     }
 
+    /// Output directory for spectrogram images of a source.
     #[must_use]
     pub fn get_spectrogram_dir(&self, source: &Source) -> PathBuf {
         self.get_output_dir()
             .join(SpectrogramName::get(&source.metadata))
     }
 
+    /// Output directory for a transcoded source in the given format.
     #[must_use]
     pub fn get_transcode_target_dir(&self, source: &Source, target: TargetFormat) -> PathBuf {
         self.get_output_dir()
             .join(TranscodeName::get(&source.metadata, target))
     }
 
+    /// Output path for a single transcoded track.
     #[must_use]
     pub fn get_transcode_path(
         &self,
@@ -110,10 +116,11 @@ impl PathManager {
             .join(format!("{base_name}.{extension}"))
     }
 
+    /// Torrent file path for a transcoded source in the given format.
     #[must_use]
     pub fn get_torrent_path(&self, source: &Source, target: TargetFormat) -> PathBuf {
-        let indexer = self.shared_options.indexer_lowercase();
-        self.get_torrent_path_for_indexer(source, target, &indexer)
+        let indexer = self.shared_options.get_indexer();
+        self.get_torrent_path_for_indexer(source, target, indexer)
     }
 
     #[must_use]
@@ -121,27 +128,22 @@ impl PathManager {
         &self,
         source: &Source,
         target: TargetFormat,
-        indexer: &str,
+        indexer: Indexer,
     ) -> PathBuf {
         let mut filename = TranscodeName::get(&source.metadata, target);
         filename.push('.');
-        filename.push_str(indexer);
+        filename.push_str(indexer.as_lowercase());
         filename.push_str(".torrent");
         self.get_output_dir().join(filename)
     }
 
-    /// Get the torrent path if it exists, or duplicate from another tracker's torrent.
+    /// Torrent path for the current indexer, duplicating from another tracker if needed.
+    ///
+    /// - Returns the existing path if already present for the current indexer
+    /// - Otherwise duplicates from another tracker's torrent file (e.g. `.ops.torrent`)
+    /// - Returns `None` if no source torrent is available to duplicate
     ///
     /// Example: `path/to/Artist - Album [2012] [WEB FLAC].red.torrent`
-    ///
-    /// Returns `None` if no torrent exists and none can be duplicated.
-    ///
-    /// Returns the torrent path if it already exists for the current indexer.
-    ///
-    /// Or attempts to duplicate from another tracker's torrent file
-    /// (e.g., `.ops.torrent`, `.pth.torrent`, `.red.torrent`).
-    ///
-    /// Returns the torrent path if duplication is successful.
     pub async fn get_or_duplicate_existing_torrent_path(
         &self,
         source: &Source,
@@ -156,19 +158,19 @@ impl PathManager {
             return Ok(None);
         };
         let announce_url = self.shared_options.announce_url.clone();
-        let indexer = self.shared_options.indexer_lowercase();
+        let indexer = self.shared_options.get_indexer();
         TorrentCreator::duplicate(&fallback_path, &target_path, announce_url, indexer).await?;
         Ok(Some(target_path))
     }
 
     /// Find a torrent file from another tracker that can be duplicated.
     fn find_fallback_torrent(&self, source: &Source, target: TargetFormat) -> Option<PathBuf> {
-        let current_indexer = self.shared_options.indexer_lowercase();
-        for suffix in TRACKER_SUFFIXES {
-            if *suffix == current_indexer {
+        let current_indexer = self.shared_options.get_indexer();
+        for indexer in KNOWN_INDEXERS {
+            if indexer == current_indexer {
                 continue;
             }
-            let path = self.get_torrent_path_for_indexer(source, target, suffix);
+            let path = self.get_torrent_path_for_indexer(source, target, indexer);
             if path.is_file() {
                 return Some(path);
             }

@@ -38,7 +38,7 @@ impl TorrentCreator {
         content_dir: &Path,
         output_path: &Path,
         announce_url: String,
-        source: String,
+        source: Indexer,
     ) -> Result<(), Failure<TorrentCreateAction>> {
         let content_dir = content_dir.to_path_buf();
         let output_path = output_path.to_path_buf();
@@ -81,7 +81,7 @@ impl TorrentCreator {
         from: &Path,
         to: &Path,
         announce_url: String,
-        source: String,
+        source: Indexer,
     ) -> Result<(), Failure<TorrentCreateAction>> {
         let mut torrent = TorrentReader::execute(from)
             .await

@@ -23,7 +23,7 @@ fn from_torrent_with_valid_data() {
         result.hash,
         Hash::from_string(&info_hash).expect("hash should be valid")
     );
-    assert_eq!(result.indexer, source.to_lowercase());
+    assert_eq!(result.indexer, Indexer::Other("abc".to_owned()));
     assert_eq!(result.id, Some(12345));
 }
 
@@ -41,7 +41,7 @@ fn from_torrent_with_missing_source() {
     let result = QueueItem::from_torrent(path, &torrent);
 
     // Assert
-    assert!(result.indexer.is_empty());
+    assert_eq!(result.indexer, Indexer::Other(String::new()));
 }
 
 #[test]

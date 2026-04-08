@@ -1,5 +1,5 @@
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 /// Summary of items in the queue
 #[derive(Default, Deserialize, Serialize)]
@@ -7,7 +7,7 @@ pub(crate) struct QueueSummary {
     /// Total count
     pub total: usize,
     /// Indexer count
-    pub indexer: BTreeMap<String, usize>,
+    pub indexer: BTreeMap<Indexer, usize>,
     /// Awaiting verify count
     pub verify_none: usize,
     /// Successful verify count
