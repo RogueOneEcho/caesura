@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use gazelle_api::GazelleClientTrait;
 use std::fs::create_dir;
-use tokio::fs::File;
+use tokio::fs::{File, rename};
 use tokio::io::AsyncWriteExt;
 
 /// Verify a FLAC source is suitable for transcoding.
@@ -216,11 +216,13 @@ impl VerifyCommand {
                 torrents_dir,
             ))?;
         }
-        let mut file = File::create_new(&path)
+        let mut tmp_path = path.clone();
+        tmp_path.as_mut_os_string().push(".tmp");
+        let mut file = File::create(&tmp_path)
             .await
             .map_err(Failure::wrap_with_path(
                 VerifyAction::CreateTorrentFile,
-                &path,
+                &tmp_path,
             ))?;
         let buffer = self
             .api
@@ -231,11 +233,19 @@ impl VerifyCommand {
             .await
             .map_err(Failure::wrap_with_path(
                 VerifyAction::WriteTorrentFile,
-                &path,
+                &tmp_path,
             ))?;
         file.flush().await.map_err(Failure::wrap_with_path(
             VerifyAction::FlushTorrentFile,
-            &path,
+            &tmp_path,
+        ))?;
+        drop(file);
+        rename(&tmp_path, &path).await.map_err(Failure::wrap_with(
+            VerifyAction::RenameTorrentFile,
+            |f| {
+                f.with("from", tmp_path.display().to_string())
+                    .with("to", path.display().to_string())
+            },
         ))?;
         Ok(path)
     }

@@ -15,6 +15,8 @@ pub enum VerifyAction {
     WriteTorrentFile,
     #[error("flush source torrent file")]
     FlushTorrentFile,
+    #[error("rename source torrent file")]
+    RenameTorrentFile,
     #[error("verify torrent hash")]
     VerifyHash,
 }

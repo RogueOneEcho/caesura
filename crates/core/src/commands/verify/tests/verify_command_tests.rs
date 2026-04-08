@@ -1,6 +1,7 @@
 use crate::testing_prelude::*;
 use crate::utils::SourceIssue::UnnecessaryDirectory;
 use std::fs::{self, create_dir};
+use std::io::{Error as IoError, ErrorKind};
 
 #[tokio::test]
 async fn verify_command_mocked() -> Result<(), TestError> {
@@ -78,6 +79,51 @@ async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
     assert_eq!(
         first_modified, second_modified,
         "cached file should not be rewritten"
+    );
+    Ok(())
+}
+
+/// A failed download must not leave a file at the final cached torrent path,
+/// or subsequent runs will treat the empty/partial file as a valid cache entry.
+#[tokio::test]
+async fn get_source_torrent_leaves_no_file_on_download_failure() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let failing_api = album
+        .api()
+        .with_download_torrent(Err(gazelle_api::GazelleError {
+            operation: gazelle_api::GazelleOperation::SendRequest,
+            source: gazelle_api::ErrorSource::Io(IoError::new(
+                ErrorKind::ConnectionRefused,
+                "simulated download failure",
+            )),
+        }));
+    let host = HostBuilder::new()
+        .with_mock_client(failing_api)
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let verifier = host.services.get_required::<VerifyCommand>();
+    let source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+    let paths = host.services.get_required::<PathManager>();
+    let torrent_path = paths.get_source_torrent_path(&source);
+
+    // Act
+    let result = verifier.get_source_torrent(&source).await;
+
+    // Assert
+    assert!(result.is_err(), "download should have failed");
+    assert!(
+        !torrent_path.is_file(),
+        "no file should remain at final torrent path after failed download, but found: {}",
+        torrent_path.display()
     );
     Ok(())
 }
