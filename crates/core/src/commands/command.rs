@@ -109,6 +109,16 @@ pub enum QueueCommand {
     #[options(ConfigOptions, SharedOptions, CacheOptions, QueueAddArgs)]
     Add,
 
+    /// Discover torrents via the qBittorrent API and add them to the queue.
+    #[options(
+        ConfigOptions,
+        SharedOptions,
+        CacheOptions,
+        QbitOptions,
+        QueueFetchOptions
+    )]
+    Fetch,
+
     /// List the sources in the queue
     #[options(ConfigOptions, SharedOptions, CacheOptions, BatchOptions)]
     List,

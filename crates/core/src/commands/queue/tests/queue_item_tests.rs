@@ -2,6 +2,7 @@ use crate::testing_prelude::*;
 use flat_db::Hash;
 use lava_torrent::bencode::BencodeElem;
 use lava_torrent::torrent::v1::Torrent;
+use qbittorrent_api::get_torrents::Torrent as QbitTorrent;
 use std::collections::HashMap;
 
 #[test]
@@ -23,7 +24,7 @@ fn from_torrent_with_valid_data() {
         result.hash,
         Hash::from_string(&info_hash).expect("hash should be valid")
     );
-    assert_eq!(result.indexer, Indexer::Other("abc".to_owned()));
+    assert_eq!(result.indexer, Some(Indexer::Other("abc".to_owned())));
     assert_eq!(result.id, Some(12345));
 }
 
@@ -41,7 +42,7 @@ fn from_torrent_with_missing_source() {
     let result = QueueItem::from_torrent(path, &torrent);
 
     // Assert
-    assert_eq!(result.indexer, Indexer::Other(String::new()));
+    assert_eq!(result.indexer, None);
 }
 
 #[test]
@@ -68,6 +69,148 @@ fn from_torrent_with_invalid_comment() {
 
     // Assert
     assert!(result.id.is_none());
+}
+
+#[test]
+fn from_qbit_torrent_with_red_comment() {
+    // Arrange
+    let torrent = QbitTorrent {
+        comment: Some("https://redacted.sh/torrents.php?id=100&torrentid=200".to_owned()),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(output.name, torrent.name);
+    assert_eq!(
+        output.hash,
+        Hash::from_string(&torrent.hash).expect("hash should be valid")
+    );
+    assert_eq!(output.indexer, Some(Indexer::Red));
+    assert_eq!(output.id, Some(200));
+}
+
+#[test]
+fn from_qbit_torrent_with_red_old_domain() {
+    // Arrange
+    let torrent = QbitTorrent {
+        comment: Some("https://redacted.ch/torrents.php?torrentid=126".to_owned()),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(output.indexer, Some(Indexer::Red));
+    assert_eq!(output.id, Some(126));
+}
+
+#[test]
+fn from_qbit_torrent_with_ops_comment() {
+    // Arrange
+    let torrent = QbitTorrent {
+        comment: Some("https://orpheus.network/torrents.php?id=300&torrentid=400".to_owned()),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(output.indexer, Some(Indexer::Ops));
+    assert_eq!(output.id, Some(400));
+}
+
+#[test]
+fn from_qbit_torrent_with_missing_comment() {
+    // Arrange
+    let torrent = QbitTorrent {
+        comment: None,
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(output.indexer, None);
+    assert!(output.id.is_none());
+}
+
+#[test]
+fn from_qbit_torrent_with_unknown_domain() {
+    // Arrange
+    let torrent = QbitTorrent {
+        comment: Some("https://unknown.example/torrents.php?id=1&torrentid=2".to_owned()),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(output.indexer, None);
+    assert_eq!(output.id, Some(2));
+}
+
+#[test]
+fn from_qbit_torrent_with_invalid_hash() {
+    // Arrange
+    let torrent = QbitTorrent {
+        hash: "not-a-valid-hex".to_owned(),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent);
+
+    // Assert
+    assert!(output.is_none());
+}
+
+/// For hybrid torrents qBittorrent's `hash` field is the truncated SHA-256 v2 info
+/// hash, so `infohash_v1` must take precedence to recover the v1 SHA-1.
+#[test]
+fn from_qbit_torrent_prefers_infohash_v1() {
+    // Arrange
+    let v1 = "1111111111111111111111111111111111111111";
+    let torrent = QbitTorrent {
+        hash: "2222222222222222222222222222222222222222".to_owned(),
+        infohash_v1: Some(v1.to_owned()),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(
+        output.hash,
+        Hash::from_string(v1).expect("hash should be valid")
+    );
+}
+
+/// Empty `infohash_v1` (e.g. v2-only torrents serialised by qBittorrent) should
+/// fall back to the `hash` field rather than failing on the empty string.
+#[test]
+fn from_qbit_torrent_falls_back_when_infohash_v1_is_empty() {
+    // Arrange
+    let torrent = QbitTorrent {
+        infohash_v1: Some(String::new()),
+        ..QbitTorrent::mock()
+    };
+
+    // Act
+    let output = QueueItem::from_qbit_torrent(&torrent).expect("should produce item");
+
+    // Assert
+    assert_eq!(
+        output.hash,
+        Hash::from_string(&torrent.hash).expect("hash should be valid")
+    );
 }
 
 fn make_torrent(name: &str, source: Option<&str>, comment: Option<&str>) -> Torrent {

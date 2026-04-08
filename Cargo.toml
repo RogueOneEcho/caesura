@@ -27,7 +27,7 @@ claxon = "0.4.3"
 colored = "3.1.1"
 dirs = "6.0.0"
 fast_image_resize = { version = "6.0.0", features = ["image"] }
-flat_db = "0.5.1"
+flat_db = "0.6.0"
 futures = "0.3.32"
 gazelle_api = "0.15.1"
 html-escape = "0.2.13"
@@ -43,7 +43,7 @@ miette = { version = "7.6.0", features = ["fancy"] }
 more-di = { version = "3.1.0", features = ["async", "builder"] }
 num_cpus = "1.17.0"
 once_cell = "1.21.4"
-qbittorrent_api = "0.5.0"
+qbittorrent_api = "0.6.0"
 regex = "1.12.3"
 reqwest = { version = "0.13.2", features = ["rustls", "json", "multipart", "stream"], default-features = false }
 rogue_logging = { version = "0.7.2", features = ["log", "miette"] }

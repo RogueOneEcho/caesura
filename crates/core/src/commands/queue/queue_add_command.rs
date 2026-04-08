@@ -42,6 +42,16 @@ impl QueueAddCommand {
         }
     }
 
+    /// Discover torrents by scanning a directory and add new ones to the queue.
+    ///
+    /// - **List all `.torrent` files in the directory (bottleneck for large directories)**
+    /// - Exclude paths already in the queue (in-memory, fast)
+    /// - **Parse each new `.torrent` file with `lava_torrent` (bottleneck)**
+    /// - Insert parsed items into the queue
+    ///
+    /// On a fresh queue, every `.torrent` file in the directory is parsed regardless
+    /// of whether it belongs to a relevant category.
+    /// On subsequent runs, only newly added files are parsed.
     async fn execute_directory(&self, path: PathBuf) -> Result<QueueStatus, Failure<QueueAction>> {
         let existing_paths: Vec<PathBuf> = self
             .queue
@@ -80,6 +90,10 @@ impl QueueAddCommand {
         })
     }
 
+    /// Load a pre-built YAML queue file and add items to the queue.
+    ///
+    /// - Read and deserialize the YAML file (single file I/O, fast)
+    /// - **Insert all items into the queue (bottleneck for large files)**
     async fn execute_file(&self, path: PathBuf) -> Result<QueueStatus, Failure<QueueAction>> {
         trace!("Reading queue file: {}", path.display());
         let file =

@@ -6,8 +6,10 @@ use serde::{Deserialize, Serialize};
 pub(crate) struct QueueSummary {
     /// Total count
     pub total: usize,
-    /// Indexer count
+    /// Count by known indexer
     pub indexer: BTreeMap<Indexer, usize>,
+    /// Count of items with no known indexer
+    pub indexer_unknown: usize,
     /// Awaiting verify count
     pub verify_none: usize,
     /// Successful verify count

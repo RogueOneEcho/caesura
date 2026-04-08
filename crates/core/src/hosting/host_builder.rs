@@ -85,6 +85,7 @@ impl HostBuilder {
             .add(InspectCommand::transient())
             // Add queue services
             .add(QueueAddCommand::transient())
+            .add(QueueFetchCommand::transient())
             .add(QueueListCommand::transient())
             .add(QueueRemoveCommand::transient())
             .add(QueueSummaryCommand::transient())

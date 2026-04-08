@@ -7,6 +7,8 @@ use std::str::FromStr;
 
 /// URL of the RED indexer.
 pub const RED_URL: &str = "https://redacted.sh";
+/// URL of the previous RED indexer.
+pub const RED_URL_CH: &str = "https://redacted.ch";
 /// URL of the OPS indexer.
 pub const OPS_URL: &str = "https://orpheus.network";
 /// Tracker announce host for RED.

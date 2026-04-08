@@ -52,6 +52,12 @@ impl Host {
                 .execute_cli()
                 .await
                 .map_err(Report::new),
+            Command::Queue(QueueCommand::Fetch) => self
+                .services
+                .get_required::<QueueFetchCommand>()
+                .execute_cli()
+                .await
+                .map_err(Report::new),
             Command::Queue(QueueCommand::List) => self
                 .services
                 .get_required::<QueueListCommand>()

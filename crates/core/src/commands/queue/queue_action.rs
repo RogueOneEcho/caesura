@@ -15,6 +15,8 @@ pub enum QueueAction {
     Remove,
     #[error("read torrent")]
     ReadTorrent,
+    #[error("fetch torrents from qBittorrent")]
+    FetchTorrents,
     #[error("match path")]
     MatchPath,
 }

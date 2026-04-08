@@ -96,7 +96,7 @@ id: 12345
 ";
     let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
     assert_eq!(item.name, "Artist - Album (2018) [FLAC]");
-    assert_eq!(item.indexer, Indexer::Red);
+    assert_eq!(item.indexer, Some(Indexer::Red));
     assert_eq!(item.id, Some(12345));
 }
 
@@ -109,7 +109,37 @@ hash: '0102030405060708090a0b0c0d0e0f1011121314'
 indexer: abc
 ";
     let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
-    assert_eq!(item.indexer, Indexer::Other("abc".to_owned()));
+    assert_eq!(item.indexer, Some(Indexer::Other("abc".to_owned())));
+}
+
+/// Legacy queue files written before the field became optional may contain
+/// `indexer: ''` for items where the indexer could not be determined. The
+/// empty string round-trips through [`Indexer::from`] to
+/// [`Indexer::Other(String::new())`], which is functionally equivalent to
+/// [`None`] for filtering since it never matches a known indexer.
+#[test]
+fn indexer_deserialize__queue_item_with_legacy_empty_indexer() {
+    let yaml = "
+name: Test Album
+path: /downloads/test.torrent
+hash: '0102030405060708090a0b0c0d0e0f1011121314'
+indexer: ''
+";
+    let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
+    assert_eq!(item.indexer, Some(Indexer::Other(String::new())));
+}
+
+/// A queue file with no `indexer` field at all must deserialize to [`None`]
+/// without error.
+#[test]
+fn indexer_deserialize__queue_item_with_missing_indexer() {
+    let yaml = "
+name: Test Album
+path: /downloads/test.torrent
+hash: '0102030405060708090a0b0c0d0e0f1011121314'
+";
+    let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
+    assert_eq!(item.indexer, None);
 }
 
 #[test]

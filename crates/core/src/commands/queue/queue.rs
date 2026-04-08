@@ -121,7 +121,7 @@ impl Queue {
         let mut items: Vec<&QueueItem> = items
             .values()
             .filter(|item| {
-                item.indexer == indexer
+                item.indexer.as_ref() == Some(&indexer)
                     && exclude_verified_if_transcode_disabled(item, transcode_enabled)
                     && exclude_transcoded_if_upload_disabled(item, upload_enabled)
                     && exclude_verify_failures(item)

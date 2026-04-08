@@ -26,7 +26,7 @@ async fn queue_set_adds_item() -> Result<(), TestError> {
     assert!(retrieved.is_some());
     let retrieved = retrieved.expect("should have item");
     assert_eq!(retrieved.name, "Test Item");
-    assert_eq!(retrieved.indexer, Indexer::Red);
+    assert_eq!(retrieved.indexer, None);
     Ok(())
 }
 
@@ -276,6 +276,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "NEW".to_owned(),
             path: PathBuf::new(),
             hash: new,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;
@@ -284,6 +285,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "VERIFIED".to_owned(),
             path: PathBuf::new(),
             hash: verified,
+            indexer: Some(Indexer::Red),
             verify: Some(VerifyStatus::verified()),
             ..QueueItem::default()
         })
@@ -293,6 +295,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "VERIFY FAILURE".to_owned(),
             path: PathBuf::new(),
             hash: not_verified,
+            indexer: Some(Indexer::Red),
             verify: Some(VerifyStatus::from_issue(SourceIssue::IdError {
                 details: "missing id".to_owned(),
             })),
@@ -304,6 +307,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "TRANSCODED".to_owned(),
             path: PathBuf::new(),
             hash: transcoded,
+            indexer: Some(Indexer::Red),
             verify: Some(VerifyStatus::verified()),
             transcode: Some(TranscodeStatus {
                 success: true,
@@ -319,6 +323,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "TRANSCODE FAILURE".to_owned(),
             path: PathBuf::new(),
             hash: not_transcoded,
+            indexer: Some(Indexer::Red),
             verify: Some(VerifyStatus::verified()),
             transcode: Some(TranscodeStatus {
                 success: false,
@@ -334,6 +339,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "UPLOADED".to_owned(),
             path: PathBuf::new(),
             hash: uploaded,
+            indexer: Some(Indexer::Red),
             verify: Some(VerifyStatus::verified()),
             transcode: Some(TranscodeStatus {
                 success: true,
@@ -355,6 +361,7 @@ async fn queue_get_unprocessed() -> Result<(), TestError> {
             name: "UPLOAD FAILURE".to_owned(),
             path: PathBuf::new(),
             hash: not_uploaded,
+            indexer: Some(Indexer::Red),
             verify: Some(VerifyStatus::verified()),
             transcode: Some(TranscodeStatus {
                 success: true,
@@ -412,6 +419,7 @@ async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), TestError> {
         .set(QueueItem {
             name: "RED Item".to_owned(),
             hash: red_hash,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;
@@ -419,7 +427,7 @@ async fn queue_get_unprocessed_filters_by_indexer() -> Result<(), TestError> {
         .set(QueueItem {
             name: "OPS Item".to_owned(),
             hash: ops_hash,
-            indexer: Indexer::Ops,
+            indexer: Some(Indexer::Ops),
             ..QueueItem::default()
         })
         .await?;
@@ -453,6 +461,7 @@ async fn queue_get_unprocessed_red_includes_pth() -> Result<(), TestError> {
         .set(QueueItem {
             name: "RED Item".to_owned(),
             hash: red_hash,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;
@@ -460,7 +469,7 @@ async fn queue_get_unprocessed_red_includes_pth() -> Result<(), TestError> {
         .set(QueueItem {
             name: "PTH Item".to_owned(),
             hash: pth_hash,
-            indexer: Indexer::Pth,
+            indexer: Some(Indexer::Pth),
             ..QueueItem::default()
         })
         .await?;
@@ -472,6 +481,63 @@ async fn queue_get_unprocessed_red_includes_pth() -> Result<(), TestError> {
 
     // Assert - RED includes both RED and PTH items
     assert_eq!(items.len(), 2);
+    Ok(())
+}
+
+/// Test `get_unprocessed` excludes items with [`None`] or unknown indexer.
+///
+/// Items with `None`, [`Indexer::Other(String::new())`] (the legacy unknown
+/// sentinel from pre-`Option` queue files), or any other [`Indexer::Other`]
+/// must never match a query for a known indexer.
+#[tokio::test]
+async fn queue_get_unprocessed_excludes_unknown_indexer() -> Result<(), TestError> {
+    // Arrange
+    let temp = TempDirectory::create("queue_excludes_unknown_indexer");
+    let queue = Queue::from_path(temp.to_path_buf());
+    let none_hash = Hash::<20>::from_string("0100000000000000000000000000000000000000")?;
+    let legacy_empty_hash = Hash::<20>::from_string("0200000000000000000000000000000000000000")?;
+    let other_hash = Hash::<20>::from_string("0300000000000000000000000000000000000000")?;
+    let red_hash = Hash::<20>::from_string("0400000000000000000000000000000000000000")?;
+    queue
+        .set(QueueItem {
+            name: "None Indexer".to_owned(),
+            hash: none_hash,
+            indexer: None,
+            ..QueueItem::default()
+        })
+        .await?;
+    queue
+        .set(QueueItem {
+            name: "Legacy Empty Indexer".to_owned(),
+            hash: legacy_empty_hash,
+            indexer: Some(Indexer::Other(String::new())),
+            ..QueueItem::default()
+        })
+        .await?;
+    queue
+        .set(QueueItem {
+            name: "Other Indexer".to_owned(),
+            hash: other_hash,
+            indexer: Some(Indexer::Other("xyz".to_owned())),
+            ..QueueItem::default()
+        })
+        .await?;
+    queue
+        .set(QueueItem {
+            name: "RED Item".to_owned(),
+            hash: red_hash,
+            indexer: Some(Indexer::Red),
+            ..QueueItem::default()
+        })
+        .await?;
+
+    // Act
+    let items = queue
+        .get_unprocessed(Indexer::Red, false, false, false)
+        .await?;
+
+    // Assert
+    assert_eq!(items, vec![red_hash]);
     Ok(())
 }
 
@@ -490,6 +556,7 @@ async fn queue_get_unprocessed_sorts_by_name() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Zebra Album".to_owned(),
             hash: hash_z,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;
@@ -497,6 +564,7 @@ async fn queue_get_unprocessed_sorts_by_name() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Apple Album".to_owned(),
             hash: hash_a,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;
@@ -504,6 +572,7 @@ async fn queue_get_unprocessed_sorts_by_name() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Mango Album".to_owned(),
             hash: hash_m,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;
@@ -534,6 +603,7 @@ async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Uploaded Item".to_owned(),
             hash: uploaded_hash,
+            indexer: Some(Indexer::Red),
             upload: Some(UploadStatus {
                 success: true,
                 completed: TimeStamp::now(),
@@ -547,6 +617,7 @@ async fn queue_get_unprocessed_excludes_uploaded() -> Result<(), TestError> {
         .set(QueueItem {
             name: "Pending Item".to_owned(),
             hash: pending_hash,
+            indexer: Some(Indexer::Red),
             ..QueueItem::default()
         })
         .await?;

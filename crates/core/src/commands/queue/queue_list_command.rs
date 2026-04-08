@@ -43,7 +43,9 @@ impl QueueListCommand {
                 continue;
             };
             info!("{}: {item}", format!("{index:pad$}").bold());
-            debug!("{}", item.path.display());
+            if !item.path.as_os_str().is_empty() {
+                debug!("{}", item.path.display());
+            }
             debug!("{hash}");
             if let Some(id) = item.id {
                 debug!("{id}");

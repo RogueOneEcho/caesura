@@ -58,6 +58,22 @@ pub fn get_group_id_from_url(url: &str) -> Option<u32> {
     Some(id)
 }
 
+/// Identify the [`Indexer`] from a tracker URL.
+///
+/// - URLs starting with `https://redacted.sh` or `https://redacted.ch` map to [`Indexer::Red`]
+/// - URLs starting with `https://orpheus.network` map to [`Indexer::Ops`]
+/// - Returns `None` for unrecognized URLs
+#[must_use]
+pub fn get_indexer_from_url(url: &str) -> Option<Indexer> {
+    if url.starts_with(RED_URL) || url.starts_with(RED_URL_CH) {
+        Some(Indexer::Red)
+    } else if url.starts_with(OPS_URL) {
+        Some(Indexer::Ops)
+    } else {
+        None
+    }
+}
+
 /// Generate a permalink URL for a torrent.
 #[must_use]
 pub fn get_permalink(base: &String, group_id: u32, torrent_id: u32) -> String {
