@@ -714,6 +714,39 @@ fn qbit_options_complete() {
     assert!(result.is_ok());
 }
 
+/// Verify `QbitOptions` does not require credentials when the URL looks like
+/// a qui reverse proxy URL (path contains `/proxy/`).
+#[test]
+fn qbit_options_qui_proxy_url_allows_missing_credentials() {
+    let partial = QbitOptionsPartial {
+        inject_torrent: Some(true),
+        qbit_url: Some("http://localhost:7476/proxy/abc123".to_owned()),
+        ..QbitOptionsPartial::default()
+    };
+    let result = partial.resolve();
+    assert!(result.is_ok());
+}
+
+/// Verify `QbitOptions` rejects a trailing slash in the URL.
+#[test]
+fn qbit_options_trailing_slash() {
+    let mock = QbitOptions::mock();
+    let partial = QbitOptionsPartial {
+        inject_torrent: Some(true),
+        qbit_url: Some("http://localhost:7476/proxy/abc123/".to_owned()),
+        qbit_username: mock.qbit_username,
+        qbit_password: mock.qbit_password,
+        ..QbitOptionsPartial::default()
+    };
+    let result = partial.resolve();
+    let errors = result.expect_err("should reject trailing slash");
+    assert!(
+        errors
+            .iter()
+            .any(|e| matches!(e, OptionRule::UrlInvalidSuffix(_, _)))
+    );
+}
+
 /// Verify invalid YAML produces a config deserialization error.
 #[test]
 #[expect(non_snake_case, reason = "double underscore test qualifier convention")]

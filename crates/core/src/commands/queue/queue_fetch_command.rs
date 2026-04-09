@@ -23,14 +23,11 @@ pub(crate) struct QueueFetchCommand {
 impl QueueFetchCommand {
     /// Execute [`QueueFetchCommand`] from the CLI.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
-        if self.qbit_options.qbit_url.is_none()
-            || self.qbit_options.qbit_username.is_none()
-            || self.qbit_options.qbit_password.is_none()
-        {
-            return Err(Failure::from_action(QueueAction::FetchTorrents).with(
-                "error",
-                "qBittorrent URL, username, and password must be set",
-            ));
+        let mut errors: Vec<OptionRule> = Vec::new();
+        self.qbit_options.validate_connection(&mut errors);
+        if !errors.is_empty() {
+            OptionRule::show(&errors);
+            return Err(Failure::from_action(QueueAction::FetchTorrents));
         }
         let status = self.execute().await?;
         info!("{} {} items to the queue", "Added".bold(), status.added);

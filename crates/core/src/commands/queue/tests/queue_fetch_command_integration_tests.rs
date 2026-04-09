@@ -13,8 +13,12 @@ async fn queue_fetch_command_adds_torrents() -> Result<(), TestError> {
         amount_left: 0,
         ..Torrent::mock()
     };
-    let (_test_dir, command, queue) =
-        queue_fetch_test_helper(vec!["music".to_owned()], vec![mock_torrent]).await;
+    let (_test_dir, command, queue) = queue_fetch_test_helper(
+        vec!["music".to_owned()],
+        vec![mock_torrent],
+        QbitOptions::mock(),
+    )
+    .await;
 
     // Act
     let result = command.execute_cli().await;
@@ -34,8 +38,12 @@ async fn queue_fetch_command_skips_incomplete() -> Result<(), TestError> {
         amount_left: 1000,
         ..Torrent::mock()
     };
-    let (_test_dir, command, queue) =
-        queue_fetch_test_helper(vec!["music".to_owned()], vec![mock_torrent]).await;
+    let (_test_dir, command, queue) = queue_fetch_test_helper(
+        vec!["music".to_owned()],
+        vec![mock_torrent],
+        QbitOptions::mock(),
+    )
+    .await;
 
     // Act
     let result = command.execute_cli().await;
@@ -47,6 +55,51 @@ async fn queue_fetch_command_skips_incomplete() -> Result<(), TestError> {
     Ok(())
 }
 
+/// Missing `qbit_url` is rejected.
+#[tokio::test]
+async fn queue_fetch_command_fails_without_url() -> Result<(), TestError> {
+    let qbit_options = QbitOptions {
+        qbit_url: None,
+        ..QbitOptions::mock()
+    };
+    let (_test_dir, command, _queue) =
+        queue_fetch_test_helper(vec!["music".to_owned()], vec![], qbit_options).await;
+    let result = command.execute_cli().await;
+    assert!(result.is_err());
+    Ok(())
+}
+
+/// Missing credentials are rejected on a direct qBittorrent URL.
+#[tokio::test]
+async fn queue_fetch_command_fails_without_credentials() -> Result<(), TestError> {
+    let qbit_options = QbitOptions {
+        qbit_username: None,
+        qbit_password: None,
+        ..QbitOptions::mock()
+    };
+    let (_test_dir, command, _queue) =
+        queue_fetch_test_helper(vec!["music".to_owned()], vec![], qbit_options).await;
+    let result = command.execute_cli().await;
+    assert!(result.is_err());
+    Ok(())
+}
+
+/// A qui reverse proxy URL is accepted without credentials.
+#[tokio::test]
+async fn queue_fetch_command_accepts_qui_proxy_url() -> Result<(), TestError> {
+    let qbit_options = QbitOptions {
+        qbit_url: Some("http://localhost:7476/proxy/test-key".to_owned()),
+        qbit_username: None,
+        qbit_password: None,
+        ..QbitOptions::mock()
+    };
+    let (_test_dir, command, _queue) =
+        queue_fetch_test_helper(vec!["music".to_owned()], vec![], qbit_options).await;
+    let result = command.execute_cli().await;
+    assert!(matches!(result, Ok(true)));
+    Ok(())
+}
+
 /// Create a host configured for `QueueFetchCommand` testing.
 ///
 /// Returns `TestDirectory` to keep it alive for the test duration.
@@ -54,6 +107,7 @@ async fn queue_fetch_command_skips_incomplete() -> Result<(), TestError> {
 async fn queue_fetch_test_helper(
     categories: Vec<String>,
     mock_torrents: Vec<Torrent>,
+    qbit_options: QbitOptions,
 ) -> (TestDirectory, Ref<QueueFetchCommand>, Ref<Queue>) {
     init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
@@ -70,7 +124,7 @@ async fn queue_fetch_test_helper(
         .with_options(QueueFetchOptions {
             qbit_queue_categories: categories,
         })
-        .with_options(QbitOptions::mock())
+        .with_options(qbit_options)
         .expect_build();
     let command = host.services.get_required::<QueueFetchCommand>();
     let queue = host.services.get_required::<Queue>();
