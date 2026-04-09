@@ -18,6 +18,7 @@ pub(crate) struct UploadCommand {
     targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
     qbit_options: Ref<QbitOptions>,
+    qbit_upload_options: Ref<QbitUploadOptions>,
     qbit: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>>,
 }
 
@@ -46,6 +47,14 @@ impl UploadCommand {
         &self,
         source: &Source,
     ) -> Result<UploadSuccess, Failure<UploadAction>> {
+        if self.qbit_upload_options.inject_torrent {
+            let mut errors: Vec<OptionRule> = Vec::new();
+            self.qbit_options.validate_connection(&mut errors);
+            if !errors.is_empty() {
+                OptionRule::show(&errors);
+                return Err(Failure::from_action(UploadAction::InjectTorrent));
+            }
+        }
         let targets = self.targets.get(source.format, &source.existing);
         let mut warnings = Vec::new();
         let mut formats = Vec::new();
@@ -125,8 +134,8 @@ impl UploadCommand {
             let id = response.torrent_id;
             let link = get_permalink(base, response.group_id, id);
             info!("{link}");
-            if self.qbit_options.inject_torrent {
-                let add_options = self.qbit_options.to_add_torrent_options();
+            if self.qbit_upload_options.inject_torrent {
+                let add_options = self.qbit_upload_options.to_add_torrent_options();
                 if let Err(e) = self
                     .qbit
                     .add_torrent(add_options, torrent_path.clone())

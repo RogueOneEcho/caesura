@@ -91,7 +91,6 @@ async fn queue_fetch_command_accepts_qui_proxy_url() -> Result<(), TestError> {
         qbit_url: Some("http://localhost:7476/proxy/test-key".to_owned()),
         qbit_username: None,
         qbit_password: None,
-        ..QbitOptions::mock()
     };
     let (_test_dir, command, _queue) =
         queue_fetch_test_helper(vec!["music".to_owned()], vec![], qbit_options).await;
@@ -122,7 +121,7 @@ async fn queue_fetch_test_helper(
         .with_test_options(&test_dir)
         .await
         .with_options(QueueFetchOptions {
-            qbit_queue_categories: categories,
+            qbit_fetch_categories: categories,
         })
         .with_options(qbit_options)
         .expect_build();

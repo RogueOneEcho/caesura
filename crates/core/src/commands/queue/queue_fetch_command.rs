@@ -40,7 +40,7 @@ impl QueueFetchCommand {
     }
 
     async fn execute(&self) -> Result<QueueStatus, Failure<QueueAction>> {
-        let categories = &self.queue_fetch_options.qbit_queue_categories;
+        let categories = &self.queue_fetch_options.qbit_fetch_categories;
         let mut torrents: Vec<Torrent> = Vec::new();
         for category in categories {
             let filters = FilterOptions {

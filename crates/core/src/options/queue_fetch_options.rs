@@ -11,7 +11,7 @@ pub struct QueueFetchOptions {
     /// and adds any fully downloaded torrents that are not already in the queue.
     #[arg(long)]
     #[options(required)]
-    pub qbit_queue_categories: Vec<String>,
+    pub qbit_fetch_categories: Vec<String>,
 }
 
 impl OptionsContract for QueueFetchOptions {

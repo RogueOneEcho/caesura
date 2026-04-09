@@ -679,17 +679,16 @@ fn inspect_arg_rejects_nonexistent_path() {
     );
 }
 
-/// Verify `QbitOptions` fails without user or pass
+/// Verify `QbitOptions::validate_connection` pushes `NotSet` errors for missing credentials.
 #[test]
-fn qbit_options_not_set() {
-    let mock = QbitOptions::mock();
-    let partial = QbitOptionsPartial {
-        inject_torrent: Some(true),
-        qbit_url: mock.qbit_url,
-        ..QbitOptionsPartial::default()
+fn qbit_options_validate_connection_missing_credentials() {
+    let options = QbitOptions {
+        qbit_url: Some("http://127.0.0.1:8080".to_owned()),
+        qbit_username: None,
+        qbit_password: None,
     };
-    let result = partial.resolve();
-    let errors = result.expect_err("should reject incomplete");
+    let mut errors: Vec<OptionRule> = Vec::new();
+    options.validate_connection(&mut errors);
     assert_eq!(
         errors,
         vec![
@@ -699,32 +698,17 @@ fn qbit_options_not_set() {
     );
 }
 
-/// Verify `QbitOptions` are accepted.
+/// Verify `QbitOptions::validate_connection` does not require credentials for a qui proxy URL.
 #[test]
-fn qbit_options_complete() {
-    let mock = QbitOptions::mock();
-    let partial = QbitOptionsPartial {
-        inject_torrent: Some(true),
-        qbit_url: mock.qbit_url,
-        qbit_username: mock.qbit_username,
-        qbit_password: mock.qbit_password,
-        ..QbitOptionsPartial::default()
-    };
-    let result = partial.resolve();
-    assert!(result.is_ok());
-}
-
-/// Verify `QbitOptions` does not require credentials when the URL looks like
-/// a qui reverse proxy URL (path contains `/proxy/`).
-#[test]
-fn qbit_options_qui_proxy_url_allows_missing_credentials() {
-    let partial = QbitOptionsPartial {
-        inject_torrent: Some(true),
+fn qbit_options_validate_connection_qui_proxy_url() {
+    let options = QbitOptions {
         qbit_url: Some("http://localhost:7476/proxy/abc123".to_owned()),
-        ..QbitOptionsPartial::default()
+        qbit_username: None,
+        qbit_password: None,
     };
-    let result = partial.resolve();
-    assert!(result.is_ok());
+    let mut errors: Vec<OptionRule> = Vec::new();
+    options.validate_connection(&mut errors);
+    assert!(errors.is_empty());
 }
 
 /// Verify `QbitOptions` rejects a trailing slash in the URL.
@@ -732,11 +716,9 @@ fn qbit_options_qui_proxy_url_allows_missing_credentials() {
 fn qbit_options_trailing_slash() {
     let mock = QbitOptions::mock();
     let partial = QbitOptionsPartial {
-        inject_torrent: Some(true),
         qbit_url: Some("http://localhost:7476/proxy/abc123/".to_owned()),
         qbit_username: mock.qbit_username,
         qbit_password: mock.qbit_password,
-        ..QbitOptionsPartial::default()
     };
     let result = partial.resolve();
     let errors = result.expect_err("should reject trailing slash");
@@ -752,7 +734,7 @@ fn qbit_options_trailing_slash() {
 #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
 fn options_provider_register__invalid_yaml() {
     // Arrange
-    let yaml = "qbit_category:\n  - not\n  - a\n  - string\n".to_owned();
+    let yaml = "qbit_url:\n  - not\n  - a\n  - string\n".to_owned();
     let mut provider = OptionsProvider::from_yaml(Some(yaml));
     let mut services = ServiceCollection::new();
 
@@ -773,7 +755,7 @@ fn options_provider_register__invalid_yaml() {
 #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
 fn options_provider_register__valid_yaml() {
     // Arrange
-    let yaml = "qbit_category: test\n".to_owned();
+    let yaml = "qbit_url: http://127.0.0.1:8080\n".to_owned();
     let mut provider = OptionsProvider::from_yaml(Some(yaml));
     let mut services = di::ServiceCollection::new();
 

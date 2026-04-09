@@ -91,6 +91,7 @@ async fn upload_command_torrent_client_injection_succeeds() -> Result<(), TestEr
             ..TargetOptions::default()
         })
         .with_options(QbitOptions::mock())
+        .with_options(QbitUploadOptions::mock())
         .with_mock_torrent_client(MockQBittorrentClient::default());
     let host = builder.expect_build();
     let (source, command) = get_source_and_command(&host).await;

@@ -23,6 +23,7 @@ pub enum Command {
         RunnerOptions,
         UploadOptions,
         QbitOptions,
+        QbitUploadOptions,
         CacheOptions,
         BatchOptions
     )]
@@ -81,6 +82,7 @@ pub enum Command {
         TargetOptions,
         UploadOptions,
         QbitOptions,
+        QbitUploadOptions,
         CopyOptions
     )]
     Upload,
