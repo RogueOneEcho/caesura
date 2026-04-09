@@ -236,6 +236,17 @@ fn spectrogram_options_rejects_empty_size_list() {
     assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
 }
 
+/// Verify explicitly empty `qbit_fetch_categories` list is rejected.
+#[test]
+fn queue_fetch_options_rejects_empty_categories_list() {
+    let result = QueueFetchOptionsPartial {
+        qbit_fetch_categories: Some(vec![]),
+    }
+    .resolve();
+    let errors = result.expect_err("should reject empty categories list");
+    assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
+}
+
 /// Verify `BatchOptionsPartial` round-trips through YAML.
 #[test]
 fn batch_options_yaml_round_trip() {

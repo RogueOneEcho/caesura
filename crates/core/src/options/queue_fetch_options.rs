@@ -9,6 +9,8 @@ pub struct QueueFetchOptions {
     ///
     /// `queue fetch` queries the qBittorrent API filtered by these categories
     /// and adds any fully downloaded torrents that are not already in the queue.
+    ///
+    /// An empty string (`""`) fetches torrents that have no category assigned.
     #[arg(long)]
     #[options(required)]
     pub qbit_fetch_categories: Vec<String>,
@@ -17,5 +19,9 @@ pub struct QueueFetchOptions {
 impl OptionsContract for QueueFetchOptions {
     type Partial = QueueFetchOptionsPartial;
 
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, errors: &mut Vec<OptionRule>) {
+        if self.qbit_fetch_categories.is_empty() {
+            errors.push(IsEmpty("qBittorrent fetch categories".to_owned()));
+        }
+    }
 }
