@@ -119,27 +119,11 @@ caesura upload 142659
 If you haven't already then add the `*.red.torrent` or `*.ops.torrent` file to your torrent client.
 
 > [!TIP]
-> `caesura` can automatically add the `.torrent` to your torrent client if it supports an autoadd directory.
->
-> Either use the `--copy-torrent-to path/to/autoadd/directory` CLI option or add the following to `config.yml`
->
-> ```yaml
-> copy_torrent_to: path/to/autoadd/directory
-> ```
->
-> If using docker then ensure the path is mounted as a volume in `docker-compose.yml`.
->
-> In qBittorrent you can configure auto add under: Options > Downloads > Automatically add torrents from
->
-> Monitored Folder: `path/to/autoadd/directory`
->
-> Override save location: `path/to/caesura/output`
+> `caesura` can automatically add the transcoded `.torrent` to your client: see [Torrent client integration](SETUP.md#torrent-client-integration).
 
 Go to your indexer and check your uploads to make sure everything has gone to plan.
 
-## `batch`
-
-Batch processing with queue management.
+## Batch processing with queue management
 
 ![](https://media.githubusercontent.com/media/RogueOneEcho/assets-caesura/main/dist/batch.gif)
 
@@ -150,9 +134,25 @@ Batch processing with queue management.
 
 The `batch` command handles `verify`, `spectrogram`, `transcode` and `upload` in a single command.
 
-### Queue management
+### `queue fetch`
 
-Add torrents from a directory to the queue:
+If you use qBittorrent the `queue fetch` command discovers fully downloaded torrents via the qBittorrent API and adds them to the queue.
+
+> [!TIP]
+> Refer to [Torrent client integration](SETUP.md#torrent-client-integration) for setup instructions.
+
+```bash
+caesura queue fetch
+```
+
+### `queue add`
+
+If you don't use qBittorrent the `queue add` command adds all `.torrent` files from a directory to the queue.
+
+If you pass the directory your torrent client stores `.torrent` files then caesura will automatically load everything from your client.
+
+- For qBittorrent use the `BT_backup` directory
+- For deluge use the `state` directory
 
 ```bash
 caesura queue add /path/to/your/torrents
@@ -169,11 +169,15 @@ caesura queue add /path/to/your/torrents
 > caesura queue add
 > ```
 
+### `queue list`
+
 List what is next in the queue for the current `indexer`:
 
 ```bash
 caesura queue list
 ```
+
+### `queue rm`
 
 Remove items from the queue:
 
@@ -181,13 +185,15 @@ Remove items from the queue:
 caesura queue rm <HASH>
 ```
 
+### `queue summary`
+
 View queue progress summary:
 
 ```bash
 caesura queue summary
 ```
 
-### Progressive batch examples
+### `batch`
 
 By default the `batch` command will limit to processing just `3` transcodes and it won't create spectrograms or upload unless explicitly instructed. These safeguards are in place to prevent mistakenly uploading a bunch of sources that you haven't checked.
 

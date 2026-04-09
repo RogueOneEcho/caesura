@@ -8,9 +8,7 @@ services:
     volumes:
     # Persistent cache for queue state and downloaded .torrent files
     - /srv/caesura/cache:/cache
-    # qBittorrent torrent state used by `queue add` (read-only)
-    - /srv/qBittorrent/BT_backup:/srv/qBittorrent/BT_backup:ro
-    # Shared volume for content, output and autoadd — a single mount
+    # Shared volume for content and output - a single mount
     # enables hard linking between content and output directories
     - /srv/shared:/srv/shared
     # Inject config.yml from the `configs:` block at the bottom of this file
@@ -65,10 +63,15 @@ configs:
       api_key: YOUR_API_KEY
       content:
       - /srv/shared/downloads/content
-      copy_torrent_to: /srv/shared/caesura/autoadd
       hard_link: true
+      inject_torrent: true
       output: /srv/shared/caesura
-      queue_add_path: /srv/qBittorrent/BT_backup
+      qbit_fetch_categories:
+      - music
+      qbit_inject_category: caesura
+      qbit_inject_tags:
+      - caesura
+      qbit_url: http://qui:7476/proxy/YOUR_QUI_API_KEY
       rename_tracks: true
       sox_ng: true
       sox_path: sox_ng

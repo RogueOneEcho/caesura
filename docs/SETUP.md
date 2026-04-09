@@ -113,6 +113,57 @@ target:
 verbosity: debug
 ```
 
+## Torrent client integration
+
+The qui or qBittorrent API can be used for queuing and injecting torrents.
+
+### qBittorrent via qui (recommended)
+
+[qui](https://getqui.com/) has a [reverse proxy feature](https://getqui.com/docs/features/reverse-proxy/) with caching that makes qBittorrent API calls faster.
+
+Point `qbit_url` at your qui instance's [Client Proxy URL](https://getqui.com/docs/features/reverse-proxy/#1-create-a-client-proxy-api-key), which includes the proxy API key directly in the path:
+
+```yaml
+inject_torrent: true
+qbit_url: http://localhost:7476/proxy/YOUR_QUI_API_KEY
+qbit_fetch_categories:
+- music
+qbit_inject_category: caesura
+qbit_inject_tags:
+- caesura
+```
+
+### qBittorrent API directly
+
+If you don't use qui, point `qbit_url` at qBittorrent's Web UI directly and set `qbit_username` and `qbit_password`.
+
+```yaml
+inject_torrent: true
+qbit_url: http://127.0.0.1:8080
+qbit_username: YOUR_QBIT_USERNAME
+qbit_password: YOUR_QBIT_PASSWORD
+qbit_fetch_categories:
+- music
+qbit_inject_category: caesura
+qbit_inject_tags:
+- caesura
+```
+
+This is slower than the qui route because every call hits qBittorrent with no caching, but still faster than file-based discovery.
+
+### Autoadd / watch directory
+
+For Deluge, Transmission, rTorrent, or anyone who prefers a file-based integration. `caesura` can:
+- write the transcoded `.torrent` to a watch directory your client monitors
+- read source torrents from your client's torrent file directory
+
+```yaml
+copy_torrent_to: /srv/shared/caesura/autoadd
+queue_add_path: /srv/qBittorrent/BT_backup
+```
+
+If using Docker then ensure the autoadd and source torrent directories are mounted as volumes in `docker-compose.yml`.
+
 ## Multi-Indexer Setup (RED + OPS)
 
 `caesura` is designed to work with both `RED` and `OPS`. There's no need for separate cache or output directories, however, you will need a separate configuration for each and the commands must be run separately.

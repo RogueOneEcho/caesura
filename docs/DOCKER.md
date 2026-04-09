@@ -35,11 +35,10 @@ The `docker-compose.yml` makes a few assumptions:
 - `/srv/caesura/cache` will be your caesura cache
 - `/srv/shared/downloads/content` is where your torrent content is stored
 - `/srv/shared/caesura` will be where caesura outputs spectrograms, transcodes and `.torrent`
-- `/srv/shared/caesura/autoadd` is where caesura will copy torrent files and your torrent client will autoadd from
-- `/srv/qBittorrent/BT_backup` is where qBittorrent stores its.torrent files
 - `/srv/shared/` contains the content and output directories. By mounting this as a single volume we can hard-link the content to the output directory.
+- qui is used as a [reverse proxy](https://getqui.com/docs/features/reverse-proxy/) for qBittorrent
 
-If your system differs then you'll need to adjust the paths accordingly.
+If your system differs then you'll need to adjust the paths or [torrent client integration](SETUP.md#torrent-client-integration) accordingly.
 
 Refer to the [setup guide](SETUP.md) for more information on configuring caesura.
 

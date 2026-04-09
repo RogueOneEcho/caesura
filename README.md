@@ -49,12 +49,14 @@ Each source is verified to ensure:
 ### Upload
 
 - Copy transcodes to content directory
-- Torrent injection via client auto-add directory
+- Inject transcoded torrents directly into qBittorrent or qui
+- Autoadd directory support for other clients (Deluge, Transmission, rTorrent)
 
 ### Batch / Queue
 
 - Verify, transcode and upload with one command for every torrent file in a directory
 - Source torrents are added to a queue to track their progress, reducing duplicate work and speeding up subsequent runs
+- Discover source torrents from qBittorrent or qui via API or load `.torrent` files from a state directory
 
 ## Documentation
 
