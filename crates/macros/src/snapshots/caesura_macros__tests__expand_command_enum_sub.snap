@@ -2,20 +2,25 @@
 source: crates/macros/src/tests.rs
 expression: format_tokens(tokens)
 ---
+/// Clap sub-command arguments for [`QueueCommand`].
 #[derive(::clap::Subcommand, ::std::clone::Clone, ::std::fmt::Debug)]
 pub enum QueueCommandArgs {
     /// Add to queue
     Add {
+        /// Flattened `ConfigOptions` arguments.
         #[command(flatten)]
         config_options: ConfigOptionsPartial,
+        /// Flattened `QueueAddArgs` arguments.
         #[command(flatten)]
         queue_add_args: QueueAddArgsPartial,
     },
     /// Remove from queue
     #[command(name = "rm")]
     Remove {
+        /// Flattened `QueueRemoveArgs` arguments.
         #[command(flatten)]
         queue_remove_args: QueueRemoveArgsPartial,
+        /// Flattened `ConfigOptions` arguments.
         #[command(flatten)]
         config_options: ConfigOptionsPartial,
     },

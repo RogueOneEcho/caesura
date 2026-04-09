@@ -14,7 +14,9 @@ fn generate_variant_fields(v: &ParsedVariant) -> TokenStream2 {
         .map(|opt| {
             let field_name = ParsedVariant::field_name_for(opt);
             let partial_type = ParsedVariant::partial_type_for(opt);
+            let doc = format!(" Flattened `{opt}` arguments.");
             quote! {
+                #[doc = #doc]
                 #[command(flatten)]
                 #field_name: #partial_type
             }
@@ -61,7 +63,9 @@ fn generate_sub_args_enum(def: &EnumDef) -> TokenStream2 {
             }
         })
         .collect();
+    let doc = format!(" Clap sub-command arguments for [`{}`].", def.name);
     quote! {
+        #[doc = #doc]
         #[derive(::clap::Subcommand, ::std::clone::Clone, ::std::fmt::Debug)]
         pub enum #args_name {
             #(#variants),*
@@ -201,6 +205,7 @@ fn generate_primary_args_enum(def: &EnumDef) -> TokenStream2 {
                     #(#doc_attrs)*
                     #cmd_attrs
                     #vname {
+                        /// Sub-command to run.
                         #[command(subcommand)]
                         command: #sub_args,
                     }
@@ -223,6 +228,7 @@ fn generate_primary_args_enum(def: &EnumDef) -> TokenStream2 {
         })
         .collect();
     quote! {
+        /// Top-level clap sub-command arguments.
         #[derive(::clap::Subcommand, ::std::clone::Clone, ::std::fmt::Debug)]
         pub enum CommandArgs {
             #(#variants),*
@@ -239,6 +245,7 @@ fn generate_cli_struct(def: &EnumDef) -> TokenStream2 {
         .collect();
     let about_text = extract_doc_string(&doc_attrs);
     quote! {
+        /// Top-level clap parser for the CLI.
         #[derive(::clap::Parser, ::std::clone::Clone, ::std::fmt::Debug)]
         #[command(about = #about_text)]
         pub struct Cli {

@@ -5,7 +5,9 @@ pub struct FieldDoc {
     pub config_key: &'static str,
     /// CLI flag in kebab-case (e.g., "--wait-before-upload")
     pub cli_flag: &'static str,
-    /// Type display string (e.g., "bool", "u32", "Option<String>")
+    /// Type display string
+    ///
+    /// Examples: `bool`, `u32`, `Option<String>`
     pub field_type: &'static str,
     /// Default value serialized with `serde_json` (displayed with backticks)
     pub default_value: Option<String>,

@@ -24,6 +24,7 @@ pub(crate) struct SpectrogramJob {
     pub image_title: String,
     /// Spectrogram size variant.
     pub size: Size,
+    /// Duration of the FLAC file in seconds, if known.
     pub duration_secs: Option<u32>,
     /// Factory for creating sox commands.
     pub sox: Ref<SoxFactory>,

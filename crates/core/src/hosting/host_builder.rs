@@ -127,6 +127,7 @@ impl HostBuilder {
     }
 
     /// Register a pre-configured mock API client for testing.
+    /// Register a mock Gazelle API client for testing.
     #[must_use]
     #[cfg(test)]
     #[expect(

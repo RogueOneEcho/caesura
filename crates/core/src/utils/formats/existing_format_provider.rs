@@ -12,6 +12,7 @@ static ZERO_PAD_REGEX: LazyLock<Regex> =
 pub struct ExistingFormatProvider;
 
 impl ExistingFormatProvider {
+    /// Existing formats matching the source release in the torrent group.
     pub fn get(source_torrent: &Torrent, group_torrents: &[Torrent]) -> BTreeSet<ExistingFormat> {
         group_torrents
             .iter()

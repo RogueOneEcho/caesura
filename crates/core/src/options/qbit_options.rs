@@ -48,6 +48,7 @@ pub struct QbitOptions {
 }
 
 impl QbitOptions {
+    /// Build `AddTorrentOptions` for the qBittorrent API from these options.
     #[must_use]
     pub fn to_add_torrent_options(&self) -> AddTorrentOptions {
         AddTorrentOptions {
@@ -60,6 +61,7 @@ impl QbitOptions {
         }
     }
 
+    /// Create a [`QbitOptions`] with mock values for testing.
     #[cfg(test)]
     #[must_use]
     pub fn mock() -> Self {

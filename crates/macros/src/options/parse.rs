@@ -31,7 +31,7 @@ pub fn parse_struct_options(attrs: &[Attribute]) -> syn::Result<StructOptions> {
     Ok(opts)
 }
 
-/// Returns the partial struct name, using explicit name if provided or appending "Partial" suffix.
+/// Get the partial struct name, using the explicit name if provided or appending a `Partial` suffix.
 pub fn get_partial_name(struct_opts: &StructOptions, struct_name: &Ident) -> Ident {
     struct_opts
         .partial_name
@@ -39,7 +39,7 @@ pub fn get_partial_name(struct_opts: &StructOptions, struct_name: &Ident) -> Ide
         .unwrap_or_else(|| format_ident!("{}Partial", struct_name))
 }
 
-/// Extracts named fields from a struct, returning an error for non-struct or unnamed fields.
+/// Extract named fields from a struct, returning an error for non-struct or unnamed fields.
 pub fn extract_named_fields(input: &DeriveInput) -> syn::Result<&Punctuated<Field, Comma>> {
     match &input.data {
         Data::Struct(data) => match &data.fields {

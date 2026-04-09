@@ -6,6 +6,7 @@ use lofty::prelude::ItemKey::Composer;
 pub(crate) struct TagVerifier;
 
 impl TagVerifier {
+    /// Verify required tags on a FLAC file and return the names of any missing tags.
     pub(crate) fn execute(
         flac: &FlacFile,
         source: &Source,

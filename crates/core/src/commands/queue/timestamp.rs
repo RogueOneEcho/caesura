@@ -18,6 +18,7 @@ impl TimeStamp {
         }
     }
 
+    /// Create a [`TimeStamp`] from an RFC 3339 date string.
     #[cfg(test)]
     pub(crate) fn from_rfc3339(s: &str) -> Result<Self, chrono::ParseError> {
         let datetime = DateTime::parse_from_rfc3339(s)?.with_timezone(&Utc);

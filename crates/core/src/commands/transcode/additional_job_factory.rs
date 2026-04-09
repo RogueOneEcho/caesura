@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use tokio::fs::{copy, create_dir_all, hard_link};
 
+/// File extensions recognized as cover-art images when collecting additional files.
 pub const IMAGE_EXTENSIONS: [&str; 3] = ["jpg", "jpeg", "png"];
+/// File extensions recognized as text metadata when collecting additional files.
 pub const TEXT_EXTENSIONS: [&str; 5] = ["cue", "log", "nfo", "rtf", "txt"];
 
 /// Factory for creating [`AdditionalJob`] instances.

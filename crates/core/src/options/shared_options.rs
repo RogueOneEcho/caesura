@@ -114,6 +114,7 @@ impl SharedOptions {
         self.content.iter().map(ExpandTilde::expand_tilde).collect()
     }
 
+    /// Create a [`SharedOptions`] with mock values for testing.
     #[cfg(test)]
     pub fn mock() -> Self {
         Self {

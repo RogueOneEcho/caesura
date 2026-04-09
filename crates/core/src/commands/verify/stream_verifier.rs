@@ -5,6 +5,7 @@ use crate::utils::SourceIssue::*;
 pub(crate) struct StreamVerifier;
 
 impl StreamVerifier {
+    /// Verify stream properties of a FLAC file and return any issues found.
     pub(crate) fn execute(flac: &FlacFile) -> Vec<SourceIssue> {
         let mut errors = Vec::new();
         let info = match flac.get_stream_info() {

@@ -42,12 +42,14 @@ pub struct BatchOptions {
 }
 
 impl BatchOptions {
+    /// Parsed `wait_before_upload` duration, or `None` if unset or unparseable.
     #[must_use]
     pub fn get_wait_before_upload(&self) -> Option<Duration> {
         let wait_before_upload = self.wait_before_upload.clone()?;
         humantime::parse_duration(wait_before_upload.as_str()).ok()
     }
 
+    /// Effective batch limit, or `None` if `no_limit` is set.
     #[must_use]
     pub fn get_limit(&self) -> Option<usize> {
         if self.no_limit {

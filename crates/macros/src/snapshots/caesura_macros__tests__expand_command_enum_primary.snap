@@ -2,37 +2,60 @@
 source: crates/macros/src/tests.rs
 expression: format_tokens(tokens)
 ---
+/// Top-level clap sub-command arguments.
 #[derive(::clap::Subcommand, ::std::clone::Clone, ::std::fmt::Debug)]
 pub enum CommandArgs {
     /// Run batch processing
     Batch {
+        /// Flattened `ConfigOptions` arguments.
         #[command(flatten)]
         config_options: ConfigOptionsPartial,
+        /// Flattened `SharedOptions` arguments.
         #[command(flatten)]
         shared_options: SharedOptionsPartial,
     },
     /// Show configuration
-    Config { #[command(flatten)] config_options: ConfigOptionsPartial },
+    Config {
+        /// Flattened `ConfigOptions` arguments.
+        #[command(flatten)]
+        config_options: ConfigOptionsPartial,
+    },
     /// Generate docs
     Docs {},
     /// Inspect files
-    Inspect { #[command(flatten)] inspect_arg: InspectArgPartial },
+    Inspect {
+        /// Flattened `InspectArg` arguments.
+        #[command(flatten)]
+        inspect_arg: InspectArgPartial,
+    },
     /// Queue commands
     #[command(subcommand_required = true, arg_required_else_help = true)]
-    Queue { #[command(subcommand)] command: QueueCommandArgs },
+    Queue {
+        /// Sub-command to run.
+        #[command(subcommand)]
+        command: QueueCommandArgs,
+    },
     /// Transcode files
     Transcode {
+        /// Flattened `SourceArg` arguments.
         #[command(flatten)]
         source_arg: SourceArgPartial,
+        /// Flattened `ConfigOptions` arguments.
         #[command(flatten)]
         config_options: ConfigOptionsPartial,
+        /// Flattened `SharedOptions` arguments.
         #[command(flatten)]
         shared_options: SharedOptionsPartial,
     },
     /// Show version
     #[command(short_flag = 'V', long_flag = "version")]
-    Version { #[command(flatten)] sox_options: SoxOptionsPartial },
+    Version {
+        /// Flattened `SoxOptions` arguments.
+        #[command(flatten)]
+        sox_options: SoxOptionsPartial,
+    },
 }
+/// Top-level clap parser for the CLI.
 #[derive(::clap::Parser, ::std::clone::Clone, ::std::fmt::Debug)]
 #[command(about = "App description")]
 pub struct Cli {

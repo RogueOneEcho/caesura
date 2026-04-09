@@ -29,7 +29,10 @@ pub fn generate_partial_fields(fields: &[ParsedField]) -> TokenStream2 {
     quote! { #(#field_defs)* }
 }
 
-/// Returns `Option<T>` for non-Option fields, or the original type for Option fields.
+/// Partial-struct type for a field.
+///
+/// - Returns `Option<T>` for non-Option fields
+/// - Returns the original type for `Option<T>` fields
 fn get_partial_type(f: &ParsedField) -> TokenStream2 {
     if f.is_option {
         let ty = &f.ty;
@@ -40,7 +43,7 @@ fn get_partial_type(f: &ParsedField) -> TokenStream2 {
     }
 }
 
-/// Generates clap `#[arg(...)]` attribute for a field.
+/// Generate the clap `#[arg(...)]` attribute for a field.
 ///
 /// Bool fields use `num_args = 0..=1` with `default_missing_value = "true"`. This keeps
 /// the field as `None` when absent from the CLI, preserving the config file merge:
@@ -67,7 +70,7 @@ fn generate_arg_attr(f: &ParsedField) -> TokenStream2 {
     }
 }
 
-/// Generates serde attribute, forwarding user attributes or using default `skip_serializing_if`.
+/// Generate the serde attribute, forwarding user attributes or using default `skip_serializing_if`.
 fn generate_serde_attr(f: &ParsedField) -> TokenStream2 {
     if f.serde_attrs.is_empty() {
         quote! {
@@ -159,7 +162,7 @@ pub fn generate_resolve_impl(
     }
 }
 
-/// Generates a let binding for a field, applying `default_fn` if present.
+/// Generate a let binding for a field, applying `default_fn` if present.
 fn generate_field_binding(f: &ParsedField) -> TokenStream2 {
     let ident = &f.ident;
     let mut expr = quote! { self.#ident };
@@ -169,7 +172,7 @@ fn generate_field_binding(f: &ParsedField) -> TokenStream2 {
     quote! { let #ident = #expr; }
 }
 
-/// Generates checks for required fields, adding `NotSet` errors if missing.
+/// Generate checks for required fields, adding `NotSet` errors if missing.
 fn generate_required_checks(fields: &[ParsedField]) -> TokenStream2 {
     let checks = fields.iter().filter(|f| f.is_required).map(|f| {
         let ident = &f.ident;
@@ -183,7 +186,7 @@ fn generate_required_checks(fields: &[ParsedField]) -> TokenStream2 {
     quote! { #(#checks)* }
 }
 
-/// Converts a field identifier to a human-readable name for error messages.
+/// Convert a field identifier to a human-readable name for error messages.
 fn field_name_for_error(ident: &Ident) -> String {
     let name = ident.to_string().replace('_', " ");
     name.chars()
@@ -192,7 +195,7 @@ fn field_name_for_error(ident: &Ident) -> String {
         .unwrap_or_default()
 }
 
-/// Generates a field initializer for struct construction.
+/// Generate a field initializer for struct construction.
 fn generate_field_init(f: &ParsedField) -> TokenStream2 {
     let ident = &f.ident;
     if let Some(default_value) = &f.default_value {
@@ -208,7 +211,7 @@ fn generate_field_init(f: &ParsedField) -> TokenStream2 {
     }
 }
 
-/// Generates the `Default` impl for the resolved struct.
+/// Generate the `Default` impl for the resolved struct.
 pub fn generate_default_impl(struct_name: &Ident, fields: &[ParsedField]) -> TokenStream2 {
     let field_defaults = fields.iter().map(generate_field_default);
     quote! {
@@ -222,7 +225,7 @@ pub fn generate_default_impl(struct_name: &Ident, fields: &[ParsedField]) -> Tok
     }
 }
 
-/// Generates a field initializer for the Default impl.
+/// Generate a field initializer for the Default impl.
 fn generate_field_default(f: &ParsedField) -> TokenStream2 {
     let ident = &f.ident;
     if f.is_option {

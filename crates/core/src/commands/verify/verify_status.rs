@@ -44,6 +44,7 @@ impl VerifyStatus {
         }
     }
 
+    /// Create a [`VerifyStatus`] representing a successful verification.
     #[cfg(test)]
     pub(crate) fn verified() -> Self {
         Self {

@@ -102,6 +102,7 @@ pub enum Command {
     Version,
 }
 
+/// Sub-commands for the `queue` command group.
 #[derive(CommandEnum, Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[command_enum(parent = "queue")]
 pub enum QueueCommand {

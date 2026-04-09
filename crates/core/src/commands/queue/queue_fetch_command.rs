@@ -21,6 +21,7 @@ pub(crate) struct QueueFetchCommand {
 }
 
 impl QueueFetchCommand {
+    /// Execute [`QueueFetchCommand`] from the CLI.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         if self.qbit_options.qbit_url.is_none()
             || self.qbit_options.qbit_username.is_none()

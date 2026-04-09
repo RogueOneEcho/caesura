@@ -1,3 +1,5 @@
+//! CLI entry point for caesura.
+
 use caesura::{HostBuilder, init_logger};
 use log::error;
 use std::process::ExitCode;

@@ -193,7 +193,7 @@ fn from_qbit_torrent_prefers_infohash_v1() {
     );
 }
 
-/// Empty `infohash_v1` (e.g. v2-only torrents serialised by qBittorrent) should
+/// Empty `infohash_v1` (e.g. v2-only torrents serialized by qBittorrent) should
 /// fall back to the `hash` field rather than failing on the empty string.
 #[test]
 fn from_qbit_torrent_falls_back_when_infohash_v1_is_empty() {

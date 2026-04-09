@@ -2,8 +2,11 @@ use crate::prelude::*;
 use regex::Regex;
 use tokio::process::Command;
 
+/// Regex capturing the semantic version from `flac --version` output.
 pub(crate) const FLAC_VERSION_PATTERN: &str = r"flac (\d+\.\d+(?:\.\d+)?)";
+/// Regex capturing the semantic version from `lame --version` output.
 pub(crate) const LAME_VERSION_PATTERN: &str = r"version (\d+\.\d+)";
+/// Regex capturing the semantic version from `sox --version` output.
 pub(crate) const SOX_VERSION_PATTERN: &str = r"v(\d+\.\d+\.\d+(?:\.\d+)?)";
 
 /// Display version information for caesura and its dependencies.

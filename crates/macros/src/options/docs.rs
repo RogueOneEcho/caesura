@@ -5,7 +5,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{Attribute, Expr, ExprLit, Ident, Lit, Meta, Type};
 
-/// Generates the `doc_metadata` function for documentation generation.
+/// Generate the `doc_metadata` function for documentation generation.
 pub fn generate_doc_metadata(
     struct_name: &Ident,
     struct_attrs: &[Attribute],
@@ -67,7 +67,7 @@ fn generate_cli_flag(f: &ParsedField) -> String {
     }
 }
 
-/// Generates the expression for the serialized default value.
+/// Generate the expression for the serialized default value.
 fn generate_default_value_expr(f: &ParsedField) -> TokenStream2 {
     if let Some(default) = &f.default_value {
         quote! { ::std::option::Option::Some(::serde_json::to_string(&(#default)).unwrap()) }
@@ -82,7 +82,7 @@ fn generate_default_value_expr(f: &ParsedField) -> TokenStream2 {
     }
 }
 
-/// Generates the expression for the default documentation string.
+/// Generate the expression for the default documentation string.
 fn generate_default_doc_expr(f: &ParsedField) -> TokenStream2 {
     if let Some(doc) = &f.default_doc {
         quote! { ::std::option::Option::Some(#doc) }
@@ -91,7 +91,7 @@ fn generate_default_doc_expr(f: &ParsedField) -> TokenStream2 {
     }
 }
 
-/// Extracts doc comment text from doc attributes, joining multiple lines.
+/// Extract doc comment text from doc attributes, joining multiple lines.
 fn extract_doc_string(doc_attrs: &[Attribute]) -> String {
     doc_attrs
         .iter()
@@ -112,7 +112,7 @@ fn extract_doc_string(doc_attrs: &[Attribute]) -> String {
         .join("<br>")
 }
 
-/// Converts a type to a display string for documentation.
+/// Convert a type to a display string for documentation.
 fn type_to_display_string(ty: &Type) -> String {
     match ty {
         Type::Path(type_path) => {
@@ -140,7 +140,7 @@ fn type_to_display_string(ty: &Type) -> String {
     }
 }
 
-/// Converts a field's default value to a string for documentation.
+/// Convert a field's default value to a string for documentation.
 pub fn field_default_to_string(f: &ParsedField) -> Option<String> {
     if let Some(default) = &f.default_value {
         Some(normalize_token_string(&quote!(#default).to_string()))
@@ -153,7 +153,7 @@ pub fn field_default_to_string(f: &ParsedField) -> Option<String> {
     }
 }
 
-/// Normalizes token stringification by removing excess whitespace around punctuation.
+/// Normalize token stringification by removing excess whitespace around punctuation.
 fn normalize_token_string(s: &str) -> String {
     s.replace(" :: ", "::")
         .replace(" !", "!")

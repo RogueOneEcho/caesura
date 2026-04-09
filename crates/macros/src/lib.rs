@@ -1,9 +1,9 @@
 //! Procedural macros for caesura.
 //!
 //! This crate provides:
-//! - `#[derive(Options)]` — generates "partial" struct variants with `Option<T>` fields,
+//! - `#[derive(Options)]` - generates "partial" struct variants with `Option<T>` fields,
 //!   plus trait implementations for merging, resolution, and validation.
-//! - `#[derive(CommandEnum)]` — generates clap CLI infrastructure from command enums.
+//! - `#[derive(CommandEnum)]` - generates clap CLI infrastructure from command enums.
 //!
 //! # Hygiene
 //!

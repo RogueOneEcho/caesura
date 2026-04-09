@@ -180,6 +180,7 @@ impl VerifyCommand {
         issues
     }
 
+    /// Verify the source files match the torrent hash, unless disabled in options.
     pub(crate) async fn hash_check(
         &self,
         source: &Source,
@@ -250,6 +251,7 @@ impl VerifyCommand {
         Ok(path)
     }
 
+    /// Check whether all FLAC files share an unnecessary common subdirectory prefix.
     pub fn subdirectory_checks(flacs: &[FlacFile]) -> Vec<SourceIssue> {
         // source.directory is the root directory of the torrent. If all flacs share a subdirectory
         // within that, it is unnecessary and trumpable. Multi-disc sets may separate items by

@@ -46,6 +46,7 @@ pub fn get_torrent_id_from_torrent_url(url: &str) -> Option<u32> {
     Some(id)
 }
 
+/// Extract the group ID from a torrent group URL.
 #[must_use]
 #[cfg(test)]
 pub fn get_group_id_from_url(url: &str) -> Option<u32> {

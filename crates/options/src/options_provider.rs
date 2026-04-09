@@ -58,7 +58,7 @@ impl OptionsProvider {
         }
     }
 
-    /// Register a partial options type, extracting from [`ArgMatches`] if applicable.
+    /// Register a partial options type, extracting from [`clap::ArgMatches`] if applicable.
     pub fn register<P>(&mut self, services: &mut ServiceCollection)
     where
         P: OptionsPartialContract,

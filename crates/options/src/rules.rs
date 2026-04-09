@@ -6,16 +6,49 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 /// Validation rule violation for a configuration option.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub enum OptionRule {
+    /// Option usage has changed and the previous value is no longer accepted.
+    ///
+    /// Fields: option name, rejected value, explanation of the change.
     Changed(String, String, String),
+    /// Required option is not set.
+    ///
+    /// Field: option name.
     NotSet(String),
+    /// Option requires another option to be set.
+    ///
+    /// Fields: dependent option name, required option name.
     Dependent(String, String),
+    /// Option must have at least one value.
+    ///
+    /// Field: option name.
     IsEmpty(String),
+    /// URL option does not start with `http://` or `https://`.
+    ///
+    /// Fields: option name, offending URL.
     UrlNotHttp(String, String),
+    /// URL option has an invalid trailing `/`.
+    ///
+    /// Fields: option name, offending URL.
     UrlInvalidSuffix(String, String),
+    /// File or directory path does not exist.
+    ///
+    /// Fields: option name, offending path.
     DoesNotExist(String, String),
+    /// Duration string could not be parsed.
+    ///
+    /// Fields: option name, offending duration string.
     DurationInvalid(String, String),
+    /// Hash string could not be parsed.
+    ///
+    /// Fields: option name, offending hash string.
     HashInvalid(String, String),
+    /// Config file could not be deserialized.
+    ///
+    /// Field: deserialization error message.
     ConfigDeserialize(String),
+    /// Option value could not be extracted from CLI arguments.
+    ///
+    /// Fields: option name, extraction error message.
     CliExtract(String, String),
 }
 

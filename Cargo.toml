@@ -58,6 +58,15 @@ thiserror = "2.0.18"
 tokio = { version = "1.51.0", features = ["full"] }
 unicode-width = "0.2.2"
 
+[workspace.lints.rust]
+missing_docs = "warn"
+
+[workspace.lints.rustdoc]
+bare_urls = "warn"
+broken_intra_doc_links = "warn"
+invalid_html_tags = "warn"
+private_intra_doc_links = "allow"
+
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 
