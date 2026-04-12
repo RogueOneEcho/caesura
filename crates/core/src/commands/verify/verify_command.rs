@@ -60,7 +60,7 @@ impl VerifyCommand {
         debug!("{} {}", "Verifying".bold(), source);
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.append(&mut self.api_checks(source));
-        issues.append(&mut self.flac_checks(source));
+        issues.append(&mut self.flac_checks(source)?);
         if let Some(issue) = self.hash_check(source).await? {
             issues.push(issue);
         }
@@ -69,74 +69,32 @@ impl VerifyCommand {
 
     /// Validate the source against the API.
     fn api_checks(&self, source: &Source) -> Vec<SourceIssue> {
-        let mut issues: Vec<SourceIssue> = Vec::new();
-        if source.group.category_name != "Music" {
-            issues.push(SourceIssue::Category {
-                actual: source.group.category_name.clone(),
-            });
-        }
-        if source.torrent.scene {
-            issues.push(SourceIssue::Scene);
-        }
-        if source.torrent.lossy_master_approved == Some(true) {
-            issues.push(SourceIssue::LossyMaster);
-        }
-        if source.torrent.lossy_web_approved == Some(true) {
-            issues.push(SourceIssue::LossyWeb);
-        }
-        if source.torrent.trumpable == Some(true) {
-            issues.push(SourceIssue::Trumpable);
-        }
-        if source.torrent.remastered == Some(false) {
-            issues.push(SourceIssue::Unconfirmed);
-        }
-        let excluded_tags: Vec<String> = self
-            .verify_options
-            .exclude_tags
-            .clone()
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|x| source.group.tags.contains(x))
-            .collect();
-        if !excluded_tags.is_empty() {
-            issues.push(SourceIssue::Excluded {
-                tags: excluded_tags,
-            });
-        }
+        let exclude_tags = self.verify_options.exclude_tags.clone().unwrap_or_default();
         let target_formats = self.targets.get(source.format, &source.existing);
-        if target_formats.is_empty() {
-            issues.push(SourceIssue::Existing {
-                formats: source.existing.clone(),
-            });
-        }
+        let mut issues = Vec::new();
+        issues.extend(check_category(source));
+        issues.extend(check_scene(source));
+        issues.extend(check_lossy_master(source));
+        issues.extend(check_lossy_web(source));
+        issues.extend(check_trumpable(source));
+        issues.extend(check_unconfirmed(source));
+        issues.extend(check_excluded_tags(source, &exclude_tags));
+        issues.extend(check_existing_formats(source, &target_formats));
         issues
     }
 
-    #[allow(
-        clippy::cast_sign_loss,
-        clippy::cast_possible_wrap,
-        clippy::as_conversions
-    )]
-    fn flac_checks(&self, source: &Source) -> Vec<SourceIssue> {
-        if !source.directory.is_dir() {
-            return vec![SourceIssue::MissingDirectory {
-                path: source.directory.clone(),
-            }];
+    fn flac_checks(&self, source: &Source) -> Result<Vec<SourceIssue>, Failure<VerifyAction>> {
+        if let Some(issue) = check_directory_exists(source) {
+            return Ok(vec![issue]);
         }
         let flacs = Collector::get_flacs_with_context(&source.directory);
         if flacs.is_empty() {
-            return vec![SourceIssue::NoFlacs {
+            return Ok(vec![SourceIssue::NoFlacs {
                 path: source.directory.clone(),
-            }];
+            }]);
         }
         let mut issues: Vec<SourceIssue> = Vec::new();
-        let api_flacs = source.torrent.get_flacs();
-        if flacs.len() != api_flacs.len() {
-            issues.push(SourceIssue::FlacCount {
-                expected: api_flacs.len(),
-                actual: flacs.len(),
-            });
-        }
+        issues.extend(check_flac_count(source, flacs.len()));
 
         issues.append(&mut VerifyCommand::subdirectory_checks(&flacs));
 
@@ -144,7 +102,6 @@ impl VerifyCommand {
             .targets
             .get_max_path_length(source.format, &source.existing);
         let output_dir = self.paths.get_output_dir();
-        let mut too_long = false;
         for flac in flacs {
             if let Some(max_target) = max_target {
                 let path = self
@@ -153,31 +110,16 @@ impl VerifyCommand {
                     .strip_prefix(output_dir.clone())
                     .expect("should be able to strip prefix from transcode path")
                     .to_path_buf();
-                let length = path.to_string_lossy().chars().count() as isize;
-                let excess = length - MAX_PATH_LENGTH;
-                if excess > 0 {
-                    let excess = excess as usize;
-                    issues.push(SourceIssue::Length { path, excess });
-                    Shortener::suggest_track_name(&flac);
-                    too_long = true;
-                }
+                issues.extend(check_path_length(&path));
             }
-            let tags = TagVerifier::execute(&flac, source)
-                .unwrap_or(vec!["failed to retrieve tags".to_owned()]);
-            if !tags.is_empty() {
-                issues.push(SourceIssue::MissingTags {
-                    path: flac.path.clone(),
-                    tags,
-                });
-            }
+            let tag_issue = TagVerifier::execute(&flac, source)
+                .map_err(Failure::wrap(VerifyAction::VerifyTags))?;
+            issues.extend(tag_issue);
             for error in StreamVerifier::execute(&flac) {
                 issues.push(error);
             }
         }
-        if too_long {
-            Shortener::suggest_album_name(source);
-        }
-        issues
+        Ok(issues)
     }
 
     /// Verify the source files match the torrent hash, unless disabled in options.
@@ -265,4 +207,41 @@ impl VerifyCommand {
         }
         vec![]
     }
+}
+
+/// Check the source directory exists.
+pub(crate) fn check_directory_exists(source: &Source) -> Option<SourceIssue> {
+    if !source.directory.is_dir() {
+        return Some(SourceIssue::MissingDirectory {
+            path: source.directory.clone(),
+        });
+    }
+    None
+}
+
+/// Check the FLAC file count matches the torrent metadata.
+pub(crate) fn check_flac_count(source: &Source, actual: usize) -> Option<SourceIssue> {
+    let expected = source.torrent.get_flacs().len();
+    if actual != expected {
+        return Some(SourceIssue::FlacCount { expected, actual });
+    }
+    None
+}
+
+/// Check the transcode path length does not exceed the maximum.
+#[allow(
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap,
+    clippy::as_conversions
+)]
+pub(crate) fn check_path_length(path: &Path) -> Option<SourceIssue> {
+    let length = path.to_string_lossy().chars().count() as isize;
+    let excess = length - MAX_PATH_LENGTH;
+    if excess > 0 {
+        return Some(SourceIssue::Length {
+            path: path.to_path_buf(),
+            excess: excess as usize,
+        });
+    }
+    None
 }

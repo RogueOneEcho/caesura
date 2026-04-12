@@ -1,11 +1,13 @@
 //! Verify a FLAC source is suitable for transcoding.
 
+pub(crate) use api_verifier::*;
 pub(crate) use stream_verifier::*;
 pub(crate) use tag_verifier::*;
 pub(crate) use verify_action::*;
 pub(crate) use verify_command::*;
 pub(crate) use verify_status::*;
 
+mod api_verifier;
 mod stream_verifier;
 mod tag_verifier;
 #[cfg(test)]

@@ -19,4 +19,6 @@ pub enum VerifyAction {
     RenameTorrentFile,
     #[error("verify torrent hash")]
     VerifyHash,
+    #[error("verify tags")]
+    VerifyTags,
 }

@@ -217,3 +217,82 @@ fn test_subdirectory_checks() {
     )]);
     assert_eq!(result.len(), 0);
 }
+
+#[test]
+fn check_directory_exists_exists() {
+    // Arrange
+    let mut source = mock_source();
+    source.directory = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+    // Act + Assert
+    assert!(check_directory_exists(&source).is_none());
+}
+
+#[test]
+fn check_directory_exists_missing() {
+    // Arrange
+    let mut source = mock_source();
+    source.directory = PathBuf::from("/nonexistent/path");
+
+    // Act + Assert
+    assert_eq!(
+        check_directory_exists(&source),
+        Some(SourceIssue::MissingDirectory {
+            path: PathBuf::from("/nonexistent/path")
+        })
+    );
+}
+
+#[test]
+fn check_flac_count_matches() {
+    // Arrange
+    let source = mock_source();
+    let actual = source.torrent.get_flacs().len();
+
+    // Act + Assert
+    assert!(check_flac_count(&source, actual).is_none());
+}
+
+#[test]
+fn check_flac_count_mismatch() {
+    // Arrange
+    let source = mock_source();
+
+    // Act + Assert
+    assert_eq!(
+        check_flac_count(&source, 5),
+        Some(SourceIssue::FlacCount {
+            expected: 1,
+            actual: 5
+        })
+    );
+}
+
+#[test]
+fn check_path_length_within_limit() {
+    let path = PathBuf::from("a".repeat(180));
+    assert_eq!(check_path_length(&path), None);
+}
+
+#[test]
+fn check_path_length_exceeds_limit() {
+    let path = PathBuf::from("a".repeat(185));
+    assert_eq!(
+        check_path_length(&path),
+        Some(SourceIssue::Length {
+            path: path.clone(),
+            excess: 5,
+        })
+    );
+}
+
+fn mock_source() -> Source {
+    Source {
+        torrent: gazelle_api::Torrent::mock(),
+        group: gazelle_api::Group::mock(),
+        existing: BTreeSet::new(),
+        format: SourceFormat::Flac,
+        directory: PathBuf::from("/tmp/test"),
+        metadata: Metadata::new(&gazelle_api::Group::mock(), &gazelle_api::Torrent::mock()),
+    }
+}
