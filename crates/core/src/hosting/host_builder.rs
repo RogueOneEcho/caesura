@@ -5,7 +5,7 @@ use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, ServiceProvider, singleton_as_self};
 use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
 use qbittorrent_api::{QBittorrentClientFactory, QBittorrentClientOptions, QBittorrentClientTrait};
-use rogue_logging::InitLog;
+use rogue_logging::{InitLog, Logger};
 use std::fs::read_to_string;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
@@ -53,17 +53,7 @@ impl HostBuilder {
         }
         services
             // Add main services
-            .add(singleton_as_self().from(|provider| {
-                let options = provider.get_required::<SharedOptions>();
-                let logger = Ref::new(
-                    default_logger()
-                        .with_verbosity(options.verbosity)
-                        .with_time_format(options.log_time)
-                        .create(),
-                );
-                logger.clone().init();
-                logger
-            }))
+            .add(singleton_as_self().from(logger_factory))
             .add(SoxFactory::singleton())
             .add(PathManager::transient())
             .add(IdProvider::transient())
@@ -89,10 +79,7 @@ impl HostBuilder {
             .add(QueueListCommand::transient())
             .add(QueueRemoveCommand::transient())
             .add(QueueSummaryCommand::transient())
-            .add(singleton_as_self().from(|provider| {
-                let options = provider.get_required::<CacheOptions>();
-                Ref::new(Queue::from_options(options))
-            }))
+            .add(Queue::singleton())
             // Add spectrogram services
             .add(SpectrogramCommand::transient())
             .add(SpectrogramJobFactory::transient())
@@ -260,6 +247,18 @@ fn gazelle_factory(services: &ServiceProvider) -> Ref<Box<dyn GazelleClientTrait
         },
     };
     Ref::new(Box::new(factory.create()) as Box<dyn GazelleClientTrait + Send + Sync>)
+}
+
+fn logger_factory(provider: &ServiceProvider) -> Ref<Logger> {
+    let options = provider.get_required::<SharedOptions>();
+    let logger = Ref::new(
+        default_logger()
+            .with_verbosity(options.verbosity)
+            .with_time_format(options.log_time)
+            .create(),
+    );
+    logger.clone().init();
+    logger
 }
 
 #[expect(clippy::type_complexity, reason = "collection of job results")]

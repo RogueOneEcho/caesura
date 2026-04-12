@@ -18,12 +18,12 @@ use std::fs::create_dir;
 ///  `10,000` total ≈  `39` per chunk
 ///  `50,000` total ≈ `195` per chunk
 /// `100,000` total ≈ `390` per chunk
-#[injectable]
 pub(crate) struct Queue {
     /// Path to the queue file
     table: Table<20, 1, QueueItem>,
 }
 
+#[injectable]
 impl Queue {
     /// Create a new [`Queue`]
     pub(crate) fn from_path(path: PathBuf) -> Self {
