@@ -5,6 +5,7 @@ use crate::prelude::*;
 pub(crate) struct VerifyCommand {
     verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
+    api_verifier: Ref<ApiVerifier>,
     targets: Ref<TargetFormatProvider>,
     paths: Ref<PathManager>,
     torrents: Ref<TorrentFileProvider>,
@@ -55,29 +56,12 @@ impl VerifyCommand {
     ) -> Result<VerifySuccess, Failure<VerifyAction>> {
         debug!("{} {}", "Verifying".bold(), source);
         let mut issues: Vec<SourceIssue> = Vec::new();
-        issues.append(&mut self.api_checks(source));
+        issues.append(&mut self.api_verifier.execute(source));
         issues.append(&mut self.flac_checks(source)?);
         if let Some(issue) = self.hash_check(source).await? {
             issues.push(issue);
         }
         Ok(VerifySuccess { issues })
-    }
-
-    /// Validate the source against the API.
-    fn api_checks(&self, source: &Source) -> Vec<SourceIssue> {
-        let exclude_tags = self.verify_options.exclude_tags.clone().unwrap_or_default();
-        let target_formats = self.targets.get(source.format, &source.existing);
-        let mut issues = Vec::new();
-        issues.extend(check_category(source));
-        issues.extend(check_scene(source));
-        issues.extend(check_possible_scene(source));
-        issues.extend(check_lossy_master(source));
-        issues.extend(check_lossy_web(source));
-        issues.extend(check_trumpable(source));
-        issues.extend(check_unconfirmed(source));
-        issues.extend(check_excluded_tags(source, &exclude_tags));
-        issues.extend(check_existing_formats(source, &target_formats));
-        issues
     }
 
     fn flac_checks(&self, source: &Source) -> Result<Vec<SourceIssue>, Failure<VerifyAction>> {

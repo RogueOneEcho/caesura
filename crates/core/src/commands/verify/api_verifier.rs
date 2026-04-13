@@ -1,5 +1,37 @@
 use crate::prelude::*;
 
+/// Verify a [`Source`] against the subset of rules that only need API data.
+#[injectable]
+pub(crate) struct ApiVerifier {
+    /// Verify options containing exclude tags.
+    verify_options: Ref<VerifyOptions>,
+    /// Target format provider.
+    targets: Ref<TargetFormatProvider>,
+}
+
+impl ApiVerifier {
+    /// Run API-only checks on a [`Source`].
+    ///
+    /// Returns a vector of [`SourceIssue`] entries; an empty vector means the
+    /// source passed every API-only rule.
+    #[must_use]
+    pub(crate) fn execute(&self, source: &Source) -> Vec<SourceIssue> {
+        let exclude_tags = self.verify_options.exclude_tags.as_deref().unwrap_or(&[]);
+        let target_formats = self.targets.get(source.format, &source.existing);
+        let mut issues: Vec<SourceIssue> = Vec::new();
+        issues.extend(check_category(source));
+        issues.extend(check_scene(source));
+        issues.extend(check_possible_scene(source));
+        issues.extend(check_lossy_master(source));
+        issues.extend(check_lossy_web(source));
+        issues.extend(check_trumpable(source));
+        issues.extend(check_unconfirmed(source));
+        issues.extend(check_excluded_tags(source, exclude_tags));
+        issues.extend(check_existing_formats(source, &target_formats));
+        issues
+    }
+}
+
 /// Check the source group category is "Music".
 pub(crate) fn check_category(source: &Source) -> Option<SourceIssue> {
     if source.group.category_name != "Music" {
