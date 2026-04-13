@@ -7,6 +7,8 @@ pub(crate) enum InspectAction {
     ReadDir,
     #[error("open audio file")]
     OpenFile,
+    #[error("seek audio file")]
+    SeekFile,
     #[error("read FLAC file")]
     ReadFlacFile,
     #[error("read MPEG file")]

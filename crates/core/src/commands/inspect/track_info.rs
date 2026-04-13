@@ -1,11 +1,12 @@
 use super::picture_info::{PictureInfo, collect_pictures};
 use crate::prelude::*;
-use lofty::config::ParseOptions;
+use lofty::config::{ParseOptions, ParsingMode};
 use lofty::file::{AudioFile, TaggedFile, TaggedFileExt};
 use lofty::flac::FlacFile;
 use lofty::mpeg::{ChannelMode, MpegFile};
 use lofty::tag::{ItemKey, ItemValue};
 use std::fs::File;
+use std::io::{Seek, SeekFrom};
 use std::time::Duration;
 
 /// FLAC file extension.
@@ -121,14 +122,13 @@ impl TrackInfo {
             .unwrap_or(path)
             .to_string_lossy()
             .into_owned();
-        let options = ParseOptions::default();
         let extension = path
             .extension()
             .map(|e| e.to_string_lossy().to_lowercase())
             .unwrap_or_default();
         let mut info = match extension.as_str() {
-            FLAC => Self::from_flac(&mut file, path, options),
-            MP3 => Self::from_mpeg(&mut file, path, options),
+            FLAC => Self::from_flac(&mut file, path, ParseOptions::default()),
+            MP3 => read_mpeg_with_fallback(&mut file, path),
             _ => Err(
                 Failure::new(InspectAction::OpenFile, InspectError::UnsupportedExtension)
                     .with("extension", extension)
@@ -218,6 +218,56 @@ fn get_tag_string(file: &TaggedFile, key: ItemKey) -> Option<String> {
         .iter()
         .find_map(|t| t.get_string(key))
         .map(ToOwned::to_owned)
+}
+
+/// Read an MPEG file with progressively relaxed parsing.
+///
+/// - Tries `Strict`, `BestAttempt`, then `Relaxed`
+/// - Returns the result from the strictest mode that succeeds
+/// - Logs a warning if a fallback was needed
+fn read_mpeg_with_fallback(
+    file: &mut File,
+    path: &Path,
+) -> Result<TrackInfo, Failure<InspectAction>> {
+    let modes = [
+        ParsingMode::Strict,
+        ParsingMode::BestAttempt,
+        ParsingMode::Relaxed,
+    ];
+    let mut error = None;
+    for mode in modes {
+        let options = ParseOptions::default().parsing_mode(mode);
+        trace!(
+            "Parsing with {} mode: {}",
+            format_parsing_mode(mode),
+            path.display()
+        );
+        match TrackInfo::from_mpeg(file, path, options) {
+            Ok(info) => {
+                return Ok(info);
+            }
+            Err(e) => {
+                warn!(
+                    "Unable to parse with {} mode\n{}",
+                    format_parsing_mode(mode),
+                    e.render()
+                );
+                error = Some(e);
+                file.seek(SeekFrom::Start(0))
+                    .map_err(Failure::wrap_with_path(InspectAction::SeekFile, path))?;
+            }
+        }
+    }
+    Err(error.expect("errors should be an error"))
+}
+
+fn format_parsing_mode(mode: ParsingMode) -> String {
+    match mode {
+        ParsingMode::Strict => "strict".to_owned(),
+        ParsingMode::BestAttempt => "best attempt".to_owned(),
+        ParsingMode::Relaxed => "relaxed".to_owned(),
+        unknown => format!("{unknown:?}"),
+    }
 }
 
 /// Format a channel mode for display.

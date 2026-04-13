@@ -56,7 +56,10 @@ pub struct FlacGenerator {
     disc_number: Option<String>,
     date: Option<String>,
 
-    // Cover image
+    /// Additional Vorbis comment tags
+    extra_tags: Vec<(String, String)>,
+
+    /// Cover image
     embed_cover: bool,
 }
 
@@ -174,6 +177,13 @@ impl FlacGenerator {
         self
     }
 
+    /// Add an arbitrary Vorbis comment tag.
+    #[must_use]
+    pub fn with_vorbis_tag(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.extra_tags.push((key.into(), value.into()));
+        self
+    }
+
     /// Embed a cover image (100x100 gradient PNG).
     #[must_use]
     pub fn with_cover_image(mut self) -> Self {
@@ -269,6 +279,9 @@ impl FlacGenerator {
         }
         if let Some(date) = &self.date {
             args.push(format!("--set-tag=DATE={date}"));
+        }
+        for (key, value) in &self.extra_tags {
+            args.push(format!("--set-tag={key}={value}"));
         }
         if args.is_empty() {
             return Ok(());
