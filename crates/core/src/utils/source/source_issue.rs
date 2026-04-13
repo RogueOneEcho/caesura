@@ -43,6 +43,7 @@ pub enum SourceIssue {
         actual: String,
     },
     Scene,
+    PossibleScene,
     LossyMaster,
     LossyWeb,
     Trumpable,
@@ -149,6 +150,9 @@ impl Display for SourceIssue {
             }
             Category { actual } => format!("Category was not Music: {actual}"),
             Scene => "Scene releases are not supported".to_owned(),
+            PossibleScene => {
+                "File path and file list contain no spaces, likely a scene release".to_owned()
+            }
             LossyMaster => "Lossy master releases need approval".to_owned(),
             LossyWeb => "Lossy web releases need approval".to_owned(),
             Trumpable => "Source is trumpable".to_owned(),

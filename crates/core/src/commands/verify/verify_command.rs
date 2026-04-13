@@ -74,6 +74,7 @@ impl VerifyCommand {
         let mut issues = Vec::new();
         issues.extend(check_category(source));
         issues.extend(check_scene(source));
+        issues.extend(check_possible_scene(source));
         issues.extend(check_lossy_master(source));
         issues.extend(check_lossy_web(source));
         issues.extend(check_trumpable(source));

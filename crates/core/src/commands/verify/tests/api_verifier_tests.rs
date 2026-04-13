@@ -132,3 +132,31 @@ fn check_existing_formats_none_available() {
         })
     );
 }
+
+#[test]
+fn check_possible_scene_has_spaces() {
+    let source = mock_source();
+    assert_eq!(check_possible_scene(&source), None);
+}
+
+#[test]
+fn check_possible_scene_no_spaces() {
+    let mut source = mock_source();
+    source.torrent.file_path = "Artist-Album-24BIT-WEB-FLAC-2026-GRP".to_owned();
+    source.torrent.file_list =
+        "01_Track_One.flac{{{10000}}}|||02_Track_Two.flac{{{10000}}}".to_owned();
+    assert_eq!(
+        check_possible_scene(&source),
+        Some(SourceIssue::PossibleScene)
+    );
+}
+
+#[test]
+/// File path without spaces but file list with spaces should pass.
+fn check_possible_scene_file_path_no_spaces() {
+    let mut source = mock_source();
+    source.torrent.file_path = "Artist-Album-2026".to_owned();
+    source.torrent.file_list =
+        "01 Track One.flac{{{10000}}}|||02 Track Two.flac{{{10000}}}".to_owned();
+    assert_eq!(check_possible_scene(&source), None);
+}

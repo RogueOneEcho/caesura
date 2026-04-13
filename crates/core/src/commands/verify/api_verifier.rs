@@ -18,6 +18,17 @@ pub(crate) fn check_scene(source: &Source) -> Option<SourceIssue> {
     None
 }
 
+/// Check the source does not look like an unmarked scene release.
+///
+/// Scene releases typically use underscores instead of spaces in both the
+/// directory name and file names.
+pub(crate) fn check_possible_scene(source: &Source) -> Option<SourceIssue> {
+    if !source.torrent.file_path.contains(' ') && !source.torrent.file_list.contains(' ') {
+        return Some(SourceIssue::PossibleScene);
+    }
+    None
+}
+
 /// Check the source does not have lossy master approval.
 pub(crate) fn check_lossy_master(source: &Source) -> Option<SourceIssue> {
     if source.torrent.lossy_master_approved == Some(true) {
