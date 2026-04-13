@@ -1,17 +1,13 @@
 use crate::prelude::*;
-use gazelle_api::GazelleClientTrait;
-use std::fs::create_dir;
-use tokio::fs::{File, rename};
-use tokio::io::AsyncWriteExt;
 
 /// Verify a FLAC source is suitable for transcoding.
 #[injectable]
 pub(crate) struct VerifyCommand {
     verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
-    api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     targets: Ref<TargetFormatProvider>,
     paths: Ref<PathManager>,
+    torrents: Ref<TorrentFileProvider>,
 }
 
 impl VerifyCommand {
@@ -96,9 +92,7 @@ impl VerifyCommand {
         }
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.extend(check_flac_count(source, flacs.len()));
-
         issues.append(&mut VerifyCommand::subdirectory_checks(&flacs));
-
         let max_target = self
             .targets
             .get_max_path_length(source.format, &source.existing);
@@ -143,55 +137,10 @@ impl VerifyCommand {
         &self,
         source: &Source,
     ) -> Result<PathBuf, Failure<VerifyAction>> {
-        let path = self.paths.get_source_torrent_path(source);
-        if path.is_file() {
-            trace!("{} cached torrent file: {}", "Using".bold(), path.display());
-            return Ok(path);
-        }
-        trace!(
-            "{} torrent file as it's not cached: {}",
-            "Downloading".bold(),
-            path.display()
-        );
-        let torrents_dir = path.parent().expect("torrent path should have parent");
-        if !torrents_dir.is_dir() {
-            create_dir(torrents_dir).map_err(Failure::wrap_with_path(
-                VerifyAction::CreateTorrentDirectory,
-                torrents_dir,
-            ))?;
-        }
-        let mut tmp_path = path.clone();
-        tmp_path.as_mut_os_string().push(".tmp");
-        let mut file = File::create(&tmp_path)
+        self.torrents
+            .get(source.torrent.id)
             .await
-            .map_err(Failure::wrap_with_path(
-                VerifyAction::CreateTorrentFile,
-                &tmp_path,
-            ))?;
-        let buffer = self
-            .api
-            .download_torrent(source.torrent.id)
-            .await
-            .map_err(Failure::wrap(VerifyAction::DownloadTorrent))?;
-        file.write_all(&buffer)
-            .await
-            .map_err(Failure::wrap_with_path(
-                VerifyAction::WriteTorrentFile,
-                &tmp_path,
-            ))?;
-        file.flush().await.map_err(Failure::wrap_with_path(
-            VerifyAction::FlushTorrentFile,
-            &tmp_path,
-        ))?;
-        drop(file);
-        rename(&tmp_path, &path).await.map_err(Failure::wrap_with(
-            VerifyAction::RenameTorrentFile,
-            |f| {
-                f.with("from", tmp_path.display().to_string())
-                    .with("to", path.display().to_string())
-            },
-        ))?;
-        Ok(path)
+            .map_err(Failure::wrap(VerifyAction::GetSourceTorrent))
     }
 
     /// Check whether all FLAC files share an unnecessary common subdirectory prefix.

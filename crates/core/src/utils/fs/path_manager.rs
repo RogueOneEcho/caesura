@@ -64,12 +64,11 @@ impl PathManager {
 
     /// Path to the cached source `.torrent` file.
     #[must_use]
-    pub fn get_source_torrent_path(&self, source: &Source) -> PathBuf {
-        let id = source.torrent.id;
+    pub fn get_source_torrent_path(&self, torrent_id: u32) -> PathBuf {
         let indexer = self.shared_options.get_indexer();
         self.get_cache_dir()
             .join("torrents")
-            .join(format!("{id}.{}.torrent", indexer.as_lowercase()))
+            .join(format!("{torrent_id}.{}.torrent", indexer.as_lowercase()))
     }
 
     /// Output directory path with tilde expansion applied.

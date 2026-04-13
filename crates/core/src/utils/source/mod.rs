@@ -6,6 +6,7 @@ pub(crate) use source::*;
 pub(crate) use source_action::*;
 pub(crate) use source_issue::*;
 pub(crate) use source_provider::SourceProvider;
+pub(crate) use torrent_file_provider::*;
 pub(crate) use url_helpers::*;
 
 mod id_provider;
@@ -18,4 +19,5 @@ mod status_helpers;
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests;
+mod torrent_file_provider;
 mod url_helpers;

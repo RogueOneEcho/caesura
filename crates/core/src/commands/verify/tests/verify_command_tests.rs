@@ -54,7 +54,7 @@ async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
         .expect("should not fail")
         .expect("should find source");
     let paths = host.services.get_required::<PathManager>();
-    let torrent_path = paths.get_source_torrent_path(&source);
+    let torrent_path = paths.get_source_torrent_path(source.torrent.id);
     assert!(!torrent_path.is_file(), "torrent should not be cached yet");
 
     // Act
@@ -113,7 +113,7 @@ async fn get_source_torrent_leaves_no_file_on_download_failure() -> Result<(), T
         .expect("should not fail")
         .expect("should find source");
     let paths = host.services.get_required::<PathManager>();
-    let torrent_path = paths.get_source_torrent_path(&source);
+    let torrent_path = paths.get_source_torrent_path(source.torrent.id);
 
     // Act
     let result = verifier.get_source_torrent(&source).await;

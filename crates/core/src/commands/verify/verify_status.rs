@@ -15,7 +15,7 @@ impl VerifySuccess {
 }
 
 /// Serializable status of a [`VerifyCommand`] execution.
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub(crate) struct VerifyStatus {
     /// Whether the source passed verification.
     pub verified: bool,
