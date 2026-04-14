@@ -19,20 +19,8 @@ fn minimal_tags() -> Tag {
     Tag::new(TagType::Id3v2)
 }
 
-fn mock_source() -> Source {
-    Source {
-        torrent: gazelle_api::Torrent::mock(),
-        group: gazelle_api::Group::mock(),
-        targets: TargetFormat::all(),
-        format: SourceFormat::Flac,
-        directory: PathBuf::from("/tmp/test"),
-        metadata: Metadata::new(&gazelle_api::Group::mock(), &gazelle_api::Torrent::mock()),
-        url: get_permalink(&RED_URL.to_owned(), 123, 456),
-    }
-}
-
 fn classical_source() -> Source {
-    let mut source = mock_source();
+    let mut source = Source::mock();
     source.group.tags = vec!["classical".to_owned()];
     source
 }
@@ -106,7 +94,7 @@ fn check_composer_tag_classical_missing() {
 #[test]
 fn check_composer_tag_not_classical() {
     let tags = minimal_tags();
-    let source = mock_source();
+    let source = Source::mock();
     assert_eq!(check_composer_tag(&tags, &source), None);
 }
 

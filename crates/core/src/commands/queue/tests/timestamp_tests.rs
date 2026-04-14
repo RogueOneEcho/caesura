@@ -1,21 +1,21 @@
 use crate::testing_prelude::*;
 
 #[test]
-fn test_serialize_timestamp() {
+fn timestamp_serialize_offset() {
     let timestamp = TimeStamp::from_rfc3339("2024-10-18T12:34:56+01:30").unwrap();
     let serialized = serde_json::to_string(&timestamp).unwrap();
     assert_eq!(serialized, "\"2024-10-18T11:04:56Z\"");
 }
 
 #[test]
-fn test_serialize_timestamp_zulu() {
+fn timestamp_serialize_zulu() {
     let timestamp = TimeStamp::from_rfc3339("2024-10-18T12:34:56Z").unwrap();
     let serialized = serde_json::to_string(&timestamp).unwrap();
     assert_eq!(serialized, "\"2024-10-18T12:34:56Z\"");
 }
 
 #[test]
-fn deserialize_timestamp() {
+fn timestamp_deserialize_offset() {
     // Arrange
     let json = "\"2024-10-18T12:34:56-02:30\"";
     let deserialized: TimeStamp = serde_json::from_str(json).unwrap();
@@ -28,7 +28,7 @@ fn deserialize_timestamp() {
 }
 
 #[test]
-fn round_trip_serialization() {
+fn timestamp_round_trip() {
     // Arrange
     let timestamp = TimeStamp::from_rfc3339("2024-10-18T12:34:56-02:30").unwrap();
 
@@ -41,7 +41,7 @@ fn round_trip_serialization() {
 }
 
 #[test]
-fn invalid_timestamp_format() {
+fn timestamp_deserialize_invalid_format() {
     // Arrange
     let invalid_json = "\"invalid-date-format\"";
 

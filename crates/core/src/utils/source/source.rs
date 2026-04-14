@@ -27,3 +27,22 @@ impl Display for Source {
         write!(formatter, "{}", text.hyperlink(&self.url))
     }
 }
+
+impl Source {
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        let group = Group::mock();
+        let torrent = Torrent::mock();
+        let metadata = Metadata::new(&Group::mock(), &Torrent::mock());
+        let url = get_permalink(&RED_URL.to_owned(), group.id, torrent.id);
+        Self {
+            torrent,
+            group,
+            targets: TargetFormat::all(),
+            format: SourceFormat::Flac24,
+            directory: PathBuf::from("/path/to/content"),
+            metadata,
+            url,
+        }
+    }
+}

@@ -328,7 +328,7 @@ fn shared_options_yaml_round_trip() {
 
 /// Verify CLI values override YAML values during merge.
 #[test]
-fn merge_cli_overrides_yaml() {
+fn batch_options_partial_merge_cli_overrides() {
     // Arrange
     let mut cli = BatchOptionsPartial {
         limit: Some(10),
@@ -352,7 +352,7 @@ fn merge_cli_overrides_yaml() {
 
 /// Verify YAML values fill in None values during merge.
 #[test]
-fn merge_yaml_fills_none_values() {
+fn batch_options_partial_merge_fills_none() {
     // Arrange
     let mut cli = BatchOptionsPartial::default();
     let yaml = BatchOptionsPartial {
@@ -371,7 +371,7 @@ fn merge_yaml_fills_none_values() {
 
 /// Verify merge does not override already-set values.
 #[test]
-fn merge_does_not_override_set_values() {
+fn shared_options_partial_merge_preserves_set() {
     // Arrange
     let mut cli = SharedOptionsPartial {
         indexer: Some("custom".to_owned()),
@@ -396,7 +396,7 @@ fn merge_does_not_override_set_values() {
 
 /// Verify `with_options` overrides options registered by `register_options`.
 #[test]
-fn with_options_overrides_default_registration() {
+fn host_builder_with_options_overrides() {
     use crate::hosting::HostBuilder;
 
     // Arrange: HostBuilder::new() registers default options via register_options()
@@ -743,8 +743,7 @@ fn qbit_options_trailing_slash() {
 
 /// Verify invalid YAML produces a config deserialization error.
 #[test]
-#[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-fn options_provider_register__invalid_yaml() {
+fn options_provider_register_invalid_yaml() {
     // Arrange
     let yaml = "qbit_url:\n  - not\n  - a\n  - string\n".to_owned();
     let mut provider = OptionsProvider::from_yaml(Some(yaml));
@@ -764,8 +763,7 @@ fn options_provider_register__invalid_yaml() {
 
 /// Verify valid YAML does not produce errors.
 #[test]
-#[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-fn options_provider_register__valid_yaml() {
+fn options_provider_register_valid_yaml() {
     // Arrange
     let yaml = "qbit_url: http://127.0.0.1:8080\n".to_owned();
     let mut provider = OptionsProvider::from_yaml(Some(yaml));
@@ -780,8 +778,7 @@ fn options_provider_register__valid_yaml() {
 
 /// Verify missing YAML does not produce errors.
 #[test]
-#[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-fn options_provider_register__no_yaml() {
+fn options_provider_register_no_yaml() {
     // Arrange
     let mut provider = OptionsProvider::from_yaml(None);
     let mut services = di::ServiceCollection::new();

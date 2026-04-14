@@ -1,5 +1,5 @@
 ---
-source: crates/core/src/utils/testing/tests/flac_generator_tests.rs
+source: crates/core/src/utils/testing/samples/tests/flac_generator_tests.rs
 expression: metadata
 ---
 duration_ms: 65000

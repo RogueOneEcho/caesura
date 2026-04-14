@@ -1,7 +1,7 @@
 use crate::testing_prelude::*;
 
 #[test]
-fn from_flac24_without_existing() {
+fn target_format_provider_get_flac24_without_existing() {
     // Arrange
     let source = SourceFormat::Flac24;
     let target = TargetFormat::all();
@@ -17,7 +17,7 @@ fn from_flac24_without_existing() {
 }
 
 #[test]
-fn from_flac_without_existing() {
+fn target_format_provider_get_flac_without_existing() {
     // Arrange
     let source = SourceFormat::Flac;
     let target = TargetFormat::all();
@@ -33,7 +33,7 @@ fn from_flac_without_existing() {
 }
 
 #[test]
-fn from_flac24_with_existing() {
+fn target_format_provider_get_flac24_with_existing() {
     // Arrange
     let source = SourceFormat::Flac24;
     let target = TargetFormat::all();
@@ -50,7 +50,7 @@ fn from_flac24_with_existing() {
 }
 
 #[test]
-fn from_flac_with_existing() {
+fn target_format_provider_get_flac_with_existing() {
     // Arrange
     let source = SourceFormat::Flac;
     let target = TargetFormat::all();
@@ -67,7 +67,7 @@ fn from_flac_with_existing() {
 }
 
 #[test]
-fn from_flac_applies_allowed() {
+fn target_format_provider_get_flac_applies_allowed() {
     // Arrange
     let source = SourceFormat::Flac;
     let target = BTreeSet::from([TargetFormat::_320, TargetFormat::V0]);
@@ -83,7 +83,7 @@ fn from_flac_applies_allowed() {
 }
 
 #[test]
-fn from_flac_applies_allowed_none() {
+fn target_format_provider_get_flac_applies_allowed_none() {
     // Arrange
     let source = SourceFormat::Flac;
     let target = BTreeSet::from([TargetFormat::_320]);

@@ -6,7 +6,7 @@ use qbittorrent_api::get_torrents::Torrent as QbitTorrent;
 use std::collections::HashMap;
 
 #[test]
-fn from_torrent_with_valid_data() {
+fn queue_item_from_torrent_valid_data() {
     // Arrange
     let path = PathBuf::from("/path/to/file.torrent");
     let name = "Artist - Album (2018) [FLAC]";
@@ -29,7 +29,7 @@ fn from_torrent_with_valid_data() {
 }
 
 #[test]
-fn from_torrent_with_missing_source() {
+fn queue_item_from_torrent_missing_source() {
     // Arrange
     let path = PathBuf::from("/path/to/file.torrent");
     let torrent = make_torrent(
@@ -46,7 +46,7 @@ fn from_torrent_with_missing_source() {
 }
 
 #[test]
-fn from_torrent_with_missing_comment() {
+fn queue_item_from_torrent_missing_comment() {
     // Arrange
     let path = PathBuf::from("/path/to/file.torrent");
     let torrent = make_torrent("Example Torrent", Some("ABC"), None);
@@ -59,7 +59,7 @@ fn from_torrent_with_missing_comment() {
 }
 
 #[test]
-fn from_torrent_with_invalid_comment() {
+fn queue_item_from_torrent_invalid_comment() {
     // Arrange
     let path = PathBuf::from("/path/to/file.torrent");
     let torrent = make_torrent("Example Torrent", Some("Indexer"), Some("invalid_url"));
@@ -72,7 +72,7 @@ fn from_torrent_with_invalid_comment() {
 }
 
 #[test]
-fn from_qbit_torrent_with_red_comment() {
+fn queue_item_from_qbit_torrent_red_comment() {
     // Arrange
     let torrent = QbitTorrent {
         comment: Some("https://redacted.sh/torrents.php?id=100&torrentid=200".to_owned()),
@@ -93,7 +93,7 @@ fn from_qbit_torrent_with_red_comment() {
 }
 
 #[test]
-fn from_qbit_torrent_with_red_old_domain() {
+fn queue_item_from_qbit_torrent_red_old_domain() {
     // Arrange
     let torrent = QbitTorrent {
         comment: Some("https://redacted.ch/torrents.php?torrentid=126".to_owned()),
@@ -109,7 +109,7 @@ fn from_qbit_torrent_with_red_old_domain() {
 }
 
 #[test]
-fn from_qbit_torrent_with_ops_comment() {
+fn queue_item_from_qbit_torrent_ops_comment() {
     // Arrange
     let torrent = QbitTorrent {
         comment: Some("https://orpheus.network/torrents.php?id=300&torrentid=400".to_owned()),
@@ -125,7 +125,7 @@ fn from_qbit_torrent_with_ops_comment() {
 }
 
 #[test]
-fn from_qbit_torrent_with_missing_comment() {
+fn queue_item_from_qbit_torrent_missing_comment() {
     // Arrange
     let torrent = QbitTorrent {
         comment: None,
@@ -141,7 +141,7 @@ fn from_qbit_torrent_with_missing_comment() {
 }
 
 #[test]
-fn from_qbit_torrent_with_unknown_domain() {
+fn queue_item_from_qbit_torrent_unknown_domain() {
     // Arrange
     let torrent = QbitTorrent {
         comment: Some("https://unknown.example/torrents.php?id=1&torrentid=2".to_owned()),
@@ -157,7 +157,7 @@ fn from_qbit_torrent_with_unknown_domain() {
 }
 
 #[test]
-fn from_qbit_torrent_with_invalid_hash() {
+fn queue_item_from_qbit_torrent_invalid_hash() {
     // Arrange
     let torrent = QbitTorrent {
         hash: "not-a-valid-hex".to_owned(),
@@ -174,7 +174,7 @@ fn from_qbit_torrent_with_invalid_hash() {
 /// For hybrid torrents qBittorrent's `hash` field is the truncated SHA-256 v2 info
 /// hash, so `infohash_v1` must take precedence to recover the v1 SHA-1.
 #[test]
-fn from_qbit_torrent_prefers_infohash_v1() {
+fn queue_item_from_qbit_torrent_prefers_infohash_v1() {
     // Arrange
     let v1 = "1111111111111111111111111111111111111111";
     let torrent = QbitTorrent {
@@ -196,7 +196,7 @@ fn from_qbit_torrent_prefers_infohash_v1() {
 /// Empty `infohash_v1` (e.g. v2-only torrents serialized by qBittorrent) should
 /// fall back to the `hash` field rather than failing on the empty string.
 #[test]
-fn from_qbit_torrent_falls_back_when_infohash_v1_is_empty() {
+fn queue_item_from_qbit_torrent_empty_infohash_v1_fallback() {
     // Arrange
     let torrent = QbitTorrent {
         infohash_v1: Some(String::new()),

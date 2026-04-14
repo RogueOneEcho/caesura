@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 /// Verify default config path ends with the expected platform suffix.
 #[test]
-fn default_config_path() {
+fn path_manager_default_config_path() {
     let path = PathManager::default_config_path();
     let expected = if is_docker() {
         "/config.yml"
@@ -30,7 +30,7 @@ fn default_config_path() {
 
 /// Verify default cache directory ends with the expected platform suffix.
 #[test]
-fn default_cache_dir() {
+fn path_manager_default_cache_dir() {
     let path = PathManager::default_cache_dir();
     let expected = if is_docker() {
         "/cache"
@@ -56,7 +56,7 @@ fn default_cache_dir() {
 
 /// Verify default output directory ends with the expected platform suffix.
 #[test]
-fn default_output_dir() {
+fn path_manager_default_output_dir() {
     let path = PathManager::default_output_dir();
     let expected = if is_docker() {
         "/output"

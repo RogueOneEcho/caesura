@@ -3,7 +3,7 @@ use crate::utils::SourceIssue::*;
 use insta::assert_snapshot;
 
 #[test]
-fn test_serialize_source_rules_vec() {
+fn source_issue_serialize() {
     // Arrange
     let rules = all_source_issues();
 

@@ -3,14 +3,14 @@ use std::fs::remove_dir_all;
 
 /// Test that `TestDirectory::new` creates the directory.
 #[test]
-fn new_creates_directory() {
+fn test_directory_new() {
     let test_dir = TestDirectory::new();
     assert!(test_dir.exists(), "directory should exist after new");
 }
 
 /// Test that directory is deleted on drop.
 #[test]
-fn drop_deletes_directory() {
+fn test_directory_drop() {
     let path = {
         let test_dir = TestDirectory::new();
         assert!(test_dir.exists());
@@ -21,7 +21,7 @@ fn drop_deletes_directory() {
 
 /// Test that `keep()` prevents deletion on drop.
 #[test]
-fn keep_prevents_deletion() {
+fn test_directory_keep() {
     let path = {
         let test_dir = TestDirectory::new().keep();
         assert!(test_dir.exists());
@@ -33,7 +33,7 @@ fn keep_prevents_deletion() {
 
 /// Test that `output()` returns correct subdirectory path.
 #[test]
-fn output_returns_subdirectory() {
+fn test_directory_output() {
     let test_dir = TestDirectory::new();
     let output = test_dir.output();
     assert!(output.ends_with("output"));
@@ -42,7 +42,7 @@ fn output_returns_subdirectory() {
 
 /// Test that `cache()` returns correct subdirectory path.
 #[test]
-fn cache_returns_subdirectory() {
+fn test_directory_cache() {
     let test_dir = TestDirectory::new();
     let cache = test_dir.cache();
     assert!(cache.ends_with("cache"));
@@ -51,7 +51,7 @@ fn cache_returns_subdirectory() {
 
 /// Test that `Deref` allows path operations.
 #[test]
-fn deref_allows_path_operations() {
+fn test_directory_deref() {
     let test_dir = TestDirectory::new();
     let joined = test_dir.join("subdir");
     assert!(joined.starts_with(&test_dir));

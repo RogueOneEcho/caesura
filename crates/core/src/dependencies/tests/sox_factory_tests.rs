@@ -6,7 +6,7 @@ use crate::testing_prelude::*;
 
 /// When only `sox_ng: true` is set, the factory selects the `sox_ng` binary.
 #[test]
-fn sox_ng_true_selects_sox_ng_binary() {
+fn sox_factory_sox_ng_true() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_ng: Some(true),
@@ -26,7 +26,7 @@ fn sox_ng_true_selects_sox_ng_binary() {
 
 /// When only `sox_ng: false` is set, the factory selects the `sox` binary.
 #[test]
-fn sox_ng_false_selects_sox_binary() {
+fn sox_factory_sox_ng_false() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_ng: Some(false),
@@ -41,7 +41,7 @@ fn sox_ng_false_selects_sox_binary() {
 
 /// When `sox_path` contains `sox_ng`, `sox_ng` defaults to `true`.
 #[test]
-fn sox_path_containing_sox_ng_infers_sox_ng_true() {
+fn sox_factory_path_containing_sox_ng() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_path: Some(PathBuf::from("/usr/local/bin/sox_ng")),
@@ -61,7 +61,7 @@ fn sox_path_containing_sox_ng_infers_sox_ng_true() {
 
 /// When `sox_path` does not contain `sox_ng`, `sox_ng` falls back to auto-detection.
 #[test]
-fn sox_path_without_sox_ng_falls_back_to_detection() {
+fn sox_factory_path_without_sox_ng() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_path: Some(PathBuf::from("/usr/local/bin/sox")),
@@ -75,7 +75,7 @@ fn sox_path_without_sox_ng_falls_back_to_detection() {
 
 /// When both are set explicitly, no defaulting occurs.
 #[test]
-fn both_explicit_no_defaulting() {
+fn sox_factory_both_explicit() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_path: Some(PathBuf::from("/opt/sox/bin/sox")),
@@ -95,7 +95,7 @@ fn both_explicit_no_defaulting() {
 
 /// When both are set explicitly with `sox_ng: false`, the path is preserved as-is.
 #[test]
-fn explicit_path_with_sox_ng_false() {
+fn sox_factory_explicit_path_sox_ng_false() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_path: Some(PathBuf::from("/custom/sox_ng")),
@@ -113,7 +113,7 @@ fn explicit_path_with_sox_ng_false() {
 
 /// When neither is set, the factory falls back to auto-detected behavior.
 #[test]
-fn neither_set_falls_back_to_auto_detection() {
+fn sox_factory_neither_set() {
     // Arrange
     let options = SoxOptionsPartial {
         sox_path: None,

@@ -1,7 +1,7 @@
 use super::super::*;
 
 #[test]
-fn valid_total_formats() {
+fn get_numeric_from_total_format_slash_separated() {
     assert_eq!(get_numeric_from_total_format("1/1"), Some((1, 1)));
     assert_eq!(get_numeric_from_total_format("1/12"), Some((1, 12)));
     assert_eq!(get_numeric_from_total_format("2/6"), Some((2, 6)));
@@ -10,7 +10,7 @@ fn valid_total_formats() {
 }
 
 #[test]
-fn invalid_total_formats() {
+fn get_numeric_from_total_format_missing_slash() {
     assert_eq!(get_numeric_from_total_format(""), None);
     assert_eq!(get_numeric_from_total_format("1"), None);
     assert_eq!(get_numeric_from_total_format("12"), None);
@@ -18,7 +18,7 @@ fn invalid_total_formats() {
 }
 
 #[test]
-fn valid_vinyl_formats() {
+fn get_numeric_from_vinyl_format_letter_prefixed() {
     assert_eq!(get_numeric_from_vinyl_format("A1"), Some((1, 1)));
     assert_eq!(get_numeric_from_vinyl_format("A"), Some((1, 1)));
     assert_eq!(get_numeric_from_vinyl_format("B"), Some((2, 1)));
@@ -29,7 +29,7 @@ fn valid_vinyl_formats() {
 }
 
 #[test]
-fn invalid_vinyl_formats() {
+fn get_numeric_from_vinyl_format_no_letter() {
     assert_eq!(get_numeric_from_vinyl_format(""), None);
     assert_eq!(get_numeric_from_vinyl_format("12"), None);
     assert_eq!(get_numeric_from_vinyl_format("1A"), None);

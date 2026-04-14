@@ -172,7 +172,7 @@ async fn hash_check_returns_issue_on_mismatch() -> Result<(), TestError> {
 
 #[test]
 #[allow(clippy::indexing_slicing)]
-fn test_subdirectory_checks() {
+fn verify_command_subdirectory_checks() {
     let source_dir = PathBuf::from("source/dir");
 
     // Good source because all flacs share the 'b' subdirectory.

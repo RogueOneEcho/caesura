@@ -79,8 +79,7 @@ mod tests {
     use gazelle_api::{Media, Torrent};
 
     #[test]
-    #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-    fn edition_key__same_torrent_fields() {
+    fn edition_key_same_torrent_fields() {
         // Arrange
         let left = Torrent {
             remaster_catalogue_number: "1234567".to_owned(),
@@ -99,8 +98,7 @@ mod tests {
     }
 
     #[test]
-    #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-    fn edition_key__zero_padded_catalogue_numbers_match() {
+    fn edition_key_zero_padded_catalogue_numbers_match() {
         // Arrange
         let left = Torrent {
             remaster_catalogue_number: "1234567".to_owned(),
@@ -119,8 +117,7 @@ mod tests {
     }
 
     #[test]
-    #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-    fn edition_key__different_catalogue_numbers_differ() {
+    fn edition_key_different_catalogue_numbers_differ() {
         // Arrange
         let left = Torrent {
             remaster_catalogue_number: "1234567".to_owned(),
@@ -139,8 +136,7 @@ mod tests {
     }
 
     #[test]
-    #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-    fn edition_key__different_media_differ() {
+    fn edition_key_different_media_differ() {
         // Arrange
         let left = Torrent {
             media: Media::CD,
@@ -159,8 +155,7 @@ mod tests {
     }
 
     #[test]
-    #[expect(non_snake_case, reason = "double underscore test qualifier convention")]
-    fn edition_key__different_title_differ() {
+    fn edition_key_different_title_differ() {
         // Arrange
         let left = Torrent {
             remaster_title: "Deluxe".to_owned(),
