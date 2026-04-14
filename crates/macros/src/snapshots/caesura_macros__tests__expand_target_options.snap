@@ -26,6 +26,16 @@ pub struct TargetOptionsPartial {
     #[arg(long = "allow-existing", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub allow_existing: Option<bool>,
+    /// Allow transcoding when the source has empty edition fields but an existing torrent does not.
+    ///
+    /// Default: `false`
+    #[arg(
+        long = "allow-less-specific",
+        num_args = 0..= 1,
+        default_missing_value = "true"
+    )]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub allow_less_specific: Option<bool>,
     /// Use random dithering when resampling with `SoX`.
     ///
     /// By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither
@@ -54,6 +64,7 @@ impl TargetOptionsPartial {
         let mut errors = ::std::vec::Vec::new();
         let target = self.target;
         let allow_existing = self.allow_existing;
+        let allow_less_specific = self.allow_less_specific;
         let sox_random_dither = self.sox_random_dither;
         let exclude_vorbis_comments = self.exclude_vorbis_comments;
         let resolved = TargetOptions {
@@ -62,6 +73,7 @@ impl TargetOptionsPartial {
                     vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0]
                 }),
             allow_existing: allow_existing.unwrap_or_default(),
+            allow_less_specific: allow_less_specific.unwrap_or_default(),
             sox_random_dither: sox_random_dither.unwrap_or_default(),
             exclude_vorbis_comments: exclude_vorbis_comments
                 .unwrap_or_else(|| TargetOptions::default_exclude_vorbis_comments()),
@@ -84,6 +96,9 @@ impl ::caesura_options::OptionsPartialContract for TargetOptionsPartial {
         }
         if self.allow_existing.is_none() {
             self.allow_existing = other.allow_existing;
+        }
+        if self.allow_less_specific.is_none() {
+            self.allow_less_specific = other.allow_less_specific;
         }
         if self.sox_random_dither.is_none() {
             self.sox_random_dither = other.sox_random_dither;
@@ -109,6 +124,7 @@ impl ::std::default::Default for TargetOptions {
         Self {
             target: vec![TargetFormat::Flac, TargetFormat::_320, TargetFormat::V0],
             allow_existing: ::std::default::Default::default(),
+            allow_less_specific: ::std::default::Default::default(),
             sox_random_dither: ::std::default::Default::default(),
             exclude_vorbis_comments: TargetOptions::default_exclude_vorbis_comments(),
         }
@@ -131,6 +147,11 @@ impl ::caesura_options::Documented for TargetOptions {
                 : "bool", default_value : ::std::option::Option::Some("false"
                 .to_owned()), default_doc : ::std::option::Option::None, description :
                 "Allow transcoding to existing formats.<br>Note: This is only useful for development and should probably not be used.",
+                }, ::caesura_options::FieldDoc { config_key : "allow_less_specific",
+                cli_flag : "--allow-less-specific", field_type : "bool", default_value :
+                ::std::option::Option::Some("false".to_owned()), default_doc :
+                ::std::option::Option::None, description :
+                "Allow transcoding when the source has empty edition fields but an existing torrent does not.",
                 }, ::caesura_options::FieldDoc { config_key : "sox_random_dither",
                 cli_flag : "--sox-random-dither", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :

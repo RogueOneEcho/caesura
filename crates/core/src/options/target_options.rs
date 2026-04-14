@@ -16,6 +16,10 @@ pub struct TargetOptions {
     #[arg(long)]
     pub allow_existing: bool,
 
+    /// Allow transcoding when the source has empty edition fields but an existing torrent does not.
+    #[arg(long)]
+    pub allow_less_specific: bool,
+
     /// Use random dithering when resampling with `SoX`.
     ///
     /// By default, `SoX` runs in repeatable mode (`-R`) which seeds the dither

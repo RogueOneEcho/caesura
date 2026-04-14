@@ -280,6 +280,7 @@ fn target_options_yaml_round_trip() {
     let original = TargetOptionsPartial {
         target: Some(vec![TargetFormat::Flac, TargetFormat::V0]),
         allow_existing: Some(true),
+        allow_less_specific: Some(true),
         sox_random_dither: Some(true),
         exclude_vorbis_comments: Some(TargetOptions::default_exclude_vorbis_comments()),
     };

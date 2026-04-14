@@ -24,6 +24,40 @@ impl EditionKey {
             media: torrent.media.to_string(),
         }
     }
+
+    /// Check whether this edition key is a less specific match.
+    ///
+    /// Returns `true` when `remaster_title` and `media` match exactly, at
+    /// least one field is less specific (empty on self but populated on other),
+    /// and no populated fields conflict.
+    ///
+    /// Exact matches return `false` (those are handled by `PartialEq`).
+    #[must_use]
+    pub(crate) fn is_less_specific_than(&self, other: &EditionKey) -> bool {
+        if self.remaster_title != other.remaster_title || self.media != other.media {
+            return false;
+        }
+        let label = self.remaster_record_label == other.remaster_record_label;
+        let number = self.remaster_catalogue_number == other.remaster_catalogue_number;
+        if self.remaster_record_label.is_empty() && number {
+            return true;
+        }
+        if self.remaster_catalogue_number.is_empty() && label {
+            return true;
+        }
+        false
+    }
+
+    /// Create a mock [`EditionKey`] for testing.
+    #[cfg(test)]
+    pub(crate) fn mock() -> Self {
+        Self {
+            remaster_title: "Test Edition".to_owned(),
+            remaster_record_label: "Test Label".to_owned(),
+            remaster_catalogue_number: "TEST-001".to_owned(),
+            media: "CD".to_owned(),
+        }
+    }
 }
 
 /// Remove leading zeros from a string.
@@ -142,6 +176,116 @@ mod tests {
             EditionKey::from_torrent(&left),
             EditionKey::from_torrent(&right)
         );
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_missing_label() {
+        // Arrange
+        let source = EditionKey {
+            remaster_record_label: String::new(),
+            ..EditionKey::mock()
+        };
+        let existing = EditionKey::mock();
+
+        // Act & Assert
+        assert!(source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_missing_catalogue() {
+        // Arrange
+        let source = EditionKey {
+            remaster_catalogue_number: String::new(),
+            ..EditionKey::mock()
+        };
+        let existing = EditionKey::mock();
+
+        // Act & Assert
+        assert!(source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_source_more_specific() {
+        // Arrange
+        let source = EditionKey::mock();
+        let existing = EditionKey {
+            remaster_record_label: String::new(),
+            remaster_catalogue_number: String::new(),
+            ..EditionKey::mock()
+        };
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_different_values() {
+        // Arrange
+        let source = EditionKey::mock();
+        let existing = EditionKey {
+            remaster_record_label: "Other Label".to_owned(),
+            remaster_catalogue_number: "OTHER-001".to_owned(),
+            ..EditionKey::mock()
+        };
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_cross_field() {
+        // Arrange
+        let source = EditionKey {
+            remaster_catalogue_number: String::new(),
+            ..EditionKey::mock()
+        };
+        let existing = EditionKey {
+            remaster_record_label: String::new(),
+            ..EditionKey::mock()
+        };
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_exact_match() {
+        // Arrange
+        let source = EditionKey::mock();
+        let existing = EditionKey::mock();
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_than_different_media() {
+        // Arrange
+        let source = EditionKey {
+            remaster_record_label: String::new(),
+            ..EditionKey::mock()
+        };
+        let existing = EditionKey {
+            media: "WEB".to_owned(),
+            ..EditionKey::mock()
+        };
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn edition_key_is_less_specific_mismatch() {
+        // Arrange
+        let source = EditionKey {
+            remaster_record_label: String::new(),
+            remaster_catalogue_number: "TEST-002".to_owned(),
+            ..EditionKey::mock()
+        };
+        let existing = EditionKey::mock();
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
     }
 
     #[test]

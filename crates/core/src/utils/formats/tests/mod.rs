@@ -1,1 +1,2 @@
+mod existing_format_provider_tests;
 mod target_format_provider_tests;

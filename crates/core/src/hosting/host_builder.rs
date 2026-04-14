@@ -64,6 +64,7 @@ impl HostBuilder {
             .add(Publisher::transient())
             .add(DebugSubscriber::transient())
             .add(ProgressBarSubscriber::transient())
+            .add(ExistingFormatProvider::transient())
             .add(TargetFormatProvider::transient())
             // Add batch services
             .add(BatchCommand::transient())
