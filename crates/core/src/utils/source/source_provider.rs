@@ -57,6 +57,7 @@ impl SourceProvider {
             Err(issue) => return Ok(Err(issue)),
         };
         let metadata = Metadata::new(&group, &torrent);
+        let url = get_permalink(&self.options.indexer_url, group.id, torrent.id);
         Ok(Ok(Source {
             torrent,
             group,
@@ -64,6 +65,7 @@ impl SourceProvider {
             format,
             directory,
             metadata,
+            url,
         }))
     }
 

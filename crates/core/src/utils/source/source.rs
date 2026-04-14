@@ -17,14 +17,13 @@ pub struct Source {
     pub directory: PathBuf,
     /// Audio metadata extracted from the source files.
     pub metadata: Metadata,
+    /// Permalink URL to the torrent on the tracker.
+    pub url: String,
 }
 
 impl Display for Source {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
-        write!(
-            formatter,
-            "{}",
-            SourceName::get(&self.metadata).gray().italic()
-        )
+        let text = SourceName::get(&self.metadata).gray().italic();
+        write!(formatter, "{}", text.hyperlink(&self.url))
     }
 }
