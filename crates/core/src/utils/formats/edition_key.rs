@@ -1,10 +1,4 @@
 use gazelle_api::Torrent;
-use regex::Regex;
-use std::sync::LazyLock;
-
-/// Match a zero-padded number, capturing the significant digits.
-static ZERO_PAD_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^0*(\d+)$").expect("regex should compile"));
 
 /// Edition identity for grouping torrents of the same release.
 ///
@@ -32,9 +26,17 @@ impl EditionKey {
     }
 }
 
-/// Remove leading zeros from a numeric string.
+/// Remove leading zeros from a string.
 fn remove_zero_pad(input: &str) -> String {
-    ZERO_PAD_REGEX.replace(input, "$1").to_string()
+    if input.is_empty() {
+        return String::new();
+    }
+    let trimmed = input.trim_start_matches('0');
+    if trimmed.is_empty() {
+        "0".to_owned()
+    } else {
+        trimmed.to_owned()
+    }
 }
 
 #[cfg(test)]
@@ -150,5 +152,9 @@ mod tests {
         assert_eq!(remove_zero_pad("9999990"), "9999990");
         assert_eq!(remove_zero_pad("09999990"), "9999990");
         assert_eq!(remove_zero_pad("-09999990"), "-09999990");
+        assert_eq!(remove_zero_pad("000"), "0");
+        assert_eq!(remove_zero_pad("0"), "0");
+        assert_eq!(remove_zero_pad("0abc"), "abc");
+        assert_eq!(remove_zero_pad(""), "");
     }
 }
