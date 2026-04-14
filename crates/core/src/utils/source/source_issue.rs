@@ -51,8 +51,12 @@ pub enum SourceIssue {
     Excluded {
         tags: Vec<String>,
     },
+    #[deprecated(since = "0.29.0", note = "use `NoTargets` instead")]
     Existing {
         formats: BTreeSet<ExistingFormat>,
+    },
+    NoTargets {
+        formats: BTreeSet<TargetFormat>,
     },
     NotSource {
         format: String,
@@ -125,7 +129,11 @@ pub enum SourceIssue {
 }
 
 impl Display for SourceIssue {
-    #[allow(deprecated)]
+    #[expect(
+        deprecated,
+        clippy::too_many_lines,
+        reason = "match arms for many variants"
+    )]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         use SourceIssue::*;
         let message = match self {
@@ -159,6 +167,12 @@ impl Display for SourceIssue {
             Unconfirmed => "Source is missing edition information".to_owned(),
             Excluded { tags } => format!("Excluded tags: {}", join_humanized(tags)),
             Existing { formats } => {
+                format!(
+                    "All allowed formats have been transcoded to already: {}",
+                    join_humanized(formats)
+                )
+            }
+            NoTargets { formats } => {
                 format!(
                     "All allowed formats have been transcoded to already: {}",
                     join_humanized(formats)

@@ -4,7 +4,7 @@ fn mock_source() -> Source {
     Source {
         torrent: gazelle_api::Torrent::mock(),
         group: gazelle_api::Group::mock(),
-        existing: BTreeSet::new(),
+        targets: TargetFormat::all(),
         format: SourceFormat::Flac,
         directory: PathBuf::from("/tmp/test"),
         metadata: Metadata::new(&gazelle_api::Group::mock(), &gazelle_api::Torrent::mock()),
@@ -115,21 +115,21 @@ fn check_excluded_tags_match() {
 }
 
 #[test]
-fn check_existing_formats_available() {
+fn check_targets_available() {
     let source = mock_source();
-    let targets = BTreeSet::from([TargetFormat::_320]);
-    assert_eq!(check_existing_formats(&source, &targets), None);
+    let configured = TargetFormat::all();
+    assert_eq!(check_targets(&source, &configured), None);
 }
 
 #[test]
-fn check_existing_formats_none_available() {
+fn check_targets_none_available() {
     let mut source = mock_source();
-    source.existing = BTreeSet::from([ExistingFormat::_320, ExistingFormat::V0]);
-    let targets = BTreeSet::new();
+    source.targets = BTreeSet::new();
+    let configured = TargetFormat::all();
     assert_eq!(
-        check_existing_formats(&source, &targets),
-        Some(SourceIssue::Existing {
-            formats: BTreeSet::from([ExistingFormat::_320, ExistingFormat::V0])
+        check_targets(&source, &configured),
+        Some(SourceIssue::NoTargets {
+            formats: TargetFormat::all()
         })
     );
 }

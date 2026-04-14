@@ -5,8 +5,8 @@ use crate::prelude::*;
 pub(crate) struct ApiVerifier {
     /// Verify options containing exclude tags.
     verify_options: Ref<VerifyOptions>,
-    /// Target format provider.
-    targets: Ref<TargetFormatProvider>,
+    /// Target format options.
+    target_options: Ref<TargetOptions>,
 }
 
 impl ApiVerifier {
@@ -17,7 +17,6 @@ impl ApiVerifier {
     #[must_use]
     pub(crate) fn execute(&self, source: &Source) -> Vec<SourceIssue> {
         let exclude_tags = self.verify_options.exclude_tags.as_deref().unwrap_or(&[]);
-        let target_formats = self.targets.get(source.format, &source.existing);
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.extend(check_category(source));
         issues.extend(check_scene(source));
@@ -27,7 +26,8 @@ impl ApiVerifier {
         issues.extend(check_trumpable(source));
         issues.extend(check_unconfirmed(source));
         issues.extend(check_excluded_tags(source, exclude_tags));
-        issues.extend(check_existing_formats(source, &target_formats));
+        let targets = BTreeSet::from_iter(self.target_options.target.clone());
+        issues.extend(check_targets(source, &targets));
         issues
     }
 }
@@ -107,13 +107,13 @@ pub(crate) fn check_excluded_tags(source: &Source, exclude_tags: &[String]) -> O
 }
 
 /// Check there are target formats available for transcoding.
-pub(crate) fn check_existing_formats(
+pub(crate) fn check_targets(
     source: &Source,
-    target_formats: &BTreeSet<TargetFormat>,
+    configured_targets: &BTreeSet<TargetFormat>,
 ) -> Option<SourceIssue> {
-    if target_formats.is_empty() {
-        return Some(SourceIssue::Existing {
-            formats: source.existing.clone(),
+    if source.targets.is_empty() {
+        return Some(SourceIssue::NoTargets {
+            formats: configured_targets.clone(),
         });
     }
     None

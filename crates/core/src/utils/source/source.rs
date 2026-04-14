@@ -9,8 +9,8 @@ pub struct Source {
     pub torrent: Torrent,
     /// Torrent group metadata from the tracker API.
     pub group: Group,
-    /// Formats that already exist for this torrent group.
-    pub existing: BTreeSet<ExistingFormat>,
+    /// Target formats to transcode to.
+    pub targets: BTreeSet<TargetFormat>,
     /// Audio format of the source files.
     pub format: SourceFormat,
     /// Path to the source FLAC directory.

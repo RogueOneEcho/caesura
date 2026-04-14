@@ -11,7 +11,6 @@ pub(crate) struct TranscodeCommand {
     copy_options: Ref<CopyOptions>,
     file_options: Ref<FileOptions>,
     paths: Ref<PathManager>,
-    targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
     additional_job_factory: Ref<AdditionalJobFactory>,
     runner: Ref<JobRunner>,
@@ -41,21 +40,21 @@ impl TranscodeCommand {
         &self,
         source: &Source,
     ) -> Result<TranscodeSuccess, Failure<TranscodeAction>> {
-        let targets = self.targets.get(source.format, &source.existing);
-        if targets.is_empty() {
+        if source.targets.is_empty() {
             return Err(Failure::new(
                 TranscodeAction::Transcode,
                 TranscodeError::NoTranscodes,
             ));
         }
-        let formats: Vec<TranscodeFormatStatus> = targets
+        let formats: Vec<TranscodeFormatStatus> = source
+            .targets
             .iter()
             .map(|&format| TranscodeFormatStatus {
                 format,
                 path: self.paths.get_transcode_target_dir(source, format),
             })
             .collect();
-        let targets = self.skip_completed(source, &targets).await;
+        let targets = self.skip_completed(source, &source.targets).await;
         if targets.is_empty() {
             return Ok(TranscodeSuccess { formats });
         }

@@ -15,7 +15,6 @@ pub(crate) struct UploadCommand {
     source_provider: Ref<SourceProvider>,
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     paths: Ref<PathManager>,
-    targets: Ref<TargetFormatProvider>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
     qbit_options: Ref<QbitOptions>,
     qbit_upload_options: Ref<QbitUploadOptions>,
@@ -55,10 +54,9 @@ impl UploadCommand {
                 return Err(Failure::from_action(UploadAction::InjectTorrent));
             }
         }
-        let targets = self.targets.get(source.format, &source.existing);
         let mut warnings = Vec::new();
         let mut formats = Vec::new();
-        for target in targets {
+        for &target in &source.targets {
             let torrent_path = self.paths.get_torrent_path(source, target);
             if !torrent_path.exists() {
                 warn!("In v0.19.0 the torrent file name format changed.");

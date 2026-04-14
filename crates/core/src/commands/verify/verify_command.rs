@@ -6,7 +6,6 @@ pub(crate) struct VerifyCommand {
     verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
     api_verifier: Ref<ApiVerifier>,
-    targets: Ref<TargetFormatProvider>,
     paths: Ref<PathManager>,
     torrents: Ref<TorrentFileProvider>,
 }
@@ -77,9 +76,7 @@ impl VerifyCommand {
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.extend(check_flac_count(source, flacs.len()));
         issues.append(&mut VerifyCommand::subdirectory_checks(&flacs));
-        let max_target = self
-            .targets
-            .get_max_path_length(source.format, &source.existing);
+        let max_target = get_max_path_length_target(source);
         let output_dir = self.paths.get_output_dir();
         for flac in flacs {
             if let Some(max_target) = max_target {
@@ -160,6 +157,18 @@ pub(crate) fn check_flac_count(source: &Source, actual: usize) -> Option<SourceI
         return Some(SourceIssue::FlacCount { expected, actual });
     }
     None
+}
+
+/// Get the target format with the longest path length.
+///
+/// - `FLAC` + `.flac` = 9 characters
+/// - `320` + `.mp3` = 7 characters
+/// - `V0` + `.mp3` = 6 characters
+///
+/// [`BTreeSet<TargetFormat>`] is ordered by discriminant value so the first
+/// element is always the format with the longest path.
+fn get_max_path_length_target(source: &Source) -> Option<TargetFormat> {
+    source.targets.first().copied()
 }
 
 /// Check the transcode path length does not exceed the maximum.

@@ -63,6 +63,13 @@ impl TargetFormat {
             V0 => Quality::V0,
         }
     }
+
+    /// All formats.
+    #[must_use]
+    #[cfg(test)]
+    pub fn all() -> BTreeSet<TargetFormat> {
+        BTreeSet::from([Flac, _320, V0])
+    }
 }
 
 impl Display for TargetFormat {

@@ -8,6 +8,7 @@ pub struct SourceProvider {
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
     options: Ref<SharedOptions>,
     id_provider: Ref<IdProvider>,
+    target_provider: Ref<TargetFormatProvider>,
 }
 
 impl SourceProvider {
@@ -52,6 +53,7 @@ impl SourceProvider {
             }));
         };
         let existing = ExistingFormatProvider::get(&torrent, &group_torrents);
+        let targets = self.target_provider.get(format, &existing);
         let directory = match self.get_source_directory(&torrent) {
             Ok(dir) => dir,
             Err(issue) => return Ok(Err(issue)),
@@ -61,7 +63,7 @@ impl SourceProvider {
         Ok(Ok(Source {
             torrent,
             group,
-            existing,
+            targets,
             format,
             directory,
             metadata,

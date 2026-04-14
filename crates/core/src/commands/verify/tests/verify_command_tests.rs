@@ -290,7 +290,7 @@ fn mock_source() -> Source {
     Source {
         torrent: gazelle_api::Torrent::mock(),
         group: gazelle_api::Group::mock(),
-        existing: BTreeSet::new(),
+        targets: TargetFormat::all(),
         format: SourceFormat::Flac,
         directory: PathBuf::from("/tmp/test"),
         metadata: Metadata::new(&gazelle_api::Group::mock(), &gazelle_api::Torrent::mock()),

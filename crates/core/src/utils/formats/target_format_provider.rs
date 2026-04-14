@@ -22,19 +22,6 @@ impl TargetFormatProvider {
         }
     }
 
-    /// Get the target format with the longest path length.
-    ///
-    /// `FLAC` + `.flac` = 9 characters
-    /// `320` + `.mp3` = 7 characters
-    /// `V0` + `.mp3` = 6 characters
-    pub fn get_max_path_length(
-        &self,
-        source: SourceFormat,
-        existing: &BTreeSet<ExistingFormat>,
-    ) -> Option<TargetFormat> {
-        self.get(source, existing).first().copied()
-    }
-
     /// Filter the target formats to exclude the source format.
     fn get_with_existing(&self, source: SourceFormat) -> BTreeSet<TargetFormat> {
         let set = BTreeSet::from([source.to_existing()]);
