@@ -75,8 +75,14 @@ pub fn get_indexer_from_url(url: &str) -> Option<Indexer> {
     }
 }
 
-/// Generate a permalink URL for a torrent.
+/// Generate a permalink URL for a torrent including the group ID.
 #[must_use]
-pub fn get_permalink(base: &String, group_id: u32, torrent_id: u32) -> String {
+pub fn get_permalink(base: &str, group_id: u32, torrent_id: u32) -> String {
     format!(r"{base}/torrents.php?id={group_id}&torrentid={torrent_id}#torrent{torrent_id}")
+}
+
+/// Generate a permalink URL for a torrent without the group ID.
+#[must_use]
+pub fn get_torrent_permalink(base: &str, torrent_id: u32) -> String {
+    format!(r"{base}/torrents.php?torrentid={torrent_id}")
 }

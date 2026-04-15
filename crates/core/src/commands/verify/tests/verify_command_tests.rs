@@ -294,6 +294,6 @@ fn mock_source() -> Source {
         format: SourceFormat::Flac,
         directory: PathBuf::from("/tmp/test"),
         metadata: Metadata::new(&gazelle_api::Group::mock(), &gazelle_api::Torrent::mock()),
-        url: get_permalink(&RED_URL.to_owned(), 123, 456),
+        url: get_permalink(RED_URL, 123, 456),
     }
 }

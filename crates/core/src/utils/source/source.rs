@@ -34,7 +34,7 @@ impl Source {
         let group = Group::mock();
         let torrent = Torrent::mock();
         let metadata = Metadata::new(&Group::mock(), &Torrent::mock());
-        let url = get_permalink(&RED_URL.to_owned(), group.id, torrent.id);
+        let url = get_permalink(RED_URL, group.id, torrent.id);
         Self {
             torrent,
             group,

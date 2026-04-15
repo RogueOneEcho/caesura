@@ -4,6 +4,7 @@ use crate::prelude::*;
 use gazelle_api::{Category, GazelleClientTrait, UploadForm};
 use html_escape::decode_html_entities;
 use qbittorrent_api::QBittorrentClientTrait;
+use rogue_logging::Colors;
 use tokio::fs::{copy, hard_link};
 
 /// Upload transcodes of a FLAC source.
@@ -127,11 +128,15 @@ impl UploadCommand {
                 .upload_torrent(form)
                 .await
                 .map_err(Failure::wrap(UploadAction::Upload))?;
-            info!("{} {target} for {source}", "Uploaded".bold());
-            let base = &self.shared_options.indexer_url;
-            let id = response.torrent_id;
-            let link = get_permalink(base, response.group_id, id);
-            info!("{link}");
+            trace!("{} {target} for {source}", "Uploaded".bold());
+            trace!(
+                "{}",
+                get_permalink(
+                    &self.shared_options.indexer_url,
+                    response.group_id,
+                    response.torrent_id,
+                )
+            );
             if self.qbit_upload_options.inject_torrent {
                 let add_options = self.qbit_upload_options.to_add_torrent_options();
                 if let Err(e) = self
@@ -144,7 +149,25 @@ impl UploadCommand {
                     warnings.push(e.to_error());
                 }
             }
-            formats.push(UploadFormatStatus { format: target, id });
+            formats.push(UploadFormatStatus {
+                format: target,
+                id: response.torrent_id,
+            });
+        }
+        if !formats.is_empty() {
+            let base = &self.shared_options.indexer_url;
+            let targets: Vec<_> = formats
+                .iter()
+                .map(|u| {
+                    let link = get_torrent_permalink(base, u.id);
+                    u.format.to_string().gray().italic().hyperlink(&link)
+                })
+                .collect();
+            info!(
+                "{} {} for {source}",
+                "Uploaded".bold(),
+                join_humanized(targets)
+            );
         }
         Ok(UploadSuccess { formats, warnings })
     }
