@@ -799,9 +799,9 @@ dependencies = [
 
 [[package]]
 name = "gazelle_api"
-version = "0.15.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "260545353d10db6a11577c79283cb6bcad43cad6a20d2810325053ce394201d1"
+checksum = "65d7125c325d80cff97cc53dd075cc6a827b0b751f60e249ac6764f339685627"
 dependencies = [
  "async-trait",
  "log",
@@ -2489,9 +2489,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.51.0"
+version = "1.52.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bd1c4c0fc4a7ab90fc15ef6daaa3ec3b893f004f915f2392557ed23237820cd"
+checksum = "a91135f59b1cbf38c91e73cf3386fca9bb77915c45ce2771460c9d92f0f3d776"
 dependencies = [
  "bytes",
  "libc",

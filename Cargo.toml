@@ -29,7 +29,7 @@ dirs = "6.0.0"
 fast_image_resize = { version = "6.0.0", features = ["image"] }
 flat_db = "0.6.0"
 futures = "0.3.32"
-gazelle_api = "0.15.1"
+gazelle_api = "0.17.0"
 html-escape = "0.2.13"
 humantime = "2.3.0"
 image = { version = "0.25.10", default-features = false, features = ["png", "jpeg"] }

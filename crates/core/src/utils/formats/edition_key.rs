@@ -1,4 +1,4 @@
-use gazelle_api::Torrent;
+use gazelle_api::{Media, Torrent};
 
 /// Edition identity for grouping torrents of the same release.
 ///
@@ -10,7 +10,7 @@ pub(crate) struct EditionKey {
     remaster_title: String,
     remaster_record_label: String,
     remaster_catalogue_number: String,
-    media: String,
+    media: Media,
 }
 
 impl EditionKey {
@@ -21,7 +21,7 @@ impl EditionKey {
             remaster_title: torrent.remaster_title.clone(),
             remaster_record_label: torrent.remaster_record_label.clone(),
             remaster_catalogue_number: remove_zero_pad(&torrent.remaster_catalogue_number),
-            media: torrent.media.to_string(),
+            media: torrent.media.clone(),
         }
     }
 
@@ -55,7 +55,7 @@ impl EditionKey {
             remaster_title: "Test Edition".to_owned(),
             remaster_record_label: "Test Label".to_owned(),
             remaster_catalogue_number: "TEST-001".to_owned(),
-            media: "CD".to_owned(),
+            media: Media::CD,
         }
     }
 }
@@ -76,7 +76,7 @@ fn remove_zero_pad(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gazelle_api::{Media, Torrent};
+    use gazelle_api::Torrent;
 
     #[test]
     fn edition_key_same_torrent_fields() {
@@ -261,7 +261,7 @@ mod tests {
             ..EditionKey::mock()
         };
         let existing = EditionKey {
-            media: "WEB".to_owned(),
+            media: Media::WEB,
             ..EditionKey::mock()
         };
 
