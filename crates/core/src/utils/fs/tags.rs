@@ -4,15 +4,17 @@ use std::str::from_utf8;
 use std::sync::LazyLock;
 
 use crate::prelude::*;
-use lofty::config::WriteOptions;
+use lofty::config::{ParseOptions, WriteOptions};
 use lofty::error::LoftyError;
-use lofty::file::TaggedFileExt;
+use lofty::file::{AudioFile, TaggedFileExt};
+use lofty::flac::FlacFile as LoftyFlacFile;
 use lofty::id3::v2::{Frame, Id3v2Tag};
 use lofty::prelude::TagExt;
 use lofty::probe::Probe;
 use lofty::tag::ItemKey::TrackNumber;
 use lofty::tag::{Accessor, ItemKey, Tag, TagType};
 use regex::Regex;
+use std::fs::File;
 
 /// Match vinyl track numbering: letter followed by optional digits.
 ///
@@ -145,9 +147,10 @@ pub(crate) fn vorbis_keys(names: &[String]) -> Vec<ItemKey> {
 
 /// Exclude specified Vorbis comments from a FLAC file on disk.
 ///
-/// - `ENCODER` cannot be stripped from flac files as lofty conflates it with the vendor string
-///   and the FLAC writer always restores the vendor from the file's raw bytes
-/// - <https://github.com/Serial-ATA/lofty-rs/blob/d9eb83ba614001973f9ba3663c9f3e10dd27a702/lofty/src/flac/write.rs#L90-L104>
+/// - Uses the native [`VorbisComments`](lofty::ogg::VorbisComments) type
+/// - Preserves all Vorbis comment keys including those without an [`ItemKey`] mapping
+///   (e.g. `SYNCEDLYRICS`, `DISCOGS_*`)
+/// - Only writes the file if at least one tag was actually removed
 pub(crate) fn exclude_vorbis_comments_from_flac(
     path: &Path,
     keys: &[String],
@@ -155,16 +158,24 @@ pub(crate) fn exclude_vorbis_comments_from_flac(
     if keys.is_empty() {
         return Ok(());
     }
-    let mut file = Probe::open(path)
-        .map_err(Failure::wrap_with_path(TagsAction::OpenFile, path))?
-        .read()
+    let mut file = File::open(path).map_err(Failure::wrap_with_path(TagsAction::OpenFile, path))?;
+    let mut flac = LoftyFlacFile::read_from(&mut file, ParseOptions::default())
         .map_err(Failure::wrap_with_path(TagsAction::ReadTags, path))?;
-    if let Some(vorbis) = file.tag_mut(TagType::VorbisComments) {
-        exclude_tags(vorbis, &vorbis_keys(keys));
-        vorbis
-            .save_to_path(path, WriteOptions::default())
-            .map_err(Failure::wrap_with_path(TagsAction::WriteTags, path))?;
+    let Some(vorbis) = flac.vorbis_comments_mut() else {
+        return Ok(());
+    };
+    let mut removed_any = false;
+    for key in keys {
+        if vorbis.remove(key).count() > 0 {
+            removed_any = true;
+        }
     }
+    if !removed_any {
+        return Ok(());
+    }
+    vorbis
+        .save_to_path(path, WriteOptions::default())
+        .map_err(Failure::wrap_with_path(TagsAction::WriteTags, path))?;
     Ok(())
 }
 
