@@ -3,6 +3,7 @@
 // Internal modules (wildcard re-exports)
 pub(crate) use crate::commands::*;
 pub(crate) use crate::dependencies::*;
+pub(crate) use crate::hosting::*;
 pub(crate) use crate::options::*;
 pub(crate) use crate::utils::*;
 pub(crate) use caesura_options::*;

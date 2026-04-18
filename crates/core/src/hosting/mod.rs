@@ -3,7 +3,9 @@
 mod build_error;
 mod host;
 mod host_builder;
+mod shutdown;
 
 pub use build_error::*;
 pub(crate) use host::*;
 pub use host_builder::*;
+pub use shutdown::*;

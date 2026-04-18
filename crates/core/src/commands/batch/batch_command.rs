@@ -18,6 +18,7 @@ pub(crate) struct BatchCommand {
     transcode: Ref<TranscodeCommand>,
     upload: Ref<UploadCommand>,
     queue: Ref<Queue>,
+    shutdown: Ref<Shutdown>,
 }
 
 impl BatchCommand {
@@ -55,6 +56,10 @@ impl BatchCommand {
         );
         let mut count = 0;
         for hash in items {
+            if self.shutdown.is_requested() {
+                info!("{}", "Shutting down".bold());
+                break;
+            }
             let Some(mut item) = self
                 .queue
                 .get(hash)
@@ -144,14 +149,14 @@ impl BatchCommand {
                     .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                 continue;
             }
-            if spectrogram_enabled {
+            if spectrogram_enabled && !self.shutdown.is_requested() {
                 let result = self.spectrogram.execute(&source).await;
                 if let Err(e) = &result {
                     warn!("{}", e.render());
                 }
                 item.spectrogram = Some(SpectrogramStatus::new(result));
             }
-            if transcode_enabled {
+            if transcode_enabled && !self.shutdown.is_requested() {
                 let result = self.transcode.execute(&source).await;
                 let success = result.is_ok();
                 if let Err(e) = &result {
@@ -166,7 +171,7 @@ impl BatchCommand {
                         .map_err(Failure::wrap(BatchAction::UpdateQueueItem))?;
                     continue;
                 }
-                if upload_enabled {
+                if upload_enabled && !self.shutdown.is_requested() {
                     if let Some(wait_before_upload) = self.batch_options.get_wait_before_upload() {
                         info!("{} {wait_before_upload:?} before upload", "Waiting".bold());
                         sleep(wait_before_upload).await;

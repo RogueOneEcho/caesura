@@ -54,6 +54,7 @@ impl HostBuilder {
         services
             // Add main services
             .add(singleton_as_self().from(logger_factory))
+            .add(Shutdown::singleton())
             .add(SoxFactory::singleton())
             .add(PathManager::transient())
             .add(IdProvider::transient())
