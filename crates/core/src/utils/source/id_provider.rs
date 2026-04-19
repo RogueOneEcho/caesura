@@ -83,7 +83,7 @@ impl Display for IdProviderError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         use IdProviderError::*;
         let message = match self {
-            NoId => "No ID was provided".to_owned(),
+            NoId => "No ID".to_owned(),
             NoMatch => "Input did not match any known types".to_owned(),
             UrlInvalid => "Input was a URL that could not be parsed".to_owned(),
             TorrentFileNotFound => "Input was a torrent file that did not exist".to_owned(),
