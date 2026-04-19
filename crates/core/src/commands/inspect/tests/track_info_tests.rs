@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::testing_prelude::*;
+use lofty::config::ParsingMode;
 
 /// Tolerate non-ISO-8601 values in `ID3v2` TDRL timestamp frames.
 ///
@@ -29,6 +30,11 @@ async fn track_info_read_mp3_with_non_iso8601_tdrl() -> Result<(), TestError> {
     assert!(has_native_tag(&info, "TRCK"));
     assert!(has_native_tag(&info, "TDRC"));
     assert!(!has_native_tag(&info, "TDRL"));
+    assert_eq!(info.parsing_mode, Some(ParsingMode::Relaxed));
+    assert_eq!(
+        info.parsing_error.as_deref(),
+        Some("Encountered an invalid timestamp: Timestamp segment contains non-digit characters"),
+    );
     Ok(())
 }
 
@@ -61,6 +67,11 @@ async fn track_info_read_mp3_with_dot_separated_tdrc() -> Result<(), TestError> 
     assert!(has_native_tag(&info, "TIT2"));
     assert!(has_native_tag(&info, "TRCK"));
     assert!(!has_native_tag(&info, "TDRC"));
+    assert_eq!(info.parsing_mode, Some(ParsingMode::Relaxed));
+    assert_eq!(
+        info.parsing_error.as_deref(),
+        Some("Encountered an invalid timestamp: Timestamp segment contains non-digit characters"),
+    );
     Ok(())
 }
 

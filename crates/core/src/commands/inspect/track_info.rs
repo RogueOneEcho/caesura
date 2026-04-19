@@ -1,10 +1,12 @@
 use super::picture_info::{PictureInfo, collect_pictures};
 use crate::prelude::*;
 use lofty::config::{ParseOptions, ParsingMode};
+use lofty::error::{ErrorKind as LoftyErrorKind, LoftyError};
 use lofty::file::{AudioFile, TaggedFile, TaggedFileExt};
 use lofty::flac::FlacFile;
 use lofty::mpeg::{ChannelMode, MpegFile};
 use lofty::tag::{ItemKey, ItemValue};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Seek, SeekFrom};
 use std::time::Duration;
@@ -54,6 +56,14 @@ pub(crate) struct TrackInfo {
     pub(super) tags: Vec<TagEntry>,
     /// Embedded pictures.
     pub(super) pictures: Vec<PictureInfo>,
+    /// The parsing mode that succeeded for MPEG files.
+    ///
+    /// `None` for FLAC files.
+    pub(super) parsing_mode: Option<ParsingMode>,
+    /// Display string of the last parsing error before the successful mode.
+    ///
+    /// `None` if parsing succeeded on the first attempt, or for FLAC files.
+    pub(super) parsing_error: Option<String>,
 }
 
 impl TrackInfo {
@@ -73,6 +83,8 @@ impl TrackInfo {
             bit_depth: Some(16),
             tags: Vec::new(),
             pictures: Vec::new(),
+            parsing_mode: None,
+            parsing_error: None,
         }
     }
 
@@ -92,6 +104,8 @@ impl TrackInfo {
             bit_depth: None,
             tags: Vec::new(),
             pictures: Vec::new(),
+            parsing_mode: None,
+            parsing_error: None,
         }
     }
 
@@ -106,6 +120,7 @@ impl TrackInfo {
         for file_path in &paths {
             tracks.push(TrackInfo::read(dir, file_path)?);
         }
+        log_parsing_fallbacks(&tracks);
         Ok(tracks)
     }
 
@@ -163,20 +178,16 @@ impl TrackInfo {
             bit_depth: Some(props.bit_depth()),
             tags: collect_tags(&tagged),
             pictures: collect_pictures(&tagged),
+            parsing_mode: None,
+            parsing_error: None,
         })
     }
 
-    /// Create a [`TrackInfo`] from an MPEG (MP3) file.
-    fn from_mpeg(
-        file: &mut File,
-        path: &Path,
-        options: ParseOptions,
-    ) -> Result<Self, Failure<InspectAction>> {
-        let mpeg = MpegFile::read_from(file, options)
-            .map_err(Failure::wrap_with_path(InspectAction::ReadMpegFile, path))?;
+    /// Create a [`TrackInfo`] from an already-parsed [`MpegFile`].
+    fn from_mpeg(mpeg: MpegFile) -> Self {
         let props = *mpeg.properties();
         let tagged = TaggedFile::from(mpeg);
-        Ok(Self {
+        Self {
             sub_path: String::new(),
             file_type: "MP3".to_owned(),
             file_size: 0,
@@ -189,7 +200,9 @@ impl TrackInfo {
             bit_depth: None,
             tags: collect_tags(&tagged),
             pictures: collect_pictures(&tagged),
-        })
+            parsing_mode: None,
+            parsing_error: None,
+        }
     }
 }
 
@@ -220,11 +233,36 @@ fn get_tag_string(file: &TaggedFile, key: ItemKey) -> Option<String> {
         .map(ToOwned::to_owned)
 }
 
+/// Log a summary of MPEG files that required fallback parsing.
+///
+/// - Groups files by parsing mode and error message
+/// - Emits one warning per group
+fn log_parsing_fallbacks(tracks: &[TrackInfo]) {
+    let mut groups: BTreeMap<(String, String), Vec<&str>> = BTreeMap::new();
+    for track in tracks {
+        if let (Some(mode), Some(error)) = (&track.parsing_mode, &track.parsing_error) {
+            let key = (format_parsing_mode(*mode), error.clone());
+            groups.entry(key).or_default().push(&track.sub_path);
+        }
+    }
+    for ((mode, error), paths) in &groups {
+        let count = paths.len();
+        let noun = if count == 1 { "file" } else { "files" };
+        let mut message = format!("{count} {noun} required {mode} MPEG parsing\n{error}");
+        for path in paths {
+            message.push('\n');
+            message.push_str(path);
+        }
+        warn!("{message}");
+    }
+}
+
 /// Read an MPEG file with progressively relaxed parsing.
 ///
 /// - Tries `Strict`, `BestAttempt`, then `Relaxed`
 /// - Returns the result from the strictest mode that succeeds
-/// - Logs a warning if a fallback was needed
+/// - Only retries on `BadTimestamp` errors; other errors propagate immediately
+/// - Populates `parsing_mode` and `parsing_error` on the returned [`TrackInfo`]
 fn read_mpeg_with_fallback(
     file: &mut File,
     path: &Path,
@@ -234,7 +272,7 @@ fn read_mpeg_with_fallback(
         ParsingMode::BestAttempt,
         ParsingMode::Relaxed,
     ];
-    let mut error = None;
+    let mut last_error: Option<LoftyError> = None;
     for mode in modes {
         let options = ParseOptions::default().parsing_mode(mode);
         trace!(
@@ -242,23 +280,33 @@ fn read_mpeg_with_fallback(
             format_parsing_mode(mode),
             path.display()
         );
-        match TrackInfo::from_mpeg(file, path, options) {
-            Ok(info) => {
+        match MpegFile::read_from(&mut *file, options) {
+            Ok(mpeg) => {
+                let mut info = TrackInfo::from_mpeg(mpeg);
+                info.parsing_mode = Some(mode);
+                info.parsing_error = last_error.map(|e| format!("{e}"));
                 return Ok(info);
             }
             Err(e) => {
-                warn!(
-                    "Unable to parse with {} mode\n{}",
+                if !matches!(e.kind(), LoftyErrorKind::BadTimestamp(_)) {
+                    return Err(Failure::new(InspectAction::ReadMpegFile, e).with_path(path));
+                }
+                trace!(
+                    "Unable to parse with {} mode: {}",
                     format_parsing_mode(mode),
-                    e.render()
+                    e
                 );
-                error = Some(e);
+                last_error = Some(e);
                 file.seek(SeekFrom::Start(0))
                     .map_err(Failure::wrap_with_path(InspectAction::SeekFile, path))?;
             }
         }
     }
-    Err(error.expect("errors should be an error"))
+    Err(Failure::new(
+        InspectAction::ReadMpegFile,
+        last_error.expect("should have at least one error"),
+    )
+    .with_path(path))
 }
 
 fn format_parsing_mode(mode: ParsingMode) -> String {
