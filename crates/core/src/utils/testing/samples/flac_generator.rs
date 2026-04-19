@@ -85,6 +85,18 @@ impl FlacGenerator {
         Self::default()
     }
 
+    /// Create a [`FlacGenerator`] with standard test metadata.
+    #[must_use]
+    pub fn mock() -> Self {
+        Self::new()
+            .with_artist("Test Artist")
+            .with_album("Test Album")
+            .with_title("Test Track")
+            .with_track_number("1")
+            .with_date("2000")
+            .with_duration_secs(3)
+    }
+
     /// Set an explicit filename (default: generated from metadata).
     #[must_use]
     pub fn with_filename(mut self, filename: impl Into<String>) -> Self {

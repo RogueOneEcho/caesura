@@ -1,8 +1,5 @@
-use std::process::Stdio;
-
 use crate::prelude::*;
 use crate::testing_prelude::*;
-use tokio::join;
 
 /// Tolerate non-ISO-8601 values in `ID3v2` TDRL timestamp frames.
 ///
@@ -14,70 +11,91 @@ async fn track_info_read_mp3_with_non_iso8601_tdrl() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let temp = TempDirectory::create("non_iso8601_tdrl");
-    let flac_path = FlacGenerator::new()
-        .with_artist("Test Artist")
-        .with_album("Test Album")
-        .with_title("Test Track")
-        .with_track_number("1")
-        .with_date("2000")
+    let flac_path = FlacGenerator::mock()
         .with_vorbis_tag("RELEASEDATE", "1st January 2001")
-        .with_duration_secs(3)
         .generate(&temp)
         .await?;
     let mp3_path = temp.join("01 - Test Track.mp3");
-    let source_dir = flac_path.parent().expect("flac should have parent");
-    let flac = FlacFile::new(flac_path.clone(), &source_dir.to_path_buf());
-    let tags = flac.id3_tags()?.clone();
-    let decode = CommandInfo {
-        program: FLAC.to_owned(),
-        args: vec![
-            "-dcs".to_owned(),
-            "--".to_owned(),
-            flac_path.to_string_lossy().to_string(),
-        ],
-    };
-    let encode = CommandInfo {
-        program: LAME.to_owned(),
-        args: vec![
-            "-S".to_owned(),
-            "-h".to_owned(),
-            "-b".to_owned(),
-            "320".to_owned(),
-            "--ignore-tag-errors".to_owned(),
-            "-".to_owned(),
-            mp3_path.to_string_lossy().to_string(),
-        ],
-    };
-    let mut decode_cmd = decode
-        .to_command()
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()?;
-    let pipe: Stdio = decode_cmd
-        .stdout
-        .take()
-        .expect("should take stdout")
-        .try_into()
-        .expect("should convert to pipe");
-    let encode_cmd = encode
-        .to_command()
-        .stdin(pipe)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()?;
-    let (decode_result, encode_result) = join!(decode_cmd.wait(), encode_cmd.wait_with_output());
-    decode_result?;
-    let encode_output = encode_result?;
-    assert!(encode_output.status.success(), "lame encoding failed");
-    save_id3v2_deterministic(tags, &mp3_path)?;
+    let source_dir = temp.to_path_buf();
+    let flac = FlacFile::new(flac_path, &source_dir);
+    transcode_to_mp3(&flac, &mp3_path, TargetFormat::_320).await?;
 
     // Act
-    let result = TrackInfo::read(source_dir, &mp3_path);
+    let info = TrackInfo::read(&source_dir, &mp3_path)?;
 
     // Assert
-    assert!(
-        result.is_ok(),
-        "TrackInfo::read should tolerate non-ISO-8601 TDRL tags"
-    );
+    assert!(has_native_tag(&info, "TPE1"));
+    assert!(has_native_tag(&info, "TIT2"));
+    assert!(has_native_tag(&info, "TRCK"));
+    assert!(has_native_tag(&info, "TDRC"));
+    assert!(!has_native_tag(&info, "TDRL"));
     Ok(())
+}
+
+/// Tolerate dot-separated dates in `ID3v2` TDRC timestamp frames.
+///
+/// - Asian distributors (Genie, etc.) use `DATE=2025.11.20` in Vorbis comments
+/// - LAME copies this verbatim into the TDRC frame during transcode
+/// - Lofty only recognizes `-`, `T`, `:` as timestamp separators
+/// - Without relaxed parsing, `.` causes `TrackInfo::read` to fail
+/// - See Serial-ATA/lofty-rs#647
+#[tokio::test]
+async fn track_info_read_mp3_with_dot_separated_tdrc() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let temp = TempDirectory::create("dot_separated_tdrc");
+    let flac_path = FlacGenerator::mock()
+        .with_date("2025.11.20")
+        .generate(&temp)
+        .await?;
+    let mp3_path = temp.join("01 - Test Track.mp3");
+    let source_dir = temp.to_path_buf();
+    let flac = FlacFile::new(flac_path, &source_dir);
+    transcode_to_mp3(&flac, &mp3_path, TargetFormat::_320).await?;
+
+    // Act
+    let info = TrackInfo::read(&source_dir, &mp3_path)?;
+
+    // Assert
+    assert!(has_native_tag(&info, "TPE1"));
+    assert!(has_native_tag(&info, "TIT2"));
+    assert!(has_native_tag(&info, "TRCK"));
+    assert!(!has_native_tag(&info, "TDRC"));
+    Ok(())
+}
+
+/// Transcode a single FLAC to MP3 using [`TranscodeJob`].
+async fn transcode_to_mp3(
+    flac: &FlacFile,
+    output: &Path,
+    format: TargetFormat,
+) -> Result<(), Failure<TranscodeAction>> {
+    let sox = Ref::new(SoxFactory::new(Ref::new(SoxOptions {
+        sox_path: None,
+        sox_ng: false,
+    })));
+    let job = TranscodeJob {
+        id: "test".to_owned(),
+        variant: Variant::Transcode(
+            Decode {
+                input: flac.path.clone(),
+                resample_rate: None,
+                repeatable: true,
+                sox,
+            },
+            Encode {
+                output: output.to_path_buf(),
+                format,
+            },
+        ),
+        tags: Some(flac.id3_tags()?.clone()),
+        exclude_vorbis_comments: Vec::new(),
+    };
+    job.execute().await
+}
+
+fn has_native_tag(info: &TrackInfo, native_key: &str) -> bool {
+    info.tags
+        .iter()
+        .any(|t| t.native.as_deref() == Some(native_key))
 }
