@@ -1,5 +1,4 @@
 use crate::testing_prelude::*;
-use std::fs;
 
 #[tokio::test]
 
@@ -23,7 +22,7 @@ async fn transcode_provider_320() {
     );
 
     // Verify MP3 files were created
-    let entries: Vec<_> = fs::read_dir(config.transcode_dir())
+    let entries: Vec<_> = read_dir(config.transcode_dir())
         .expect("should read transcode dir")
         .filter_map(Result::ok)
         .filter(|e| e.path().extension().is_some_and(|ext| ext == "mp3"))
@@ -56,7 +55,7 @@ async fn transcode_provider_v0() {
     );
 
     // Verify MP3 files were created
-    let entries: Vec<_> = fs::read_dir(config.transcode_dir())
+    let entries: Vec<_> = read_dir(config.transcode_dir())
         .expect("should read transcode dir")
         .filter_map(Result::ok)
         .filter(|e| e.path().extension().is_some_and(|ext| ext == "mp3"))

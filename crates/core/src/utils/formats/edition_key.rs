@@ -1,4 +1,4 @@
-use gazelle_api::{Media, Torrent};
+use crate::prelude::*;
 
 /// Edition identity for grouping torrents of the same release.
 ///
@@ -76,7 +76,6 @@ fn remove_zero_pad(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gazelle_api::Torrent;
 
     #[test]
     fn edition_key_same_torrent_fields() {

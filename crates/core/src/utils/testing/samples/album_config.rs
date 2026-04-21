@@ -1,9 +1,4 @@
-use crate::utils::{SAMPLE_SOURCES_DIR, SampleFormat, TempDirectory};
-use gazelle_api::{
-    Credit, Credits, Format, Group, GroupResponse, Media, MockGazelleClient, Torrent,
-    TorrentResponse, UploadResponse,
-};
-use std::fs;
+use crate::testing_prelude::*;
 
 /// Configuration for generating a test album.
 #[derive(Debug, Clone)]
@@ -324,7 +319,7 @@ impl AlbumConfig {
         let dir = TempDirectory::create("single_torrent");
         let dest = dir.join(self.torrent_filename());
         let src = SAMPLE_SOURCES_DIR.join(self.torrent_filename());
-        fs::copy(src, &dest).expect("should copy torrent file");
+        copy(src, &dest).expect("should copy torrent file");
         dir
     }
 
@@ -379,7 +374,7 @@ impl AlbumConfig {
     #[must_use]
     pub fn api(&self) -> MockGazelleClient {
         let torrent_path = SAMPLE_SOURCES_DIR.join(self.torrent_filename());
-        let torrent_bytes = fs::read(torrent_path)
+        let torrent_bytes = read(torrent_path)
             .expect("torrent file should exist - ensure AlbumProvider::get() was called first");
         build_mock_client(self, torrent_bytes, Self::TORRENT_ID, 123)
     }

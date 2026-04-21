@@ -1,5 +1,4 @@
 use crate::testing_prelude::*;
-use gazelle_api::{Format, Quality, Torrent};
 
 #[test]
 fn existing_format_provider_get_excludes_less_specific() {

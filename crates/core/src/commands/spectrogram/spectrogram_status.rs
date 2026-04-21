@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
+use rogue_logging::Error as LogError;
 
 /// Successful result of a spectrogram operation.
 pub(crate) struct SpectrogramSuccess {
@@ -23,7 +23,7 @@ pub(crate) struct SpectrogramStatus {
     pub completed: TimeStamp,
     /// Error details if the operation failed.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<rogue_logging::Error>,
+    pub error: Option<LogError>,
 }
 
 impl SpectrogramStatus {

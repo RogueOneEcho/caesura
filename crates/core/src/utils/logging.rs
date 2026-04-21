@@ -1,6 +1,6 @@
 //! Shared logger configuration.
 
-use rogue_logging::Verbosity::Trace;
+use crate::prelude::*;
 use rogue_logging::{InitLog, LoggerBuilder};
 
 /// Create a [`LoggerBuilder`] with standard exclude filters applied.
@@ -11,7 +11,7 @@ pub fn default_logger() -> LoggerBuilder {
         .with_exclude_filter("lofty".to_owned())
         .with_exclude_filter("reqwest".to_owned())
         .with_exclude_filter("rustls_platform_verifier".to_owned())
-        .with_verbosity(Trace)
+        .with_verbosity(Verbosity::Trace)
 }
 
 /// Initialize a logger with standard filters and [`Trace`] verbosity.

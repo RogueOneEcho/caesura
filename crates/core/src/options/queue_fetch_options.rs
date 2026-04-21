@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Options for `queue fetch` command.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -21,7 +19,9 @@ impl OptionsContract for QueueFetchOptions {
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if self.qbit_fetch_categories.is_empty() {
-            errors.push(IsEmpty("qBittorrent fetch categories".to_owned()));
+            errors.push(OptionRule::IsEmpty(
+                "qBittorrent fetch categories".to_owned(),
+            ));
         }
     }
 }

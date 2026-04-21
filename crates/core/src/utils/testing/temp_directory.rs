@@ -1,9 +1,8 @@
 //! RAII wrapper for temporary directories with automatic cleanup.
 
-use crate::prelude::*;
+use crate::testing_prelude::*;
 use chrono::Local;
 use std::env::temp_dir;
-use std::fs::{create_dir_all, remove_dir_all};
 use std::ops::Deref;
 use std::sync::atomic::{AtomicU64, Ordering};
 

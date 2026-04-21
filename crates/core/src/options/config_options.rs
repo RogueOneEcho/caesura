@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Legacy config path from before platform user directories.
 const LEGACY_CONFIG_PATH: &str = "./config.yml";
@@ -32,7 +30,7 @@ impl OptionsContract for ConfigOptions {
         if let Some(config) = self.path()
             && !config.is_file()
         {
-            errors.push(DoesNotExist(
+            errors.push(OptionRule::DoesNotExist(
                 CONFIG_FILE_LABEL.to_owned(),
                 config.to_string_lossy().to_string(),
             ));
@@ -45,7 +43,7 @@ impl OptionsContract for ConfigOptions {
             && PathBuf::from(LEGACY_CONFIG_PATH).is_file()
         {
             let default_path = PathManager::default_config_path();
-            errors.push(Changed(
+            errors.push(OptionRule::Changed(
                 CONFIG_FILE_LABEL.to_owned(),
                 default_path.to_string_lossy().to_string(),
                 format!("In v0.27.0 the default config path changed to {}.\nPass the option: --config {LEGACY_CONFIG_PATH} to use the previous config path.", default_path.display()),

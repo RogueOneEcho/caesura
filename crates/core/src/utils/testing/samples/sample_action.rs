@@ -1,6 +1,6 @@
 //! Action types for sample generation errors.
 
-use crate::prelude::*;
+use crate::testing_prelude::*;
 
 /// Action that failed during sample generation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, ThisError)]

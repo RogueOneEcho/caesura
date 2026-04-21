@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::collections::HashSet;
 
 /// Remove or replace characters that are invalid in file paths.
 pub(crate) struct Sanitizer {

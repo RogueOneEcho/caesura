@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Legacy cache path from before platform user directories.
 const LEGACY_CACHE_DIR: &str = "./cache";
@@ -39,13 +37,13 @@ impl OptionsContract for CacheOptions {
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         let cache = self.path();
         if !cache.is_dir() {
-            errors.push(DoesNotExist(
+            errors.push(OptionRule::DoesNotExist(
                 CACHE_DIR_LABEL.to_owned(),
                 cache.to_string_lossy().to_string(),
             ));
             if PathBuf::from(LEGACY_CACHE_DIR).is_dir() {
                 let default_dir = PathManager::default_cache_dir();
-                errors.push(Changed(
+                errors.push(OptionRule::Changed(
                     CACHE_DIR_LABEL.to_owned(),
                     self.cache.to_string_lossy().to_string(),
                     format!("In v0.27.0 the default cache path changed to {}.\nPass the option: --cache {LEGACY_CACHE_DIR} to use the previous cache path.", default_dir.display()),

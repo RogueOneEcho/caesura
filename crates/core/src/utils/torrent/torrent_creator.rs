@@ -3,13 +3,7 @@
 use crate::prelude::*;
 use lava_torrent::bencode::BencodeElem;
 use lava_torrent::torrent::v1::TorrentBuilder;
-use rogue_logging::Failure;
-use std::collections::HashMap;
-use std::fs;
-use tokio::fs::copy;
-use tokio::task::spawn_blocking;
-
-use super::{TorrentCreateAction, TorrentExt, TorrentReader};
+use num_cpus::get as get_num_cpus;
 
 /// Maximum number of threads used by `lava_torrent`.
 ///
@@ -99,10 +93,12 @@ impl TorrentCreator {
                 from.file_name(),
                 to.file_name()
             );
-            copy(&from, &to).await.map_err(Failure::wrap_with_path(
-                TorrentCreateAction::CopyTorrent,
-                to,
-            ))?;
+            tokio_copy(&from, &to)
+                .await
+                .map_err(Failure::wrap_with_path(
+                    TorrentCreateAction::CopyTorrent,
+                    to,
+                ))?;
             return Ok(());
         }
         trace!(
@@ -135,7 +131,7 @@ impl TorrentCreator {
 /// Calculate total size of all files in a directory recursively.
 fn dir_size(path: &Path) -> Result<u64, Failure<TorrentCreateAction>> {
     let mut total: u64 = 0;
-    let entries = fs::read_dir(path).map_err(Failure::wrap_with_path(
+    let entries = read_dir(path).map_err(Failure::wrap_with_path(
         TorrentCreateAction::ReadDirectory,
         path,
     ))?;
@@ -183,7 +179,7 @@ fn piece_length(content_size: u64) -> i64 {
 }
 
 fn num_threads() -> usize {
-    num_cpus::get().min(MAX_THREADS)
+    get_num_cpus().min(MAX_THREADS)
 }
 
 #[expect(

@@ -3,13 +3,10 @@ use crate::prelude::*;
 use lofty::config::{ParseOptions, ParsingMode};
 use lofty::error::{ErrorKind as LoftyErrorKind, LoftyError};
 use lofty::file::{AudioFile, TaggedFile, TaggedFileExt};
-use lofty::flac::FlacFile;
+use lofty::flac::FlacFile as LoftyFlacFile;
 use lofty::mpeg::{ChannelMode, MpegFile};
 use lofty::tag::{ItemKey, ItemValue};
-use std::collections::BTreeMap;
-use std::fs::File;
 use std::io::{Seek, SeekFrom};
-use std::time::Duration;
 
 /// FLAC file extension.
 const FLAC: &str = "flac";
@@ -161,7 +158,7 @@ impl TrackInfo {
         path: &Path,
         options: ParseOptions,
     ) -> Result<Self, Failure<InspectAction>> {
-        let flac = FlacFile::read_from(file, options)
+        let flac = LoftyFlacFile::read_from(file, options)
             .map_err(Failure::wrap_with_path(InspectAction::ReadFlacFile, path))?;
         let props = *flac.properties();
         let tagged = TaggedFile::from(flac);

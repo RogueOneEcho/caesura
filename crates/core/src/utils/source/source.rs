@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use gazelle_api::{Group, Torrent};
-use rogue_logging::Colors;
 
 /// Source to be transcoded
 #[derive(Debug)]

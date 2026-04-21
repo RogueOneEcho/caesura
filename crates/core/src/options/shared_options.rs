@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use rogue_logging::{TimeFormat, Verbosity};
-use serde::{Deserialize, Serialize};
 
 /// Legacy output path from before platform user directories.
 const LEGACY_OUTPUT_DIR: &str = "./output";
@@ -132,35 +129,35 @@ impl OptionsContract for SharedOptions {
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if !self.indexer_url.starts_with("https://") && !self.indexer_url.starts_with("http://") {
-            errors.push(UrlNotHttp(
+            errors.push(OptionRule::UrlNotHttp(
                 "Indexer URL".to_owned(),
                 self.indexer_url.clone(),
             ));
         }
         if self.indexer_url.ends_with('/') {
-            errors.push(UrlInvalidSuffix(
+            errors.push(OptionRule::UrlInvalidSuffix(
                 "Indexer URL".to_owned(),
                 self.indexer_url.clone(),
             ));
         }
         if !self.announce_url.starts_with("https://") && !self.announce_url.starts_with("http://") {
-            errors.push(UrlNotHttp(
+            errors.push(OptionRule::UrlNotHttp(
                 "Announce URL".to_owned(),
                 self.announce_url.clone(),
             ));
         }
         if self.announce_url.ends_with('/') {
-            errors.push(UrlInvalidSuffix(
+            errors.push(OptionRule::UrlInvalidSuffix(
                 "Announce URL".to_owned(),
                 self.announce_url.clone(),
             ));
         }
         if self.content.is_empty() {
-            errors.push(IsEmpty(CONTENT_DIR_LABEL.to_owned()));
+            errors.push(OptionRule::IsEmpty(CONTENT_DIR_LABEL.to_owned()));
         }
         for dir in self.content_paths() {
             if !dir.exists() || !dir.is_dir() {
-                errors.push(DoesNotExist(
+                errors.push(OptionRule::DoesNotExist(
                     CONTENT_DIR_LABEL.to_owned(),
                     dir.to_string_lossy().to_string(),
                 ));
@@ -168,13 +165,13 @@ impl OptionsContract for SharedOptions {
         }
         let output = self.output_path();
         if !output.exists() || !output.is_dir() {
-            errors.push(DoesNotExist(
+            errors.push(OptionRule::DoesNotExist(
                 OUTPUT_DIR_LABEL.to_owned(),
                 output.to_string_lossy().to_string(),
             ));
             if PathBuf::from(LEGACY_OUTPUT_DIR).is_dir() {
                 let default_dir = PathManager::default_output_dir();
-                errors.push(Changed(
+                errors.push(OptionRule::Changed(
                     OUTPUT_DIR_LABEL.to_owned(),
                     self.output.to_string_lossy().to_string(),
                     format!("In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.", default_dir.display()),

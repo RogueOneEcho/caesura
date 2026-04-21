@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use gazelle_api::{ApiResponseKind, GazelleClientTrait, GazelleOperation, Torrent};
-use html_escape::decode_html_entities;
 
 /// Retrieve [`Source`] from the API.
 #[injectable]

@@ -1,8 +1,5 @@
 use crate::prelude::*;
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
-use rogue_logging::Verbosity::Info;
-use rogue_logging::{Colors, Logger};
-use tokio::task::JoinSet;
 
 /// A [Subscriber] that updates a progress bar in the console
 pub struct ProgressBarSubscriber {
@@ -60,7 +57,7 @@ fn create_progress_bar() -> ProgressBar {
 }
 
 fn create_progress_style(logger: Ref<Logger>) -> ProgressStyle {
-    let prefix = logger.format_prefix(Info);
+    let prefix = logger.format_prefix(Verbosity::Info);
     let template = format!(
         "{} [{}] {}{}/{{len}}  {} remain",
         prefix,

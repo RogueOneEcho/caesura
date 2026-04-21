@@ -10,7 +10,7 @@ impl QueueSummaryCommand {
     /// Print a YAML summary of queue status to stdout.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
         let summary = self.execute().await?;
-        let yaml = serde_yaml::to_string(&summary).expect("should be able to serialize summary");
+        let yaml = yaml_to_string(&summary).expect("should be able to serialize summary");
         println!("{yaml}");
         Ok(true)
     }

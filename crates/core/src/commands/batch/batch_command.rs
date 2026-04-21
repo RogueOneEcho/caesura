@@ -1,8 +1,4 @@
 use crate::prelude::*;
-use gazelle_api::{ApiResponseKind, GazelleError, GazelleOperation};
-use std::error::Error;
-use std::time::Duration;
-use tokio::time::sleep;
 
 const PAUSE_DURATION: u64 = 10;
 

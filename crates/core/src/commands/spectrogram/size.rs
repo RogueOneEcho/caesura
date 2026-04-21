@@ -1,5 +1,5 @@
+use crate::prelude::*;
 use clap::ValueEnum;
-use serde::{Deserialize, Serialize};
 
 /// Spectrogram image size.
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, ValueEnum, PartialEq, Eq)]

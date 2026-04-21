@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::fs::create_dir_all;
 use std::process::Output;
 
 /// Duration of the zoom spectrogram capture window in seconds.

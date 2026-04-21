@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use gazelle_api::{Group, Media, Torrent};
-use html_escape::decode_html_entities;
 
 const MAX_ARTISTS: usize = 2;
 const UNKNOWN_ARTIST: &str = "Unknown Artist";
@@ -127,7 +125,7 @@ fn get_year(group: &Group, torrent: &Torrent) -> u16 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gazelle_api::{Credit, Credits, Group};
+    use gazelle_api::{Credit, Credits};
 
     #[test]
     fn get_artist_none() {

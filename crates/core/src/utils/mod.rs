@@ -11,7 +11,6 @@ pub(crate) use logging::*;
 pub(crate) use naming::*;
 pub(crate) use platform::*;
 pub(crate) use process::*;
-pub(crate) use rogue_logging::Failure;
 pub(crate) use source::*;
 pub(crate) use table::*;
 #[cfg(test)]

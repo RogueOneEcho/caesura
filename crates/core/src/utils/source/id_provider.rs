@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
-use std::path::Path;
 
 /// Retrieve the id of a source.
 #[injectable]

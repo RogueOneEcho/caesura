@@ -1,9 +1,5 @@
-use super::{AudioSnapshot, ImageSnapshot};
-use serde::{Deserialize, Serialize};
+use crate::testing_prelude::*;
 use sha2::{Digest, Sha256};
-use std::fs;
-use std::io::Result;
-use std::path::Path;
 
 /// Snapshot of a single file for deterministic testing.
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -26,7 +22,7 @@ pub struct FileSnapshot {
 
 impl FileSnapshot {
     /// Create a [`FileSnapshot`] from a file path relative to a root directory.
-    pub fn from_path(root: &Path, path: &Path) -> Result<Self> {
+    pub fn from_path(root: &Path, path: &Path) -> Result<Self, IoError> {
         let relative = path.strip_prefix(root).expect("path should be under root");
 
         let directory = relative.parent().and_then(|p| {
@@ -41,7 +37,7 @@ impl FileSnapshot {
             .to_string();
 
         let ext = get_extension(path);
-        let content = fs::read(path)?;
+        let content = read(path)?;
         let size = u64::try_from(content.len()).expect("file size fits in u64");
 
         Ok(Self {
@@ -77,7 +73,7 @@ fn parse_image_metadata(path: &Path, ext: Option<&str>) -> Option<ImageSnapshot>
 
 /// Extract the snapshot body (after the YAML front matter) from a `.snap` file.
 fn read_snap_body(snap_path: &Path) -> Option<String> {
-    let content = fs::read_to_string(snap_path).ok()?;
+    let content = read_to_string(snap_path).ok()?;
     content.splitn(3, "---\n").nth(2).map(String::from)
 }
 
@@ -91,7 +87,7 @@ pub fn patch_platform_dependent_fields(files: &mut [FileSnapshot], snap_path: &P
     let Some(yaml_body) = read_snap_body(snap_path) else {
         return;
     };
-    let Ok(stored) = serde_yaml::from_str::<Vec<FileSnapshot>>(&yaml_body) else {
+    let Ok(stored) = yaml_from_str::<Vec<FileSnapshot>>(&yaml_body) else {
         return;
     };
     for (actual, stored) in files.iter_mut().zip(stored.iter()) {

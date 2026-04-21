@@ -1,10 +1,6 @@
-use crate::commands::InspectAction;
-use crate::commands::inspect::picture_info::PictureInfo;
-use crate::commands::inspect::track_info::{TagEntry, TrackInfo};
-use crate::prelude::TableBuilder;
-use colored::Colorize;
-use rogue_logging::Failure;
-use std::path::Path;
+use super::picture_info::PictureInfo;
+use super::track_info::{TagEntry, TrackInfo};
+use crate::prelude::*;
 
 /// Format inspect output with optional terminal styling.
 pub struct InspectFactory {

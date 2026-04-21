@@ -4,6 +4,7 @@ use crate::prelude::*;
 use std::process::exit;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::signal::ctrl_c;
+use tokio::spawn;
 
 /// Cooperative shutdown signal for graceful SIGINT handling.
 ///
@@ -40,7 +41,7 @@ impl Shutdown {
     /// - Second signal: calls [`exit`]
     pub fn listen(self: &Ref<Self>) {
         let shutdown = self.clone();
-        tokio::spawn(async move {
+        spawn(async move {
             ctrl_c().await.ok();
             shutdown.request();
             info!(

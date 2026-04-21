@@ -1,7 +1,5 @@
 use crate::Size;
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Options for spectrograms
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -17,7 +15,7 @@ impl OptionsContract for SpectrogramOptions {
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if self.spectrogram_size.is_empty() {
-            errors.push(IsEmpty("Spectrogram Size".to_owned()));
+            errors.push(OptionRule::IsEmpty("Spectrogram Size".to_owned()));
         }
     }
 }

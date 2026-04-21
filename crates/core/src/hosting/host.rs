@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use di::ServiceProvider;
 use miette::Report;
-use rogue_logging::Logger;
 
 /// Application host, responsible for executing the application
 ///

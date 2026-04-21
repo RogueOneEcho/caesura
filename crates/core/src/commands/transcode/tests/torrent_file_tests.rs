@@ -1,7 +1,4 @@
 use crate::testing_prelude::*;
-use std::fs;
-use std::time::Duration;
-use tokio::time::sleep;
 
 /// Delay between file operations to ensure filesystem modification times differ.
 ///
@@ -337,12 +334,12 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
 
     // Record modification time of a transcoded file to verify no re-transcoding
     let transcode_dir = paths_red.get_transcode_target_dir(&source, TargetFormat::_320);
-    let mp3_file = fs::read_dir(&transcode_dir)
+    let mp3_file = read_dir(&transcode_dir)
         .expect("should read transcode dir")
         .filter_map(Result::ok)
         .find(|e| e.path().extension().is_some_and(|ext| ext == "mp3"))
         .expect("should have mp3 file");
-    let mp3_modified_before = fs::metadata(mp3_file.path())
+    let mp3_modified_before = metadata(mp3_file.path())
         .expect("should get metadata")
         .modified()
         .expect("should get mtime");
@@ -381,7 +378,7 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
     assert!(red_torrent.exists(), "RED torrent should still exist");
 
     // Verify transcoding was skipped by checking mp3 wasn't modified
-    let mp3_modified_after = fs::metadata(mp3_file.path())
+    let mp3_modified_after = metadata(mp3_file.path())
         .expect("should get metadata")
         .modified()
         .expect("should get mtime");
@@ -423,7 +420,7 @@ async fn transcode_skips_when_torrent_exists() {
         .expect("transcode should succeed");
 
     let torrent_path = paths.get_torrent_path(&source, TargetFormat::_320);
-    let modified_before = fs::metadata(&torrent_path)
+    let modified_before = metadata(&torrent_path)
         .expect("torrent should exist")
         .modified()
         .expect("should get modified time");
@@ -434,7 +431,7 @@ async fn transcode_skips_when_torrent_exists() {
         .execute(&source)
         .await
         .expect("transcode should succeed");
-    let modified_after = fs::metadata(&torrent_path)
+    let modified_after = metadata(&torrent_path)
         .expect("torrent should exist")
         .modified()
         .expect("should get modified time");

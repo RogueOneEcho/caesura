@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use caesura_macros::Options;
 use qbittorrent_api::add_torrent::AddTorrentOptions;
-use serde::{Deserialize, Serialize};
 
 /// Options controlling qBittorrent torrent injection on upload.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

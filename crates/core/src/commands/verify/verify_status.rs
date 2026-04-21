@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
 
 /// Successful result of a verify operation.
 pub(crate) struct VerifySuccess {

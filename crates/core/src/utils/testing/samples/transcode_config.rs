@@ -1,8 +1,6 @@
 //! Configuration for cached transcodes in tests.
 
-use crate::options::SharedOptions;
-use crate::utils::{AlbumConfig, SAMPLE_TRANSCODES_DIR, TargetFormat};
-use std::path::PathBuf;
+use crate::testing_prelude::*;
 
 /// Configuration for a cached transcode output.
 #[derive(Debug, Clone)]

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use std::os::unix::prelude::MetadataExt;
-use tokio::fs::File;
 
 /// A non-FLAC file to include in transcodes.
 pub struct AdditionalFile {
@@ -39,7 +38,7 @@ impl AdditionalFile {
 
     /// File size in bytes.
     pub async fn get_size(&self) -> Result<u64, Failure<FsAction>> {
-        let file = File::open(&self.path)
+        let file = TokioFile::open(&self.path)
             .await
             .map_err(Failure::wrap_with_path(FsAction::OpenFile, &self.path))?;
         let metadata = file

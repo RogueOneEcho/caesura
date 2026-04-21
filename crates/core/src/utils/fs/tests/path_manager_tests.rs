@@ -1,6 +1,6 @@
 //! Tests for [`PathManager`] default path functions.
 
-use crate::prelude::*;
+use crate::testing_prelude::*;
 
 /// Verify default config path ends with the expected platform suffix.
 #[test]

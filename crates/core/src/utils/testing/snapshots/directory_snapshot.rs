@@ -1,7 +1,4 @@
-use super::FileSnapshot;
-use std::fs;
-use std::io::Result;
-use std::path::{Path, PathBuf};
+use crate::testing_prelude::*;
 
 /// Builder for creating a snapshot of files in a directory.
 #[derive(Default)]
@@ -36,7 +33,7 @@ impl DirectorySnapshot {
     /// # Panics
     ///
     /// Panics if `with_directory` was not called.
-    pub fn create(self) -> Result<Vec<FileSnapshot>> {
+    pub fn create(self) -> Result<Vec<FileSnapshot>, IoError> {
         let root = self
             .directory
             .expect("with_directory must be called before create");
@@ -52,8 +49,8 @@ fn collect_files(
     current: &Path,
     files: &mut Vec<FileSnapshot>,
     exclude: &[String],
-) -> Result<()> {
-    for entry in fs::read_dir(current)? {
+) -> Result<(), IoError> {
+    for entry in read_dir(current)? {
         let path = entry?.path();
 
         if path.is_dir() {

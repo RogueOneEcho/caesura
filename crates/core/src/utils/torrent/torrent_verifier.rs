@@ -1,16 +1,9 @@
 //! Verify file contents match torrent piece hashes.
 
-use lava_torrent::torrent::v1::Torrent;
-use rogue_logging::Failure;
+use crate::prelude::*;
+use lava_torrent::torrent::v1::Torrent as LavaTorrent;
 use sha1::{Digest, Sha1};
-use std::fs::File;
-use std::io::{self, ErrorKind, Read};
-use std::path::{Path, PathBuf};
-use tokio::task::spawn_blocking;
-
-use crate::utils::SourceIssue;
-
-use super::TorrentVerifyAction;
+use std::io::{Read, copy as io_copy, empty as io_empty};
 
 /// Verify that files on disk match the piece hashes in a `.torrent` file.
 pub struct TorrentVerifier;
@@ -38,7 +31,7 @@ fn verify(
     torrent_file: &Path,
     directory: &Path,
 ) -> Result<Option<SourceIssue>, Failure<TorrentVerifyAction>> {
-    let torrent = Torrent::read_from_file(torrent_file).map_err(Failure::wrap_with_path(
+    let torrent = LavaTorrent::read_from_file(torrent_file).map_err(Failure::wrap_with_path(
         TorrentVerifyAction::ReadTorrent,
         torrent_file,
     ))?;
@@ -51,7 +44,7 @@ fn verify(
     let mut hasher = Sha1::new();
     for (index, expected) in torrent.pieces.iter().enumerate() {
         let mut piece = stream.by_ref().take(piece_length);
-        let bytes_copied = io::copy(&mut piece, &mut hasher)
+        let bytes_copied = io_copy(&mut piece, &mut hasher)
             .map_err(Failure::wrap(TorrentVerifyAction::HashContent))?;
         if bytes_copied == 0 {
             return Ok(Some(SourceIssue::HashCheck { piece_index: index }));
@@ -83,9 +76,9 @@ fn verify(
 ///
 /// Memory usage is minimal: each [`chain`](Read::chain) is a zero-cost wrapper
 /// that delegates reads to the underlying file handles. No file content is
-/// buffered beyond what [`io::copy`] uses internally (8 KB).
+/// buffered beyond what [`io_copy`] uses internally (8 KB).
 fn open_content_stream(paths: &[PathBuf]) -> Result<Box<dyn Read>, SourceIssue> {
-    let mut stream: Box<dyn Read> = Box::new(io::empty());
+    let mut stream: Box<dyn Read> = Box::new(io_empty());
     for path in paths {
         let file = match File::open(path) {
             Ok(f) => f,
@@ -105,7 +98,7 @@ fn open_content_stream(paths: &[PathBuf]) -> Result<Box<dyn Read>, SourceIssue> 
 }
 
 /// Build the ordered list of file paths from the torrent metadata.
-fn get_file_paths(torrent: &Torrent, directory: &Path) -> Vec<PathBuf> {
+fn get_file_paths(torrent: &LavaTorrent, directory: &Path) -> Vec<PathBuf> {
     match &torrent.files {
         Some(files) => files.iter().map(|f| directory.join(&f.path)).collect(),
         None => vec![directory.join(&torrent.name)],

@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
-use std::time::Duration;
+use humantime::parse_duration;
 
 /// Options for batch processing
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -46,7 +44,7 @@ impl BatchOptions {
     #[must_use]
     pub fn get_wait_before_upload(&self) -> Option<Duration> {
         let wait_before_upload = self.wait_before_upload.clone()?;
-        humantime::parse_duration(wait_before_upload.as_str()).ok()
+        parse_duration(wait_before_upload.as_str()).ok()
     }
 
     /// Effective batch limit, or `None` if `no_limit` is set.
@@ -65,7 +63,7 @@ impl OptionsContract for BatchOptions {
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if let Some(wait_before_upload) = &self.wait_before_upload
-            && humantime::parse_duration(wait_before_upload.as_str()).is_err()
+            && parse_duration(wait_before_upload.as_str()).is_err()
         {
             errors.push(OptionRule::DurationInvalid(
                 "Wait Before Upload".to_owned(),

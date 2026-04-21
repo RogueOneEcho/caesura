@@ -1,11 +1,5 @@
-use std::collections::HashSet;
-
 use crate::prelude::*;
-use gazelle_api::{Category, GazelleClientTrait, UploadForm};
-use html_escape::decode_html_entities;
 use qbittorrent_api::QBittorrentClientTrait;
-use rogue_logging::Colors;
-use tokio::fs::{copy, hard_link};
 
 /// Upload transcodes of a FLAC source.
 #[injectable]
@@ -220,23 +214,21 @@ impl UploadCommand {
             .file_name()
             .expect("torrent path should have a name");
         let target_path = target_dir.join(source_file_name);
-        let verb = if self.copy_options.hard_link {
-            hard_link(&source_path, &target_path)
-                .await
-                .map_err(Failure::wrap_with_path(
-                    UploadAction::HardLinkTorrent,
-                    &target_path,
-                ))?;
-            "Hard Linked"
-        } else {
-            copy(&source_path, &target_path)
-                .await
-                .map_err(Failure::wrap_with_path(
-                    UploadAction::CopyTorrent,
-                    &target_path,
-                ))?;
-            "Copied"
-        };
+        let verb =
+            if self.copy_options.hard_link {
+                tokio_hard_link(&source_path, &target_path).await.map_err(
+                    Failure::wrap_with_path(UploadAction::HardLinkTorrent, &target_path),
+                )?;
+                "Hard Linked"
+            } else {
+                tokio_copy(&source_path, &target_path)
+                    .await
+                    .map_err(Failure::wrap_with_path(
+                        UploadAction::CopyTorrent,
+                        &target_path,
+                    ))?;
+                "Copied"
+            };
         trace!(
             "{} {} to {}",
             verb.bold(),

@@ -1,5 +1,4 @@
 use crate::testing_prelude::*;
-use gazelle_api::{Group, GroupResponse, MockGazelleClient, Torrent, TorrentResponse};
 
 #[tokio::test]
 async fn get_finds_directory_with_exact_path() -> Result<(), TestError> {

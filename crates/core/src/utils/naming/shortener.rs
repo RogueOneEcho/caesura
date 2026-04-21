@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use crate::prelude::*;
 
 /// Suggest shorter names for albums and tracks.

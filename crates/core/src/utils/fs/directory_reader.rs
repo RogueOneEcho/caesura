@@ -1,5 +1,4 @@
-use std::io::Error;
-use std::path::{Path, PathBuf};
+use crate::prelude::*;
 
 /// Read files from a directory with optional filtering.
 pub struct DirectoryReader {
@@ -38,7 +37,7 @@ impl DirectoryReader {
     }
 
     /// Read all matching files from the directory.
-    pub fn read(&mut self, path: &Path) -> Result<Vec<PathBuf>, Error> {
+    pub fn read(&mut self, path: &Path) -> Result<Vec<PathBuf>, IoError> {
         let depth = 0;
         let mut files: Vec<PathBuf> = Vec::new();
         self.read_internal(path, depth, &mut files)?;
@@ -50,7 +49,7 @@ impl DirectoryReader {
         path: &Path,
         depth: usize,
         files: &mut Vec<PathBuf>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), IoError> {
         let dir = path.read_dir()?;
         for entry in dir {
             let entry = entry?;

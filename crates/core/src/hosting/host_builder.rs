@@ -1,15 +1,11 @@
-use crate::hosting::*;
 use crate::prelude::*;
 #[cfg(test)]
 use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, ServiceProvider, singleton_as_self};
-use gazelle_api::{GazelleClientFactory, GazelleClientOptions, GazelleClientTrait};
+#[cfg(test)]
+use gazelle_api::MockGazelleClient;
 use qbittorrent_api::{QBittorrentClientFactory, QBittorrentClientOptions, QBittorrentClientTrait};
-use rogue_logging::{InitLog, Logger};
-use std::fs::read_to_string;
-use std::sync::Arc;
-use tokio::sync::Semaphore;
-use tokio::task::JoinSet;
+use rogue_logging::InitLog;
 
 /// Builder for configuring and constructing the application host.
 pub struct HostBuilder {
@@ -125,7 +121,7 @@ impl HostBuilder {
         clippy::as_conversions,
         reason = "required for DI trait object registration"
     )]
-    pub fn with_mock_client(&mut self, client: gazelle_api::MockGazelleClient) -> &mut Self {
+    pub fn with_mock_client(&mut self, client: MockGazelleClient) -> &mut Self {
         let client: Ref<Box<dyn GazelleClientTrait + Send + Sync>> =
             Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
         self.services
@@ -160,13 +156,12 @@ impl HostBuilder {
     /// - Sets up content, output, and cache directories
     #[cfg(test)]
     pub async fn with_test_options(&mut self, test_dir: &TestDirectory) -> &mut Self {
-        use tokio::fs::create_dir_all;
         let output_dir = test_dir.output();
         let cache_dir = test_dir.cache();
-        create_dir_all(&output_dir)
+        tokio_create_dir_all(&output_dir)
             .await
             .expect("should be able to create output dir");
-        create_dir_all(&cache_dir)
+        tokio_create_dir_all(&cache_dir)
             .await
             .expect("should be able to create cache dir");
         self.with_options(SharedOptions {

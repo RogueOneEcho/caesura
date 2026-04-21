@@ -1,14 +1,8 @@
 //! Cached provider for transcode outputs in tests.
 
-use std::collections::HashMap;
-use std::fs::File;
-use std::path::Path;
-use std::sync::{Arc, LazyLock, Mutex};
-use tokio::sync::OnceCell;
-
 use super::transcode_generator::TranscodeGenerator;
-use super::{AlbumProvider, SampleFormat, TranscodeConfig};
-use crate::utils::{AlbumConfig, DiagnosticExt, TargetFormat};
+use crate::testing_prelude::*;
+use std::sync::Mutex;
 
 /// Per-config cache of transcode generation results.
 ///

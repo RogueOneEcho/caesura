@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use ExistingFormat::*;
 use clap::ValueEnum;
-use gazelle_api::{Format, Quality, Torrent};
-use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+
 /// Format of an existing release.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]

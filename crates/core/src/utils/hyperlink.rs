@@ -1,7 +1,7 @@
 //! OSC 8 terminal hyperlink support.
 
+use crate::prelude::*;
 use colored::control::SHOULD_COLORIZE;
-use std::fmt::Display;
 
 /// Extension trait for wrapping display text in an OSC 8 terminal hyperlink.
 ///

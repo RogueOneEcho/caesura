@@ -9,16 +9,7 @@
 //! Use [`AlbumConfig`] to configure metadata (artist, album, tracks, disc numbers,
 //! vinyl-style numbering) and audio format (bit depth, sample rate).
 
-use std::fs;
-use std::path::{Path, PathBuf};
-
-use rogue_logging::Failure;
-
-use super::SampleAction;
-use crate::options::{Indexer, RED_TRACKER_URL};
-use crate::utils::AlbumConfig;
-use crate::utils::TorrentCreator;
-use crate::utils::testing::samples::{FlacGenerator, ImageGenerator};
+use crate::testing_prelude::*;
 
 /// Generates a complete test album (FLAC files, cover image, torrent).
 pub(super) struct AlbumGenerator;
@@ -43,7 +34,7 @@ impl AlbumGenerator {
         config: &AlbumConfig,
         source_dir: &Path,
     ) -> Result<(), Failure<SampleAction>> {
-        fs::create_dir_all(source_dir).map_err(Failure::wrap(SampleAction::CreateDirectory))?;
+        create_dir_all(source_dir).map_err(Failure::wrap(SampleAction::CreateDirectory))?;
         for track in &config.tracks {
             let mut generator = FlacGenerator::new()
                 .with_filename(config.track_filename(track))

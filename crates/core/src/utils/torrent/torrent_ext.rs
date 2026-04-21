@@ -1,9 +1,8 @@
 //! Extension trait for convenient access to `lava_torrent` torrent fields.
 
-use crate::prelude::Indexer;
+use crate::prelude::*;
 use lava_torrent::bencode::BencodeElem;
-use lava_torrent::torrent::v1::Torrent;
-use std::collections::HashMap;
+use lava_torrent::torrent::v1::Torrent as LavaTorrent;
 
 type Dictionary = HashMap<String, BencodeElem>;
 
@@ -23,7 +22,7 @@ pub(crate) trait TorrentExt {
     fn is_source_equal(&self, source: &Indexer) -> bool;
 }
 
-impl TorrentExt for Torrent {
+impl TorrentExt for LavaTorrent {
     fn source(&self) -> Option<&str> {
         get_string(self.extra_info_fields.as_ref(), "source")
     }
@@ -56,13 +55,13 @@ fn get_string<'a>(dict: Option<&'a Dictionary>, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
-    fn torrent_with_source(source: Option<&str>) -> Torrent {
+    fn torrent_with_source(source: Option<&str>) -> LavaTorrent {
         let extra_info_fields = source.map(|s| {
             let mut map = HashMap::new();
             map.insert("source".to_owned(), BencodeElem::String(s.to_owned()));
             map
         });
-        Torrent {
+        LavaTorrent {
             announce: None,
             announce_list: None,
             length: 0,

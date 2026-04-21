@@ -1,5 +1,4 @@
-use std::error::Error;
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use crate::prelude::*;
 use std::process::Output;
 
 /// Captured output from a failed process.

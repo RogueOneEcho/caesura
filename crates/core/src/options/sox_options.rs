@@ -1,14 +1,7 @@
 //! Options for configuring the sox binary path and feature set.
 
-use std::path::PathBuf;
-use std::process::Command;
-use std::sync::LazyLock;
-
-use serde::{Deserialize, Serialize};
-
 use crate::prelude::*;
-use caesura_macros::Options;
-use caesura_options::{OptionRule, OptionsContract};
+use std::process::Command;
 
 /// Options for sox binary selection.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

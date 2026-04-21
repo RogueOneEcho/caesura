@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use tokio::fs::{copy, create_dir_all, hard_link};
 
 /// File extensions recognized as cover-art images when collecting additional files.
 pub const IMAGE_EXTENSIONS: [&str; 3] = ["jpg", "jpeg", "png"];
@@ -60,7 +59,7 @@ impl AdditionalJobFactory {
         let is_image = IMAGE_EXTENSIONS.contains(&extension.as_str());
         let is_large = size > max_file_size;
         let no_image_compression = self.file_options.no_image_compression;
-        create_dir_all(&output_dir)
+        tokio_create_dir_all(&output_dir)
             .await
             .map_err(Failure::wrap_with_path(
                 TranscodeAction::CreateOutputDirectory,
@@ -77,17 +76,14 @@ impl AdditionalJobFactory {
             }
             let verb =
                 if self.copy_options.hard_link {
-                    hard_link(&source_path, &output_path).await.map_err(
+                    tokio_hard_link(&source_path, &output_path).await.map_err(
                         Failure::wrap_with_path(TranscodeAction::HardLinkAdditional, &output_path),
                     )?;
                     "Hard Linked"
                 } else {
-                    copy(&source_path, &output_path)
-                        .await
-                        .map_err(Failure::wrap_with_path(
-                            TranscodeAction::CopyAdditional,
-                            &output_path,
-                        ))?;
+                    tokio_copy(&source_path, &output_path).await.map_err(
+                        Failure::wrap_with_path(TranscodeAction::CopyAdditional, &output_path),
+                    )?;
                     "Copied"
                 };
             trace!(

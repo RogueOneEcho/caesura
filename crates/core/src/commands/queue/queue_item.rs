@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use flat_db::Hash;
 use lava_torrent::torrent::v1::Torrent;
 use qbittorrent_api::get_torrents::Torrent as QbitTorrent;
-use serde::{Deserialize, Serialize};
 
 /// A source in the batch processing queue.
 #[derive(Clone, Deserialize, Serialize, Default)]

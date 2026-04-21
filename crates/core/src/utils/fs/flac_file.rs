@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::utils::{convert_to_id3v2, fix_track_numbering, get_vorbis_tags};
+use claxon::Error as ClaxonError;
 use claxon::FlacReader;
 use claxon::metadata::StreamInfo;
 use lofty::tag::Tag;
@@ -72,7 +72,7 @@ impl FlacFile {
     }
 
     /// FLAC stream info containing sample rate, channels, and bit depth.
-    pub fn get_stream_info(&self) -> Result<StreamInfo, claxon::Error> {
+    pub fn get_stream_info(&self) -> Result<StreamInfo, ClaxonError> {
         let reader = FlacReader::open(&self.path)?;
         Ok(reader.streaminfo())
     }

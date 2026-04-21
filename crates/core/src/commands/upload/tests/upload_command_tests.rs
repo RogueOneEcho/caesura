@@ -1,7 +1,6 @@
 use crate::testing_prelude::*;
-use gazelle_api::{Format, Media, MockGazelleClient, Quality};
+use di::{Ref as DiRef, singleton_as_self};
 use qbittorrent_api::mock::MockQBittorrentClient;
-use std::fs;
 
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
 #[tokio::test]
@@ -212,11 +211,11 @@ async fn upload_command_missing_torrent_fails() -> Result<(), TestError> {
 }
 
 fn delete_torrent_files(dir: &PathBuf) {
-    if let Ok(entries) = fs::read_dir(dir) {
+    if let Ok(entries) = read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.extension().is_some_and(|ext| ext == "torrent") {
-                let _ = fs::remove_file(&path);
+                let _ = remove_file(&path);
             }
             if path.is_dir() {
                 delete_torrent_files(&path);
@@ -262,7 +261,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
 
     // Assert
     assert!(status.success, "upload should succeed");
-    let entries: Vec<_> = fs::read_dir(&copy_target).expect("read dir").collect();
+    let entries: Vec<_> = read_dir(&copy_target).expect("read dir").collect();
     assert!(!entries.is_empty(), "should have copied transcodes");
 
     Ok(())
@@ -303,7 +302,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
 
     // Assert
     assert!(status.success, "upload should succeed");
-    let entries: Vec<_> = fs::read_dir(&copy_target).expect("read dir").collect();
+    let entries: Vec<_> = read_dir(&copy_target).expect("read dir").collect();
     assert!(!entries.is_empty(), "should have copied transcodes");
 
     Ok(())
@@ -344,7 +343,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
 
     // Assert
     assert!(status.success, "upload should succeed");
-    let torrent_files: Vec<_> = fs::read_dir(&*torrent_target)
+    let torrent_files: Vec<_> = read_dir(&*torrent_target)
         .expect("read dir")
         .filter_map(Result::ok)
         .filter(|e| e.path().extension().is_some_and(|ext| ext == "torrent"))
@@ -365,65 +364,62 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
 
     // Create a mock client that fails on upload
     let torrent_path = SAMPLE_SOURCES_DIR.join(transcode.album.torrent_filename());
-    let torrent_bytes = fs::read(torrent_path).expect("torrent file should exist");
+    let torrent_bytes = read(torrent_path).expect("torrent file should exist");
 
     let mock = MockGazelleClient::new()
-        .with_get_torrent(Ok(gazelle_api::TorrentResponse {
-            group: gazelle_api::Group {
+        .with_get_torrent(Ok(TorrentResponse {
+            group: Group {
                 id: 123,
                 name: transcode.album.album.to_owned(),
                 year: transcode.album.year,
                 category_name: "Music".to_owned(),
-                music_info: Some(gazelle_api::Credits {
-                    artists: vec![gazelle_api::Credit {
+                music_info: Some(Credits {
+                    artists: vec![Credit {
                         id: 1,
                         name: transcode.album.artist.to_owned(),
                     }],
-                    ..gazelle_api::Credits::default()
+                    ..Credits::default()
                 }),
-                ..gazelle_api::Group::default()
+                ..Group::default()
             },
-            torrent: gazelle_api::Torrent {
+            torrent: Torrent {
                 id: AlbumConfig::TORRENT_ID,
                 format: Format::FLAC,
                 encoding: Quality::Lossless,
                 media: Media::WEB,
-                ..gazelle_api::Torrent::default()
+                ..Torrent::default()
             },
         }))
-        .with_get_torrent_group(Ok(gazelle_api::GroupResponse {
-            group: gazelle_api::Group {
+        .with_get_torrent_group(Ok(GroupResponse {
+            group: Group {
                 id: 123,
                 name: transcode.album.album.to_owned(),
                 year: transcode.album.year,
                 category_name: "Music".to_owned(),
-                ..gazelle_api::Group::default()
+                ..Group::default()
             },
-            torrents: vec![gazelle_api::Torrent {
+            torrents: vec![Torrent {
                 id: AlbumConfig::TORRENT_ID,
                 format: Format::FLAC,
                 encoding: Quality::Lossless,
                 media: Media::WEB,
-                ..gazelle_api::Torrent::default()
+                ..Torrent::default()
             }],
         }))
         .with_download_torrent(Ok(torrent_bytes))
-        .with_upload_torrent(Err(gazelle_api::GazelleError {
-            operation: gazelle_api::GazelleOperation::ReadFile,
-            source: gazelle_api::ErrorSource::Io(IoError::new(
-                ErrorKind::NotFound,
-                "Upload failed",
-            )),
+        .with_upload_torrent(Err(GazelleError {
+            operation: GazelleOperation::ReadFile,
+            source: ErrorSource::Io(IoError::new(ErrorKind::NotFound, "Upload failed")),
         }));
 
     let mut builder = HostBuilder::new();
 
     #[allow(clippy::as_conversions)]
-    let client: di::Ref<Box<dyn gazelle_api::GazelleClientTrait + Send + Sync>> =
-        di::Ref::new(Box::new(mock) as Box<dyn gazelle_api::GazelleClientTrait + Send + Sync>);
+    let client: DiRef<Box<dyn GazelleClientTrait + Send + Sync>> =
+        DiRef::new(Box::new(mock) as Box<dyn GazelleClientTrait + Send + Sync>);
     builder
         .services
-        .add(di::singleton_as_self().from(move |_| client.clone()));
+        .add(singleton_as_self().from(move |_| client.clone()));
 
     let _ = builder
         .with_test_options(&test_dir)
@@ -520,7 +516,7 @@ async fn build_upload_test_host(transcode: &TranscodeConfig, test_dir: &TestDire
 }
 
 /// Helper to get source and upload command from a host.
-async fn get_source_and_command(host: &Host) -> (Source, di::Ref<UploadCommand>) {
+async fn get_source_and_command(host: &Host) -> (Source, DiRef<UploadCommand>) {
     let provider = host.services.get_required::<SourceProvider>();
     let source = provider
         .get(AlbumConfig::TORRENT_ID)

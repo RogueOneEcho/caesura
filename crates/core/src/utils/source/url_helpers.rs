@@ -1,9 +1,6 @@
 //! Parse and generate Gazelle tracker torrent URLs.
 
-use std::sync::LazyLock;
-
 use crate::prelude::*;
-use regex::Regex;
 
 /// Match group URL: `/torrents.php?id={group}&torrentid={torrent}`.
 static GROUP_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {

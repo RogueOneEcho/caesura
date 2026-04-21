@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use tokio::fs::{copy, create_dir, hard_link, read_dir};
 
 /// Copy the contents of one directory to another.
 ///
@@ -49,13 +48,13 @@ pub async fn copy_dir(
         )
         .with_path(target_dir));
     }
-    create_dir(target_dir)
+    tokio_create_dir(target_dir)
         .await
         .map_err(Failure::wrap_with_path(
             FsAction::CreateDirectory,
             target_dir,
         ))?;
-    let mut dir = read_dir(source_dir)
+    let mut dir = tokio_read_dir(source_dir)
         .await
         .map_err(Failure::wrap_with_path(FsAction::ReadDirectory, source_dir))?;
     while let Some(entry) = dir
@@ -68,11 +67,11 @@ pub async fn copy_dir(
         if source_entry_path.is_dir() {
             Box::pin(copy_dir(&source_entry_path, &target_path, use_hard_link)).await?;
         } else if use_hard_link {
-            hard_link(&source_entry_path, &target_path)
+            tokio_hard_link(&source_entry_path, &target_path)
                 .await
                 .map_err(Failure::wrap_with_path(FsAction::HardLink, &target_path))?;
         } else {
-            copy(&source_entry_path, &target_path)
+            tokio_copy(&source_entry_path, &target_path)
                 .await
                 .map_err(Failure::wrap_with_path(FsAction::CopyFile, &target_path))?;
         }

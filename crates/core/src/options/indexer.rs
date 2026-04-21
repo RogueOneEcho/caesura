@@ -1,9 +1,6 @@
-use crate::prelude::FmtResult;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 use std::cmp::Ordering;
 use std::convert::Infallible;
-use std::fmt::{Display, Formatter};
-use std::str::FromStr;
 
 /// URL of the RED indexer.
 pub const RED_URL: &str = "https://redacted.sh";
@@ -108,6 +105,6 @@ impl PartialOrd for Indexer {
 
 impl Display for Indexer {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        self.to_uppercase().fmt(f)
+        Display::fmt(&self.to_uppercase(), f)
     }
 }

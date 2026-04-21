@@ -3,7 +3,7 @@
 use super::parse::ParsedField;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{Attribute, Expr, ExprLit, Ident, Lit, Meta, Type};
+use syn::{Attribute, Expr, ExprLit, GenericArgument, Ident, Lit, Meta, PathArguments, Type};
 
 /// Generate the `doc_metadata` function for documentation generation.
 pub fn generate_doc_metadata(
@@ -120,15 +120,15 @@ fn type_to_display_string(ty: &Type) -> String {
                 let ident = segment.ident.to_string();
                 // Handle Option<T> specially
                 if ident == "Option"
-                    && let syn::PathArguments::AngleBracketed(args) = &segment.arguments
-                    && let Some(syn::GenericArgument::Type(inner)) = args.args.first()
+                    && let PathArguments::AngleBracketed(args) = &segment.arguments
+                    && let Some(GenericArgument::Type(inner)) = args.args.first()
                 {
                     return format!("Option<{}>", type_to_display_string(inner));
                 }
                 // Handle Vec<T> specially
                 if ident == "Vec"
-                    && let syn::PathArguments::AngleBracketed(args) = &segment.arguments
-                    && let Some(syn::GenericArgument::Type(inner)) = args.args.first()
+                    && let PathArguments::AngleBracketed(args) = &segment.arguments
+                    && let Some(GenericArgument::Type(inner)) = args.args.first()
                 {
                     return format!("Vec<{}>", type_to_display_string(inner));
                 }

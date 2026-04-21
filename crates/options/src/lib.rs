@@ -6,7 +6,6 @@ pub use doc_metadata::*;
 pub use options_provider::*;
 pub use options_registration::*;
 pub use options_trait::*;
-pub use rules::OptionRule::*;
 pub use rules::*;
 
 mod args_provider;

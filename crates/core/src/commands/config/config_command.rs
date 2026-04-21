@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use colored::ColoredString;
-use serde_yaml::Value;
-use std::collections::HashMap;
 
 /// Display the current configuration options.
 #[injectable]
@@ -49,8 +46,8 @@ impl ConfigCommand {
                     let _ = writeln!(out, "{}", format_comment(format!("# Default: {default}")));
                 }
             }
-            let yaml = serde_yaml::to_string(&value)
-                .map_err(Failure::wrap(ConfigAction::SerializeValue))?;
+            let yaml =
+                yaml_to_string(&value).map_err(Failure::wrap(ConfigAction::SerializeValue))?;
             let yaml = yaml.trim_end_matches('\n');
             let is_block = matches!(value, Value::Sequence(s) if !s.is_empty());
             let spacer = if is_block { '\n' } else { ' ' };
@@ -59,21 +56,21 @@ impl ConfigCommand {
         Ok(out)
     }
 
-    fn get_options_map(&self) -> Result<BTreeMap<String, Value>, serde_yaml::Error> {
+    fn get_options_map(&self) -> Result<BTreeMap<String, Value>, YamlError> {
         let option_values = [
-            serde_yaml::to_value(&*self.batch_options)?,
-            serde_yaml::to_value(&*self.cache_options)?,
-            serde_yaml::to_value(&*self.config_options)?,
-            serde_yaml::to_value(&*self.copy_options)?,
-            serde_yaml::to_value(&*self.file_options)?,
-            serde_yaml::to_value(&*self.queue_add_args)?,
-            serde_yaml::to_value(&*self.runner_options)?,
-            serde_yaml::to_value(&*self.shared_options)?,
-            serde_yaml::to_value(&*self.sox_options)?,
-            serde_yaml::to_value(&*self.spectrogram_options)?,
-            serde_yaml::to_value(&*self.target_options)?,
-            serde_yaml::to_value(&*self.upload_options)?,
-            serde_yaml::to_value(&*self.verify_options)?,
+            yaml_to_value(&*self.batch_options)?,
+            yaml_to_value(&*self.cache_options)?,
+            yaml_to_value(&*self.config_options)?,
+            yaml_to_value(&*self.copy_options)?,
+            yaml_to_value(&*self.file_options)?,
+            yaml_to_value(&*self.queue_add_args)?,
+            yaml_to_value(&*self.runner_options)?,
+            yaml_to_value(&*self.shared_options)?,
+            yaml_to_value(&*self.sox_options)?,
+            yaml_to_value(&*self.spectrogram_options)?,
+            yaml_to_value(&*self.target_options)?,
+            yaml_to_value(&*self.upload_options)?,
+            yaml_to_value(&*self.verify_options)?,
         ];
         let mut data = BTreeMap::new();
         for value in option_values {

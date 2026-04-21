@@ -1,12 +1,6 @@
-use std::collections::HashMap;
-use std::fs::File;
-use std::path::Path;
-use std::sync::{Arc, LazyLock, Mutex};
-use tokio::sync::OnceCell;
-
 use super::album_generator::AlbumGenerator;
-use super::{AlbumConfig, SampleFormat};
-use crate::utils::{DiagnosticExt, SAMPLE_SOURCES_DIR};
+use crate::testing_prelude::*;
+use std::sync::Mutex;
 
 /// Per-config cache of album generation results.
 ///

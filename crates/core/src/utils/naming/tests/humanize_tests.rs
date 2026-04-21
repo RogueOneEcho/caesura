@@ -1,5 +1,4 @@
-use super::super::*;
-use std::collections::BTreeSet;
+use crate::testing_prelude::*;
 
 #[test]
 fn join_humanized_with_slice() {

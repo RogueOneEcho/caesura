@@ -1,7 +1,5 @@
 use crate::testing_prelude::*;
-use crate::utils::SourceIssue::UnnecessaryDirectory;
-use std::fs::{self, create_dir};
-use std::io::{Error as IoError, ErrorKind};
+use std::fs::metadata as fs_metadata;
 
 #[tokio::test]
 async fn verify_command_mocked() -> Result<(), TestError> {
@@ -66,7 +64,7 @@ async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
         torrent_path.is_file(),
         "torrent should be cached after download"
     );
-    let metadata = fs::metadata(&torrent_path)?;
+    let metadata = fs_metadata(&torrent_path)?;
     let first_modified = metadata.modified()?;
 
     // Act
@@ -74,7 +72,7 @@ async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
 
     // Assert
     assert_eq!(result, torrent_path);
-    let metadata = fs::metadata(&torrent_path)?;
+    let metadata = fs_metadata(&torrent_path)?;
     let second_modified = metadata.modified()?;
     assert_eq!(
         first_modified, second_modified,
@@ -91,15 +89,13 @@ async fn get_source_torrent_leaves_no_file_on_download_failure() -> Result<(), T
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let failing_api = album
-        .api()
-        .with_download_torrent(Err(gazelle_api::GazelleError {
-            operation: gazelle_api::GazelleOperation::SendRequest,
-            source: gazelle_api::ErrorSource::Io(IoError::new(
-                ErrorKind::ConnectionRefused,
-                "simulated download failure",
-            )),
-        }));
+    let failing_api = album.api().with_download_torrent(Err(GazelleError {
+        operation: GazelleOperation::SendRequest,
+        source: ErrorSource::Io(IoError::new(
+            ErrorKind::ConnectionRefused,
+            "simulated download failure",
+        )),
+    }));
     let host = HostBuilder::new()
         .with_mock_client(failing_api)
         .with_test_options(&test_dir)
@@ -204,7 +200,7 @@ fn verify_command_subdirectory_checks() {
     assert_eq!(result.len(), 1);
     assert_eq!(
         result[0].to_string(),
-        UnnecessaryDirectory {
+        SourceIssue::UnnecessaryDirectory {
             prefix: PathBuf::from("c")
         }
         .to_string()
@@ -288,12 +284,12 @@ fn check_path_length_exceeds_limit() {
 
 fn mock_source() -> Source {
     Source {
-        torrent: gazelle_api::Torrent::mock(),
-        group: gazelle_api::Group::mock(),
+        torrent: Torrent::mock(),
+        group: Group::mock(),
         targets: TargetFormat::all(),
         format: SourceFormat::Flac,
         directory: PathBuf::from("/tmp/test"),
-        metadata: Metadata::new(&gazelle_api::Group::mock(), &gazelle_api::Torrent::mock()),
+        metadata: Metadata::new(&Group::mock(), &Torrent::mock()),
         url: get_permalink(RED_URL, 123, 456),
     }
 }

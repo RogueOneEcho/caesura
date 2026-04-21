@@ -1,8 +1,7 @@
-use chrono::{DateTime, Utc};
-use serde::de::{self, Visitor};
-use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::str::FromStr;
+use crate::prelude::*;
+#[cfg(test)]
+use chrono::ParseError;
+use chrono::{DateTime, SecondsFormat, Utc};
 
 /// UTC timestamp for queue item status tracking.
 #[derive(Clone, Debug, PartialEq)]
@@ -20,7 +19,7 @@ impl TimeStamp {
 
     /// Create a [`TimeStamp`] from an RFC 3339 date string.
     #[cfg(test)]
-    pub(crate) fn from_rfc3339(s: &str) -> Result<Self, chrono::ParseError> {
+    pub(crate) fn from_rfc3339(s: &str) -> Result<Self, ParseError> {
         let datetime = DateTime::parse_from_rfc3339(s)?.with_timezone(&Utc);
         Ok(TimeStamp { datetime })
     }
@@ -29,11 +28,9 @@ impl TimeStamp {
 impl Serialize for TimeStamp {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
-        let s = self
-            .datetime
-            .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+        let s = self.datetime.to_rfc3339_opts(SecondsFormat::Secs, true);
         serializer.serialize_str(&s)
     }
 }
@@ -41,20 +38,20 @@ impl Serialize for TimeStamp {
 impl<'de> Deserialize<'de> for TimeStamp {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct TimeStampVisitor;
 
         impl Visitor<'_> for TimeStampVisitor {
             type Value = TimeStamp;
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut Formatter) -> FmtResult {
                 formatter.write_str("a valid ISO 8601 date string")
             }
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
-                E: de::Error,
+                E: SerdeError,
             {
-                let datetime = DateTime::from_str(value).map_err(de::Error::custom)?;
+                let datetime = DateTime::from_str(value).map_err(SerdeError::custom)?;
                 Ok(TimeStamp { datetime })
             }
         }

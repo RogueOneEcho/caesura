@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use flat_db::Hash;
 
 /// Remove an item from the queue
 #[injectable]

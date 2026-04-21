@@ -1,14 +1,13 @@
 use crate::testing_prelude::*;
-use crate::utils::SourceIssue::Id;
 
 #[test]
 #[allow(clippy::similar_names)]
-fn id_provider_error_pascal_case_alias() -> Result<(), serde_yaml::Error> {
+fn id_provider_error_pascal_case_alias() -> Result<(), YamlError> {
     // Arrange
     let example = vec![
-        Id(IdProviderError::NoMatch),
-        Id(IdProviderError::UrlInvalid),
-        Id(IdProviderError::TorrentFileSource {
+        SourceIssue::Id(IdProviderError::NoMatch),
+        SourceIssue::Id(IdProviderError::UrlInvalid),
+        SourceIssue::Id(IdProviderError::TorrentFileSource {
             actual: "ABC".to_owned(),
             expected: "CBA".to_owned(),
         }),
@@ -33,11 +32,11 @@ fn id_provider_error_pascal_case_alias() -> Result<(), serde_yaml::Error> {
 ";
 
     // Act
-    let pascal_case_deserialized: Vec<SourceIssue> = serde_yaml::from_str(pascal_case)?;
-    let snake_case_deserialized: Vec<SourceIssue> = serde_yaml::from_str(snake_case)?;
-    let yaml = serde_yaml::to_string(&example)?;
+    let pascal_case_deserialized: Vec<SourceIssue> = yaml_from_str(pascal_case)?;
+    let snake_case_deserialized: Vec<SourceIssue> = yaml_from_str(snake_case)?;
+    let yaml = yaml_to_string(&example)?;
     println!("{yaml}");
-    let pascal_case_reserialized = serde_yaml::to_string(&pascal_case_deserialized)?;
+    let pascal_case_reserialized = yaml_to_string(&pascal_case_deserialized)?;
 
     // Assert
     assert_eq!(yaml, snake_case);

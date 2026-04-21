@@ -1,5 +1,4 @@
-use crate::utils::TempDirectory;
-use std::fs::remove_dir_all;
+use crate::testing_prelude::*;
 
 /// Test that `TempDirectory::create` creates the directory.
 #[test]

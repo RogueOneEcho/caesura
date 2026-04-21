@@ -1,13 +1,4 @@
-use std::fs;
-use std::path::{Path, PathBuf};
-
-use rogue_logging::Failure;
-use tokio::process::Command;
-
-use super::{ImageGenerator, SampleAction};
-use crate::dependencies::{METAFLAC, SOX, SOX_NG};
-use crate::options::detect_sox_ng;
-use crate::utils::ProcessExt;
+use crate::testing_prelude::*;
 
 /// Builder for generating sample FLAC files.
 ///
@@ -223,7 +214,7 @@ impl FlacGenerator {
             Some(sub) => output_dir.join(sub),
             None => output_dir.to_path_buf(),
         };
-        fs::create_dir_all(&dir).map_err(Failure::wrap(SampleAction::CreateDirectory))?;
+        create_dir_all(&dir).map_err(Failure::wrap(SampleAction::CreateDirectory))?;
         let filename = self
             .filename
             .clone()
@@ -236,7 +227,7 @@ impl FlacGenerator {
         let frequency = self.frequency.unwrap_or(Self::DEFAULT_FREQUENCY);
         let is_sox_ng = detect_sox_ng();
         let binary = if is_sox_ng { SOX_NG } else { SOX };
-        let mut command = Command::new(binary);
+        let mut command = TokioCommand::new(binary);
         if is_sox_ng {
             command.arg("--single-threaded");
         }
@@ -267,7 +258,7 @@ impl FlacGenerator {
                 .with_filename("cover_temp.png")
                 .generate(&dir)?;
             self.apply_picture(&path, &image_path).await?;
-            fs::remove_file(&image_path).map_err(Failure::wrap(SampleAction::RemoveFile))?;
+            remove_file(&image_path).map_err(Failure::wrap(SampleAction::RemoveFile))?;
         }
         Ok(path)
     }
@@ -298,7 +289,7 @@ impl FlacGenerator {
         if args.is_empty() {
             return Ok(());
         }
-        Command::new(METAFLAC)
+        TokioCommand::new(METAFLAC)
             .args(&args)
             .arg(path)
             .run()
@@ -316,7 +307,7 @@ impl FlacGenerator {
         // Type 3 = front cover
         // Leave width/height/depth empty for metaflac to auto-detect
         let spec = format!("3|image/png|||{}", image_path.display());
-        Command::new(METAFLAC)
+        TokioCommand::new(METAFLAC)
             .arg(format!("--import-picture-from={spec}"))
             .arg(flac_path)
             .run()

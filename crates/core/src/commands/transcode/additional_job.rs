@@ -1,5 +1,3 @@
-use tokio::task::spawn_blocking;
-
 use crate::prelude::*;
 
 /// Job to resize and copy an additional file to the transcode directory.

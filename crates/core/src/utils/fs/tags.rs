@@ -1,8 +1,5 @@
 //! Read and manipulate audio file tags for transcoding.
 
-use std::str::from_utf8;
-use std::sync::LazyLock;
-
 use crate::prelude::*;
 use lofty::config::{ParseOptions, WriteOptions};
 use lofty::error::LoftyError;
@@ -13,8 +10,7 @@ use lofty::prelude::TagExt;
 use lofty::probe::Probe;
 use lofty::tag::ItemKey::TrackNumber;
 use lofty::tag::{Accessor, ItemKey, Tag, TagType};
-use regex::Regex;
-use std::fs::File;
+use std::str::from_utf8;
 
 /// Match vinyl track numbering: letter followed by optional digits.
 ///

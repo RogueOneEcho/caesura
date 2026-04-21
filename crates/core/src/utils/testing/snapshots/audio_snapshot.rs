@@ -1,12 +1,10 @@
+use crate::testing_prelude::*;
 use lofty::file::{AudioFile, TaggedFile, TaggedFileExt};
 use lofty::picture::Picture;
 use lofty::probe::Probe;
 use lofty::properties::{ChannelMask, FileProperties};
 use lofty::tag::{ItemValue, Tag};
-use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
-use std::path::Path;
 
 /// Snapshot of audio file metadata for deterministic testing.
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]

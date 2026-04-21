@@ -1,9 +1,5 @@
-use std::path::{Path, PathBuf};
-
+use crate::testing_prelude::*;
 use image::{Rgb, RgbImage};
-use rogue_logging::Failure;
-
-use super::SampleAction;
 
 /// Builder for generating sample PNG images with a gradient pattern.
 ///

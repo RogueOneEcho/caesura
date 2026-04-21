@@ -1,9 +1,4 @@
-use std::fs;
-use std::time::Duration;
-
-use crate::prelude::*;
 use crate::testing_prelude::*;
-use insta::assert_snapshot;
 
 /// Test that [`InspectFactory::create`] returns FLAC metadata for a multi-disc source directory.
 #[tokio::test]
@@ -85,7 +80,7 @@ async fn inspect_factory_mixed() -> Result<(), TestError> {
     let mp3_dir = transcode.transcode_dir();
 
     let temp = TempDirectory::create("mixed_format");
-    fs::copy(
+    copy(
         flac_dir
             .join("Disc 1")
             .join(config.track_filename(&config.tracks[0])),
@@ -94,7 +89,7 @@ async fn inspect_factory_mixed() -> Result<(), TestError> {
     let mp3_filename = config
         .track_filename(&config.tracks[1])
         .replace(".flac", ".mp3");
-    fs::copy(
+    copy(
         mp3_dir.join("Disc 1").join(&mp3_filename),
         temp.join(&mp3_filename),
     )?;

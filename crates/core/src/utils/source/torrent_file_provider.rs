@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use gazelle_api::GazelleClientTrait;
-use std::fs::create_dir;
-use tokio::fs::{File, rename};
 use tokio::io::AsyncWriteExt;
 
 /// Download and cache source `.torrent` files from the Gazelle API.
@@ -39,7 +36,7 @@ impl TorrentFileProvider {
         }
         let mut tmp_path = path.clone();
         tmp_path.as_mut_os_string().push(".tmp");
-        let mut file = File::create(&tmp_path)
+        let mut file = TokioFile::create(&tmp_path)
             .await
             .map_err(Failure::wrap_with_path(
                 TorrentFileAction::CreateFile,
@@ -61,13 +58,12 @@ impl TorrentFileProvider {
             &tmp_path,
         ))?;
         drop(file);
-        rename(&tmp_path, &path).await.map_err(Failure::wrap_with(
-            TorrentFileAction::RenameFile,
-            |f| {
+        tokio_rename(&tmp_path, &path)
+            .await
+            .map_err(Failure::wrap_with(TorrentFileAction::RenameFile, |f| {
                 f.with("from", tmp_path.display().to_string())
                     .with("to", path.display().to_string())
-            },
-        ))?;
+            }))?;
         Ok(path)
     }
 }

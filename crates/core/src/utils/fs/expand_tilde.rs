@@ -1,6 +1,7 @@
 //! Tilde expansion for user-provided paths.
 
-use std::path::{Path, PathBuf};
+use crate::prelude::*;
+use dirs::home_dir;
 
 /// Extension trait for expanding `~` in paths.
 pub(crate) trait ExpandTilde {
@@ -19,10 +20,10 @@ impl ExpandTilde for Path {
             return self.to_path_buf();
         };
         if s == "~" {
-            return dirs::home_dir().expect("home directory should be determinable");
+            return home_dir().expect("home directory should be determinable");
         }
         if let Some(rest) = s.strip_prefix("~/") {
-            return dirs::home_dir()
+            return home_dir()
                 .expect("home directory should be determinable")
                 .join(rest);
         }

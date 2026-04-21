@@ -4,6 +4,8 @@ use crate::{
     ArgsProviderContract, Documented, OptionRule, OptionsPartialContract, OptionsRegistration,
 };
 use di::{ServiceCollection, existing_as_self};
+use inventory::iter as inventory_iter;
+use serde_yaml::from_str as from_yaml_str;
 use std::sync::Arc;
 
 /// Setup helper for resolving, validating, and registering options with DI.
@@ -47,7 +49,7 @@ impl OptionsProvider {
         P: OptionsPartialContract,
     {
         let Some(yaml) = &self.yaml else { return };
-        match serde_yaml::from_str(yaml) {
+        match from_yaml_str(yaml) {
             Ok(file_partial) => {
                 partial.merge(file_partial);
             }
@@ -102,7 +104,7 @@ impl OptionsProvider {
 
     /// Validate all relevant options and register them with DI.
     fn register_all(&mut self, services: &mut ServiceCollection) {
-        for entry in inventory::iter::<OptionsRegistration> {
+        for entry in inventory_iter::<OptionsRegistration> {
             (entry.register)(self, services);
         }
     }

@@ -1,10 +1,13 @@
-//! Snapshot tests for the Options and CommandEnum derive macros.
+//! Snapshot tests for the Options and `CommandEnum` derive macros.
 
 use insta::assert_snapshot;
+use prettyplease::unparse;
 use proc_macro2::TokenStream as TokenStream2;
-use syn::DeriveInput;
+use syn::parse_file as syn_parse_file;
+use syn::parse_str as syn_parse_str;
+use syn::{Data, DataStruct, DeriveInput, Item};
 
-/// Verify macro output for all 8 combinations of (default_fn, default_value, is_option).
+/// Verify macro output for all 8 combinations of (`default_fn`, `default_value`, `is_option`).
 #[test]
 fn expand_all_field_types() {
     let output = expand_options(
@@ -83,22 +86,26 @@ fn expand_with_custom_arg_attrs() {
 
 /// Formats generated tokens as readable Rust code using prettyplease.
 fn format_tokens(tokens: TokenStream2) -> String {
-    let file = syn::parse_file(&tokens.to_string()).expect("generated code should parse");
-    prettyplease::unparse(&file)
+    let file = syn_parse_file(&tokens.to_string()).expect("generated code should parse");
+    unparse(&file)
 }
 
 /// Expands the Options derive macro on the given struct definition.
 fn expand_options(input: &str) -> String {
-    let input: DeriveInput = syn::parse_str(input).expect("input should parse");
+    let input: DeriveInput = syn_parse_str(input).expect("input should parse");
     let tokens = super::options::derive(input).expect("derive should succeed");
     format_tokens(tokens)
 }
 
 /// Extracts the struct with `#[derive(...Options...)]` from a source file and expands it.
+#[expect(
+    clippy::panic,
+    reason = "test helper should panic on missing derive target"
+)]
 fn expand_options_from_file(source: &str) -> String {
-    let file = syn::parse_file(source).expect("file should parse");
+    let file = syn_parse_file(source).expect("file should parse");
     for item in file.items {
-        if let syn::Item::Struct(item_struct) = item {
+        if let Item::Struct(item_struct) = item {
             let has_options_derive = item_struct.attrs.iter().any(|attr| {
                 if attr.path().is_ident("derive") {
                     let mut has_options = false;
@@ -118,7 +125,7 @@ fn expand_options_from_file(source: &str) -> String {
                     vis: item_struct.vis,
                     ident: item_struct.ident,
                     generics: item_struct.generics,
-                    data: syn::Data::Struct(syn::DataStruct {
+                    data: Data::Struct(DataStruct {
                         struct_token: item_struct.struct_token,
                         fields: item_struct.fields,
                         semi_token: item_struct.semi_token,
@@ -136,7 +143,7 @@ fn expand_options_from_file(source: &str) -> String {
 
 #[test]
 fn expand_command_enum_primary() {
-    let input: DeriveInput = syn::parse_str(
+    let input: DeriveInput = syn_parse_str(
         r#"
         /// App description
         #[derive(CommandEnum, Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -178,7 +185,7 @@ fn expand_command_enum_primary() {
 
 #[test]
 fn expand_command_enum_sub() {
-    let input: DeriveInput = syn::parse_str(
+    let input: DeriveInput = syn_parse_str(
         r#"
         #[derive(CommandEnum, Clone, Copy, Debug, Eq, Hash, PartialEq)]
         #[command_enum(parent = "queue")]

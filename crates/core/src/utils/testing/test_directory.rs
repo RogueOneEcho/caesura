@@ -1,6 +1,5 @@
-use crate::utils::TempDirectory;
+use crate::testing_prelude::*;
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
 use std::thread::current as current_thread;
 
 /// Test directory with `output` and `cache` subdirectories.

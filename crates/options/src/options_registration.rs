@@ -1,4 +1,6 @@
-use crate::OptionsDoc;
+use crate::{OptionsDoc, OptionsProvider};
+use di::ServiceCollection;
+use inventory::iter as inventory_iter;
 
 inventory::collect!(OptionsRegistration);
 
@@ -7,14 +9,14 @@ pub struct OptionsRegistration {
     /// Return documentation metadata for this options type.
     pub doc_metadata: fn() -> &'static OptionsDoc,
     /// Register the partial type with the DI container.
-    pub register: fn(&mut crate::OptionsProvider, &mut di::ServiceCollection),
+    pub register: fn(&mut OptionsProvider, &mut ServiceCollection),
 }
 
 impl OptionsRegistration {
     /// Collect documentation metadata from all registered option types, sorted by name.
     #[must_use]
     pub fn get_all() -> Vec<&'static OptionsDoc> {
-        let mut docs: Vec<_> = inventory::iter::<OptionsRegistration>
+        let mut docs: Vec<_> = inventory_iter::<OptionsRegistration>
             .into_iter()
             .map(|r| (r.doc_metadata)())
             .collect();

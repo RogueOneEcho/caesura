@@ -1,5 +1,3 @@
-use std::fs;
-
 use crate::testing_prelude::*;
 
 #[tokio::test]
@@ -65,7 +63,7 @@ async fn verify_corrupted_content_returns_hash_check() {
         .first()
         .expect("should have at least one track");
     let corrupt_path = corrupt_dir.join(album.track_filename(first_track));
-    fs::write(&corrupt_path, b"corrupted data").expect("should write corrupt file");
+    write(&corrupt_path, b"corrupted data").expect("should write corrupt file");
 
     // Act
     let result = TorrentVerifier::execute(&output_path, &corrupt_dir)
@@ -97,7 +95,7 @@ async fn verify_missing_file_returns_missing_file() {
     .await
     .expect("should create torrent");
     let empty_dir = test_dir.join(album.dir_name());
-    fs::create_dir_all(&empty_dir).expect("should create empty dir");
+    create_dir_all(&empty_dir).expect("should create empty dir");
 
     // Act
     let result = TorrentVerifier::execute(&output_path, &empty_dir)
@@ -135,11 +133,11 @@ async fn verify_truncated_file_returns_hash_check() {
         .first()
         .expect("should have at least one track");
     let track_path = truncated_dir.join(album.track_filename(first_track));
-    let original = fs::read(&track_path).expect("should read track file");
+    let original = read(&track_path).expect("should read track file");
     let truncated = original
         .get(..truncate_midpoint(original.len()))
         .expect("slice should be in bounds");
-    fs::write(&track_path, truncated).expect("should write truncated file");
+    write(&track_path, truncated).expect("should write truncated file");
 
     // Act
     let result = TorrentVerifier::execute(&output_path, &truncated_dir)
@@ -162,9 +160,9 @@ async fn verify_excess_content_returns_excess_content() {
     let piece_len: usize = 16384;
     let test_dir = TempDirectory::create("verify_excess_content");
     let content_dir = test_dir.join("album");
-    fs::create_dir_all(&content_dir).expect("should create content dir");
+    create_dir_all(&content_dir).expect("should create content dir");
     let file_path = content_dir.join("data.bin");
-    fs::write(&file_path, vec![0xAB_u8; piece_len]).expect("should write aligned file");
+    write(&file_path, vec![0xAB_u8; piece_len]).expect("should write aligned file");
     let output_path = test_dir.join("test.torrent");
     TorrentCreator::create(
         &content_dir,
@@ -174,9 +172,9 @@ async fn verify_excess_content_returns_excess_content() {
     )
     .await
     .expect("should create torrent");
-    let mut content = fs::read(&file_path).expect("should read file");
+    let mut content = read(&file_path).expect("should read file");
     content.extend_from_slice(&[0xFF_u8; 512]);
-    fs::write(&file_path, &content).expect("should write padded file");
+    write(&file_path, &content).expect("should write padded file");
 
     // Act
     let result = TorrentVerifier::execute(&output_path, &content_dir)
@@ -210,14 +208,14 @@ const fn truncate_midpoint(len: usize) -> usize {
 }
 
 fn copy_dir(from: &Path, to: &Path) {
-    fs::create_dir_all(to).expect("should create destination dir");
-    for entry in fs::read_dir(from).expect("should read source dir") {
+    create_dir_all(to).expect("should create destination dir");
+    for entry in read_dir(from).expect("should read source dir") {
         let entry = entry.expect("should read entry");
         let dest = to.join(entry.file_name());
         if entry.file_type().expect("should get file type").is_dir() {
             copy_dir(&entry.path(), &dest);
         } else {
-            fs::copy(entry.path(), &dest).expect("should copy file");
+            copy(entry.path(), &dest).expect("should copy file");
         }
     }
 }

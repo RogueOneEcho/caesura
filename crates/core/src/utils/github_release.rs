@@ -3,7 +3,7 @@
 use crate::prelude::*;
 use chrono::{DateTime, TimeDelta, Utc};
 use reqwest::Client;
-use serde::Deserialize;
+use reqwest::Error as ReqwestError;
 
 const RELEASES_API: &str = "https://api.github.com/repos/RogueOneEcho/caesura/releases/latest";
 const RELEASES_URL: &str = "https://github.com/RogueOneEcho/caesura/releases";
@@ -43,7 +43,7 @@ impl GitHubRelease {
     }
 
     /// Fetch the latest release from the GitHub API.
-    async fn get_latest() -> Result<GitHubRelease, reqwest::Error> {
+    async fn get_latest() -> Result<GitHubRelease, ReqwestError> {
         Client::new()
             .get(RELEASES_API)
             .header("User-Agent", app_user_agent(true))

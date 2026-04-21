@@ -1,5 +1,3 @@
-use std::fs;
-
 use crate::testing_prelude::*;
 use crate::utils::TargetFormat::_320;
 
@@ -138,7 +136,7 @@ async fn no_png_to_jpg_preserves_png() {
 async fn text_file_is_copied_not_resized() {
     // Arrange
     let (_test_dir, source_dir, factory, source) = setup_factory(small_max_file_options()).await;
-    fs::write(source_dir.join("info.txt"), "a".repeat(1000)).expect("should write text file");
+    write(source_dir.join("info.txt"), "a".repeat(1000)).expect("should write text file");
 
     // Act
     let file = AdditionalFile::new(source_dir.join("info.txt"), &source_dir);
@@ -169,7 +167,7 @@ async fn setup_factory(
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&source_dir).expect("should create source dir");
     let host = HostBuilder::new()
         .with_mock_api(album)
         .with_test_options(&test_dir)

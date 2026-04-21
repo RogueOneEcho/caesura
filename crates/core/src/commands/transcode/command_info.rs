@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use tokio::process::Command;
 
-/// Information required to create a [`Command`].
+/// Information required to create a [`TokioCommand`].
 pub(crate) struct CommandInfo {
     /// Program to run
     pub program: String,
@@ -10,14 +9,14 @@ pub(crate) struct CommandInfo {
 }
 
 impl CommandInfo {
-    /// Create a [`Command`] from the program and its arguments.
+    /// Create a [`TokioCommand`] from the program and its arguments.
     ///
     /// On Unix, the child is placed in its own process group so it does not
     /// receive the terminal's SIGINT.
     #[must_use]
     #[allow(clippy::wrong_self_convention)]
-    pub(crate) fn to_command(self) -> Command {
-        let mut cmd = Command::new(self.program);
+    pub(crate) fn to_command(self) -> TokioCommand {
+        let mut cmd = TokioCommand::new(self.program);
         cmd.args(self.args);
         #[cfg(unix)]
         cmd.process_group(0);

@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use regex::Regex;
-use tokio::process::Command;
 
 /// Regex capturing the semantic version from `flac --version` output.
 pub(crate) const FLAC_VERSION_PATTERN: &str = r"flac (\d+\.\d+(?:\.\d+)?)";
@@ -38,7 +36,7 @@ impl VersionCommand {
 
 /// Check if a dependency is available and extract its version.
 pub(super) async fn get_version(binary: &str, pattern: &str) -> Result<VersionInfo, VersionError> {
-    let output = Command::new(binary)
+    let output = TokioCommand::new(binary)
         .arg("--version")
         .output()
         .await

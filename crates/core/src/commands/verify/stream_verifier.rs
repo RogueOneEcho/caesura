@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::utils::SourceIssue::*;
 use claxon::metadata::StreamInfo;
 
 /// Verify FLAC stream properties are suitable for transcoding.
@@ -23,7 +22,7 @@ impl StreamVerifier {
 
 /// Check the FLAC file can be read and return its stream info.
 pub(crate) fn check_flac_readable(flac: &FlacFile) -> Result<StreamInfo, SourceIssue> {
-    flac.get_stream_info().map_err(|e| FlacError {
+    flac.get_stream_info().map_err(|e| SourceIssue::FlacError {
         path: flac.path.clone(),
         error: format!("{e}"),
     })
@@ -32,7 +31,7 @@ pub(crate) fn check_flac_readable(flac: &FlacFile) -> Result<StreamInfo, SourceI
 /// Check the sample rate is a multiple of 44100 or 48000.
 pub(crate) fn check_sample_rate(path: &Path, info: &StreamInfo) -> Option<SourceIssue> {
     if get_resample_rate(info).is_err() {
-        return Some(SampleRate {
+        return Some(SourceIssue::SampleRate {
             path: path.to_path_buf(),
             rate: info.sample_rate,
         });
@@ -45,7 +44,7 @@ pub(crate) fn check_bit_rate(path: &Path, info: &StreamInfo) -> Option<SourceIss
     if let Some(rate) = get_average_bit_rate(info)
         && rate < MIN_BIT_RATE_KBPS * 1000
     {
-        return Some(BitRate {
+        return Some(SourceIssue::BitRate {
             path: path.to_path_buf(),
             rate,
         });
@@ -58,7 +57,7 @@ pub(crate) fn check_duration(path: &Path, info: &StreamInfo) -> Option<SourceIss
     if let Some(seconds) = get_duration(info)
         && seconds > MAX_DURATION
     {
-        return Some(Duration {
+        return Some(SourceIssue::Duration {
             path: path.to_path_buf(),
             seconds,
         });
@@ -69,7 +68,7 @@ pub(crate) fn check_duration(path: &Path, info: &StreamInfo) -> Option<SourceIss
 /// Check the channel count does not exceed 2.
 pub(crate) fn check_channels(path: &Path, info: &StreamInfo) -> Option<SourceIssue> {
     if info.channels > 2 {
-        return Some(Channels {
+        return Some(SourceIssue::Channels {
             path: path.to_path_buf(),
             count: info.channels,
         });

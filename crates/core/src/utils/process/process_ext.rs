@@ -1,10 +1,6 @@
+use crate::prelude::*;
 use std::future::Future;
 use std::process::Output;
-
-use rogue_logging::Failure;
-use tokio::process::Command;
-
-use super::{ProcessAction, ProcessOutput};
 
 /// Extension trait for running processes and requiring success.
 pub trait ProcessExt {
@@ -16,7 +12,7 @@ pub trait ProcessExt {
     fn run(&mut self) -> impl Future<Output = Result<Output, Failure<ProcessAction>>> + Send;
 }
 
-impl ProcessExt for Command {
+impl ProcessExt for TokioCommand {
     async fn run(&mut self) -> Result<Output, Failure<ProcessAction>> {
         let program = self.as_std().get_program().to_string_lossy().to_string();
         let output = self

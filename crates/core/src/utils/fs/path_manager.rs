@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use dirs::{cache_dir, config_dir, data_dir};
 
 /// Known indexers considered when looking for a fallback torrent from another tracker.
 const KNOWN_INDEXERS: [Indexer; 3] = [Indexer::Red, Indexer::Ops, Indexer::Pth];
@@ -21,7 +22,7 @@ impl PathManager {
         if is_docker() {
             return PathBuf::from("/config.yml");
         }
-        dirs::config_dir()
+        config_dir()
             .expect("config directory should be determinable")
             .join(APP_NAME)
             .join("config.yml")
@@ -36,7 +37,7 @@ impl PathManager {
         if is_docker() {
             return PathBuf::from("/cache");
         }
-        dirs::cache_dir()
+        cache_dir()
             .expect("cache directory should be determinable")
             .join(APP_NAME)
     }
@@ -50,7 +51,7 @@ impl PathManager {
         if is_docker() {
             return PathBuf::from("/output");
         }
-        dirs::data_dir()
+        data_dir()
             .expect("data directory should be determinable")
             .join(APP_NAME)
             .join("output")

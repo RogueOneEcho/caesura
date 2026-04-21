@@ -1,10 +1,12 @@
 //! Parsing logic for command enum variants.
 
 use quote::format_ident;
+use syn::Error as SynError;
+use syn::Result as SynResult;
 use syn::parse::ParseStream;
 use syn::{
-    Attribute, Data, DeriveInput, Expr, ExprLit, Ident, Lit, Meta, Token, Variant,
-    punctuated::Punctuated,
+    Attribute, Data, DeriveInput, Expr, ExprLit, Fields, Ident, Lit, LitStr, Meta, Token, Type,
+    Variant, punctuated::Punctuated,
 };
 
 /// A parsed enum definition with attributes, name, and variants.
@@ -43,7 +45,7 @@ pub fn extract_parent_attr(input: &DeriveInput) -> Option<String> {
         let _ = attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("parent") {
                 let value = meta.value()?;
-                let lit: syn::LitStr = value.parse()?;
+                let lit: LitStr = value.parse()?;
                 parent = Some(lit.value());
             }
             Ok(())
@@ -56,9 +58,9 @@ pub fn extract_parent_attr(input: &DeriveInput) -> Option<String> {
 }
 
 /// Build an [`EnumDef`] from a [`DeriveInput`].
-pub fn enum_def_from_derive(input: &DeriveInput) -> syn::Result<EnumDef> {
+pub fn enum_def_from_derive(input: &DeriveInput) -> SynResult<EnumDef> {
     let Data::Enum(data_enum) = &input.data else {
-        return Err(syn::Error::new_spanned(
+        return Err(SynError::new_spanned(
             &input.ident,
             "CommandEnum can only be derived for enums",
         ));
@@ -74,7 +76,7 @@ pub fn enum_def_from_derive(input: &DeriveInput) -> syn::Result<EnumDef> {
         .iter()
         .cloned()
         .map(parse_variant)
-        .collect::<syn::Result<Vec<_>>>()?;
+        .collect::<SynResult<Vec<_>>>()?;
     Ok(EnumDef {
         attrs,
         name: input.ident.clone(),
@@ -83,18 +85,18 @@ pub fn enum_def_from_derive(input: &DeriveInput) -> syn::Result<EnumDef> {
 }
 
 /// Parse a single variant, extracting custom attributes.
-fn parse_variant(variant: Variant) -> syn::Result<ParsedVariant> {
+fn parse_variant(variant: Variant) -> SynResult<ParsedVariant> {
     let name = variant.ident;
     let mut doc_attrs = Vec::new();
     let mut options = Vec::new();
     let mut cli_name = None;
     let mut command_attrs = Vec::new();
     let mut sub_enum = None;
-    if let syn::Fields::Unnamed(fields) = &variant.fields
+    if let Fields::Unnamed(fields) = &variant.fields
         && fields.unnamed.len() == 1
     {
         let field = fields.unnamed.first().expect("just checked len");
-        if let syn::Type::Path(type_path) = &field.ty
+        if let Type::Path(type_path) = &field.ty
             && let Some(segment) = type_path.path.segments.last()
         {
             sub_enum = Some(segment.ident.clone());
@@ -128,7 +130,7 @@ fn parse_variant(variant: Variant) -> syn::Result<ParsedVariant> {
 }
 
 /// Parse a parenthesized, comma-separated list of idents from an attribute.
-fn parse_ident_list(attr: &Attribute, out: &mut Vec<Ident>) -> syn::Result<()> {
+fn parse_ident_list(attr: &Attribute, out: &mut Vec<Ident>) -> SynResult<()> {
     attr.parse_args_with(|input: ParseStream| {
         let punctuated: Punctuated<Ident, Token![,]> = Punctuated::parse_terminated(input)?;
         out.extend(punctuated);

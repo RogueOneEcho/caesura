@@ -1,16 +1,17 @@
 use crate::testing_prelude::*;
+use serde_json::{from_str as json_from_str, to_string as json_to_string};
 
 #[test]
 fn timestamp_serialize_offset() {
     let timestamp = TimeStamp::from_rfc3339("2024-10-18T12:34:56+01:30").unwrap();
-    let serialized = serde_json::to_string(&timestamp).unwrap();
+    let serialized = json_to_string(&timestamp).unwrap();
     assert_eq!(serialized, "\"2024-10-18T11:04:56Z\"");
 }
 
 #[test]
 fn timestamp_serialize_zulu() {
     let timestamp = TimeStamp::from_rfc3339("2024-10-18T12:34:56Z").unwrap();
-    let serialized = serde_json::to_string(&timestamp).unwrap();
+    let serialized = json_to_string(&timestamp).unwrap();
     assert_eq!(serialized, "\"2024-10-18T12:34:56Z\"");
 }
 
@@ -18,7 +19,7 @@ fn timestamp_serialize_zulu() {
 fn timestamp_deserialize_offset() {
     // Arrange
     let json = "\"2024-10-18T12:34:56-02:30\"";
-    let deserialized: TimeStamp = serde_json::from_str(json).unwrap();
+    let deserialized: TimeStamp = json_from_str(json).unwrap();
 
     // Act
     let expected = TimeStamp::from_rfc3339("2024-10-18T12:34:56-02:30").unwrap();
@@ -33,8 +34,8 @@ fn timestamp_round_trip() {
     let timestamp = TimeStamp::from_rfc3339("2024-10-18T12:34:56-02:30").unwrap();
 
     // Act
-    let serialized = serde_json::to_string(&timestamp).unwrap();
-    let deserialized: TimeStamp = serde_json::from_str(&serialized).unwrap();
+    let serialized = json_to_string(&timestamp).unwrap();
+    let deserialized: TimeStamp = json_from_str(&serialized).unwrap();
 
     // Assert
     assert_eq!(timestamp, deserialized);
@@ -46,7 +47,7 @@ fn timestamp_deserialize_invalid_format() {
     let invalid_json = "\"invalid-date-format\"";
 
     // Act
-    let result: Result<TimeStamp, _> = serde_json::from_str(invalid_json);
+    let result: Result<TimeStamp, _> = json_from_str(invalid_json);
 
     // Assert
     assert!(

@@ -1,4 +1,4 @@
-use gazelle_api::Quality;
+use crate::testing_prelude::*;
 
 /// Audio bit depth.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

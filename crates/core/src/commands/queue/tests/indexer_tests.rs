@@ -2,82 +2,82 @@ use crate::testing_prelude::*;
 
 #[test]
 fn indexer_deserialize_red_lowercase() {
-    let indexer: Indexer = serde_yaml::from_str("red").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("red").expect("should deserialize");
     assert_eq!(indexer, Indexer::Red);
 }
 
 #[test]
 fn indexer_deserialize_red_uppercase() {
-    let indexer: Indexer = serde_yaml::from_str("RED").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("RED").expect("should deserialize");
     assert_eq!(indexer, Indexer::Red);
 }
 
 #[test]
 fn indexer_deserialize_red_mixed_case() {
-    let indexer: Indexer = serde_yaml::from_str("Red").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("Red").expect("should deserialize");
     assert_eq!(indexer, Indexer::Red);
 }
 
 #[test]
 fn indexer_deserialize_ops_lowercase() {
-    let indexer: Indexer = serde_yaml::from_str("ops").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("ops").expect("should deserialize");
     assert_eq!(indexer, Indexer::Ops);
 }
 
 #[test]
 fn indexer_deserialize_pth_lowercase() {
-    let indexer: Indexer = serde_yaml::from_str("pth").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("pth").expect("should deserialize");
     assert_eq!(indexer, Indexer::Pth);
 }
 
 #[test]
 fn indexer_deserialize_unknown_normalizes_to_lowercase() {
-    let indexer: Indexer = serde_yaml::from_str("ABCdefGHI").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("ABCdefGHI").expect("should deserialize");
     assert_eq!(indexer, Indexer::Other("abcdefghi".to_owned()));
 }
 
 #[test]
 fn indexer_deserialize_empty_string() {
-    let indexer: Indexer = serde_yaml::from_str("''").expect("should deserialize");
+    let indexer: Indexer = yaml_from_str("''").expect("should deserialize");
     assert_eq!(indexer, Indexer::Other(String::new()));
 }
 
 #[test]
 fn indexer_serialize_red() {
-    let yaml = serde_yaml::to_string(&Indexer::Red).expect("should serialize");
+    let yaml = yaml_to_string(&Indexer::Red).expect("should serialize");
     assert_eq!(yaml.trim(), "red");
 }
 
 #[test]
 fn indexer_serialize_ops() {
-    let yaml = serde_yaml::to_string(&Indexer::Ops).expect("should serialize");
+    let yaml = yaml_to_string(&Indexer::Ops).expect("should serialize");
     assert_eq!(yaml.trim(), "ops");
 }
 
 #[test]
 fn indexer_serialize_pth() {
-    let yaml = serde_yaml::to_string(&Indexer::Pth).expect("should serialize");
+    let yaml = yaml_to_string(&Indexer::Pth).expect("should serialize");
     assert_eq!(yaml.trim(), "pth");
 }
 
 #[test]
 fn indexer_serialize_other() {
-    let yaml = serde_yaml::to_string(&Indexer::Other("abc".to_owned())).expect("should serialize");
+    let yaml = yaml_to_string(&Indexer::Other("abc".to_owned())).expect("should serialize");
     assert_eq!(yaml.trim(), "abc");
 }
 
 #[test]
 fn indexer_round_trip_red() {
-    let yaml = serde_yaml::to_string(&Indexer::Red).expect("should serialize");
-    let indexer: Indexer = serde_yaml::from_str(&yaml).expect("should deserialize");
+    let yaml = yaml_to_string(&Indexer::Red).expect("should serialize");
+    let indexer: Indexer = yaml_from_str(&yaml).expect("should deserialize");
     assert_eq!(indexer, Indexer::Red);
 }
 
 #[test]
 fn indexer_round_trip_other() {
     let original = Indexer::Other("abc".to_owned());
-    let yaml = serde_yaml::to_string(&original).expect("should serialize");
-    let indexer: Indexer = serde_yaml::from_str(&yaml).expect("should deserialize");
+    let yaml = yaml_to_string(&original).expect("should serialize");
+    let indexer: Indexer = yaml_from_str(&yaml).expect("should deserialize");
     assert_eq!(indexer, original);
 }
 
@@ -92,7 +92,7 @@ hash: '0102030405060708090a0b0c0d0e0f1011121314'
 indexer: red
 id: 12345
 ";
-    let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
+    let item: QueueItem = yaml_from_str(yaml).expect("should deserialize");
     assert_eq!(item.name, "Artist - Album (2018) [FLAC]");
     assert_eq!(item.indexer, Some(Indexer::Red));
     assert_eq!(item.id, Some(12345));
@@ -106,7 +106,7 @@ path: /downloads/test.torrent
 hash: '0102030405060708090a0b0c0d0e0f1011121314'
 indexer: abc
 ";
-    let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
+    let item: QueueItem = yaml_from_str(yaml).expect("should deserialize");
     assert_eq!(item.indexer, Some(Indexer::Other("abc".to_owned())));
 }
 
@@ -123,7 +123,7 @@ path: /downloads/test.torrent
 hash: '0102030405060708090a0b0c0d0e0f1011121314'
 indexer: ''
 ";
-    let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
+    let item: QueueItem = yaml_from_str(yaml).expect("should deserialize");
     assert_eq!(item.indexer, Some(Indexer::Other(String::new())));
 }
 
@@ -136,7 +136,7 @@ name: Test Album
 path: /downloads/test.torrent
 hash: '0102030405060708090a0b0c0d0e0f1011121314'
 ";
-    let item: QueueItem = serde_yaml::from_str(yaml).expect("should deserialize");
+    let item: QueueItem = yaml_from_str(yaml).expect("should deserialize");
     assert_eq!(item.indexer, None);
 }
 

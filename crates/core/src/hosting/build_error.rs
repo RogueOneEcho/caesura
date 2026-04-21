@@ -1,9 +1,7 @@
 //! Error types for host building.
 
-use caesura_options::OptionRule;
-use colored::Colorize;
-use std::error::Error;
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use crate::prelude::*;
+use di::ValidationError;
 
 /// Error that occurs when building the application host.
 #[derive(Debug)]
@@ -11,7 +9,7 @@ pub enum BuildError {
     /// Options validation failed.
     Options(Vec<OptionRule>),
     /// Dependency injection container failed to build.
-    Container(di::ValidationError),
+    Container(ValidationError),
 }
 
 impl Display for BuildError {
@@ -39,8 +37,8 @@ impl From<Vec<OptionRule>> for BuildError {
     }
 }
 
-impl From<di::ValidationError> for BuildError {
-    fn from(error: di::ValidationError) -> Self {
+impl From<ValidationError> for BuildError {
+    fn from(error: ValidationError) -> Self {
         BuildError::Container(error)
     }
 }

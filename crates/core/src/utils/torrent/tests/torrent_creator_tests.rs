@@ -1,5 +1,3 @@
-use std::fs;
-
 use crate::testing_prelude::*;
 
 #[tokio::test]
@@ -120,8 +118,8 @@ async fn duplicate_copies_when_source_matches() {
         .expect("should duplicate torrent");
 
     // Assert - copied file should be byte-identical
-    let original_bytes = fs::read(&source_path).expect("should read original");
-    let copy_bytes = fs::read(&dest_path).expect("should read copy");
+    let original_bytes = read(&source_path).expect("should read original");
+    let copy_bytes = read(&dest_path).expect("should read copy");
     assert_eq!(original_bytes, copy_bytes, "copy should be byte-identical");
 }
 

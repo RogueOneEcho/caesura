@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Path argument for the inspect command.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

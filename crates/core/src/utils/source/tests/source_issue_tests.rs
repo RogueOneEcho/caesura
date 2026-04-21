@@ -1,56 +1,54 @@
 #[allow(deprecated)]
 use crate::testing_prelude::*;
-#[allow(deprecated)]
-use crate::utils::SourceIssue::{Api, ApiResponse, Id, IdError, Provider};
 use gazelle_api::GazelleSerializableError::*;
 
 #[test]
 #[allow(deprecated)]
-fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
+fn source_issue_serialization() -> Result<(), YamlError> {
     // Arrange
     let example = vec![
-        IdError {
+        SourceIssue::IdError {
             details: "Hello, world!".to_owned(),
         },
-        Id(IdProviderError::NoMatch),
-        Id(IdProviderError::UrlInvalid),
-        Id(IdProviderError::TorrentFileSource {
+        SourceIssue::Id(IdProviderError::NoMatch),
+        SourceIssue::Id(IdProviderError::UrlInvalid),
+        SourceIssue::Id(IdProviderError::TorrentFileSource {
             actual: "ABC".to_owned(),
             expected: "CBA".to_owned(),
         }),
-        ApiResponse {
+        SourceIssue::ApiResponse {
             action: "test".to_owned(),
             status_code: 200,
             error: "test".to_owned(),
         },
-        Provider,
-        Api {
+        SourceIssue::Provider,
+        SourceIssue::Api {
             response: BadRequest {
                 message: String::new(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: NotFound {
                 message: String::new(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Deserialization {
                 error: "A deserialization error occurred".to_owned(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Request {
                 error: "A request error occurred".to_owned(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Other {
                 status: 503,
                 message: Some("Service unavailable".to_owned()),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Other {
                 status: 500,
                 message: None,
@@ -101,9 +99,9 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
 ";
 
     // Act
-    let yaml = serde_yaml::to_string(&example)?;
+    let yaml = yaml_to_string(&example)?;
     println!("{yaml}");
-    let deserialized: Vec<SourceIssue> = serde_yaml::from_str(expected)?;
+    let deserialized: Vec<SourceIssue> = yaml_from_str(expected)?;
 
     // Assert
     assert_eq!(yaml, expected);
@@ -113,36 +111,36 @@ fn source_issue_serialization() -> Result<(), serde_yaml::Error> {
 
 #[test]
 #[allow(deprecated, clippy::similar_names)]
-fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
+fn source_issue_provider_deprecated() -> Result<(), YamlError> {
     // Arrange
     let example = vec![
-        Api {
+        SourceIssue::Api {
             response: BadRequest {
                 message: String::new(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: NotFound {
                 message: String::new(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Deserialization {
                 error: "A deserialization error occurred".to_owned(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Request {
                 error: "A request error occurred".to_owned(),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Other {
                 status: 503,
                 message: Some("Service unavailable".to_owned()),
             },
         },
-        Api {
+        SourceIssue::Api {
             response: Other {
                 status: 500,
                 message: None,
@@ -193,11 +191,11 @@ fn source_issue_provider_deprecated() -> Result<(), serde_yaml::Error> {
 ";
 
     // Act
-    let before_deserialized: Vec<SourceIssue> = serde_yaml::from_str(before)?;
-    let after_deserialized: Vec<SourceIssue> = serde_yaml::from_str(after)?;
-    let yaml = serde_yaml::to_string(&example)?;
+    let before_deserialized: Vec<SourceIssue> = yaml_from_str(before)?;
+    let after_deserialized: Vec<SourceIssue> = yaml_from_str(after)?;
+    let yaml = yaml_to_string(&example)?;
     println!("{yaml}");
-    let before_reserialized = serde_yaml::to_string(&before_deserialized)?;
+    let before_reserialized = yaml_to_string(&before_deserialized)?;
     println!("--------------------");
     println!("{before_reserialized}");
 

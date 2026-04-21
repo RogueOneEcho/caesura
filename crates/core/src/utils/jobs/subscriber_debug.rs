@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use rogue_logging::Colors;
-use std::sync::Arc;
-use tokio::sync::Semaphore;
 
 /// Log all [`Job`] status updates to the console by subscribing to
 /// [`JobRunner`] as a [`Subscriber`].

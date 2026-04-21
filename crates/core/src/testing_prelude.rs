@@ -1,11 +1,13 @@
 //! Test-specific imports extending the main prelude.
 
-use std::error::Error;
-
-pub(crate) use crate::hosting::*;
 pub(crate) use crate::prelude::*;
-pub(crate) use crate::utils::SAMPLE_SOURCES_DIR;
-pub(crate) use insta::assert_yaml_snapshot;
+pub(crate) use gazelle_api::{
+    Credit, Credits, ErrorSource, GroupResponse, MockGazelleClient, TorrentResponse, UploadResponse,
+};
+pub(crate) use insta::{assert_snapshot, assert_yaml_snapshot};
+pub(crate) use serde_yaml::from_str as yaml_from_str;
+pub(crate) use std::fs::{copy, metadata, read, remove_dir_all, remove_file, write};
+pub(crate) use tokio::sync::OnceCell;
 
 /// Type alias for test error results.
 pub(crate) type TestError = Box<dyn Error + Send + Sync>;

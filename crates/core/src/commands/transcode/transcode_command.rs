@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use crate::utils::Job::Additional;
-use rogue_logging::Colors;
-use tokio::fs::{copy, hard_link};
 
 /// Transcode each track of a FLAC source to the target formats.
 #[injectable]
@@ -149,7 +146,7 @@ impl TranscodeCommand {
                 .await?;
             let output = self.paths.get_transcode_target_dir(source, *target);
             for job in jobs {
-                if let Additional(AdditionalJob { resize, .. }) = job {
+                if let Job::Additional(AdditionalJob { resize, .. }) = job {
                     let from = from_prefix.clone().join(
                         resize
                             .output
@@ -157,20 +154,20 @@ impl TranscodeCommand {
                             .expect("should have prefix"),
                     );
                     let verb = if self.copy_options.hard_link {
-                        hard_link(&from, &resize.output)
-                            .await
-                            .map_err(Failure::wrap_with_path(
+                        tokio_hard_link(&from, &resize.output).await.map_err(
+                            Failure::wrap_with_path(
                                 TranscodeAction::HardLinkAdditional,
                                 &resize.output,
-                            ))?;
+                            ),
+                        )?;
                         "Hard Linked"
                     } else {
-                        copy(&from, &resize.output)
-                            .await
-                            .map_err(Failure::wrap_with_path(
+                        tokio_copy(&from, &resize.output).await.map_err(
+                            Failure::wrap_with_path(
                                 TranscodeAction::CopyAdditional,
                                 &resize.output,
-                            ))?;
+                            ),
+                        )?;
                         "Copied"
                     };
                     trace!(

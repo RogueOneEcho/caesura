@@ -1,13 +1,10 @@
-use std::fs::File;
-use std::io::BufWriter;
-
+use crate::prelude::*;
 use fast_image_resize::images::Image;
 use fast_image_resize::{FilterType, IntoImageView, ResizeAlg, ResizeOptions, Resizer};
 use image::codecs::jpeg::JpegEncoder;
 use image::codecs::png::PngEncoder;
 use image::{ColorType, DynamicImage, ExtendedColorType, ImageEncoder, ImageFormat, ImageReader};
-
-use crate::prelude::*;
+use std::io::BufWriter;
 
 const RESIZE_ALGORITHM: ResizeAlg = ResizeAlg::Interpolation(FilterType::CatmullRom);
 

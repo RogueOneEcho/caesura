@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use flat_db::{Hash, Table};
 use futures::stream::{StreamExt, iter};
-use std::fs::create_dir;
 
 /// Queue of FLAC sources and their statuses.
 ///

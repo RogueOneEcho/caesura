@@ -1,9 +1,7 @@
 use crate::testing_prelude::*;
-use flat_db::Hash;
 use lava_torrent::bencode::BencodeElem;
 use lava_torrent::torrent::v1::Torrent;
 use qbittorrent_api::get_torrents::Torrent as QbitTorrent;
-use std::collections::HashMap;
 
 #[test]
 fn queue_item_from_torrent_valid_data() {

@@ -1,6 +1,5 @@
 use super::super::*;
 use crate::testing_prelude::*;
-use std::fs;
 
 #[test]
 fn get_numeric_from_total_format_slash_separated() {
@@ -159,8 +158,7 @@ async fn exclude_vorbis_comments_from_flac_encoder() -> Result<(), TestError> {
 }
 
 async fn assert_flac_integrity(path: &Path) {
-    use tokio::process::Command;
-    let result = Command::new(FLAC)
+    let result = TokioCommand::new(FLAC)
         .args(["--test", "--silent"])
         .arg(path)
         .run()
@@ -180,10 +178,10 @@ fn read_vorbis_tags(path: &Path) -> String {
 
 fn file_sha256(path: &Path) -> String {
     use sha2::{Digest, Sha256};
-    let content = fs::read(path).expect("file should be readable");
+    let content = read(path).expect("file should be readable");
     format!("{:x}", Sha256::digest(&content))
 }
 
 fn file_size(path: &Path) -> u64 {
-    fs::metadata(path).expect("file should exist").len()
+    metadata(path).expect("file should exist").len()
 }

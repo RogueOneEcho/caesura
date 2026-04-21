@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::testing_prelude::*;
 use claxon::metadata::StreamInfo;
 
 fn valid_stream_info() -> StreamInfo {

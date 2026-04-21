@@ -1,6 +1,6 @@
-use std::fs;
-
 use crate::testing_prelude::*;
+use image::{ImageBuffer, Rgb, Rgb as Rgb16, Rgba, RgbaImage, open as image_open};
+use reqwest::Client;
 
 /// Large JPG is resized to fit within `max_pixel_size` while preserving aspect ratio.
 #[tokio::test]
@@ -36,8 +36,8 @@ async fn error_when_input_file_missing() {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     let job = AdditionalJob {
         id: "missing.jpg".to_owned(),
         resize: Resize {
@@ -64,7 +64,7 @@ async fn error_when_output_directory_missing() {
     init_logger();
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&source_dir).expect("should create source dir");
     ImageGenerator::new()
         .with_size(600, 450)
         .with_filename("cover.jpg")
@@ -97,10 +97,10 @@ async fn error_when_input_file_invalid() {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     let invalid_file = source_dir.join("invalid.jpg");
-    fs::write(&invalid_file, b"not an image").expect("should write invalid file");
+    write(&invalid_file, b"not an image").expect("should write invalid file");
     let job = AdditionalJob {
         id: "invalid.jpg".to_owned(),
         resize: Resize {
@@ -128,11 +128,11 @@ async fn rgba_png_to_jpg_is_converted() {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     let input_path = source_dir.join("cover.png");
-    let img = image::RgbaImage::from_fn(600, 450, |x, _y| {
-        image::Rgba([u8::try_from(x % 256).expect("should fit"), 0, 128, 128])
+    let img = RgbaImage::from_fn(600, 450, |x, _y| {
+        Rgba([u8::try_from(x % 256).expect("should fit"), 0, 128, 128])
     });
     img.save(&input_path).expect("should save RGBA PNG");
     let output_path = output_dir.join("cover.jpg");
@@ -165,11 +165,11 @@ async fn rgb16_png_to_jpg_is_converted() {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     let input_path = source_dir.join("cover.png");
-    let img = image::ImageBuffer::<image::Rgb<u16>, Vec<u16>>::from_fn(600, 450, |x, _y| {
-        image::Rgb([u16::try_from(x % 256).expect("should fit") * 257, 0, 32768])
+    let img = ImageBuffer::<Rgb16<u16>, Vec<u16>>::from_fn(600, 450, |x, _y| {
+        Rgb([u16::try_from(x % 256).expect("should fit") * 257, 0, 32768])
     });
     img.save(&input_path).expect("should save 16-bit PNG");
     let output_path = output_dir.join("cover.jpg");
@@ -202,8 +202,8 @@ async fn small_image_is_not_resized() {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     ImageGenerator::new()
         .with_size(200, 150)
         .with_filename("cover.jpg")
@@ -244,16 +244,16 @@ async fn real_world_image_is_under_1mb() {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     let cache_dir = PathBuf::from("/tmp/caesura/image_cache");
     let cached_path = cache_dir.join("abbey_road.jpg");
     if cached_path.exists() {
         eprintln!("Cached: {}", cached_path.display());
     } else {
-        fs::create_dir_all(&cache_dir).expect("should create cache dir");
+        create_dir_all(&cache_dir).expect("should create cache dir");
         let url = "https://upload.wikimedia.org/wikipedia/commons/a/a4/The_Beatles_Abbey_Road_album_cover.jpg";
-        let client = reqwest::Client::builder()
+        let client = Client::builder()
             .user_agent("caesura-test/0.1 (https://github.com/RogueOneEcho/caesura)")
             .build()
             .expect("should build client");
@@ -265,16 +265,14 @@ async fn real_world_image_is_under_1mb() {
             .bytes()
             .await
             .expect("should read bytes");
-        fs::write(&cached_path, &bytes).expect("should write cached image");
+        write(&cached_path, &bytes).expect("should write cached image");
         eprintln!("Downloaded: {}", cached_path.display());
     }
     let input_path = source_dir.join("cover.jpg");
-    fs::copy(&cached_path, &input_path).expect("should copy cached image");
-    let input_size = fs::metadata(&input_path)
-        .expect("should read metadata")
-        .len();
+    copy(&cached_path, &input_path).expect("should copy cached image");
+    let input_size = metadata(&input_path).expect("should read metadata").len();
     let input_size = usize::try_from(input_size).expect("input size should fit in usize");
-    let input_img = image::open(&input_path).expect("should open input");
+    let input_img = image_open(&input_path).expect("should open input");
     let job = AdditionalJob {
         id: "cover.jpg".to_owned(),
         resize: Resize {
@@ -290,10 +288,8 @@ async fn real_world_image_is_under_1mb() {
 
     // Preview
     let output_path = output_dir.join("cover.jpg");
-    let output_size = fs::metadata(&output_path)
-        .expect("output should exist")
-        .len();
-    let output_img = image::open(&output_path).expect("should open output");
+    let output_size = metadata(&output_path).expect("output should exist").len();
+    let output_img = image_open(&output_path).expect("should open output");
     let output_size_usize = usize::try_from(output_size).expect("output size should fit in usize");
     eprintln!(
         "Original: {}x{}, {} KB",
@@ -349,8 +345,8 @@ fn setup_resize(source_filename: &str, output_filename: &str) -> ResizeContext {
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     let output_dir = test_dir.join("output");
-    fs::create_dir_all(&source_dir).expect("should create source dir");
-    fs::create_dir_all(&output_dir).expect("should create output dir");
+    create_dir_all(&source_dir).expect("should create source dir");
+    create_dir_all(&output_dir).expect("should create output dir");
     ImageGenerator::new()
         .with_size(600, 450)
         .with_filename(source_filename)

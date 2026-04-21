@@ -14,15 +14,16 @@ use parse::{
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::DeriveInput;
+use syn::Result as SynResult;
 
 /// Implement the Options derive macro.
-pub(crate) fn derive(input: DeriveInput) -> syn::Result<TokenStream2> {
+pub(crate) fn derive(input: DeriveInput) -> SynResult<TokenStream2> {
     let struct_name = &input.ident;
     let struct_opts = parse_struct_options(&input.attrs)?;
     let partial_name = get_partial_name(&struct_opts, struct_name);
     let fields = extract_named_fields(&input)?;
     let parsed_fields: Vec<ParsedField> =
-        fields.iter().map(parse_field).collect::<syn::Result<_>>()?;
+        fields.iter().map(parse_field).collect::<SynResult<_>>()?;
     let partial_fields = generate_partial_fields(&parsed_fields);
     let merge_impl = generate_merge_impl(&parsed_fields);
     let resolve_impl =

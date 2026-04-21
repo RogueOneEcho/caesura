@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use TargetFormat::*;
 use clap::ValueEnum;
-use gazelle_api::{Format, Quality};
-use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
 /// Format to transcode to.

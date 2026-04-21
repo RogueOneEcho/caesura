@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 /// Options for `queue add` command.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]

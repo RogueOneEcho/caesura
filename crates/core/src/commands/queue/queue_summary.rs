@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
 
 /// Summary of items in the queue
 #[derive(Default, Deserialize, Serialize)]

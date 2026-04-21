@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// qBittorrent connection options shared by any command that talks to qBittorrent.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -36,14 +34,14 @@ impl QbitOptions {
     /// Push [`OptionRule`] violations for missing connection fields.
     pub(crate) fn validate_connection(&self, errors: &mut Vec<OptionRule>) {
         if self.qbit_url.is_none() {
-            errors.push(NotSet("qBittorrent URL".to_owned()));
+            errors.push(OptionRule::NotSet("qBittorrent URL".to_owned()));
         }
         if self.requires_credentials() {
             if self.qbit_username.is_none() {
-                errors.push(NotSet("qBittorrent username".to_owned()));
+                errors.push(OptionRule::NotSet("qBittorrent username".to_owned()));
             }
             if self.qbit_password.is_none() {
-                errors.push(NotSet("qBittorrent password".to_owned()));
+                errors.push(OptionRule::NotSet("qBittorrent password".to_owned()));
             }
         }
     }
@@ -80,12 +78,18 @@ impl OptionsContract for QbitOptions {
             && !url.starts_with("https://")
             && !url.starts_with("http://")
         {
-            errors.push(UrlNotHttp("qBittorrent URL".to_owned(), url.clone()));
+            errors.push(OptionRule::UrlNotHttp(
+                "qBittorrent URL".to_owned(),
+                url.clone(),
+            ));
         }
         if let Some(url) = &self.qbit_url
             && url.ends_with('/')
         {
-            errors.push(UrlInvalidSuffix("qBittorrent URL".to_owned(), url.clone()));
+            errors.push(OptionRule::UrlInvalidSuffix(
+                "qBittorrent URL".to_owned(),
+                url.clone(),
+            ));
         }
     }
 }

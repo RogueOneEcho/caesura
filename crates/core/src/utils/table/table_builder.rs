@@ -1,10 +1,8 @@
 //! Builder for formatting data as aligned text tables.
 
-use std::borrow::Cow;
-use std::sync::LazyLock;
-
+use crate::prelude::*;
 use TableStyle::*;
-use regex::Regex;
+use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 
 /// Number of spaces between columns in plain-text output.

@@ -1,6 +1,6 @@
 //! Application-level metadata: name, version, build status, and user agent.
 
-use std::fmt;
+use crate::prelude::*;
 
 /// Application name.
 pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
@@ -29,8 +29,8 @@ pub enum BuildStatus {
     Unknown,
 }
 
-impl fmt::Display for BuildStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for BuildStatus {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         f.write_str(self.as_str())
     }
 }

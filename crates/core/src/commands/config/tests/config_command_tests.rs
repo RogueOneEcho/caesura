@@ -1,8 +1,5 @@
-use std::path::PathBuf;
-
-use colored::control;
-
 use crate::testing_prelude::*;
+use colored::control;
 
 /// Test that `ConfigCommand` renders documented YAML with comments.
 #[test]

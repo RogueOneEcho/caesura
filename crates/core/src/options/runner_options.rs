@@ -1,7 +1,5 @@
-use serde::{Deserialize, Serialize};
-
-use caesura_macros::Options;
-use caesura_options::{OptionRule, OptionsContract};
+use crate::prelude::*;
+use num_cpus::get as get_num_cpus;
 
 /// Options for concurrency
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -18,7 +16,7 @@ pub struct RunnerOptions {
 )]
 #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
 fn default_cpus(_partial: &RunnerOptionsPartial) -> Option<u16> {
-    Some(num_cpus::get() as u16)
+    Some(get_num_cpus() as u16)
 }
 
 impl OptionsContract for RunnerOptions {

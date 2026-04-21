@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Result of a queue add operation.
 #[derive(Clone, Default, Deserialize, Serialize)]

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rogue_logging::Verbosity;
+
 /// A publisher notifies subscribers when the status of a [Job] changes.
 ///
 /// An [observer design pattern](https://refactoring.guru/design-patterns/observer) allows different

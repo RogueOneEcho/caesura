@@ -1,5 +1,4 @@
 use crate::testing_prelude::*;
-use flat_db::Hash;
 
 /// Test that `BatchCommand` succeeds with an empty queue.
 #[tokio::test]

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use gazelle_api::Torrent;
 
 /// Determine which formats already exist for a given release.
 #[injectable]

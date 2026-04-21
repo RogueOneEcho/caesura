@@ -1,7 +1,5 @@
 use crate::testing_prelude::*;
 use di::ServiceCollection;
-use rogue_logging::{TimeFormat, Verbosity};
-use std::fs::read_to_string;
 
 /// Verify `BatchOptions` default values.
 #[test]
@@ -262,8 +260,8 @@ fn batch_options_yaml_round_trip() {
     };
 
     // Act
-    let yaml = serde_yaml::to_string(&original).expect("should serialize");
-    let parsed: BatchOptionsPartial = serde_yaml::from_str(&yaml).expect("should deserialize");
+    let yaml = yaml_to_string(&original).expect("should serialize");
+    let parsed: BatchOptionsPartial = yaml_from_str(&yaml).expect("should deserialize");
 
     // Assert
     assert_eq!(original.spectrogram, parsed.spectrogram);
@@ -286,8 +284,8 @@ fn target_options_yaml_round_trip() {
     };
 
     // Act
-    let yaml = serde_yaml::to_string(&original).expect("should serialize");
-    let parsed: TargetOptionsPartial = serde_yaml::from_str(&yaml).expect("should deserialize");
+    let yaml = yaml_to_string(&original).expect("should serialize");
+    let parsed: TargetOptionsPartial = yaml_from_str(&yaml).expect("should deserialize");
 
     // Assert
     assert_eq!(original.target, parsed.target);
@@ -315,8 +313,8 @@ fn shared_options_yaml_round_trip() {
     };
 
     // Act
-    let yaml = serde_yaml::to_string(&original).expect("should serialize");
-    let parsed: SharedOptionsPartial = serde_yaml::from_str(&yaml).expect("should deserialize");
+    let yaml = yaml_to_string(&original).expect("should serialize");
+    let parsed: SharedOptionsPartial = yaml_from_str(&yaml).expect("should deserialize");
 
     // Assert
     assert_eq!(original.announce_url, parsed.announce_url);
@@ -519,7 +517,10 @@ fn cache_options_rejects_dollar_home() {
     // Assert
     assert_eq!(
         errors,
-        vec![DoesNotExist(CACHE_DIR_LABEL.to_owned(), path.to_owned())]
+        vec![OptionRule::DoesNotExist(
+            CACHE_DIR_LABEL.to_owned(),
+            path.to_owned()
+        )]
     );
 }
 
@@ -553,7 +554,10 @@ fn shared_options_rejects_dollar_home_output() {
     // Assert
     assert_eq!(
         errors,
-        vec![DoesNotExist(OUTPUT_DIR_LABEL.to_owned(), path.to_owned())]
+        vec![OptionRule::DoesNotExist(
+            OUTPUT_DIR_LABEL.to_owned(),
+            path.to_owned()
+        )]
     );
 }
 
@@ -583,7 +587,10 @@ fn shared_options_rejects_dollar_home_content() {
     // Assert
     assert_eq!(
         errors,
-        vec![DoesNotExist(CONTENT_DIR_LABEL.to_owned(), path.to_owned())]
+        vec![OptionRule::DoesNotExist(
+            CONTENT_DIR_LABEL.to_owned(),
+            path.to_owned()
+        )]
     );
 }
 
@@ -630,7 +637,10 @@ fn config_options_rejects_dollar_home() {
     // Assert
     assert_eq!(
         errors,
-        vec![DoesNotExist(CONFIG_FILE_LABEL.to_owned(), path.to_owned())]
+        vec![OptionRule::DoesNotExist(
+            CONFIG_FILE_LABEL.to_owned(),
+            path.to_owned()
+        )]
     );
 }
 
@@ -652,7 +662,7 @@ fn config_options_expands_tilde() {
     assert_eq!(errors.len(), 1);
     assert!(matches!(
         errors.first(),
-        Some(DoesNotExist(_, path)) if !path.starts_with('~')
+        Some(OptionRule::DoesNotExist(_, path)) if !path.starts_with('~')
     ));
 }
 
@@ -767,7 +777,7 @@ fn options_provider_register_valid_yaml() {
     // Arrange
     let yaml = "qbit_url: http://127.0.0.1:8080\n".to_owned();
     let mut provider = OptionsProvider::from_yaml(Some(yaml));
-    let mut services = di::ServiceCollection::new();
+    let mut services = ServiceCollection::new();
 
     // Act
     provider.register::<QbitOptionsPartial>(&mut services);
@@ -781,7 +791,7 @@ fn options_provider_register_valid_yaml() {
 fn options_provider_register_no_yaml() {
     // Arrange
     let mut provider = OptionsProvider::from_yaml(None);
-    let mut services = di::ServiceCollection::new();
+    let mut services = ServiceCollection::new();
 
     // Act
     provider.register::<QbitOptionsPartial>(&mut services);

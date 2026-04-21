@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use flat_db::Hash;
-use std::fs::File;
 use std::io::BufReader;
 
 /// Add a directory of `.torrent` files to the queue
@@ -99,7 +97,7 @@ impl QueueAddCommand {
         let file =
             File::open(&path).map_err(Failure::wrap_with_path(QueueAction::ReadTorrent, &path))?;
         let reader = BufReader::new(file);
-        let items: BTreeMap<Hash<20>, QueueItem> = serde_yaml::from_reader(reader)
+        let items: BTreeMap<Hash<20>, QueueItem> = yaml_from_reader(reader)
             .map_err(Failure::wrap_with_path(QueueAction::ReadTorrent, &path))?;
         let found = items.len();
         info!("{} {} items", "Found".bold(), found);

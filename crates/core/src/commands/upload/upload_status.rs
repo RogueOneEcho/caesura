@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
+use rogue_logging::Error as LogError;
 use std::ops::Not;
 
 /// Successful result of an upload operation.
@@ -7,7 +7,7 @@ pub(crate) struct UploadSuccess {
     /// Status of each target format that was uploaded.
     pub formats: Vec<UploadFormatStatus>,
     /// Non-fatal warnings (e.g., copy failures that didn't prevent upload).
-    pub warnings: Vec<rogue_logging::Error>,
+    pub warnings: Vec<LogError>,
 }
 
 /// Serializable status of an [`UploadCommand`] execution.
@@ -22,7 +22,7 @@ pub(crate) struct UploadStatus {
     pub completed: TimeStamp,
     /// Error or warning details.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub errors: Option<Vec<rogue_logging::Error>>,
+    pub errors: Option<Vec<LogError>>,
 }
 
 impl UploadStatus {

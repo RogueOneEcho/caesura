@@ -1,7 +1,3 @@
-use std::path::PathBuf;
-use std::sync::Arc;
-
-use crate::dependencies::SoxFactory;
 use crate::testing_prelude::*;
 
 /// When only `sox_ng: true` is set, the factory selects the `sox_ng` binary.

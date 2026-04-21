@@ -1,6 +1,5 @@
+use crate::testing_prelude::*;
 use image::ImageReader;
-use serde::{Deserialize, Serialize};
-use std::path::Path;
 
 /// Snapshot of image metadata for deterministic testing.
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]

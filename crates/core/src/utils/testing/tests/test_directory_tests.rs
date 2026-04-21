@@ -1,5 +1,4 @@
-use crate::utils::TestDirectory;
-use std::fs::remove_dir_all;
+use crate::testing_prelude::*;
 
 /// Test that `TestDirectory::new` creates the directory.
 #[test]

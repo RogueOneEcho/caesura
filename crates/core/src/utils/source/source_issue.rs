@@ -1,9 +1,5 @@
 use crate::prelude::*;
-use gazelle_api::GazelleSerializableError;
 use reqwest::StatusCode;
-use rogue_logging::Colors;
-use serde::{Deserialize, Serialize};
-use std::error::Error;
 
 /// Maximum allowed path length for transcodes.
 pub const MAX_PATH_LENGTH: isize = 180;

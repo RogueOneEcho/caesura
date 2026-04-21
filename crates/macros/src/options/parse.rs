@@ -1,9 +1,11 @@
 //! Parsing logic for the Options derive macro.
 
 use quote::format_ident;
+use syn::Error as SynError;
+use syn::Result as SynResult;
 use syn::{
-    Attribute, Data, DeriveInput, Expr, Field, Fields, Ident, Path, Type, punctuated::Punctuated,
-    token::Comma,
+    Attribute, Data, DeriveInput, Expr, Field, Fields, Ident, LitStr, Path, Type,
+    punctuated::Punctuated, token::Comma,
 };
 
 /// Struct-level options parsed from `#[options(...)]` attributes.
@@ -13,7 +15,7 @@ pub struct StructOptions {
 }
 
 /// Parse struct-level `#[options(...)]` attributes.
-pub fn parse_struct_options(attrs: &[Attribute]) -> syn::Result<StructOptions> {
+pub fn parse_struct_options(attrs: &[Attribute]) -> SynResult<StructOptions> {
     let mut opts = StructOptions { partial_name: None };
     for attr in attrs {
         if !attr.path().is_ident("options") {
@@ -22,7 +24,7 @@ pub fn parse_struct_options(attrs: &[Attribute]) -> syn::Result<StructOptions> {
         attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("partial") {
                 let _eq: syn::Token![=] = meta.input.parse()?;
-                let lit: syn::LitStr = meta.input.parse()?;
+                let lit: LitStr = meta.input.parse()?;
                 opts.partial_name = Some(format_ident!("{}", lit.value()));
             }
             Ok(())
@@ -40,16 +42,16 @@ pub fn get_partial_name(struct_opts: &StructOptions, struct_name: &Ident) -> Ide
 }
 
 /// Extract named fields from a struct, returning an error for non-struct or unnamed fields.
-pub fn extract_named_fields(input: &DeriveInput) -> syn::Result<&Punctuated<Field, Comma>> {
+pub fn extract_named_fields(input: &DeriveInput) -> SynResult<&Punctuated<Field, Comma>> {
     match &input.data {
         Data::Struct(data) => match &data.fields {
             Fields::Named(fields) => Ok(&fields.named),
-            _ => Err(syn::Error::new_spanned(
+            _ => Err(SynError::new_spanned(
                 input,
                 "Options derive only supports structs with named fields",
             )),
         },
-        _ => Err(syn::Error::new_spanned(
+        _ => Err(SynError::new_spanned(
             input,
             "Options derive only supports structs",
         )),
@@ -87,11 +89,11 @@ pub struct ParsedField {
 }
 
 /// Parse a struct field into a [`ParsedField`].
-pub fn parse_field(field: &Field) -> syn::Result<ParsedField> {
+pub fn parse_field(field: &Field) -> SynResult<ParsedField> {
     let ident = field
         .ident
         .clone()
-        .ok_or_else(|| syn::Error::new_spanned(field, "Field must have a name"))?;
+        .ok_or_else(|| SynError::new_spanned(field, "Field must have a name"))?;
     let ty = field.ty.clone();
     let is_option = is_option_type(&ty);
     let is_bool = is_bool_type(&ty);
@@ -117,7 +119,7 @@ pub fn parse_field(field: &Field) -> syn::Result<ParsedField> {
                     default_fn = Some(path);
                 } else if meta.path.is_ident("default_doc") {
                     let _eq: syn::Token![=] = meta.input.parse()?;
-                    let lit: syn::LitStr = meta.input.parse()?;
+                    let lit: LitStr = meta.input.parse()?;
                     default_doc = Some(lit.value());
                 } else if meta.path.is_ident("required") {
                     is_required = true;
@@ -155,19 +157,19 @@ fn parse_arg_attr(
     attr: &Attribute,
     arg_long: &mut Option<String>,
     arg_value_name: &mut Option<String>,
-) -> syn::Result<()> {
+) -> SynResult<()> {
     attr.parse_nested_meta(|meta| {
         if meta.path.is_ident("long") {
             if meta.input.peek(syn::Token![=]) {
                 let _eq: syn::Token![=] = meta.input.parse()?;
-                let lit: syn::LitStr = meta.input.parse()?;
+                let lit: LitStr = meta.input.parse()?;
                 *arg_long = Some(lit.value());
             } else {
                 *arg_long = Some(String::new());
             }
         } else if meta.path.is_ident("value_name") {
             let _eq: syn::Token![=] = meta.input.parse()?;
-            let lit: syn::LitStr = meta.input.parse()?;
+            let lit: LitStr = meta.input.parse()?;
             *arg_value_name = Some(lit.value());
         }
         Ok(())

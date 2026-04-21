@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use lofty::tag::Tag;
-use std::fs::create_dir_all;
 use std::process::Stdio;
-use tokio::fs::{copy, hard_link};
 use tokio::join;
 
 /// Job to transcode a single FLAC file to a target format.
@@ -114,7 +112,7 @@ async fn execute_resample(resample: Resample) -> Result<(), Failure<TranscodeAct
 
 async fn execute_include(include: Include) -> Result<(), Failure<TranscodeAction>> {
     let verb = if include.hard_link {
-        hard_link(&include.input, &include.output)
+        tokio_hard_link(&include.input, &include.output)
             .await
             .map_err(Failure::wrap_with_path(
                 TranscodeAction::HardLinkFlac,
@@ -122,7 +120,7 @@ async fn execute_include(include: Include) -> Result<(), Failure<TranscodeAction
             ))?;
         "Hard Linked"
     } else {
-        copy(&include.input, &include.output)
+        tokio_copy(&include.input, &include.output)
             .await
             .map_err(Failure::wrap_with_path(
                 TranscodeAction::CopyFlac,

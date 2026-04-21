@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use flat_db::Hash;
 use qbittorrent_api::QBittorrentClientTrait;
 use qbittorrent_api::get_torrents::{FilterOptions, Torrent};
-use std::collections::HashSet;
 
 /// Discover torrents via the qBittorrent API and add them to the queue.
 ///

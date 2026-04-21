@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Source argument used by Verify, Spectrogram, Transcode, and Upload commands
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -24,7 +22,7 @@ impl OptionsContract for SourceArg {
 
 impl Display for SourceArg {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
+        let output = if let Ok(yaml) = yaml_to_string(self) {
             yaml
         } else {
             format!("{self:?}")

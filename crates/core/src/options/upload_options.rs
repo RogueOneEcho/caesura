@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Options for upload
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -35,7 +33,7 @@ impl OptionsContract for UploadOptions {
         if let Some(dir) = &self.copy_transcode_to
             && !dir.is_dir()
         {
-            errors.push(DoesNotExist(
+            errors.push(OptionRule::DoesNotExist(
                 "Copy transcode to directory".to_owned(),
                 dir.to_string_lossy().to_string(),
             ));
@@ -43,7 +41,7 @@ impl OptionsContract for UploadOptions {
         if let Some(dir) = &self.copy_torrent_to
             && !dir.is_dir()
         {
-            errors.push(DoesNotExist(
+            errors.push(OptionRule::DoesNotExist(
                 "Copy torrent to directory".to_owned(),
                 dir.to_string_lossy().to_string(),
             ));

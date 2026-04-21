@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use caesura_macros::Options;
-use serde::{Deserialize, Serialize};
 
 /// Options for transcoding
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -52,7 +50,7 @@ impl OptionsContract for TargetOptions {
 
     fn validate(&self, errors: &mut Vec<OptionRule>) {
         if self.target.is_empty() {
-            errors.push(IsEmpty("Target format".to_owned()));
+            errors.push(OptionRule::IsEmpty("Target format".to_owned()));
         }
     }
 }
