@@ -98,6 +98,9 @@ impl HostBuilder {
             .add(ApiVerifier::transient())
             .add(TorrentFileProvider::transient())
             .add(VerifyCommand::transient())
+            // Add report services
+            .add(ReportRenderer::transient())
+            .add(SourceReporter::transient())
             // Add version services
             .add(VersionCommand::transient());
         HostBuilder { services, options }
@@ -191,6 +194,7 @@ impl HostBuilder {
     pub async fn with_test_options(&mut self, test_dir: &TestDirectory) -> &mut Self {
         let output_dir = test_dir.output();
         let cache_dir = test_dir.cache();
+        let reports_dir = test_dir.reports();
         tokio_create_dir_all(&output_dir)
             .await
             .expect("should be able to create output dir");
@@ -203,6 +207,10 @@ impl HostBuilder {
             ..SharedOptions::mock()
         })
         .with_options(CacheOptions { cache: cache_dir })
+        .with_options(ReportOptions {
+            reports_dir,
+            no_reports: false,
+        })
     }
 
     /// Build the [`Host`] from the configured services.

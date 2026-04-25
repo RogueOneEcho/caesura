@@ -8,6 +8,7 @@ pub(crate) struct VerifyCommand {
     api_verifier: Ref<ApiVerifier>,
     paths: Ref<PathManager>,
     torrents: Ref<TorrentFileProvider>,
+    reporter: Ref<SourceReporter>,
 }
 
 impl VerifyCommand {
@@ -59,6 +60,9 @@ impl VerifyCommand {
         issues.append(&mut self.flac_checks(source)?);
         if let Some(issue) = self.hash_check(source).await? {
             issues.push(issue);
+        }
+        if let Err(failure) = self.reporter.execute(source, &issues) {
+            warn!("{}", failure.render());
         }
         Ok(VerifySuccess { issues })
     }

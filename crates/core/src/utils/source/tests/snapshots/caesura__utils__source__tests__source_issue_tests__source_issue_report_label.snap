@@ -1,0 +1,11 @@
+---
+source: crates/core/src/utils/source/tests/source_issue_tests.rs
+expression: output
+---
+- No tags
+- "Missing tags: composer"
+- "Missing tags: composer, disc_number"
+- FLAC stream error
+- "Unsupported sample rate: 192000"
+- Unnecessary nested directory
+- Unsupported scene

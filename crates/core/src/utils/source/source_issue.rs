@@ -230,6 +230,60 @@ impl Display for SourceIssue {
 
 impl Error for SourceIssue {}
 
+impl SourceIssue {
+    /// Whether this issue should trigger an automatically generated report.
+    pub(crate) fn is_reportable(&self) -> bool {
+        matches!(
+            self,
+            SourceIssue::NoTags { .. }
+                | SourceIssue::MissingTags { .. }
+                | SourceIssue::FlacError { .. }
+                | SourceIssue::UnnecessaryDirectory { .. }
+                | SourceIssue::SampleRate { .. }
+        )
+    }
+
+    /// Suggested tracker report type for this issue.
+    pub(crate) fn report_type(&self) -> Option<&'static str> {
+        match self {
+            SourceIssue::NoTags { .. } | SourceIssue::MissingTags { .. } => Some("Bad Tags"),
+            SourceIssue::FlacError { .. } | SourceIssue::SampleRate { .. } => Some("Mislabeled"),
+            SourceIssue::UnnecessaryDirectory { .. } => Some("Trumpable"),
+            _ => None,
+        }
+    }
+
+    /// Human-readable label for this issue grouping in the report body.
+    pub(crate) fn report_label(&self) -> String {
+        match self {
+            SourceIssue::NoTags { .. } => String::from("No tags"),
+            SourceIssue::MissingTags { tags, .. } => {
+                format!("Missing tags: {}", tags.join(", "))
+            }
+            SourceIssue::FlacError { .. } => String::from("FLAC stream error"),
+            SourceIssue::UnnecessaryDirectory { .. } => {
+                String::from("Unnecessary nested directory")
+            }
+            SourceIssue::SampleRate { rate, .. } => {
+                format!("Unsupported sample rate: {rate}")
+            }
+            other => other.to_string(),
+        }
+    }
+
+    /// File paths affected by this issue.
+    pub(crate) fn affected_paths(&self) -> Vec<&Path> {
+        match self {
+            SourceIssue::NoTags { path }
+            | SourceIssue::MissingTags { path, .. }
+            | SourceIssue::FlacError { path, .. }
+            | SourceIssue::SampleRate { path, .. } => vec![path.as_path()],
+            SourceIssue::UnnecessaryDirectory { prefix } => vec![prefix.as_path()],
+            _ => Vec::new(),
+        }
+    }
+}
+
 /// Format a path as a gray string for display.
 fn format_path(path: &Path) -> String {
     path.display().to_string().gray().to_string()

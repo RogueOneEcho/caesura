@@ -34,7 +34,7 @@ async fn verify_command_mocked() -> Result<(), TestError> {
 }
 
 #[tokio::test]
-async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
+async fn get_source_torrent_repeat_call() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let test_dir = TestDirectory::new();
@@ -84,7 +84,7 @@ async fn get_source_torrent_downloads_then_caches() -> Result<(), TestError> {
 /// A failed download must not leave a file at the final cached torrent path,
 /// or subsequent runs will treat the empty/partial file as a valid cache entry.
 #[tokio::test]
-async fn get_source_torrent_leaves_no_file_on_download_failure() -> Result<(), TestError> {
+async fn get_source_torrent_download_failure() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let test_dir = TestDirectory::new();
@@ -125,7 +125,7 @@ async fn get_source_torrent_leaves_no_file_on_download_failure() -> Result<(), T
 }
 
 #[tokio::test]
-async fn hash_check_returns_issue_on_mismatch() -> Result<(), TestError> {
+async fn hash_check_mismatch() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let test_dir = TestDirectory::new();
@@ -280,6 +280,111 @@ fn check_path_length_exceeds_limit() {
             excess: 5,
         })
     );
+}
+
+#[tokio::test]
+async fn verify_command_execute_reportable_issue() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let reports_dir = test_dir.reports();
+    let content_dir = test_dir.join("tagless_source");
+    create_dir(&content_dir)?;
+    FlacGenerator::new()
+        .with_filename("01 - track.flac")
+        .omit_vorbis_comments()
+        .generate(&content_dir)
+        .await
+        .expect("generate tagless flac");
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let mut builder = HostBuilder::new();
+    let _ = builder
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(VerifyOptions {
+            no_hash_check: true,
+            exclude_tags: None,
+        });
+    let host = builder.expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let verifier = host.services.get_required::<VerifyCommand>();
+    let mut source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+    source.directory = content_dir;
+
+    // Act
+    let result = verifier
+        .execute(&source)
+        .await
+        .expect("verify should succeed");
+
+    // Assert
+    assert!(
+        result
+            .issues
+            .iter()
+            .any(|issue| matches!(issue, SourceIssue::NoTags { .. })),
+        "expected NoTags issue, got: {:?}",
+        result.issues
+    );
+    let expected = reports_dir.join(format!("red-{}.md", source.torrent.id));
+    assert!(expected.exists(), "expected report at {expected:?}");
+    let contents = read_to_string(&expected)?;
+    assert!(contents.contains("No tags"));
+    Ok(())
+}
+
+#[tokio::test]
+async fn verify_command_execute_no_reports_set() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let reports_dir = test_dir.reports();
+    let content_dir = test_dir.join("tagless_source");
+    create_dir(&content_dir)?;
+    FlacGenerator::new()
+        .with_filename("01 - track.flac")
+        .omit_vorbis_comments()
+        .generate(&content_dir)
+        .await
+        .expect("generate tagless flac");
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let mut builder = HostBuilder::new();
+    let _ = builder
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(VerifyOptions {
+            no_hash_check: true,
+            exclude_tags: None,
+        })
+        .with_options(ReportOptions {
+            reports_dir: reports_dir.clone(),
+            no_reports: true,
+        });
+    let host = builder.expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let verifier = host.services.get_required::<VerifyCommand>();
+    let mut source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+    source.directory = content_dir;
+
+    // Act
+    let _ = verifier
+        .execute(&source)
+        .await
+        .expect("verify should succeed");
+
+    // Assert
+    assert!(!reports_dir.exists(), "expected no reports directory");
+    Ok(())
 }
 
 fn mock_source() -> Source {

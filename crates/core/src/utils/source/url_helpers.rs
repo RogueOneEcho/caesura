@@ -83,3 +83,9 @@ pub fn get_permalink(base: &str, group_id: u32, torrent_id: u32) -> String {
 pub fn get_torrent_permalink(base: &str, torrent_id: u32) -> String {
     format!(r"{base}/torrents.php?torrentid={torrent_id}")
 }
+
+/// Generate the URL for the tracker's report create page.
+#[must_use]
+pub fn get_report_url(base: &str, torrent_id: u32) -> String {
+    format!("{base}/reportsv2.php?action=report&id={torrent_id}")
+}

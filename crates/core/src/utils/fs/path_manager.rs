@@ -42,6 +42,15 @@ impl PathManager {
             .join(APP_NAME)
     }
 
+    /// Default reports directory.
+    ///
+    /// - Docker: `/output/reports`
+    /// - Native: platform user data directory joined with `output/reports`
+    #[must_use]
+    pub fn default_reports_dir() -> PathBuf {
+        Self::default_output_dir().join("reports")
+    }
+
     /// Default output directory.
     ///
     /// - Docker: `/output`

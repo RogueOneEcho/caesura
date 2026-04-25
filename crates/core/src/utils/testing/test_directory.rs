@@ -2,7 +2,7 @@ use crate::testing_prelude::*;
 use std::ops::Deref;
 use std::thread::current as current_thread;
 
-/// Test directory with `output` and `cache` subdirectories.
+/// Test directory with `output`, `cache`, and `reports` subdirectories.
 ///
 /// - Wraps [`TempDirectory`] for automatic cleanup on drop
 /// - Provides standard subdirectory paths for test output
@@ -33,6 +33,12 @@ impl TestDirectory {
     #[must_use]
     pub fn cache(&self) -> PathBuf {
         self.temp_dir.join("cache")
+    }
+
+    /// Path to the reports subdirectory.
+    #[must_use]
+    pub fn reports(&self) -> PathBuf {
+        self.temp_dir.join("reports")
     }
 
     /// Disable cleanup on drop, useful for debugging test failures.

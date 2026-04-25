@@ -1,0 +1,39 @@
+---
+source: crates/core/src/utils/report/tests/report_renderer_tests.rs
+expression: output
+---
+# Unknown Artist - Test Album [2020]
+
+- **Source:** https://example.com/torrents.php?id=123&torrentid=456#torrent456
+- **Report:** https://example.com/reportsv2.php?action=report&id=456
+
+## Detected issues
+
+- No tags: /content/Artist - Album [2024]/02 - Track.flac
+- Missing tags: composer: /content/Artist - Album [2024]/10 - Another.flac
+- Unnecessary nested directory: CD1
+
+## Suggested reports
+
+- **Bad Tags**
+- **Trumpable**
+
+## Report body
+
+Paste the block below into the "Comments" field of the report form.
+
+```
+No tags:
+- "02 - Track.flac"
+
+Missing tags: composer:
+- "10 - Another.flac"
+
+Unnecessary nested directory:
+- "CD1"
+
+[code]caesura inspect "content"[/code]
+
+[pre]
+[/pre]
+```

@@ -102,6 +102,9 @@ no_limit: false
 # Only applied if the image is greater than `max_file_size`.
 # Default: false
 no_png_to_jpg: false
+# Disable automatic report generation.
+# Default: false
+no_reports: false
 # Directory where transcodes and spectrograms will be written.
 # Default: `~/.local/share/caesura/output/` or platform equivalent
 output: /test/output
@@ -122,6 +125,9 @@ queue_add_path: null
 # - `CD1/10 Example track title.mp3`
 # Default: false
 rename_tracks: false
+# Path to the directory where generated reports are written.
+# Default: `~/.local/share/caesura/output/reports/` or platform equivalent
+reports_dir: /test/reports
 # Should failed transcodes be retried?
 # Default: false
 retry_transcode: false

@@ -30,6 +30,7 @@ Default paths vary by platform:
 | `config`  | `/config.yml` | `$XDG_CONFIG_HOME/caesura/config.yml` | `%APPDATA%/caesura/config.yml`   | `~/Library/Application Support/caesura/config.yml` |
 | `cache`   | `/cache`      | `$XDG_CACHE_HOME/caesura/`            | `%LOCALAPPDATA%/caesura/`        | `~/Library/Caches/caesura/`                        |
 | `output`  | `/output`     | `$XDG_DATA_HOME/caesura/output/`      | `%LOCALAPPDATA%/caesura/output/` | `~/Library/Application Support/caesura/output/`    |
+| `reports` | `/output/reports` | `$XDG_DATA_HOME/caesura/output/reports/` | `%LOCALAPPDATA%/caesura/output/reports/` | `~/Library/Application Support/caesura/output/reports/` |
 | `content` | `/content`    | -                                     | -                                | -                                                  |
 
 `content` must be set explicitly for native installations.

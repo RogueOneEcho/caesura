@@ -25,7 +25,8 @@ pub enum Command {
         QbitOptions,
         QbitUploadOptions,
         CacheOptions,
-        BatchOptions
+        BatchOptions,
+        ReportOptions
     )]
     Batch,
 
@@ -110,7 +111,8 @@ pub enum Command {
         SharedOptions,
         CacheOptions,
         TargetOptions,
-        VerifyOptions
+        VerifyOptions,
+        ReportOptions
     )]
     Verify,
 

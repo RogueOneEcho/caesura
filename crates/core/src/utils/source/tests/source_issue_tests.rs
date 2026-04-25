@@ -204,3 +204,96 @@ fn source_issue_provider_deprecated() -> Result<(), YamlError> {
     assert_eq!(before_deserialized.len(), after_deserialized.len());
     Ok(())
 }
+
+#[test]
+fn source_issue_is_reportable() {
+    let reportable = [
+        SourceIssue::NoTags {
+            path: PathBuf::from("/a.flac"),
+        },
+        SourceIssue::MissingTags {
+            path: PathBuf::from("/b.flac"),
+            tags: vec!["composer".to_owned()],
+        },
+        SourceIssue::FlacError {
+            path: PathBuf::from("/c.flac"),
+            error: "decode".to_owned(),
+        },
+        SourceIssue::UnnecessaryDirectory {
+            prefix: PathBuf::from("CD1"),
+        },
+        SourceIssue::SampleRate {
+            path: PathBuf::from("/d.flac"),
+            rate: 192_000,
+        },
+    ];
+    let not_reportable = [
+        SourceIssue::NotFound,
+        SourceIssue::Scene,
+        SourceIssue::Trumpable,
+        SourceIssue::MissingDirectory {
+            path: PathBuf::from("/x"),
+        },
+    ];
+    for issue in reportable {
+        assert!(issue.is_reportable(), "expected reportable: {issue:?}");
+    }
+    for issue in not_reportable {
+        assert!(!issue.is_reportable(), "expected not reportable: {issue:?}");
+    }
+}
+
+#[test]
+fn source_issue_report_type() {
+    let issues = report_sample_issues();
+    let output: Vec<_> = issues.iter().map(SourceIssue::report_type).collect();
+    assert_yaml_snapshot!(output);
+}
+
+#[test]
+fn source_issue_report_label() {
+    let issues = report_sample_issues();
+    let output: Vec<_> = issues.iter().map(SourceIssue::report_label).collect();
+    assert_yaml_snapshot!(output);
+}
+
+#[test]
+fn source_issue_affected_paths() {
+    // Arrange
+    let path = PathBuf::from("/a.flac");
+    let issue = SourceIssue::NoTags { path: path.clone() };
+
+    // Act
+    let output = issue.affected_paths();
+
+    // Assert
+    assert_eq!(output, vec![path.as_path()]);
+}
+
+fn report_sample_issues() -> Vec<SourceIssue> {
+    vec![
+        SourceIssue::NoTags {
+            path: PathBuf::from("/a.flac"),
+        },
+        SourceIssue::MissingTags {
+            path: PathBuf::from("/a.flac"),
+            tags: vec!["composer".to_owned()],
+        },
+        SourceIssue::MissingTags {
+            path: PathBuf::from("/a.flac"),
+            tags: vec!["composer".to_owned(), "disc_number".to_owned()],
+        },
+        SourceIssue::FlacError {
+            path: PathBuf::from("/a.flac"),
+            error: "e".to_owned(),
+        },
+        SourceIssue::SampleRate {
+            path: PathBuf::from("/a.flac"),
+            rate: 192_000,
+        },
+        SourceIssue::UnnecessaryDirectory {
+            prefix: PathBuf::from("CD1"),
+        },
+        SourceIssue::Scene,
+    ]
+}

@@ -44,3 +44,14 @@ fn get_torrent_id_from_url_incorrect_hash() {
     assert_eq!(get_torrent_id_from_torrent_url(url), None);
     assert!(matches!(get_torrent_id_from_url(url), Ok(4_871_992)));
 }
+
+#[test]
+fn get_report_url_with_torrent_id() {
+    // Act
+    let url = get_report_url("https://example.com", 4_871_992);
+    // Assert
+    assert_eq!(
+        url,
+        "https://example.com/reportsv2.php?action=report&id=4871992"
+    );
+}

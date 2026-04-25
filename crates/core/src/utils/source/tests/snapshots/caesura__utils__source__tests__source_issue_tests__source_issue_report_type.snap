@@ -1,0 +1,11 @@
+---
+source: crates/core/src/utils/source/tests/source_issue_tests.rs
+expression: output
+---
+- Bad Tags
+- Bad Tags
+- Bad Tags
+- Mislabeled
+- Mislabeled
+- Trumpable
+- ~

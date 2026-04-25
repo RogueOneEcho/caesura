@@ -20,6 +20,10 @@ fn config_command_renders_documented_yaml() {
             sox_path: None,
             sox_ng: true,
         })
+        .with_options(ReportOptions {
+            reports_dir: PathBuf::from("/test/reports"),
+            no_reports: false,
+        })
         .expect_build();
     let config_command = host.services.get_required::<ConfigCommand>();
 

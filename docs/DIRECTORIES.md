@@ -43,3 +43,19 @@ Then `transcode` will create a `.torrent` files:
 > You can delete the `.torrent` files if you:
 > - Have already uploaded to the indexer
 > - Don't intend to produce transcodes or cross seed to another indexer.
+
+### Reports Directory
+
+The `verify` and `batch` commands will write a markdown tracker report to
+`{REPORTS}/{INDEXER}-{TORRENT_ID}.md` whenever a reportable issue is detected.
+
+By default this is `{OUTPUT}/reports/`.
+
+> [!TIP]
+> The report includes a pre-filled body suitable for pasting into the tracker's report form.
+
+> [!TIP]
+> You can delete report files at any time. They will be re-created on the next `verify` if the issue is still present, and become stale once the source is fixed or replaced.
+
+> [!TIP]
+> Disable automatic report generation with `no_reports: true` in your config or `--no-reports` on the CLI.

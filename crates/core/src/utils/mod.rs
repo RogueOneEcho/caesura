@@ -14,6 +14,7 @@ pub(crate) use logging::*;
 pub(crate) use naming::*;
 pub(crate) use platform::*;
 pub(crate) use process::*;
+pub(crate) use report::*;
 pub(crate) use source::*;
 pub(crate) use table::*;
 #[cfg(test)]
@@ -34,6 +35,7 @@ pub mod logging;
 mod naming;
 mod platform;
 mod process;
+mod report;
 mod source;
 mod table;
 #[cfg(test)]
