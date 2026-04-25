@@ -46,6 +46,8 @@ Refer to the [setup guide](SETUP.md) for more information on configuring caesura
 
 The [command guide](COMMANDS.md) shows commands in native form. To run them with Docker Compose, prefix with `docker compose run --rm caesura`.
 
+Any path used in the config file or passed to a command must be the path as seen inside the container. In the example compose file, `/srv/shared` is mounted at the same path inside the container, so values such as `/srv/shared/downloads/content` work in both places. If you mount a host directory somewhere else in the container, use the container-side path.
+
 For example, the native version command is:
 
 ```bash
@@ -56,6 +58,12 @@ For docker compose use:
 
 ```bash
 docker compose run --rm caesura version
+```
+
+The same rule applies to command arguments. To inspect an album directory mounted by the example compose file:
+
+```bash
+docker compose run --rm caesura inspect "/srv/shared/downloads/content/Artist - Album"
 ```
 
 ---

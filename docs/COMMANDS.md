@@ -33,12 +33,12 @@ caesura config
 
 The inspect command can be used on any directory of `.flac` or `.mp3` files.
 
-It prints a table of metadata for each file followed by printing every tag and embeded image in the file.
+It prints a table of metadata for each file followed by printing every tag and embedded image in the file.
 
 It's useful for checking that the metadata of a source is correct before transcoding.
 
 ```bash
-caesura inspect 142659
+caesura inspect "/path/to/Artist - Album"
 ```
 
 ![](https://media.githubusercontent.com/media/RogueOneEcho/assets-caesura/main/dist/inspect.gif)
