@@ -41,6 +41,12 @@ impl Host {
                 .get_required::<ConfigCommand>()
                 .execute()
                 .map_err(Report::new),
+            Command::Cross => self
+                .services
+                .get_required::<CrossCommand>()
+                .execute_cli()
+                .await
+                .map_err(Report::new),
             Command::Docs => Ok(self.services.get_required::<DocsCommand>().execute()),
             Command::Inspect => self
                 .services

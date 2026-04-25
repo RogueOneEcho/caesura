@@ -26,6 +26,9 @@ config: null
 # Typically this is set as the download directory in your torrent client.
 # Default: []
 content: []
+# Directory the cross-seed `.torrent` file is copied to after download.
+# This should be set if you wish to auto-add to your torrent client via a watch directory.
+copy_cross_torrent_to: null
 # Directory the torrent file is copied to.
 # This should be set if you wish to auto-add to your torrent client.
 copy_torrent_to: null
@@ -38,6 +41,9 @@ copy_transcode_to_content_dir: false
 # Number of cpus to use for processing.
 # Default: Total CPUs
 cpus: 4
+# Path to a config file for the cross indexer.
+# Only `api_key`, `indexer`, and `indexer_url` are used.
+cross_config: null
 # Is this a dry run?
 # If enabled data won't be uploaded and will instead be printed to the console.
 # Default: false

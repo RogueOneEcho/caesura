@@ -12,6 +12,8 @@ pub struct Source {
     /// Audio format of the source files.
     pub format: SourceFormat,
     /// Path to the source FLAC directory.
+    ///
+    /// Empty when content checks are skipped (e.g. cross command).
     pub directory: PathBuf,
     /// Audio metadata extracted from the source files.
     pub metadata: Metadata,

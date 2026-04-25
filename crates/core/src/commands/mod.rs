@@ -3,6 +3,7 @@
 pub(crate) use batch::*;
 pub use command::*;
 pub(crate) use config::*;
+pub(crate) use cross::*;
 pub(crate) use docs::*;
 pub(crate) use inspect::*;
 pub(crate) use queue::*;
@@ -15,6 +16,7 @@ pub(crate) use version::*;
 mod batch;
 mod command;
 mod config;
+mod cross;
 mod docs;
 mod inspect;
 mod queue;

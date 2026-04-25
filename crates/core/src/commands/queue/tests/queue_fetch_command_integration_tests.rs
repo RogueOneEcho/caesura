@@ -1,7 +1,6 @@
 use crate::testing_prelude::*;
 use qbittorrent_api::Response;
 use qbittorrent_api::get_torrents::Torrent;
-use qbittorrent_api::mock::MockQBittorrentClient;
 
 /// Test that `QueueFetchCommand` adds torrents via qBittorrent API.
 ///

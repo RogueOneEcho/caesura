@@ -17,11 +17,38 @@ static HASH_PATTERN: LazyLock<Regex> =
 impl SourceProvider {
     /// Retrieve a [`Source`] by torrent ID.
     ///
+    /// Includes content checks (source directory must exist locally).
+    ///
     /// Returns:
     /// - `Ok(Ok(source))` - Source retrieved successfully
     /// - `Ok(Err(issue))` - Source not available (not found, missing directory, etc.)
     /// - `Err(failure)` - Operation failed (unauthorized, rate limited, network error)
     pub async fn get(&self, id: u32) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
+        let mut source = match self.get_without_content(id).await? {
+            Ok(source) => source,
+            Err(issue) => return Ok(Err(issue)),
+        };
+        let directory = match self.get_source_directory(&source.torrent) {
+            Ok(dir) => dir,
+            Err(issue) => return Ok(Err(issue)),
+        };
+        source.directory = directory;
+        Ok(Ok(source))
+    }
+
+    /// Retrieve a [`Source`] by torrent ID without content checks.
+    ///
+    /// Skips source directory lookup. The returned [`Source`] will have an
+    /// empty `directory` field.
+    ///
+    /// Returns:
+    /// - `Ok(Ok(source))` - Source retrieved successfully
+    /// - `Ok(Err(issue))` - Source not available (not found, not a source format, etc.)
+    /// - `Err(failure)` - Operation failed (unauthorized, rate limited, network error)
+    pub async fn get_without_content(
+        &self,
+        id: u32,
+    ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
         let response = match self.api.get_torrent(id).await {
             Ok(response) => response,
             Err(e) if e.is_missing() => return Ok(Err(SourceIssue::NotFound)),
@@ -30,7 +57,7 @@ impl SourceProvider {
         self.build_source(response).await
     }
 
-    async fn get_by_hash(
+    async fn get_without_content_by_hash(
         &self,
         hash: &str,
     ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
@@ -40,11 +67,6 @@ impl SourceProvider {
             Err(e) => return Err(Failure::new(SourceAction::GetTorrent, e)),
         };
         self.build_source(response).await
-    }
-
-    fn hash_from_arg(&self) -> Option<&str> {
-        let source = self.arg.source.as_str();
-        HASH_PATTERN.is_match(source).then_some(source)
     }
 
     async fn build_source(
@@ -75,10 +97,6 @@ impl SourceProvider {
         };
         let existing = self.existing_provider.get(&torrent, &group_torrents);
         let targets = self.target_provider.get(format, &existing);
-        let directory = match self.get_source_directory(&torrent) {
-            Ok(dir) => dir,
-            Err(issue) => return Ok(Err(issue)),
-        };
         let metadata = Metadata::new(&group, &torrent);
         let url = get_permalink(&self.options.indexer_url, group.id, torrent.id);
         Ok(Ok(Source {
@@ -86,7 +104,7 @@ impl SourceProvider {
             group,
             targets,
             format,
-            directory,
+            directory: PathBuf::new(),
             metadata,
             url,
         }))
@@ -130,8 +148,27 @@ impl SourceProvider {
     pub async fn get_from_options(
         &self,
     ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
+        let mut source = match self.get_from_options_without_content().await? {
+            Ok(source) => source,
+            Err(issue) => return Ok(Err(issue)),
+        };
+        let directory = match self.get_source_directory(&source.torrent) {
+            Ok(dir) => dir,
+            Err(issue) => return Ok(Err(issue)),
+        };
+        source.directory = directory;
+        Ok(Ok(source))
+    }
+
+    /// Retrieve a [`Source`] using the ID from CLI options without content checks.
+    ///
+    /// Skips source directory lookup. The returned [`Source`] will have an
+    /// empty `directory` field.
+    pub async fn get_from_options_without_content(
+        &self,
+    ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
         if let Some(hash) = self.hash_from_arg() {
-            return self.get_by_hash(hash).await;
+            return self.get_without_content_by_hash(hash).await;
         }
         let id = self
             .id_provider
@@ -139,8 +176,13 @@ impl SourceProvider {
             .await
             .map_err(SourceIssue::Id);
         match id {
-            Ok(id) => self.get(id).await,
+            Ok(id) => self.get_without_content(id).await,
             Err(issue) => Ok(Err(issue)),
         }
+    }
+
+    fn hash_from_arg(&self) -> Option<&str> {
+        let source = self.arg.source.as_str();
+        HASH_PATTERN.is_match(source).then_some(source)
     }
 }

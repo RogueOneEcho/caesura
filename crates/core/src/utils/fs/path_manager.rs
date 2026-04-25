@@ -7,9 +7,9 @@ const KNOWN_INDEXERS: [Indexer; 3] = [Indexer::Red, Indexer::Ops, Indexer::Pth];
 /// Resolve cache, output, and torrent paths from options.
 #[injectable]
 pub struct PathManager {
-    shared_options: Ref<SharedOptions>,
-    cache_options: Ref<CacheOptions>,
-    file_options: Ref<FileOptions>,
+    pub(crate) shared_options: Ref<SharedOptions>,
+    pub(crate) cache_options: Ref<CacheOptions>,
+    pub(crate) file_options: Ref<FileOptions>,
 }
 
 impl PathManager {

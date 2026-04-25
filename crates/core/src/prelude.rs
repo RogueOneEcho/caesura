@@ -11,9 +11,10 @@ pub(crate) use colored::{ColoredString, Colorize};
 pub(crate) use di::{Ref, RefMut, inject, injectable};
 pub(crate) use flat_db::{Hash, Table};
 pub(crate) use gazelle_api::{
-    ApiResponseKind, Category, Format, GazelleClientFactory, GazelleClientOptions,
-    GazelleClientTrait, GazelleError, GazelleOperation, GazelleSerializableError, Group, Media,
-    Quality, Torrent, TorrentResponse, UploadForm,
+    ApiResponseKind, BrowseRequest, BrowseResponse, BrowseTorrent, Category, FileItem, Format,
+    GazelleClientFactory, GazelleClientOptions, GazelleClientTrait, GazelleError, GazelleOperation,
+    GazelleSerializableError, Group, Media, Quality, ReleaseType, ReleaseTypeId, Torrent,
+    TorrentResponse, UploadForm,
 };
 pub(crate) use html_escape::decode_html_entities;
 pub(crate) use log::{debug, error, info, trace, warn};
@@ -22,8 +23,8 @@ pub(crate) use rogue_logging::{Colors, Failure, Logger, TimeFormat, Verbosity};
 pub(crate) use serde::de::{Error as SerdeError, Visitor};
 pub(crate) use serde::{Deserialize, Deserializer, Serialize, Serializer};
 pub(crate) use serde_yaml::{
-    Error as YamlError, Value, from_reader as yaml_from_reader, to_string as yaml_to_string,
-    to_value as yaml_to_value,
+    Error as YamlError, Value, from_reader as yaml_from_reader, from_str as yaml_from_str,
+    to_string as yaml_to_string, to_value as yaml_to_value,
 };
 pub(crate) use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 pub(crate) use std::error::Error;

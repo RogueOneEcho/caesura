@@ -7,7 +7,6 @@ pub(crate) use gazelle_api::{
 };
 pub(crate) use insta::{assert_snapshot, assert_yaml_snapshot};
 pub(crate) use qbittorrent_api::mock::MockQBittorrentClient;
-pub(crate) use serde_yaml::from_str as yaml_from_str;
 pub(crate) use std::fs::{copy, metadata, read, remove_dir_all, remove_file, write};
 pub(crate) use tokio::sync::OnceCell;
 

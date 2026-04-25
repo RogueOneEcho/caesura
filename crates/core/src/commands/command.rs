@@ -33,6 +33,22 @@ pub enum Command {
     #[options(ConfigOptions)]
     Config,
 
+    /// Find a source on the primary indexer and look up cross-seeds on the cross indexer.
+    #[options(
+        SourceArg,
+        ConfigOptions,
+        SharedOptions,
+        CacheOptions,
+        FileOptions,
+        TargetOptions,
+        CrossConfigOptions,
+        CrossOptions,
+        QbitOptions,
+        QbitCrossOptions,
+        CopyOptions
+    )]
+    Cross,
+
     /// Generate markdown documentation for configuration options.
     Docs,
 

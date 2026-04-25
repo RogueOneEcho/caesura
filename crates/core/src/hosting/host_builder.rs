@@ -67,6 +67,9 @@ impl HostBuilder {
             .add(BatchCommand::transient())
             // Add config services
             .add(ConfigCommand::transient())
+            // Add cross services
+            .add(CrossCommand::transient())
+            .add(singleton_as_self().from(cross_factory))
             // Add docs services
             .add(DocsCommand::transient())
             // Add inspect services
@@ -115,8 +118,7 @@ impl HostBuilder {
         self.with_mock_client(album_config.api())
     }
 
-    /// Register a pre-configured mock API client for testing.
-    /// Register a mock Gazelle API client for testing.
+    /// Register a pre-configured mock Gazelle API client for testing.
     #[must_use]
     #[cfg(test)]
     #[expect(
@@ -128,6 +130,35 @@ impl HostBuilder {
             Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
         self.services
             .add(singleton_as_self().from(move |_| client.clone()));
+        self
+    }
+
+    /// Register a mock Gazelle API client for the cross indexer.
+    ///
+    /// - Replaces the default [`CrossServices`] factory so the cross indexer's
+    ///   API client comes from the supplied mock instead of a live HTTP client.
+    #[must_use]
+    #[cfg(test)]
+    #[expect(
+        clippy::as_conversions,
+        reason = "required for DI trait object registration"
+    )]
+    pub fn with_mock_cross_client(&mut self, client: MockGazelleClient) -> &mut Self {
+        let api: Ref<Box<dyn GazelleClientTrait + Send + Sync>> =
+            Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
+        self.services.add(singleton_as_self().from(move |services| {
+            let main_options = services.get_required::<SharedOptions>();
+            let cache_options = services.get_required::<CacheOptions>();
+            let file_options = services.get_required::<FileOptions>();
+            let cross_config_options = services.get_required::<CrossConfigOptions>();
+            Ref::new(CrossServices::mock(
+                main_options,
+                cache_options,
+                file_options,
+                cross_config_options,
+                api.clone(),
+            ))
+        }));
         self
     }
 
@@ -248,6 +279,19 @@ fn gazelle_factory(services: &ServiceProvider) -> Ref<Box<dyn GazelleClientTrait
         },
     };
     Ref::new(Box::new(factory.create()) as Box<dyn GazelleClientTrait + Send + Sync>)
+}
+
+fn cross_factory(services: &ServiceProvider) -> Ref<Option<CrossServices>> {
+    let main_options = services.get_required::<SharedOptions>();
+    let cache_options = services.get_required::<CacheOptions>();
+    let file_options = services.get_required::<FileOptions>();
+    let cross_config_options = services.get_required::<CrossConfigOptions>();
+    Ref::new(CrossServices::create(
+        main_options,
+        cache_options,
+        file_options,
+        cross_config_options,
+    ))
 }
 
 fn logger_factory(provider: &ServiceProvider) -> Ref<Logger> {
