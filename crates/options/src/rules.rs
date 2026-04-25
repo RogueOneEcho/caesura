@@ -14,6 +14,10 @@ pub enum OptionRule {
     ///
     /// Field: option name.
     NotSet(String),
+    /// At least one of a set of options must be set.
+    ///
+    /// Field: option names.
+    AtLeastOne(Vec<String>),
     /// Option requires another option to be set.
     ///
     /// Fields: dependent option name, required option name.
@@ -60,6 +64,9 @@ impl Display for OptionRule {
             }
             Self::Dependent(this, that) => format!("{this} requires {that} to be set"),
             Self::NotSet(name) => format!("{name} is not set"),
+            Self::AtLeastOne(names) => {
+                format!("at least one of {} must be set", names.join(", "))
+            }
             Self::IsEmpty(name) => format!("{name} must have at least one value"),
             Self::UrlNotHttp(name, value) => {
                 format!("{name} must start with https:// or http://: {value}")

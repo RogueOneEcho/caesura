@@ -91,6 +91,16 @@ impl CrossCommand {
         if self.qbit_cross_options.qbit_cross {
             self.qbit_options.validate_connection(&mut errors);
         }
+        if !self.cross_options.dry_run
+            && !self.qbit_cross_options.qbit_cross
+            && self.cross_options.copy_cross_torrent_to.is_none()
+        {
+            errors.push(OptionRule::AtLeastOne(vec![
+                "qBit cross".to_owned(),
+                "Copy cross torrent to".to_owned(),
+                "Dry run".to_owned(),
+            ]));
+        }
         if errors.is_empty() {
             Ok(())
         } else {

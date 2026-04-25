@@ -68,6 +68,42 @@ async fn cross_command_unresolvable_source_returns_false() {
     assert_eq!(result.ok(), Some(false));
 }
 
+/// Verify `cross` errors when neither inject nor copy target is configured and `dry_run` is false.
+#[tokio::test]
+async fn cross_command_validation_fails_without_inject_copy_or_dry_run() {
+    // Arrange
+    let test_dir = TestDirectory::new();
+    let cross_config = make_cross_config(&test_dir, "OPS").await;
+    let host = HostBuilder::new()
+        .with_mock_client(MockGazelleClient::default())
+        .with_mock_cross_client(MockGazelleClient::default())
+        .with_mock_torrent_client(MockQBittorrentClient::default())
+        .with_test_options(&test_dir)
+        .await
+        .with_options(QbitOptions::mock())
+        .with_options(CrossConfigOptions {
+            cross_config: Some(cross_config),
+        })
+        .with_options(CrossOptions {
+            dry_run: false,
+            copy_cross_torrent_to: None,
+        })
+        .with_options(SourceArg {
+            source: AlbumConfig::TORRENT_ID.to_string(),
+        })
+        .expect_build();
+    let command = host.services.get_required::<CrossCommand>();
+
+    // Act
+    let result = command.execute_cli().await;
+
+    // Assert
+    assert!(
+        result.is_err(),
+        "should fail validation without qbit_cross, copy_cross_torrent_to, or dry_run"
+    );
+}
+
 /// Build a minimal cross-indexer config file pointing at the given indexer.
 async fn make_cross_config(test_dir: &TestDirectory, indexer: &str) -> PathBuf {
     let path = test_dir.cache().join("cross.yml");
