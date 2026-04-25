@@ -1,6 +1,5 @@
 use crate::testing_prelude::*;
 use di::{Ref as DiRef, singleton_as_self};
-use qbittorrent_api::mock::MockQBittorrentClient;
 
 /// Test that `UploadCommand` succeeds with a valid transcoded source.
 #[tokio::test]

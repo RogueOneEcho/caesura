@@ -87,6 +87,8 @@ impl HostBuilder {
             .add(TranscodeCommand::transient())
             .add(TranscodeJobFactory::transient())
             .add(AdditionalJobFactory::transient())
+            // Add shared injection services
+            .add(TorrentInjector::transient())
             // Add upload services
             .add(UploadCommand::transient())
             // Add verify services

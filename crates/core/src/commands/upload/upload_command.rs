@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use qbittorrent_api::QBittorrentClientTrait;
 
 /// Upload transcodes of a FLAC source.
 #[injectable]
@@ -13,7 +12,7 @@ pub(crate) struct UploadCommand {
     transcode_job_factory: Ref<TranscodeJobFactory>,
     qbit_options: Ref<QbitOptions>,
     qbit_upload_options: Ref<QbitUploadOptions>,
-    qbit: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>>,
+    injector: Ref<TorrentInjector>,
 }
 
 impl UploadCommand {
@@ -111,11 +110,17 @@ impl UploadCommand {
                     warnings.push(e.to_error());
                 }
             }
-            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to
-                && let Err(e) = self.copy_torrent(source, &target, torrent_dir).await
-            {
-                warn!("{}", e.render());
-                warnings.push(e.to_error());
+            if let Some(torrent_dir) = &self.upload_options.copy_torrent_to {
+                let source_torrent = self.paths.get_torrent_path(source, target);
+                if let Err(e) = self
+                    .injector
+                    .copy_torrent(&source_torrent, torrent_dir)
+                    .await
+                    .map_err(Failure::wrap(UploadAction::CopyTorrent))
+                {
+                    warn!("{}", e.render());
+                    warnings.push(e.to_error());
+                }
             }
             let response = self
                 .api
@@ -134,8 +139,8 @@ impl UploadCommand {
             if self.qbit_upload_options.inject_torrent {
                 let add_options = self.qbit_upload_options.to_add_torrent_options();
                 if let Err(e) = self
-                    .qbit
-                    .add_torrent(add_options, torrent_path.clone())
+                    .injector
+                    .inject_qbit(&torrent_path, add_options)
                     .await
                     .map_err(Failure::wrap(UploadAction::InjectTorrent))
                 {
@@ -199,41 +204,6 @@ impl UploadCommand {
             verb.bold(),
             source_path.display(),
             target_dir.display()
-        );
-        Ok(())
-    }
-
-    async fn copy_torrent(
-        &self,
-        source: &Source,
-        target: &TargetFormat,
-        target_dir: &Path,
-    ) -> Result<(), Failure<UploadAction>> {
-        let source_path = self.paths.get_torrent_path(source, *target);
-        let source_file_name = source_path
-            .file_name()
-            .expect("torrent path should have a name");
-        let target_path = target_dir.join(source_file_name);
-        let verb =
-            if self.copy_options.hard_link {
-                tokio_hard_link(&source_path, &target_path).await.map_err(
-                    Failure::wrap_with_path(UploadAction::HardLinkTorrent, &target_path),
-                )?;
-                "Hard Linked"
-            } else {
-                tokio_copy(&source_path, &target_path)
-                    .await
-                    .map_err(Failure::wrap_with_path(
-                        UploadAction::CopyTorrent,
-                        &target_path,
-                    ))?;
-                "Copied"
-            };
-        trace!(
-            "{} {} to {}",
-            verb.bold(),
-            source_path.display(),
-            target_path.display()
         );
         Ok(())
     }

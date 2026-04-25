@@ -11,8 +11,6 @@ pub enum UploadAction {
     VerifyContent,
     #[error("upload torrent")]
     Upload,
-    #[error("hard link torrent")]
-    HardLinkTorrent,
     #[error("copy torrent")]
     CopyTorrent,
     #[error("inject torrent")]
