@@ -4,11 +4,15 @@ use crate::prelude::*;
 #[injectable]
 pub struct SourceProvider {
     api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
+    arg: Ref<SourceArg>,
     options: Ref<SharedOptions>,
     id_provider: Ref<IdProvider>,
     existing_provider: Ref<ExistingFormatProvider>,
     target_provider: Ref<TargetFormatProvider>,
 }
+
+static HASH_PATTERN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[0-9a-fA-F]{40}$").expect("regex should compile"));
 
 impl SourceProvider {
     /// Retrieve a [`Source`] by torrent ID.
@@ -24,6 +28,23 @@ impl SourceProvider {
             Err(e) => return Err(Failure::new(SourceAction::GetTorrent, e)),
         };
         self.build_source(response).await
+    }
+
+    async fn get_by_hash(
+        &self,
+        hash: &str,
+    ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
+        let response = match self.api.get_torrent_by_hash(&hash.to_uppercase()).await {
+            Ok(response) => response,
+            Err(e) if e.is_missing() => return Ok(Err(SourceIssue::NotFound)),
+            Err(e) => return Err(Failure::new(SourceAction::GetTorrent, e)),
+        };
+        self.build_source(response).await
+    }
+
+    fn hash_from_arg(&self) -> Option<&str> {
+        let source = self.arg.source.as_str();
+        HASH_PATTERN.is_match(source).then_some(source)
     }
 
     async fn build_source(
@@ -109,6 +130,9 @@ impl SourceProvider {
     pub async fn get_from_options(
         &self,
     ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
+        if let Some(hash) = self.hash_from_arg() {
+            return self.get_by_hash(hash).await;
+        }
         let id = self
             .id_provider
             .get_by_options()

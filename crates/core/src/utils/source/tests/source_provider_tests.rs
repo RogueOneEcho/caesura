@@ -57,6 +57,84 @@ async fn get_returns_missing_directory_when_path_not_found() -> Result<(), TestE
     Ok(())
 }
 
+const TEST_HASH: &str = "0123456789abcdef0123456789abcdef01234567";
+
+/// Verify `get_from_options` dispatches to hash lookup when the source arg is a hash.
+#[tokio::test]
+async fn source_provider_get_from_options_dispatches_to_hash() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let _album = AlbumProvider::get(SampleFormat::default()).await;
+    let test_dir = TestDirectory::new();
+    let dir_name = AlbumConfig::default().dir_name();
+    let host = HostBuilder::new()
+        .with_options(SourceArg {
+            source: TEST_HASH.to_owned(),
+        })
+        .with_mock_client(mock_api_with_hash(&dir_name))
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+
+    // Act
+    let result = provider.get_from_options().await;
+
+    // Assert
+    let source = result?.expect("should find source via hash dispatch");
+    assert_eq!(source.directory, SAMPLE_SOURCES_DIR.join(&dir_name));
+    Ok(())
+}
+
+/// Verify hash dispatch returns `NotFound` when the api has no torrent at the hash.
+#[tokio::test]
+async fn source_provider_get_from_options_hash_not_found() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let client = MockGazelleClient::new().with_get_torrent_by_hash(Err(GazelleError {
+        operation: GazelleOperation::ApiResponse(ApiResponseKind::NotFound),
+        source: ErrorSource::ApiResponse(ApiResponseError {
+            message: "not found".to_owned(),
+            status: 404,
+        }),
+    }));
+    let host = HostBuilder::new()
+        .with_options(SourceArg {
+            source: TEST_HASH.to_owned(),
+        })
+        .with_mock_client(client)
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+
+    // Act
+    let result = provider.get_from_options().await;
+
+    // Assert
+    assert!(matches!(result?, Err(SourceIssue::NotFound)));
+    Ok(())
+}
+
+fn mock_api_with_hash(file_path: &str) -> MockGazelleClient {
+    let torrent = Torrent {
+        id: AlbumConfig::TORRENT_ID,
+        file_path: file_path.to_owned(),
+        ..Torrent::mock()
+    };
+    let group = Group::mock();
+    MockGazelleClient::new()
+        .with_get_torrent_by_hash(Ok(TorrentResponse {
+            group: group.clone(),
+            torrent: torrent.clone(),
+        }))
+        .with_get_torrent_group(Ok(GroupResponse {
+            group,
+            torrents: vec![torrent],
+        }))
+}
+
 fn mock_api(file_path: &str) -> MockGazelleClient {
     let torrent = Torrent {
         id: AlbumConfig::TORRENT_ID,

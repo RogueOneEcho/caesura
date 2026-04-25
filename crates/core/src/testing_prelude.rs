@@ -2,7 +2,8 @@
 
 pub(crate) use crate::prelude::*;
 pub(crate) use gazelle_api::{
-    Credit, Credits, ErrorSource, GroupResponse, MockGazelleClient, TorrentResponse, UploadResponse,
+    ApiResponseError, Credit, Credits, ErrorSource, GroupResponse, MockGazelleClient,
+    TorrentResponse, UploadResponse,
 };
 pub(crate) use insta::{assert_snapshot, assert_yaml_snapshot};
 pub(crate) use serde_yaml::from_str as yaml_from_str;

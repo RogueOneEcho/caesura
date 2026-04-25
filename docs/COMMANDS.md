@@ -54,11 +54,12 @@ caesura verify 142659
 ![](https://media.githubusercontent.com/media/RogueOneEcho/assets-caesura/main/dist/verify.gif)
 
 > [!TIP]
-> For the source you can use a permalink, the numeric torrent id, or a path to a torrent file.
+> For the source you can use a permalink, the numeric torrent id, a path to a torrent file, or a 40-character info hash.
 > Examples:
 > - `caesura verify https://redacted.sh/torrents.php?id=80518&torrentid=142659#torrent142659`
 > - `caesura verify 142659`
 > - `caesura verify "../path/to/Artist - Hello World [2024].torrent"`
+> - `caesura verify 0123456789abcdef0123456789abcdef01234567`
 
 If it looks good you can proceed to transcoding, otherwise try another source.
 
