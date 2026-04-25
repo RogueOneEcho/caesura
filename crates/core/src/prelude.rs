@@ -13,7 +13,7 @@ pub(crate) use flat_db::{Hash, Table};
 pub(crate) use gazelle_api::{
     ApiResponseKind, Category, Format, GazelleClientFactory, GazelleClientOptions,
     GazelleClientTrait, GazelleError, GazelleOperation, GazelleSerializableError, Group, Media,
-    Quality, Torrent, UploadForm,
+    Quality, Torrent, TorrentResponse, UploadForm,
 };
 pub(crate) use html_escape::decode_html_entities;
 pub(crate) use log::{debug, error, info, trace, warn};

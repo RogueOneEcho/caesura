@@ -23,6 +23,13 @@ impl SourceProvider {
             Err(e) if e.is_missing() => return Ok(Err(SourceIssue::NotFound)),
             Err(e) => return Err(Failure::new(SourceAction::GetTorrent, e)),
         };
+        self.build_source(response).await
+    }
+
+    async fn build_source(
+        &self,
+        response: TorrentResponse,
+    ) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
         let torrent = response.torrent;
         let group = response.group;
         let response = match self.api.get_torrent_group(group.id).await {
