@@ -52,6 +52,12 @@ pub struct FlacGenerator {
 
     /// Cover image
     embed_cover: bool,
+
+    /// Skip writing Vorbis comments entirely.
+    ///
+    /// Produces a FLAC with only `STREAMINFO` + `SEEKTABLE`, simulating a
+    /// file with no `VORBIS_COMMENT` block at all.
+    omit_vorbis_comments: bool,
 }
 
 impl FlacGenerator {
@@ -194,6 +200,15 @@ impl FlacGenerator {
         self
     }
 
+    /// Skip writing Vorbis comments entirely.
+    ///
+    /// - Strips only the `VORBIS_COMMENT` block; combine with `with_cover` and a `PICTURE` block is still added
+    #[must_use]
+    pub fn omit_vorbis_comments(mut self) -> Self {
+        self.omit_vorbis_comments = true;
+        self
+    }
+
     /// Build the filename from metadata.
     ///
     /// Format: "{`track_number`} - {title}.flac" or "{title}.flac" or "track.flac"
@@ -264,6 +279,17 @@ impl FlacGenerator {
     }
 
     async fn apply_metadata(&self, path: &Path) -> Result<(), Failure<SampleAction>> {
+        if self.omit_vorbis_comments {
+            TokioCommand::new(METAFLAC)
+                .arg("--remove")
+                .arg("--block-type=VORBIS_COMMENT")
+                .arg("--dont-use-padding")
+                .arg(path)
+                .run()
+                .await
+                .map_err(Failure::wrap(SampleAction::SetTags))?;
+            return Ok(());
+        }
         let mut args: Vec<String> = Vec::new();
         if let Some(artist) = &self.artist {
             args.push(format!("--set-tag=ARTIST={artist}"));

@@ -93,6 +93,9 @@ pub enum SourceIssue {
         path: PathBuf,
         excess: usize,
     },
+    NoTags {
+        path: PathBuf,
+    },
     MissingTags {
         path: PathBuf,
         tags: Vec<String>,
@@ -195,6 +198,9 @@ impl Display for SourceIssue {
                     seconds / 60,
                     format_path(path)
                 )
+            }
+            NoTags { path } => {
+                format!("No tags: {}", format_path(path))
             }
             MissingTags { path, tags } => {
                 format!(

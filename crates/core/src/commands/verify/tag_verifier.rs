@@ -12,7 +12,15 @@ impl TagVerifier {
         flac: &FlacFile,
         source: &Source,
     ) -> Result<Option<SourceIssue>, Failure<TranscodeAction>> {
-        let tags = flac.id3_tags()?;
+        let tags = match flac.id3_tags() {
+            Ok(tags) => tags,
+            Err(failure) if is_no_vorbis_comments(&failure) => {
+                return Ok(Some(SourceIssue::NoTags {
+                    path: flac.path.clone(),
+                }));
+            }
+            Err(failure) => return Err(failure),
+        };
         let mut missing = Vec::new();
         missing.extend(check_artist_tag(tags));
         missing.extend(check_album_tag(tags));
@@ -81,4 +89,16 @@ pub(crate) fn check_disc_number_tag(tags: &Tag, flac: &FlacFile) -> Option<Strin
         return Some("disc_number".to_owned());
     }
     None
+}
+
+/// Walk the source chain looking for [`TagsError::NoVorbisComments`].
+fn is_no_vorbis_comments(failure: &Failure<TranscodeAction>) -> bool {
+    let mut source: Option<&(dyn Error + 'static)> = failure.source();
+    while let Some(err) = source {
+        if let Some(tags_err) = err.downcast_ref::<TagsError>() {
+            return matches!(tags_err, TagsError::NoVorbisComments);
+        }
+        source = err.source();
+    }
+    false
 }

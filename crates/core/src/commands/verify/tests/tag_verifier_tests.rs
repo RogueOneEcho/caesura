@@ -136,3 +136,23 @@ fn check_disc_number_tag_single_disc() {
     let flac = mock_flac(false);
     assert_eq!(check_disc_number_tag(&tags, &flac), None);
 }
+
+#[tokio::test]
+async fn tag_verifier_execute_no_vorbis_block() {
+    // Arrange
+    let dir = TempDirectory::create("tag_verifier_execute_no_vorbis_block");
+    let flac_path = FlacGenerator::new()
+        .with_filename("track.flac")
+        .omit_vorbis_comments()
+        .generate(&dir)
+        .await
+        .expect("generate should succeed");
+    let flac = FlacFile::new(flac_path.clone(), &dir.to_path_buf());
+    let source = Source::mock();
+
+    // Act
+    let output = TagVerifier::execute(&flac, &source).expect("should not fail hard");
+
+    // Assert
+    assert_eq!(output, Some(SourceIssue::NoTags { path: flac_path }));
+}
