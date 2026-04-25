@@ -18,22 +18,16 @@ impl SourceProvider {
     /// - `Ok(Err(issue))` - Source not available (not found, missing directory, etc.)
     /// - `Err(failure)` - Operation failed (unauthorized, rate limited, network error)
     pub async fn get(&self, id: u32) -> Result<Result<Source, SourceIssue>, Failure<SourceAction>> {
-        let not_found = GazelleOperation::ApiResponse(ApiResponseKind::NotFound);
-        let bad_request = GazelleOperation::ApiResponse(ApiResponseKind::BadRequest);
         let response = match self.api.get_torrent(id).await {
             Ok(response) => response,
-            Err(e) if e.operation == not_found || e.operation == bad_request => {
-                return Ok(Err(SourceIssue::NotFound));
-            }
+            Err(e) if e.is_missing() => return Ok(Err(SourceIssue::NotFound)),
             Err(e) => return Err(Failure::new(SourceAction::GetTorrent, e)),
         };
         let torrent = response.torrent;
         let group = response.group;
         let response = match self.api.get_torrent_group(group.id).await {
             Ok(response) => response,
-            Err(e) if e.operation == not_found || e.operation == bad_request => {
-                return Ok(Err(SourceIssue::NotFound));
-            }
+            Err(e) if e.is_missing() => return Ok(Err(SourceIssue::NotFound)),
             Err(e) => return Err(Failure::new(SourceAction::GetTorrentGroup, e)),
         };
         if group.id != response.group.id {
