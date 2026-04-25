@@ -26,8 +26,8 @@ pub(crate) struct VerifyStatus {
 }
 
 impl VerifyStatus {
-    /// Create a new [`VerifyStatus`] from a [`VerifySuccess`].
-    pub fn new(success: VerifySuccess) -> Self {
+    /// Create a [`VerifyStatus`] from a [`VerifySuccess`].
+    pub fn from_success(success: VerifySuccess) -> Self {
         if success.issues.is_empty() {
             Self {
                 verified: true,

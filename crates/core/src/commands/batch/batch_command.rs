@@ -137,7 +137,7 @@ impl BatchCommand {
                 }
             }
             let verified = success.verified();
-            item.verify = Some(VerifyStatus::new(success));
+            item.verify = Some(VerifyStatus::from_success(success));
             if !verified {
                 self.queue
                     .set(item)
