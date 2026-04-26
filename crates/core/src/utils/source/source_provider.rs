@@ -111,7 +111,7 @@ impl SourceProvider {
     }
 
     fn get_source_directory(&self, torrent: &Torrent) -> Result<PathBuf, SourceIssue> {
-        let path = decode_html_entities(&torrent.file_path).to_string();
+        let path = torrent.file_path.clone();
         let result = Sanitizer::libtorrent().execute(path.clone());
         if !result.found.is_empty() {
             warn!("Invisible characters in source path: {}", result.humanize());

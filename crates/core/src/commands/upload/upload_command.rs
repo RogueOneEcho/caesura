@@ -72,8 +72,7 @@ impl UploadCommand {
                 category_id: Category::Music,
                 remaster_year: source.metadata.year,
                 remaster_title: source.torrent.remaster_title.clone(),
-                remaster_record_label: decode_html_entities(&source.torrent.remaster_record_label)
-                    .to_string(),
+                remaster_record_label: source.torrent.remaster_record_label.clone(),
                 remaster_catalogue_number: source.torrent.remaster_catalogue_number.clone(),
                 format: target.to_format(),
                 bitrate: target.to_quality(),

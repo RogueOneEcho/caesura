@@ -227,7 +227,6 @@ dependencies = [
  "flat_db",
  "futures",
  "gazelle_api",
- "html-escape",
  "humantime",
  "image",
  "indicatif",
@@ -799,11 +798,12 @@ dependencies = [
 
 [[package]]
 name = "gazelle_api"
-version = "0.21.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c2ce07fc0e96a279989c59665ee40e1ff76842a9bc48d6ce27bba70e892c6da"
+checksum = "3e6f4d8dd6b19df45c13caab23f3220b5a02f3289f60bd42a9ee031b180f6a25"
 dependencies = [
  "async-trait",
+ "html-escape",
  "log",
  "miette",
  "regex",

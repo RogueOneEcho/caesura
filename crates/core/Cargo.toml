@@ -37,7 +37,6 @@ fast_image_resize = { workspace = true }
 flat_db = { workspace = true }
 futures = { workspace = true }
 gazelle_api = { workspace = true }
-html-escape = { workspace = true }
 humantime = { workspace = true }
 image = { workspace = true }
 indicatif = { workspace = true }

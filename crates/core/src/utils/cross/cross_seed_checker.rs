@@ -65,12 +65,11 @@ impl CrossSeedChecker {
         &self,
         source: &Source,
     ) -> Result<Option<u32>, Failure<CrossSeedAction>> {
-        let source_files = normalize_fileset(source.torrent.get_files());
+        let source_files = source.torrent.get_files();
         let Some(filename) = select_search_filename(&source_files) else {
             return Ok(None);
         };
         let results = self.get_candidates(source, filename).await?;
-        let source_file_path = decode_html_entities(&source.torrent.file_path);
         for group in &results.results {
             for candidate in &group.torrents {
                 if !passes_prefilter(candidate, source.torrent.size, source.torrent.file_count) {
@@ -81,13 +80,13 @@ impl CrossSeedChecker {
                         f.with("torrent_id", candidate.torrent_id.to_string())
                     }),
                 )?;
-                if decode_html_entities(&response.torrent.file_path) != source_file_path {
+                if response.torrent.file_path != source.torrent.file_path {
                     continue;
                 }
                 if response.torrent.encoding != source.torrent.encoding {
                     continue;
                 }
-                if normalize_fileset(response.torrent.get_files()) == source_files {
+                if response.torrent.get_files() == source_files {
                     debug!(
                         "{} cross indexer match by filelist for torrent {}",
                         "Found".bold(),
@@ -147,13 +146,11 @@ pub(crate) fn passes_prefilter(
     candidate.size == source_size && candidate.file_count == source_file_count
 }
 
-/// Select the best filename from a decoded file list to use as a browse search query.
+/// Select the best filename from the file list to use as a browse search query.
 ///
 /// - Only considers music files (FLAC, MP3, etc.)
 /// - Picks the longest name (most distinctive)
 /// - Returns the full filename including extension
-/// - Caller must pre-decode HTML entities so length comparison reflects the
-///   string the cross indexer will tokenize
 fn select_search_filename(files: &[FileItem]) -> Option<String> {
     files
         .iter()
@@ -163,18 +160,6 @@ fn select_search_filename(files: &[FileItem]) -> Option<String> {
         })
         .max_by_key(|item| item.name.len())
         .map(|item| item.name.clone())
-}
-
-/// Decode HTML entities in each [`FileItem`] name so filesets from different
-/// trackers can be compared consistently.
-fn normalize_fileset(files: Vec<FileItem>) -> Vec<FileItem> {
-    files
-        .into_iter()
-        .map(|item| FileItem {
-            name: decode_html_entities(&item.name).into_owned(),
-            size: item.size,
-        })
-        .collect()
 }
 
 /// Compute the info hash this torrent would have with its `source` field swapped.
@@ -407,175 +392,6 @@ mod tests {
                 id: 555,
                 file_path: source.torrent.file_path.clone(),
                 file_list: source.torrent.file_list.clone(),
-                encoding: source.torrent.encoding.clone(),
-                ..Torrent::mock()
-            },
-            ..TorrentResponse::mock()
-        };
-        let mock = MockGazelleClient::new()
-            .with_get_torrent_by_hash(Err(not_found_error()))
-            .with_browse(Ok(browse))
-            .with_get_torrent(Ok(matching));
-        let checker = CrossSeedChecker {
-            api: mock_api(mock),
-            main: Indexer::Red,
-            cross: Indexer::Ops,
-        };
-        let torrent_path = write_mock_torrent();
-
-        // Act
-        let output = checker
-            .execute(torrent_path.path(), &source)
-            .await
-            .expect("execute");
-
-        // Assert
-        assert_eq!(output, Some(555));
-    }
-
-    /// Verify filelist fallback matches when the source `file_path` uses a literal
-    /// apostrophe and the candidate returns the HTML-encoded form.
-    #[tokio::test]
-    async fn cross_seed_checker_execute_filelist_match_html_encoded_candidate() {
-        // Arrange
-        let source = Source {
-            torrent: Torrent {
-                file_path: "Test's Album (2020) [FLAC]".to_owned(),
-                ..Torrent::mock()
-            },
-            ..Source::mock()
-        };
-        let browse = BrowseResponse {
-            results: vec![BrowseGroup {
-                torrents: vec![BrowseTorrent {
-                    torrent_id: 555,
-                    size: source.torrent.size,
-                    file_count: source.torrent.file_count,
-                    ..BrowseTorrent::mock()
-                }],
-                ..BrowseGroup::mock()
-            }],
-            ..BrowseResponse::mock()
-        };
-        let matching = TorrentResponse {
-            torrent: Torrent {
-                id: 555,
-                file_path: "Test&#39;s Album (2020) [FLAC]".to_owned(),
-                file_list: source.torrent.file_list.clone(),
-                encoding: source.torrent.encoding.clone(),
-                ..Torrent::mock()
-            },
-            ..TorrentResponse::mock()
-        };
-        let mock = MockGazelleClient::new()
-            .with_get_torrent_by_hash(Err(not_found_error()))
-            .with_browse(Ok(browse))
-            .with_get_torrent(Ok(matching));
-        let checker = CrossSeedChecker {
-            api: mock_api(mock),
-            main: Indexer::Ops,
-            cross: Indexer::Red,
-        };
-        let torrent_path = write_mock_torrent();
-
-        // Act
-        let output = checker
-            .execute(torrent_path.path(), &source)
-            .await
-            .expect("execute");
-
-        // Assert
-        assert_eq!(output, Some(555));
-    }
-
-    /// Verify filelist fallback matches when the source `file_path` is HTML-encoded
-    /// and the candidate returns a literal apostrophe.
-    #[tokio::test]
-    async fn cross_seed_checker_execute_filelist_match_html_encoded_source() {
-        // Arrange
-        let source = Source {
-            torrent: Torrent {
-                file_path: "Test&#39;s Album (2020) [FLAC]".to_owned(),
-                ..Torrent::mock()
-            },
-            ..Source::mock()
-        };
-        let browse = BrowseResponse {
-            results: vec![BrowseGroup {
-                torrents: vec![BrowseTorrent {
-                    torrent_id: 555,
-                    size: source.torrent.size,
-                    file_count: source.torrent.file_count,
-                    ..BrowseTorrent::mock()
-                }],
-                ..BrowseGroup::mock()
-            }],
-            ..BrowseResponse::mock()
-        };
-        let matching = TorrentResponse {
-            torrent: Torrent {
-                id: 555,
-                file_path: "Test's Album (2020) [FLAC]".to_owned(),
-                file_list: source.torrent.file_list.clone(),
-                encoding: source.torrent.encoding.clone(),
-                ..Torrent::mock()
-            },
-            ..TorrentResponse::mock()
-        };
-        let mock = MockGazelleClient::new()
-            .with_get_torrent_by_hash(Err(not_found_error()))
-            .with_browse(Ok(browse))
-            .with_get_torrent(Ok(matching));
-        let checker = CrossSeedChecker {
-            api: mock_api(mock),
-            main: Indexer::Red,
-            cross: Indexer::Ops,
-        };
-        let torrent_path = write_mock_torrent();
-
-        // Act
-        let output = checker
-            .execute(torrent_path.path(), &source)
-            .await
-            .expect("execute");
-
-        // Assert
-        assert_eq!(output, Some(555));
-    }
-
-    /// Verify filelist fallback matches when a track filename differs only in
-    /// HTML-entity encoding (e.g. `Track&#39;s Name.flac` vs `Track's Name.flac`).
-    #[tokio::test]
-    async fn cross_seed_checker_execute_filelist_match_html_encoded_file_list() {
-        // Arrange
-        let source_file_list =
-            "01. First Track.flac{{{1000}}}|||02. Track&#39;s Name.flac{{{2000}}}|||";
-        let candidate_file_list =
-            "01. First Track.flac{{{1000}}}|||02. Track's Name.flac{{{2000}}}|||";
-        let source = Source {
-            torrent: Torrent {
-                file_list: source_file_list.to_owned(),
-                ..Torrent::mock()
-            },
-            ..Source::mock()
-        };
-        let browse = BrowseResponse {
-            results: vec![BrowseGroup {
-                torrents: vec![BrowseTorrent {
-                    torrent_id: 555,
-                    size: source.torrent.size,
-                    file_count: source.torrent.file_count,
-                    ..BrowseTorrent::mock()
-                }],
-                ..BrowseGroup::mock()
-            }],
-            ..BrowseResponse::mock()
-        };
-        let matching = TorrentResponse {
-            torrent: Torrent {
-                id: 555,
-                file_path: source.torrent.file_path.clone(),
-                file_list: candidate_file_list.to_owned(),
                 encoding: source.torrent.encoding.clone(),
                 ..Torrent::mock()
             },

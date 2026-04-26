@@ -16,7 +16,6 @@ pub(crate) use gazelle_api::{
     GazelleSerializableError, Group, Media, Quality, ReleaseType, ReleaseTypeId, Torrent,
     TorrentResponse, UploadForm,
 };
-pub(crate) use html_escape::decode_html_entities;
 pub(crate) use log::{debug, error, info, trace, warn};
 pub(crate) use regex::Regex;
 pub(crate) use rogue_logging::{Colors, Failure, Logger, TimeFormat, Verbosity};

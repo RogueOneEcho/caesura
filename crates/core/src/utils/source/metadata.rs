@@ -100,19 +100,16 @@ fn get_artist(group: &Group) -> String {
         );
         return VARIOUS_ARTISTS.to_owned();
     };
-    let artists: Vec<String> = artists
-        .into_iter()
-        .map(|x| decode_html_entities(&x.name).to_string())
-        .collect();
+    let artists: Vec<String> = artists.into_iter().map(|x| x.name.clone()).collect();
     join_humanized(artists)
 }
 
 fn get_album(group: &Group) -> String {
-    decode_html_entities(&group.name).to_string()
+    group.name.clone()
 }
 
 fn get_remaster_title(torrent: &Torrent) -> String {
-    decode_html_entities(&torrent.remaster_title).to_string()
+    torrent.remaster_title.clone()
 }
 
 fn get_year(group: &Group, torrent: &Torrent) -> u16 {
