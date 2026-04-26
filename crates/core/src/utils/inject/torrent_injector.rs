@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use qbittorrent_api::QBittorrentClientTrait;
 use qbittorrent_api::add_torrent::AddTorrentOptions;
 
 /// Reusable helper for injecting torrents into qBittorrent and copying
@@ -7,7 +6,7 @@ use qbittorrent_api::add_torrent::AddTorrentOptions;
 #[injectable]
 pub(crate) struct TorrentInjector {
     copy_options: Ref<CopyOptions>,
-    qbit: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>>,
+    qbit: Ref<QbitClient>,
 }
 
 impl TorrentInjector {
@@ -212,8 +211,7 @@ mod tests {
         reason = "required for trait object boxing in test"
     )]
     fn make_injector(qbit: MockQBittorrentClient, copy_options: CopyOptions) -> TorrentInjector {
-        let qbit: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>> =
-            Ref::new(Box::new(qbit) as Box<dyn QBittorrentClientTrait + Send + Sync>);
+        let qbit: Ref<QbitClient> = Ref::new(Box::new(qbit) as QbitClient);
         TorrentInjector {
             copy_options: Ref::new(copy_options),
             qbit,

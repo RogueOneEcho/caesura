@@ -17,6 +17,7 @@ pub(crate) use gazelle_api::{
     TorrentResponse, UploadForm,
 };
 pub(crate) use log::{debug, error, info, trace, warn};
+pub(crate) use qbittorrent_api::QBittorrentClientTrait;
 pub(crate) use regex::Regex;
 pub(crate) use rogue_logging::{Colors, Failure, Logger, TimeFormat, Verbosity};
 pub(crate) use serde::de::{Error as SerdeError, Visitor};
@@ -46,3 +47,9 @@ pub(crate) use tokio::process::Command as TokioCommand;
 pub(crate) use tokio::sync::Semaphore;
 pub(crate) use tokio::task::{JoinSet, spawn_blocking};
 pub(crate) use tokio::time::sleep;
+
+/// DI-injected Gazelle API client.
+pub(crate) type GazelleClient = Box<dyn GazelleClientTrait + Send + Sync>;
+
+/// DI-injected qBittorrent API client.
+pub(crate) type QbitClient = Box<dyn QBittorrentClientTrait + Send + Sync>;

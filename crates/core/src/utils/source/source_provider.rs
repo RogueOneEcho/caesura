@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Retrieve [`Source`] from the API.
 #[injectable]
 pub struct SourceProvider {
-    api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
+    api: Ref<GazelleClient>,
     arg: Ref<SourceArg>,
     options: Ref<SharedOptions>,
     id_provider: Ref<IdProvider>,

@@ -414,8 +414,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
     let mut builder = HostBuilder::new();
 
     #[allow(clippy::as_conversions)]
-    let client: DiRef<Box<dyn GazelleClientTrait + Send + Sync>> =
-        DiRef::new(Box::new(mock) as Box<dyn GazelleClientTrait + Send + Sync>);
+    let client: DiRef<GazelleClient> = DiRef::new(Box::new(mock) as GazelleClient);
     builder
         .services
         .add(singleton_as_self().from(move |_| client.clone()));

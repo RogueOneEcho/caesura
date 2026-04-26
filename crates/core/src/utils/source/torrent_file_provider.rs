@@ -5,7 +5,7 @@ use tokio::io::AsyncWriteExt;
 #[injectable]
 pub(crate) struct TorrentFileProvider {
     /// Gazelle API client.
-    pub(crate) api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
+    pub(crate) api: Ref<GazelleClient>,
     /// Path manager for resolving cache paths.
     pub(crate) paths: Ref<PathManager>,
 }

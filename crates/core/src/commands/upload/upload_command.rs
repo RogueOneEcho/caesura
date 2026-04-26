@@ -7,7 +7,7 @@ pub(crate) struct UploadCommand {
     upload_options: Ref<UploadOptions>,
     copy_options: Ref<CopyOptions>,
     source_provider: Ref<SourceProvider>,
-    api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
+    api: Ref<GazelleClient>,
     paths: Ref<PathManager>,
     transcode_job_factory: Ref<TranscodeJobFactory>,
     qbit_options: Ref<QbitOptions>,

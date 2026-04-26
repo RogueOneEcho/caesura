@@ -10,7 +10,7 @@ const EXTENSIONS: &[&str] = &[".flac", ".mp3"];
 /// filename browse with size, file count, file path, and fileset verification.
 pub(crate) struct CrossSeedChecker {
     /// Gazelle client for the cross indexer. `None` when cross indexer is not configured.
-    pub(crate) api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
+    pub(crate) api: Ref<GazelleClient>,
     /// Main indexer used to decode the `release_type` ID on the source torrent.
     pub(crate) main: Indexer,
     /// Cross indexer used to decode the `release_type` ID on the source torrent.
@@ -470,8 +470,8 @@ mod tests {
         clippy::as_conversions,
         reason = "required for trait object boxing in test"
     )]
-    fn mock_api(mock: MockGazelleClient) -> Ref<Box<dyn GazelleClientTrait + Send + Sync>> {
-        Ref::new(Box::new(mock) as Box<dyn GazelleClientTrait + Send + Sync>)
+    fn mock_api(mock: MockGazelleClient) -> Ref<GazelleClient> {
+        Ref::new(Box::new(mock) as GazelleClient)
     }
 
     fn not_found_error() -> GazelleError {

@@ -52,7 +52,7 @@ impl CrossServices {
         cache_options: Ref<CacheOptions>,
         file_options: Ref<FileOptions>,
         cross_config_options: Ref<CrossConfigOptions>,
-        api: Ref<Box<dyn GazelleClientTrait + Send + Sync>>,
+        api: Ref<GazelleClient>,
     ) -> Option<Self> {
         let shared_options = Ref::new(cross_config_options.load_shared_options().ok()?);
         let paths = Ref::new(PathManager {
@@ -76,7 +76,7 @@ impl CrossServices {
     }
 }
 
-fn create_api(shared: Ref<SharedOptions>) -> Ref<Box<dyn GazelleClientTrait + Send + Sync>> {
+fn create_api(shared: Ref<SharedOptions>) -> Ref<GazelleClient> {
     let factory = GazelleClientFactory {
         options: GazelleClientOptions {
             url: shared.indexer_url.clone(),

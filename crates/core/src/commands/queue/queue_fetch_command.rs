@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use qbittorrent_api::QBittorrentClientTrait;
 use qbittorrent_api::get_torrents::{FilterOptions, Torrent};
 
 /// Discover torrents via the qBittorrent API and add them to the queue.
@@ -14,7 +13,7 @@ use qbittorrent_api::get_torrents::{FilterOptions, Torrent};
 pub(crate) struct QueueFetchCommand {
     qbit_options: Ref<QbitOptions>,
     queue_fetch_options: Ref<QueueFetchOptions>,
-    qbit: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>>,
+    qbit: Ref<QbitClient>,
     queue: Ref<Queue>,
 }
 

@@ -4,7 +4,7 @@ use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, ServiceProvider, singleton_as_self};
 #[cfg(test)]
 use gazelle_api::MockGazelleClient;
-use qbittorrent_api::{QBittorrentClientFactory, QBittorrentClientOptions, QBittorrentClientTrait};
+use qbittorrent_api::{QBittorrentClientFactory, QBittorrentClientOptions};
 use rogue_logging::InitLog;
 
 /// Builder for configuring and constructing the application host.
@@ -129,8 +129,7 @@ impl HostBuilder {
         reason = "required for DI trait object registration"
     )]
     pub fn with_mock_client(&mut self, client: MockGazelleClient) -> &mut Self {
-        let client: Ref<Box<dyn GazelleClientTrait + Send + Sync>> =
-            Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
+        let client: Ref<GazelleClient> = Ref::new(Box::new(client) as GazelleClient);
         self.services
             .add(singleton_as_self().from(move |_| client.clone()));
         self
@@ -147,8 +146,7 @@ impl HostBuilder {
         reason = "required for DI trait object registration"
     )]
     pub fn with_mock_cross_client(&mut self, client: MockGazelleClient) -> &mut Self {
-        let api: Ref<Box<dyn GazelleClientTrait + Send + Sync>> =
-            Ref::new(Box::new(client) as Box<dyn GazelleClientTrait + Send + Sync>);
+        let api: Ref<GazelleClient> = Ref::new(Box::new(client) as GazelleClient);
         self.services.add(singleton_as_self().from(move |services| {
             let main_options = services.get_required::<SharedOptions>();
             let cache_options = services.get_required::<CacheOptions>();
@@ -180,8 +178,7 @@ impl HostBuilder {
         &mut self,
         client: qbittorrent_api::mock::MockQBittorrentClient,
     ) -> &mut Self {
-        let client: Ref<Box<dyn QBittorrentClientTrait + Send + Sync>> =
-            Ref::new(Box::new(client) as Box<dyn QBittorrentClientTrait + Send + Sync>);
+        let client: Ref<QbitClient> = Ref::new(Box::new(client) as QbitClient);
         self.services
             .add(singleton_as_self().from(move |_| client.clone()));
         self
@@ -256,7 +253,7 @@ fn read_config_file(args: &ArgumentsProvider) -> Option<String> {
 }
 
 #[expect(clippy::as_conversions, reason = "required for traits")]
-fn qbit_factory(provider: &ServiceProvider) -> Arc<Box<dyn QBittorrentClientTrait + Send + Sync>> {
+fn qbit_factory(provider: &ServiceProvider) -> Arc<QbitClient> {
     let options = provider.get_required::<QbitOptions>();
     let client_options = match &options.qbit_url {
         Some(url) => QBittorrentClientOptions {
@@ -271,11 +268,11 @@ fn qbit_factory(provider: &ServiceProvider) -> Arc<Box<dyn QBittorrentClientTrai
     let factory = QBittorrentClientFactory {
         options: client_options,
     };
-    Ref::new(Box::new(factory.create()) as Box<dyn QBittorrentClientTrait + Send + Sync>)
+    Ref::new(Box::new(factory.create()) as QbitClient)
 }
 
 #[expect(clippy::as_conversions, reason = "required for traits")]
-fn gazelle_factory(services: &ServiceProvider) -> Ref<Box<dyn GazelleClientTrait + Send + Sync>> {
+fn gazelle_factory(services: &ServiceProvider) -> Ref<GazelleClient> {
     let options = services.get_required::<SharedOptions>();
     let factory = GazelleClientFactory {
         options: GazelleClientOptions {
@@ -286,7 +283,7 @@ fn gazelle_factory(services: &ServiceProvider) -> Ref<Box<dyn GazelleClientTrait
             request_limit_duration: None,
         },
     };
-    Ref::new(Box::new(factory.create()) as Box<dyn GazelleClientTrait + Send + Sync>)
+    Ref::new(Box::new(factory.create()) as GazelleClient)
 }
 
 fn cross_factory(services: &ServiceProvider) -> Ref<Option<CrossServices>> {
