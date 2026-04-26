@@ -176,7 +176,6 @@ fn format_tags_table_with_long_value() {
     let output = factory.format_all_tags(&[track]);
 
     // Assert
-    let output = strip_ansi(&output);
     assert_snapshot!(output);
 }
 
@@ -202,6 +201,5 @@ fn format_tags_table_with_multiline_value() {
     let output = factory.format_all_tags(&[track]);
 
     // Assert
-    let output = strip_ansi(&output);
     assert_snapshot!(output);
 }

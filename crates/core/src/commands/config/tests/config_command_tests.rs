@@ -1,12 +1,10 @@
 use crate::testing_prelude::*;
-use colored::control;
 
 /// Test that `ConfigCommand` renders documented YAML with comments.
 #[test]
 fn config_command_renders_documented_yaml() {
     // Arrange
     init_logger();
-    control::set_override(false);
     let host = HostBuilder::new()
         .with_options(SharedOptions {
             output: PathBuf::from("/test/output"),
@@ -31,6 +29,6 @@ fn config_command_renders_documented_yaml() {
     let output = config_command.render().expect("render should succeed");
 
     // Assert
-    insta::assert_snapshot!(output);
-    control::unset_override();
+    let output = strip_ansi(&output);
+    assert_snapshot!(output);
 }

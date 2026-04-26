@@ -34,6 +34,7 @@ pub(crate) struct TableBuilder<'a> {
     style: TableStyle,
     max_column_widths: Vec<Option<usize>>,
     max_cell_lines: Option<usize>,
+    ansi: bool,
 }
 
 impl<'a> TableBuilder<'a> {
@@ -47,12 +48,21 @@ impl<'a> TableBuilder<'a> {
             style: TableStyle::default(),
             max_column_widths: Vec::new(),
             max_cell_lines: None,
+            ansi: true,
         }
     }
 
     /// Use GitHub-flavored markdown output with pipe delimiters.
     pub(crate) fn markdown(mut self) -> Self {
         self.style = Markdown;
+        self
+    }
+
+    /// Whether to emit ANSI escape codes in generated content (e.g. clip notes).
+    ///
+    /// - Default: `true`
+    pub(crate) fn ansi(mut self, ansi: bool) -> Self {
+        self.ansi = ansi;
         self
     }
 
@@ -211,7 +221,7 @@ impl<'a> TableBuilder<'a> {
                             return vec![escaped];
                         }
                         let max_width = self.max_column_widths.get(col).copied().flatten();
-                        expand_cell(&escaped, max_width, self.max_cell_lines)
+                        expand_cell(&escaped, max_width, self.max_cell_lines, self.ansi)
                     })
                     .collect()
             })
@@ -342,7 +352,12 @@ impl<'a> TableBuilder<'a> {
 /// - Word-wraps each source line if `max_width` is set
 /// - Caps the resulting visual line count at `max_lines`, replacing the excess
 ///   with `[+X more lines, Y chars clipped]` on the final retained row
-fn expand_cell(cell: &str, max_width: Option<usize>, max_lines: Option<usize>) -> Vec<String> {
+fn expand_cell(
+    cell: &str,
+    max_width: Option<usize>,
+    max_lines: Option<usize>,
+    ansi: bool,
+) -> Vec<String> {
     let source_lines: Vec<&str> = cell.split('\n').collect();
     let mut visual: Vec<String> = Vec::new();
     for src_line in &source_lines {
@@ -367,11 +382,12 @@ fn expand_cell(cell: &str, max_width: Option<usize>, max_lines: Option<usize>) -
         .get(kept_visual..)
         .map_or(0, |d| d.join("\n").chars().count());
     let mut output = visual.into_iter().take(kept_visual).collect::<Vec<_>>();
-    output.push(
-        format!("[+{dropped_visual_count} more lines, {dropped_chars} chars clipped]")
-            .dimmed()
-            .to_string(),
-    );
+    let clip_note = format!("[+{dropped_visual_count} more lines, {dropped_chars} chars clipped]");
+    output.push(if ansi {
+        clip_note.dimmed().to_string()
+    } else {
+        clip_note
+    });
     output
 }
 
@@ -402,20 +418,20 @@ mod tests {
 
     #[test]
     fn expand_cell_no_constraints_splits_on_newline() {
-        let lines = expand_cell("line one\nline two", None, None);
+        let lines = expand_cell("line one\nline two", None, None, true);
         assert_eq!(lines, vec!["line one", "line two"]);
     }
 
     #[test]
     fn expand_cell_wraps_long_line() {
-        let lines = expand_cell("the quick brown fox jumps", Some(10), None);
+        let lines = expand_cell("the quick brown fox jumps", Some(10), None, true);
         assert_eq!(lines, vec!["the quick", "brown fox", "jumps"]);
     }
 
     #[test]
     fn expand_cell_caps_lines_with_clip_note() {
         let input = "a\nb\nc\nd\ne";
-        let lines = expand_cell(input, None, Some(3));
+        let lines = expand_cell(input, None, Some(3), true);
         assert_eq!(
             lines,
             vec![
@@ -429,7 +445,7 @@ mod tests {
     #[test]
     fn expand_cell_clip_note_counts_after_last_retained_break() {
         let input = "alpha bravo charlie delta echo foxtrot";
-        let lines = expand_cell(input, Some(11), Some(2));
+        let lines = expand_cell(input, Some(11), Some(2), true);
         let mut iter = lines.iter();
         assert_eq!(iter.next().map(String::as_str), Some("alpha bravo"));
         let second = iter.next().expect("expected at least 2 lines");
@@ -443,8 +459,15 @@ mod tests {
 
     #[test]
     fn expand_cell_within_limit_no_clip_note() {
-        let lines = expand_cell("a\nb", None, Some(3));
+        let lines = expand_cell("a\nb", None, Some(3), true);
         assert_eq!(lines, vec!["a", "b"]);
+    }
+
+    #[test]
+    fn expand_cell_clip_note_plain_when_ansi_disabled() {
+        let input = "a\nb\nc\nd\ne";
+        let lines = expand_cell(input, None, Some(3), false);
+        assert_eq!(lines, vec!["a", "b", "[+3 more lines, 5 chars clipped]"],);
     }
 
     #[test]

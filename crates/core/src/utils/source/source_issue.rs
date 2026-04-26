@@ -127,11 +127,18 @@ pub enum SourceIssue {
     Other(String),
 }
 
-impl Display for SourceIssue {
+impl SourceIssue {
+    /// Render this issue as a human-readable string.
+    ///
+    /// - `styled` controls whether paths are dimmed in gray.
     #[expect(deprecated, reason = "match arms for deprecated variants")]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
+    #[expect(
+        clippy::too_many_lines,
+        reason = "flat match over enum variants; splitting hurts readability"
+    )]
+    pub(crate) fn render(&self, styled: bool) -> String {
         use SourceIssue::*;
-        let message = match self {
+        match self {
             Id(error) => error.to_string(),
             IdError { details } => format!("Invalid id: {details}"),
             ApiResponse {
@@ -166,12 +173,17 @@ impl Display for SourceIssue {
             }
             NotSource { format, encoding } => format!("Unsupported: {format} {encoding}"),
             MissingDirectory { path } => {
-                format!("Directory not found: {}", format_path(path))
+                format!("Directory not found: {}", format_path(path, styled))
             }
             UnnecessaryDirectory { prefix } => {
-                format!("Unnecessary nested directory: {}", format_path(prefix))
+                format!(
+                    "Unnecessary nested directory: {}",
+                    format_path(prefix, styled)
+                )
             }
-            NoFlacs { path } => format!("No FLAC files in directory: {}", format_path(path)),
+            NoFlacs { path } => {
+                format!("No FLAC files in directory: {}", format_path(path, styled))
+            }
             FlacCount { expected, actual } => {
                 format!("Expected {expected} FLACs, found {actual}")
             }
@@ -180,57 +192,61 @@ impl Display for SourceIssue {
                 format!("Incorrect hash for piece {piece_index}")
             }
             MissingFile { path } => {
-                format!("Missing file: {}", format_path(path))
+                format!("Missing file: {}", format_path(path, styled))
             }
             OpenFile { path, error } => {
-                format!("Failed to open file: {error}: {}", format_path(path))
+                format!(
+                    "Failed to open file: {error}: {}",
+                    format_path(path, styled)
+                )
             }
             ExcessContent => "Content exceeds torrent size".to_owned(),
             Length { path, excess } => {
                 format!(
                     "Path is {excess} characters too long:\n{}",
-                    format_path(path)
+                    format_path(path, styled)
                 )
             }
             Duration { path, seconds } => {
                 format!(
                     "Excessive duration: {} minutes: {}",
                     seconds / 60,
-                    format_path(path)
+                    format_path(path, styled)
                 )
             }
             NoTags { path } => {
-                format!("No tags: {}", format_path(path))
+                format!("No tags: {}", format_path(path, styled))
             }
             MissingTags { path, tags } => {
                 format!(
                     "Missing tags: {}: {}",
                     join_humanized(tags),
-                    format_path(path)
+                    format_path(path, styled)
                 )
             }
             SampleRate { path, rate } => {
-                format!("Unsupported sample rate: {rate}: {}", format_path(path))
+                format!(
+                    "Unsupported sample rate: {rate}: {}",
+                    format_path(path, styled)
+                )
             }
             BitRate { path, rate } => {
-                format!("Bit rate too low: {rate} kbps: {}", format_path(path))
+                format!(
+                    "Bit rate too low: {rate} kbps: {}",
+                    format_path(path, styled)
+                )
             }
             Channels { path, count } => {
-                format!("Too many channels: {count}: {}", format_path(path))
+                format!("Too many channels: {count}: {}", format_path(path, styled))
             }
             FlacError { path, error } => {
-                format!("FLAC stream error: {error}: {}", format_path(path))
+                format!("FLAC stream error: {error}: {}", format_path(path, styled))
             }
             Error { domain, details } => format!("A {domain} error occurred:\n{details}"),
             Other(details) => details.clone(),
-        };
-        write!(formatter, "{message}")
+        }
     }
-}
 
-impl Error for SourceIssue {}
-
-impl SourceIssue {
     /// Whether this issue should trigger an automatically generated report.
     pub(crate) fn is_reportable(&self) -> bool {
         matches!(
@@ -284,9 +300,22 @@ impl SourceIssue {
     }
 }
 
-/// Format a path as a gray string for display.
-fn format_path(path: &Path) -> String {
-    path.display().to_string().gray().to_string()
+impl Display for SourceIssue {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
+        write!(formatter, "{}", self.render(true))
+    }
+}
+
+impl Error for SourceIssue {}
+
+/// Format a path for display, dimmed in gray when `styled`.
+fn format_path(path: &Path, styled: bool) -> String {
+    let display = path.display().to_string();
+    if styled {
+        display.gray().to_string()
+    } else {
+        display
+    }
 }
 
 fn get_status(status_code: &u16) -> &str {

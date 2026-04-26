@@ -69,6 +69,7 @@ impl InspectFactory {
         }
         let headers = self.style_headers(headers);
         let mut builder = TableBuilder::new()
+            .ansi(self.style)
             .multi_line_headers(headers)
             .right_align(align)
             .newline_after_headers();
@@ -228,6 +229,7 @@ impl TrackInfo {
     /// Format tags as a table with NATIVE, ITEM, VALUE columns.
     fn format_tags_table(&self, factory: &InspectFactory) -> String {
         let mut builder = TableBuilder::new()
+            .ansi(factory.style)
             .max_column_width(1, MAX_VALUE_WIDTH)
             .max_cell_lines(MAX_VALUE_LINES);
         for entry in &self.tags {
@@ -242,7 +244,7 @@ impl TrackInfo {
 
     /// Format pictures as a table with NATIVE, ITEM, SIZE, MIME columns.
     fn format_pictures_table(&self, factory: &InspectFactory) -> String {
-        let mut builder = TableBuilder::new();
+        let mut builder = TableBuilder::new().ansi(factory.style);
         for pic in &self.pictures {
             builder = builder.row(pic.as_row(factory));
         }

@@ -1,20 +1,10 @@
 use crate::prelude::*;
-use colored::control;
 use lofty::tag::ItemKey;
 
 /// Render markdown reports for reportable source issues.
 #[injectable]
 pub(crate) struct ReportRenderer {
     shared_options: Ref<SharedOptions>,
-}
-
-/// Restores `colored` control override on drop.
-struct OverrideGuard;
-
-impl Drop for OverrideGuard {
-    fn drop(&mut self) {
-        control::unset_override();
-    }
 }
 
 impl ReportRenderer {
@@ -26,9 +16,6 @@ impl ReportRenderer {
         source: &Source,
         issues: &[SourceIssue],
     ) -> Result<String, Failure<ReportAction>> {
-        control::set_override(false);
-        let _guard = OverrideGuard;
-
         let inspect = if source.directory.is_dir() {
             Some(
                 InspectFactory::new(false)
@@ -79,7 +66,7 @@ fn write_detected_issues(out: &mut String, issues: &[SourceIssue]) -> FmtResult 
     writeln!(out, "## Detected issues")?;
     writeln!(out)?;
     for issue in issues {
-        writeln!(out, "- {issue}")?;
+        writeln!(out, "- {}", issue.render(false))?;
     }
     writeln!(out)?;
     Ok(())
