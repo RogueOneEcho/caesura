@@ -130,19 +130,20 @@ pub fn generate_resolve_impl(
     };
     let inherent = quote! {
         impl #partial_name {
-            fn resolve_internal(#self_param, validate: bool) -> ::std::result::Result<#struct_name, ::std::vec::Vec<::caesura_options::OptionRule>> {
-                let mut errors = ::std::vec::Vec::new();
+            fn resolve_internal(#self_param, validate: bool) -> ::std::result::Result<#struct_name, ::std::vec::Vec<::caesura_options::OptionIssue>> {
+                let mut validator = ::caesura_options::OptionsValidator::new();
                 #defaults_binding
                 #(#field_bindings)*
                 #required_checks
                 let resolved = #struct_name { #(#field_inits),* };
                 if validate {
-                    resolved.validate(&mut errors);
+                    resolved.validate(&mut validator);
                 }
-                if errors.is_empty() {
+                let issues = validator.into_issues();
+                if issues.is_empty() {
                     ::std::result::Result::Ok(resolved)
                 } else {
-                    ::std::result::Result::Err(errors)
+                    ::std::result::Result::Err(issues)
                 }
             }
         }
@@ -152,7 +153,7 @@ pub fn generate_resolve_impl(
             self.resolve_internal(false).expect("validation disabled")
         }
 
-        fn resolve(self) -> ::std::result::Result<#struct_name, ::std::vec::Vec<::caesura_options::OptionRule>> {
+        fn resolve(self) -> ::std::result::Result<#struct_name, ::std::vec::Vec<::caesura_options::OptionIssue>> {
             self.resolve_internal(true)
         }
     };
@@ -172,27 +173,18 @@ fn generate_field_binding(f: &ParsedField) -> TokenStream2 {
     quote! { let #ident = #expr; }
 }
 
-/// Generate checks for required fields, adding `NotSet` errors if missing.
+/// Generate checks for required fields via [`OptionsValidator::check_set`].
 fn generate_required_checks(fields: &[ParsedField]) -> TokenStream2 {
     let checks = fields.iter().filter(|f| f.is_required).map(|f| {
         let ident = &f.ident;
-        let name = field_name_for_error(ident);
+        let name = ident.to_string();
         quote! {
-            if validate && #ident.is_none() {
-                errors.push(::caesura_options::OptionRule::NotSet(#name.to_owned()));
+            if validate {
+                validator.check_set(#name, &#ident);
             }
         }
     });
     quote! { #(#checks)* }
-}
-
-/// Convert a field identifier to a human-readable name for error messages.
-fn field_name_for_error(ident: &Ident) -> String {
-    let name = ident.to_string().replace('_', " ");
-    name.chars()
-        .next()
-        .map(|c| c.to_uppercase().collect::<String>() + &name[1..])
-        .unwrap_or_default()
 }
 
 /// Generate a field initializer for struct construction.

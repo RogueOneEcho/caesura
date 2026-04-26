@@ -1,0 +1,6 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Invalid config
+▷ reason: missing field `indexer` at line 3 column 1

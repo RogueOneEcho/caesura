@@ -65,5 +65,5 @@ impl QbitCrossOptions {
 impl OptionsContract for QbitCrossOptions {
     type Partial = QbitCrossOptionsPartial;
 
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

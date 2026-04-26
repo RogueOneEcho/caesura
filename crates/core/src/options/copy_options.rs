@@ -12,5 +12,5 @@ pub struct CopyOptions {
 
 impl OptionsContract for CopyOptions {
     type Partial = CopyOptionsPartial;
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

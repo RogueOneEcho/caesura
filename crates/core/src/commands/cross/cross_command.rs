@@ -84,29 +84,22 @@ impl CrossCommand {
     }
 
     fn validate(&self) -> Result<(), Failure<CrossCommandAction>> {
-        let mut errors: Vec<OptionRule> = Vec::new();
-        if self.cross_config_options.cross_config.is_none() {
-            errors.push(OptionRule::NotSet("Cross Config File".to_owned()));
-        }
+        let mut validator = OptionsValidator::new();
+        validator.check_set("cross_config", &self.cross_config_options.cross_config);
         if self.qbit_cross_options.qbit_cross {
-            self.qbit_options.validate_connection(&mut errors);
+            self.qbit_options.validate_connection(&mut validator);
         }
         if !self.cross_options.dry_run
             && !self.qbit_cross_options.qbit_cross
             && self.cross_options.copy_cross_torrent_to.is_none()
         {
-            errors.push(OptionRule::AtLeastOne(vec![
-                "qBit cross".to_owned(),
-                "Copy cross torrent to".to_owned(),
-                "Dry run".to_owned(),
+            validator.push(OptionIssue::required_one_of(&[
+                "qbit_cross",
+                "copy_cross_torrent_to",
+                "dry_run",
             ]));
         }
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            OptionRule::show(&errors);
-            Err(Failure::from_action(CrossCommandAction::ValidateOptions))
-        }
+        validator.check_or(CrossCommandAction::ValidateOptions)
     }
 }
 

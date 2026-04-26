@@ -57,5 +57,5 @@ impl FileOptions {
 
 impl OptionsContract for FileOptions {
     type Partial = FileOptionsPartial;
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

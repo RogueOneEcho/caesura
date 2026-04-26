@@ -61,5 +61,5 @@ impl QbitUploadOptions {
 impl OptionsContract for QbitUploadOptions {
     type Partial = QbitUploadOptionsPartial;
 
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

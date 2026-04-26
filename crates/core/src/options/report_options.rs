@@ -24,5 +24,5 @@ fn default_reports_dir(_partial: &ReportOptionsPartial) -> Option<PathBuf> {
 impl OptionsContract for ReportOptions {
     type Partial = ReportOptionsPartial;
 
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

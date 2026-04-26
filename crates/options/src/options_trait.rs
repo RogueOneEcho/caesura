@@ -6,7 +6,7 @@
 //! 2. Implement [`OptionsContract`] for it
 //! 3. Macro generates the partial struct and [`OptionsPartialContract`] impl
 
-use crate::OptionRule;
+use crate::{OptionIssue, OptionsValidator};
 use clap::FromArgMatches;
 use serde::de::DeserializeOwned;
 
@@ -19,8 +19,8 @@ pub trait OptionsContract: Sized {
 
     /// Validate the resolved options.
     ///
-    /// Appends any validation errors to the provided vector.
-    fn validate(&self, errors: &mut Vec<OptionRule>);
+    /// Pushes any validation issues into the provided [`OptionsValidator`].
+    fn validate(&self, validator: &mut OptionsValidator);
 }
 
 /// Contract for partial options structs.
@@ -45,6 +45,6 @@ pub trait OptionsPartialContract:
     /// Resolve partial into final options with validation.
     ///
     /// Checks required fields are present and runs validation.
-    /// Returns `Err` with all validation errors if any checks fail.
-    fn resolve(self) -> Result<Self::Resolved, Vec<OptionRule>>;
+    /// Returns `Err` with all validation issues if any checks fail.
+    fn resolve(self) -> Result<Self::Resolved, Vec<OptionIssue>>;
 }

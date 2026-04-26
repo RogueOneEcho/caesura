@@ -1,0 +1,8 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Directory not found
+▷ key: output
+▷ flag: --output
+▷ path: /no/such/dir

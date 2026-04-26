@@ -20,12 +20,8 @@ pub(crate) struct QueueFetchCommand {
 impl QueueFetchCommand {
     /// Execute [`QueueFetchCommand`] from the CLI.
     pub(crate) async fn execute_cli(&self) -> Result<bool, Failure<QueueAction>> {
-        let mut errors: Vec<OptionRule> = Vec::new();
-        self.qbit_options.validate_connection(&mut errors);
-        if !errors.is_empty() {
-            OptionRule::show(&errors);
-            return Err(Failure::from_action(QueueAction::FetchTorrents));
-        }
+        self.qbit_options
+            .check_connection_or(QueueAction::FetchTorrents)?;
         let status = self.execute().await?;
         info!("{} {} items to the queue", "Added".bold(), status.added);
         trace!(

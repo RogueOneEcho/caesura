@@ -65,9 +65,9 @@ impl SharedOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         SharedOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
-        let mut errors = ::std::vec::Vec::new();
+        let mut validator = ::caesura_options::OptionsValidator::new();
         let defaults = self.clone();
         let announce_url = self.announce_url;
         let api_key = self.api_key;
@@ -77,21 +77,20 @@ impl SharedOptionsPartial {
         let verbosity = self.verbosity;
         let log_time = self.log_time;
         let output = self.output.or_else(|| default_output(&defaults));
-        if validate && announce_url.is_none() {
-            errors
-                .push(::caesura_options::OptionRule::NotSet("Announce url".to_owned()));
+        if validate {
+            validator.check_set("announce_url", &announce_url);
         }
-        if validate && api_key.is_none() {
-            errors.push(::caesura_options::OptionRule::NotSet("Api key".to_owned()));
+        if validate {
+            validator.check_set("api_key", &api_key);
         }
-        if validate && indexer.is_none() {
-            errors.push(::caesura_options::OptionRule::NotSet("Indexer".to_owned()));
+        if validate {
+            validator.check_set("indexer", &indexer);
         }
-        if validate && indexer_url.is_none() {
-            errors.push(::caesura_options::OptionRule::NotSet("Indexer url".to_owned()));
+        if validate {
+            validator.check_set("indexer_url", &indexer_url);
         }
-        if validate && content.is_none() {
-            errors.push(::caesura_options::OptionRule::NotSet("Content".to_owned()));
+        if validate {
+            validator.check_set("content", &content);
         }
         let resolved = SharedOptions {
             announce_url: announce_url.unwrap_or_default(),
@@ -104,12 +103,13 @@ impl SharedOptionsPartial {
             output: output.unwrap_or_default(),
         };
         if validate {
-            resolved.validate(&mut errors);
+            resolved.validate(&mut validator);
         }
-        if errors.is_empty() {
+        let issues = validator.into_issues();
+        if issues.is_empty() {
             ::std::result::Result::Ok(resolved)
         } else {
-            ::std::result::Result::Err(errors)
+            ::std::result::Result::Err(issues)
         }
     }
 }
@@ -148,7 +148,7 @@ impl ::caesura_options::OptionsPartialContract for SharedOptionsPartial {
         self,
     ) -> ::std::result::Result<
         SharedOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
         self.resolve_internal(true)
     }

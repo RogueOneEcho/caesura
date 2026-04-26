@@ -1,0 +1,9 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+At least one required
+▷ key: indexer_url
+▷ flag: --indexer-url
+▷ key: announce_url
+▷ flag: --announce-url

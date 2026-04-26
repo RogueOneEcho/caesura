@@ -1,0 +1,10 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Invalid URL
+▷ key: indexer_url
+▷ flag: --indexer-url
+▷ url: ftp://example.com/
+▷ reason: must start with http:// or https://
+▷ reason: must not end with a trailing slash

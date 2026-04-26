@@ -47,7 +47,7 @@ fn default_sox_ng(partial: &SoxOptionsPartial) -> Option<bool> {
 
 impl OptionsContract for SoxOptions {
     type Partial = SoxOptionsPartial;
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }
 
 /// Cached result of `sox_ng` detection.

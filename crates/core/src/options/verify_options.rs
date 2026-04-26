@@ -16,5 +16,5 @@ pub struct VerifyOptions {
 
 impl OptionsContract for VerifyOptions {
     type Partial = VerifyOptionsPartial;
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

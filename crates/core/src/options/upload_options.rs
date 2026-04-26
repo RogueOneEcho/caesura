@@ -29,22 +29,12 @@ pub struct UploadOptions {
 impl OptionsContract for UploadOptions {
     type Partial = UploadOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if let Some(dir) = &self.copy_transcode_to
-            && !dir.is_dir()
-        {
-            errors.push(OptionRule::DoesNotExist(
-                "Copy transcode to directory".to_owned(),
-                dir.to_string_lossy().to_string(),
-            ));
+    fn validate(&self, validator: &mut OptionsValidator) {
+        if let Some(dir) = &self.copy_transcode_to {
+            validator.check_dir_exists("copy_transcode_to", dir);
         }
-        if let Some(dir) = &self.copy_torrent_to
-            && !dir.is_dir()
-        {
-            errors.push(OptionRule::DoesNotExist(
-                "Copy torrent to directory".to_owned(),
-                dir.to_string_lossy().to_string(),
-            ));
+        if let Some(dir) = &self.copy_torrent_to {
+            validator.check_dir_exists("copy_torrent_to", dir);
         }
     }
 }

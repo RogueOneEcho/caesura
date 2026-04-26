@@ -59,9 +59,9 @@ impl TargetOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         TargetOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
-        let mut errors = ::std::vec::Vec::new();
+        let mut validator = ::caesura_options::OptionsValidator::new();
         let target = self.target;
         let allow_existing = self.allow_existing;
         let allow_less_specific = self.allow_less_specific;
@@ -79,12 +79,13 @@ impl TargetOptionsPartial {
                 .unwrap_or_else(|| TargetOptions::default_exclude_vorbis_comments()),
         };
         if validate {
-            resolved.validate(&mut errors);
+            resolved.validate(&mut validator);
         }
-        if errors.is_empty() {
+        let issues = validator.into_issues();
+        if issues.is_empty() {
             ::std::result::Result::Ok(resolved)
         } else {
-            ::std::result::Result::Err(errors)
+            ::std::result::Result::Err(issues)
         }
     }
 }
@@ -114,7 +115,7 @@ impl ::caesura_options::OptionsPartialContract for TargetOptionsPartial {
         self,
     ) -> ::std::result::Result<
         TargetOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
         self.resolve_internal(true)
     }

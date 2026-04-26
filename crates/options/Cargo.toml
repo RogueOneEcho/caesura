@@ -16,6 +16,13 @@ log = { workspace = true }
 more-di = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+testing = []
+
+[dev-dependencies]
+insta = { workspace = true }
 
 [lints]
 workspace = true

@@ -3,9 +3,6 @@ use crate::prelude::*;
 /// Legacy cache path from before platform user directories.
 const LEGACY_CACHE_DIR: &str = "./cache";
 
-/// Validation label for the cache directory.
-pub(crate) const CACHE_DIR_LABEL: &str = "Cache Directory";
-
 /// Options for queue cache
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct CacheOptions {
@@ -34,21 +31,19 @@ impl CacheOptions {
 impl OptionsContract for CacheOptions {
     type Partial = CacheOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
+    fn validate(&self, validator: &mut OptionsValidator) {
         let cache = self.path();
-        if !cache.is_dir() {
-            errors.push(OptionRule::DoesNotExist(
-                CACHE_DIR_LABEL.to_owned(),
-                cache.to_string_lossy().to_string(),
+        validator.check_dir_exists("cache", &cache);
+        if !cache.is_dir() && PathBuf::from(LEGACY_CACHE_DIR).is_dir() {
+            let default_dir = PathManager::default_cache_dir();
+            validator.push(OptionIssue::default_changed(
+                "cache",
+                &self.cache.to_string_lossy(),
+                &format!(
+                    "In v0.27.0 the default cache path changed to {}.\nPass the option: --cache {LEGACY_CACHE_DIR} to use the previous cache path.",
+                    default_dir.display()
+                ),
             ));
-            if PathBuf::from(LEGACY_CACHE_DIR).is_dir() {
-                let default_dir = PathManager::default_cache_dir();
-                errors.push(OptionRule::Changed(
-                    CACHE_DIR_LABEL.to_owned(),
-                    self.cache.to_string_lossy().to_string(),
-                    format!("In v0.27.0 the default cache path changed to {}.\nPass the option: --cache {LEGACY_CACHE_DIR} to use the previous cache path.", default_dir.display()),
-                ));
-            }
         }
     }
 }

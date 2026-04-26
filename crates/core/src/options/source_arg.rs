@@ -18,7 +18,7 @@ pub struct SourceArg {
 impl OptionsContract for SourceArg {
     type Partial = SourceArgPartial;
 
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }
 
 impl Display for SourceArg {

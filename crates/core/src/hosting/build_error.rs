@@ -7,7 +7,7 @@ use di::ValidationError;
 #[derive(Debug)]
 pub enum BuildError {
     /// Options validation failed.
-    Options(Vec<OptionRule>),
+    Options(Vec<OptionIssue>),
     /// Dependency injection container failed to build.
     Container(ValidationError),
 }
@@ -31,8 +31,8 @@ impl Display for BuildError {
 
 impl Error for BuildError {}
 
-impl From<Vec<OptionRule>> for BuildError {
-    fn from(errors: Vec<OptionRule>) -> Self {
+impl From<Vec<OptionIssue>> for BuildError {
+    fn from(errors: Vec<OptionIssue>) -> Self {
         BuildError::Options(errors)
     }
 }

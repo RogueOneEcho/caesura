@@ -1,0 +1,9 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Invalid hash
+▷ key: queue_rm_hash
+▷ flag: --queue-rm-hash
+▷ hash: zz
+▷ reason: invalid hex character

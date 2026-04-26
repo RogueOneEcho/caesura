@@ -149,9 +149,9 @@ fn shared_options_explicit_empty_indexer_bypasses_required() {
     // but indexer_url fails because default_fn can't derive from empty indexer
     let errors = result.expect_err("should fail due to indexer_url");
     assert!(
-        errors
-            .iter()
-            .any(|e| matches!(e, OptionRule::NotSet(name) if name == "Indexer url"))
+        errors.iter().any(
+            |e| e.kind == OptionIssueKind::Required && e.keys == vec!["indexer_url".to_owned()]
+        )
     );
 }
 
@@ -168,7 +168,7 @@ fn batch_options_rejects_upload_without_transcode() {
     assert!(
         errors
             .iter()
-            .any(|e| matches!(e, OptionRule::Dependent(_, _)))
+            .any(|e| e.kind == OptionIssueKind::DependencyMissing)
     );
 }
 
@@ -196,7 +196,7 @@ fn batch_options_rejects_invalid_wait_duration() {
     assert!(
         errors
             .iter()
-            .any(|e| matches!(e, OptionRule::DurationInvalid(_, _)))
+            .any(|e| e.kind == OptionIssueKind::DurationInvalid)
     );
 }
 
@@ -220,7 +220,11 @@ fn target_options_rejects_empty_target_list() {
     }
     .resolve();
     let errors = result.expect_err("should reject empty target list");
-    assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
+    assert!(
+        errors
+            .iter()
+            .any(|e| e.kind == OptionIssueKind::RequiredNonEmpty)
+    );
 }
 
 /// Verify explicitly empty `spectrogram_size` list is rejected.
@@ -231,7 +235,11 @@ fn spectrogram_options_rejects_empty_size_list() {
     }
     .resolve();
     let errors = result.expect_err("should reject empty size list");
-    assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
+    assert!(
+        errors
+            .iter()
+            .any(|e| e.kind == OptionIssueKind::RequiredNonEmpty)
+    );
 }
 
 /// Verify explicitly empty `qbit_fetch_categories` list is rejected.
@@ -242,7 +250,11 @@ fn queue_fetch_options_rejects_empty_categories_list() {
     }
     .resolve();
     let errors = result.expect_err("should reject empty categories list");
-    assert!(errors.iter().any(|e| matches!(e, OptionRule::IsEmpty(_))));
+    assert!(
+        errors
+            .iter()
+            .any(|e| e.kind == OptionIssueKind::RequiredNonEmpty)
+    );
 }
 
 /// Verify `BatchOptionsPartial` round-trips through YAML.
@@ -472,7 +484,7 @@ fn queue_rm_args_rejects_invalid_hash() {
     assert!(
         errors
             .iter()
-            .any(|e| matches!(e, OptionRule::HashInvalid(_, _)))
+            .any(|e| e.kind == OptionIssueKind::HashInvalid)
     );
 }
 
@@ -487,7 +499,7 @@ fn queue_rm_args_rejects_missing_hash() {
     assert!(
         errors
             .iter()
-            .any(|e| matches!(e, OptionRule::HashInvalid(_, _)))
+            .any(|e| e.kind == OptionIssueKind::HashInvalid)
     );
 }
 
@@ -517,9 +529,9 @@ fn cache_options_rejects_dollar_home() {
     // Assert
     assert_eq!(
         errors,
-        vec![OptionRule::DoesNotExist(
-            CACHE_DIR_LABEL.to_owned(),
-            path.to_owned()
+        vec![OptionIssue::directory_not_found(
+            "cache",
+            &PathBuf::from(path)
         )]
     );
 }
@@ -554,9 +566,9 @@ fn shared_options_rejects_dollar_home_output() {
     // Assert
     assert_eq!(
         errors,
-        vec![OptionRule::DoesNotExist(
-            OUTPUT_DIR_LABEL.to_owned(),
-            path.to_owned()
+        vec![OptionIssue::directory_not_found(
+            "output",
+            &PathBuf::from(path)
         )]
     );
 }
@@ -587,9 +599,9 @@ fn shared_options_rejects_dollar_home_content() {
     // Assert
     assert_eq!(
         errors,
-        vec![OptionRule::DoesNotExist(
-            CONTENT_DIR_LABEL.to_owned(),
-            path.to_owned()
+        vec![OptionIssue::directory_not_found(
+            "content",
+            &PathBuf::from(path)
         )]
     );
 }
@@ -637,10 +649,7 @@ fn config_options_rejects_dollar_home() {
     // Assert
     assert_eq!(
         errors,
-        vec![OptionRule::DoesNotExist(
-            CONFIG_FILE_LABEL.to_owned(),
-            path.to_owned()
-        )]
+        vec![OptionIssue::file_not_found("config", &PathBuf::from(path))]
     );
 }
 
@@ -660,10 +669,14 @@ fn config_options_expands_tilde() {
 
     // Assert
     assert_eq!(errors.len(), 1);
-    assert!(matches!(
-        errors.first(),
-        Some(OptionRule::DoesNotExist(_, path)) if !path.starts_with('~')
-    ));
+    let issue = errors.first().expect("should have one issue");
+    assert_eq!(issue.kind, OptionIssueKind::FileNotFound);
+    let path = issue
+        .additional
+        .iter()
+        .find_map(|(k, v)| (k == "path").then_some(v.as_str()))
+        .expect("should have path additional");
+    assert!(!path.starts_with('~'));
 }
 
 fn valid_shared_options_with_output(output: &str) -> SharedOptionsPartial {
@@ -697,7 +710,7 @@ fn inspect_arg_rejects_nonexistent_path() {
     assert!(
         errors
             .iter()
-            .any(|e| matches!(e, OptionRule::DoesNotExist(_, _)))
+            .any(|e| e.kind == OptionIssueKind::DirectoryNotFound)
     );
 }
 
@@ -709,13 +722,14 @@ fn qbit_options_validate_connection_missing_credentials() {
         qbit_username: None,
         qbit_password: None,
     };
-    let mut errors: Vec<OptionRule> = Vec::new();
-    options.validate_connection(&mut errors);
+    let mut validator = OptionsValidator::new();
+    options.validate_connection(&mut validator);
+    let errors = validator.into_issues();
     assert_eq!(
         errors,
         vec![
-            OptionRule::NotSet("qBittorrent username".to_owned()),
-            OptionRule::NotSet("qBittorrent password".to_owned())
+            OptionIssue::required("qbit_username"),
+            OptionIssue::required("qbit_password")
         ]
     );
 }
@@ -728,9 +742,9 @@ fn qbit_options_validate_connection_qui_proxy_url() {
         qbit_username: None,
         qbit_password: None,
     };
-    let mut errors: Vec<OptionRule> = Vec::new();
-    options.validate_connection(&mut errors);
-    assert!(errors.is_empty());
+    let mut validator = OptionsValidator::new();
+    options.validate_connection(&mut validator);
+    assert!(validator.into_issues().is_empty());
 }
 
 /// Verify `QbitOptions` rejects a trailing slash in the URL.
@@ -744,11 +758,7 @@ fn qbit_options_trailing_slash() {
     };
     let result = partial.resolve();
     let errors = result.expect_err("should reject trailing slash");
-    assert!(
-        errors
-            .iter()
-            .any(|e| matches!(e, OptionRule::UrlInvalidSuffix(_, _)))
-    );
+    assert!(errors.iter().any(|e| e.kind == OptionIssueKind::UrlInvalid));
 }
 
 /// Verify invalid YAML produces a config deserialization error.
@@ -766,8 +776,8 @@ fn options_provider_register_invalid_yaml() {
     assert!(provider.has_errors());
     let error = provider.errors.first().expect("should have an error");
     assert!(
-        matches!(error, OptionRule::ConfigDeserialize(_)),
-        "Expected ConfigDeserialize, got: {error}"
+        error.kind == OptionIssueKind::ConfigInvalid,
+        "Expected ConfigInvalid, got: {error}"
     );
 }
 

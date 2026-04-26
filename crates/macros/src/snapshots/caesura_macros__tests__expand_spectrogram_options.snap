@@ -25,21 +25,22 @@ impl SpectrogramOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         SpectrogramOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
-        let mut errors = ::std::vec::Vec::new();
+        let mut validator = ::caesura_options::OptionsValidator::new();
         let spectrogram_size = self.spectrogram_size;
         let resolved = SpectrogramOptions {
             spectrogram_size: spectrogram_size
                 .unwrap_or_else(|| vec![Size::Full, Size::Zoom]),
         };
         if validate {
-            resolved.validate(&mut errors);
+            resolved.validate(&mut validator);
         }
-        if errors.is_empty() {
+        let issues = validator.into_issues();
+        if issues.is_empty() {
             ::std::result::Result::Ok(resolved)
         } else {
-            ::std::result::Result::Err(errors)
+            ::std::result::Result::Err(issues)
         }
     }
 }
@@ -57,7 +58,7 @@ impl ::caesura_options::OptionsPartialContract for SpectrogramOptionsPartial {
         self,
     ) -> ::std::result::Result<
         SpectrogramOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
         self.resolve_internal(true)
     }

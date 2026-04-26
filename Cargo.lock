@@ -270,11 +270,13 @@ version = "0.0.0"
 dependencies = [
  "clap",
  "colored",
+ "insta",
  "inventory",
  "log",
  "more-di",
  "serde",
  "serde_yaml",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

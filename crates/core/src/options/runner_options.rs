@@ -21,5 +21,5 @@ fn default_cpus(_partial: &RunnerOptionsPartial) -> Option<u16> {
 
 impl OptionsContract for RunnerOptions {
     type Partial = RunnerOptionsPartial;
-    fn validate(&self, _errors: &mut Vec<OptionRule>) {}
+    fn validate(&self, _validator: &mut OptionsValidator) {}
 }

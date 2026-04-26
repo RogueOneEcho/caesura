@@ -1,20 +1,49 @@
 ---
 source: crates/core/src/options/tests/options_tests.rs
+assertion_line: 424
 expression: errors
 ---
-- NotSet: Announce url
-- NotSet: Api key
-- NotSet: Indexer
-- NotSet: Indexer url
-- UrlNotHttp:
-    - Indexer URL
-    - ""
-- UrlNotHttp:
-    - Announce URL
-    - ""
-- DoesNotExist:
-    - Content Directory
-    - "./nonexistent-content"
-- DoesNotExist:
-    - Output Directory
-    - "./nonexistent-output"
+- keys:
+    - announce_url
+  kind: Required
+  additional: []
+- keys:
+    - api_key
+  kind: Required
+  additional: []
+- keys:
+    - indexer
+  kind: Required
+  additional: []
+- keys:
+    - indexer_url
+  kind: Required
+  additional: []
+- keys:
+    - indexer_url
+  kind: UrlInvalid
+  additional:
+    - - url
+      - ""
+    - - reason
+      - "must start with http:// or https://"
+- keys:
+    - announce_url
+  kind: UrlInvalid
+  additional:
+    - - url
+      - ""
+    - - reason
+      - "must start with http:// or https://"
+- keys:
+    - content
+  kind: DirectoryNotFound
+  additional:
+    - - path
+      - "./nonexistent-content"
+- keys:
+    - output
+  kind: DirectoryNotFound
+  additional:
+    - - path
+      - "./nonexistent-output"

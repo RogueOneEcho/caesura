@@ -11,11 +11,12 @@ pub struct QueueRemoveArgs {
 impl OptionsContract for QueueRemoveArgs {
     type Partial = QueueRemoveArgsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if Hash::<20>::from_string(&self.queue_rm_hash).is_err() {
-            errors.push(OptionRule::HashInvalid(
-                "Queue remove hash".to_owned(),
-                self.queue_rm_hash.clone(),
+    fn validate(&self, validator: &mut OptionsValidator) {
+        if let Err(error) = Hash::<20>::from_string(&self.queue_rm_hash) {
+            validator.push(OptionIssue::hash_invalid(
+                "queue_rm_hash",
+                &self.queue_rm_hash,
+                &error.to_string(),
             ));
         }
     }

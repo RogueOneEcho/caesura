@@ -1,0 +1,7 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Required
+▷ key: content
+▷ flag: --content

@@ -61,20 +61,16 @@ impl BatchOptions {
 impl OptionsContract for BatchOptions {
     type Partial = BatchOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
+    fn validate(&self, validator: &mut OptionsValidator) {
         if let Some(wait_before_upload) = &self.wait_before_upload
-            && parse_duration(wait_before_upload.as_str()).is_err()
+            && let Err(error) = parse_duration(wait_before_upload.as_str())
         {
-            errors.push(OptionRule::DurationInvalid(
-                "Wait Before Upload".to_owned(),
-                wait_before_upload.clone(),
+            validator.push(OptionIssue::duration_invalid(
+                "wait_before_upload",
+                wait_before_upload,
+                &error.to_string(),
             ));
         }
-        if self.upload && !self.transcode {
-            errors.push(OptionRule::Dependent(
-                "Upload".to_owned(),
-                "Transcode".to_owned(),
-            ));
-        }
+        validator.check_dependent("upload", self.upload, "transcode", self.transcode);
     }
 }

@@ -1,0 +1,8 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Path not found
+▷ key: queue_add_path
+▷ flag: --queue-add-path
+▷ path: /no/such/path

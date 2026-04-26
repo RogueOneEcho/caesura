@@ -1,0 +1,9 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Invalid duration
+▷ key: wait_before_upload
+▷ flag: --wait-before-upload
+▷ duration: not-a-duration
+▷ reason: expected number followed by unit

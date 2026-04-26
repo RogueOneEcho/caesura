@@ -1,0 +1,9 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Default changed
+▷ key: output
+▷ flag: --output
+▷ value: ./output
+▷ details: Default changed in v0.27.0.

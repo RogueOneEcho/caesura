@@ -3,12 +3,6 @@ use crate::prelude::*;
 /// Legacy output path from before platform user directories.
 const LEGACY_OUTPUT_DIR: &str = "./output";
 
-/// Validation label for the content directory.
-pub(crate) const CONTENT_DIR_LABEL: &str = "Content Directory";
-
-/// Validation label for the output directory.
-pub(crate) const OUTPUT_DIR_LABEL: &str = "Output Directory";
-
 /// Options shared by all commands
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct SharedOptions {
@@ -127,56 +121,25 @@ impl SharedOptions {
 impl OptionsContract for SharedOptions {
     type Partial = SharedOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if !self.indexer_url.starts_with("https://") && !self.indexer_url.starts_with("http://") {
-            errors.push(OptionRule::UrlNotHttp(
-                "Indexer URL".to_owned(),
-                self.indexer_url.clone(),
-            ));
-        }
-        if self.indexer_url.ends_with('/') {
-            errors.push(OptionRule::UrlInvalidSuffix(
-                "Indexer URL".to_owned(),
-                self.indexer_url.clone(),
-            ));
-        }
-        if !self.announce_url.starts_with("https://") && !self.announce_url.starts_with("http://") {
-            errors.push(OptionRule::UrlNotHttp(
-                "Announce URL".to_owned(),
-                self.announce_url.clone(),
-            ));
-        }
-        if self.announce_url.ends_with('/') {
-            errors.push(OptionRule::UrlInvalidSuffix(
-                "Announce URL".to_owned(),
-                self.announce_url.clone(),
-            ));
-        }
-        if self.content.is_empty() {
-            errors.push(OptionRule::IsEmpty(CONTENT_DIR_LABEL.to_owned()));
-        }
+    fn validate(&self, validator: &mut OptionsValidator) {
+        validator.check_url("indexer_url", &self.indexer_url);
+        validator.check_url("announce_url", &self.announce_url);
+        validator.check_non_empty("content", &self.content);
         for dir in self.content_paths() {
-            if !dir.exists() || !dir.is_dir() {
-                errors.push(OptionRule::DoesNotExist(
-                    CONTENT_DIR_LABEL.to_owned(),
-                    dir.to_string_lossy().to_string(),
-                ));
-            }
+            validator.check_dir_exists("content", &dir);
         }
         let output = self.output_path();
-        if !output.exists() || !output.is_dir() {
-            errors.push(OptionRule::DoesNotExist(
-                OUTPUT_DIR_LABEL.to_owned(),
-                output.to_string_lossy().to_string(),
+        validator.check_dir_exists("output", &output);
+        if !output.is_dir() && PathBuf::from(LEGACY_OUTPUT_DIR).is_dir() {
+            let default_dir = PathManager::default_output_dir();
+            validator.push(OptionIssue::default_changed(
+                "output",
+                &self.output.to_string_lossy(),
+                &format!(
+                    "In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.",
+                    default_dir.display()
+                ),
             ));
-            if PathBuf::from(LEGACY_OUTPUT_DIR).is_dir() {
-                let default_dir = PathManager::default_output_dir();
-                errors.push(OptionRule::Changed(
-                    OUTPUT_DIR_LABEL.to_owned(),
-                    self.output.to_string_lossy().to_string(),
-                    format!("In v0.27.0 the default output path changed to {}.\nPass the option: --output {LEGACY_OUTPUT_DIR} to use the previous output path.", default_dir.display()),
-                ));
-            }
         }
     }
 }

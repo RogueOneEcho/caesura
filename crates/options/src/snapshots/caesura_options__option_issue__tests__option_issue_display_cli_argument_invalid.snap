@@ -1,0 +1,8 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+Invalid CLI argument
+▷ options: SharedOptions
+▷ reason: missing required argument
+

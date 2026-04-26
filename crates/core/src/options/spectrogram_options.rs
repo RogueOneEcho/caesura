@@ -13,9 +13,7 @@ pub struct SpectrogramOptions {
 impl OptionsContract for SpectrogramOptions {
     type Partial = SpectrogramOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if self.spectrogram_size.is_empty() {
-            errors.push(OptionRule::IsEmpty("Spectrogram Size".to_owned()));
-        }
+    fn validate(&self, validator: &mut OptionsValidator) {
+        validator.check_non_empty("spectrogram_size", &self.spectrogram_size);
     }
 }

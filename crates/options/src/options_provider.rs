@@ -1,7 +1,7 @@
 //! Setup helper for resolving, validating, and registering options with DI.
 
 use crate::{
-    ArgsProviderContract, Documented, OptionRule, OptionsPartialContract, OptionsRegistration,
+    ArgsProviderContract, Documented, OptionIssue, OptionsPartialContract, OptionsRegistration,
 };
 use di::{ServiceCollection, existing_as_self};
 use inventory::iter as inventory_iter;
@@ -21,7 +21,7 @@ pub struct OptionsProvider {
     args: Option<Arc<dyn ArgsProviderContract>>,
     yaml: Option<String>,
     /// Validation errors collected during registration.
-    pub errors: Vec<OptionRule>,
+    pub errors: Vec<OptionIssue>,
 }
 
 impl OptionsProvider {
@@ -55,7 +55,7 @@ impl OptionsProvider {
             }
             Err(error) => {
                 self.errors
-                    .push(OptionRule::ConfigDeserialize(error.to_string()));
+                    .push(OptionIssue::config_invalid(&error.to_string()));
             }
         }
     }
@@ -94,10 +94,13 @@ impl OptionsProvider {
         let Some(args) = self.args.as_ref() else {
             return P::default();
         };
+        // `from_arg_matches` is theoretically unreachable in this codebase:
+        // clap exits on its own parse errors before reaching here, and partial
+        // fields are all `Option<T>`. The error path is kept defensively.
         P::from_arg_matches(args.arg_matches()).unwrap_or_else(|error| {
-            let name = String::from(P::Resolved::doc_metadata().name);
+            let name = P::Resolved::doc_metadata().name;
             self.errors
-                .push(OptionRule::CliExtract(name, error.to_string()));
+                .push(OptionIssue::cli_argument_invalid(name, &error.to_string()));
             P::default()
         })
     }

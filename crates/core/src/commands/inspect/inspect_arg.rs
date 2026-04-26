@@ -11,12 +11,7 @@ pub struct InspectArg {
 impl OptionsContract for InspectArg {
     type Partial = InspectArgPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if !self.inspect_path.exists() {
-            errors.push(OptionRule::DoesNotExist(
-                "inspect_path".to_owned(),
-                self.inspect_path.to_string_lossy().to_string(),
-            ));
-        }
+    fn validate(&self, validator: &mut OptionsValidator) {
+        validator.check_dir_exists("inspect_path", &self.inspect_path);
     }
 }

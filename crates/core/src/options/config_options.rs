@@ -3,9 +3,6 @@ use crate::prelude::*;
 /// Legacy config path from before platform user directories.
 const LEGACY_CONFIG_PATH: &str = "./config.yml";
 
-/// Validation label for the config file.
-pub(crate) const CONFIG_FILE_LABEL: &str = "Config File";
-
 /// Configuration file path.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
 pub struct ConfigOptions {
@@ -26,27 +23,25 @@ impl ConfigOptions {
 impl OptionsContract for ConfigOptions {
     type Partial = ConfigOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
+    fn validate(&self, validator: &mut OptionsValidator) {
         if let Some(config) = self.path()
             && !config.is_file()
         {
-            errors.push(OptionRule::DoesNotExist(
-                CONFIG_FILE_LABEL.to_owned(),
-                config.to_string_lossy().to_string(),
-            ));
+            validator.push(OptionIssue::file_not_found("config", &config));
         }
-        if !self
+        let resolved = self
             .config
             .clone()
-            .unwrap_or(PathManager::default_config_path())
-            .is_file()
-            && PathBuf::from(LEGACY_CONFIG_PATH).is_file()
-        {
+            .unwrap_or_else(PathManager::default_config_path);
+        if !resolved.is_file() && PathBuf::from(LEGACY_CONFIG_PATH).is_file() {
             let default_path = PathManager::default_config_path();
-            errors.push(OptionRule::Changed(
-                CONFIG_FILE_LABEL.to_owned(),
-                default_path.to_string_lossy().to_string(),
-                format!("In v0.27.0 the default config path changed to {}.\nPass the option: --config {LEGACY_CONFIG_PATH} to use the previous config path.", default_path.display()),
+            validator.push(OptionIssue::default_changed(
+                "config",
+                &resolved.to_string_lossy(),
+                &format!(
+                    "In v0.27.0 the default config path changed to {}.\nPass the option: --config {LEGACY_CONFIG_PATH} to use the previous config path.",
+                    default_path.display()
+                ),
             ));
         }
     }

@@ -1,0 +1,8 @@
+---
+source: crates/options/src/option_issue.rs
+expression: issue.to_string()
+---
+File not found
+▷ key: config
+▷ flag: --config
+▷ path: /no/such/file.yml

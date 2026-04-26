@@ -41,12 +41,8 @@ impl UploadCommand {
         source: &Source,
     ) -> Result<UploadSuccess, Failure<UploadAction>> {
         if self.qbit_upload_options.inject_torrent {
-            let mut errors: Vec<OptionRule> = Vec::new();
-            self.qbit_options.validate_connection(&mut errors);
-            if !errors.is_empty() {
-                OptionRule::show(&errors);
-                return Err(Failure::from_action(UploadAction::InjectTorrent));
-            }
+            self.qbit_options
+                .check_connection_or(UploadAction::InjectTorrent)?;
         }
         let mut warnings = Vec::new();
         let mut formats = Vec::new();

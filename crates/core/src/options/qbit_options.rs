@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use rogue_logging::Action;
 
 /// qBittorrent connection options shared by any command that talks to qBittorrent.
 #[derive(Options, Clone, Debug, Deserialize, Serialize)]
@@ -31,18 +32,22 @@ pub struct QbitOptions {
 }
 
 impl QbitOptions {
-    /// Push [`OptionRule`] violations for missing connection fields.
-    pub(crate) fn validate_connection(&self, errors: &mut Vec<OptionRule>) {
-        if self.qbit_url.is_none() {
-            errors.push(OptionRule::NotSet("qBittorrent URL".to_owned()));
-        }
+    /// Check connection fields and log any issues.
+    ///
+    /// - Returns `Ok(())` if all required connection fields are set.
+    /// - Returns [`Failure`] from `action` otherwise.
+    pub(crate) fn check_connection_or<T: Action>(&self, action: T) -> Result<(), Failure<T>> {
+        let mut validator = OptionsValidator::new();
+        self.validate_connection(&mut validator);
+        validator.check_or(action)
+    }
+
+    /// Push [`OptionIssue`] violations for missing connection fields.
+    pub(crate) fn validate_connection(&self, validator: &mut OptionsValidator) {
+        validator.check_set("qbit_url", &self.qbit_url);
         if self.requires_credentials() {
-            if self.qbit_username.is_none() {
-                errors.push(OptionRule::NotSet("qBittorrent username".to_owned()));
-            }
-            if self.qbit_password.is_none() {
-                errors.push(OptionRule::NotSet("qBittorrent password".to_owned()));
-            }
+            validator.check_set("qbit_username", &self.qbit_username);
+            validator.check_set("qbit_password", &self.qbit_password);
         }
     }
 
@@ -73,23 +78,9 @@ impl QbitOptions {
 impl OptionsContract for QbitOptions {
     type Partial = QbitOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if let Some(url) = &self.qbit_url
-            && !url.starts_with("https://")
-            && !url.starts_with("http://")
-        {
-            errors.push(OptionRule::UrlNotHttp(
-                "qBittorrent URL".to_owned(),
-                url.clone(),
-            ));
-        }
-        if let Some(url) = &self.qbit_url
-            && url.ends_with('/')
-        {
-            errors.push(OptionRule::UrlInvalidSuffix(
-                "qBittorrent URL".to_owned(),
-                url.clone(),
-            ));
+    fn validate(&self, validator: &mut OptionsValidator) {
+        if let Some(url) = &self.qbit_url {
+            validator.check_url("qbit_url", url);
         }
     }
 }

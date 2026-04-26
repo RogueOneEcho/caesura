@@ -24,20 +24,21 @@ impl NoCommandOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         NoCommandOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
-        let mut errors = ::std::vec::Vec::new();
+        let mut validator = ::caesura_options::OptionsValidator::new();
         let limit = self.limit;
         let resolved = NoCommandOptions {
             limit: limit.unwrap_or_else(|| 100),
         };
         if validate {
-            resolved.validate(&mut errors);
+            resolved.validate(&mut validator);
         }
-        if errors.is_empty() {
+        let issues = validator.into_issues();
+        if issues.is_empty() {
             ::std::result::Result::Ok(resolved)
         } else {
-            ::std::result::Result::Err(errors)
+            ::std::result::Result::Err(issues)
         }
     }
 }
@@ -55,7 +56,7 @@ impl ::caesura_options::OptionsPartialContract for NoCommandOptionsPartial {
         self,
     ) -> ::std::result::Result<
         NoCommandOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
         self.resolve_internal(true)
     }

@@ -21,16 +21,12 @@ pub struct QueueAddArgs {
 impl OptionsContract for QueueAddArgs {
     type Partial = QueueAddArgsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if let Some(path) = &self.queue_add_path {
-            if !path.exists() {
-                errors.push(OptionRule::DoesNotExist(
-                    "Queue add path".to_owned(),
-                    path.to_string_lossy().to_string(),
-                ));
-            }
-        } else {
-            errors.push(OptionRule::NotSet("Queue add path".to_owned()));
+    fn validate(&self, validator: &mut OptionsValidator) {
+        validator.check_set("queue_add_path", &self.queue_add_path);
+        if let Some(path) = &self.queue_add_path
+            && !path.exists()
+        {
+            validator.push(OptionIssue::path_not_found("queue_add_path", path));
         }
     }
 }

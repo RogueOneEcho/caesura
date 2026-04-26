@@ -1,10 +1,21 @@
 ---
 source: crates/core/src/options/tests/options_tests.rs
+assertion_line: 441
 expression: errors
 ---
-- UrlNotHttp:
-    - Indexer URL
-    - not-a-url
-- UrlInvalidSuffix:
-    - Announce URL
-    - "https://example.com/announce/"
+- keys:
+    - indexer_url
+  kind: UrlInvalid
+  additional:
+    - - url
+      - not-a-url
+    - - reason
+      - "must start with http:// or https://"
+- keys:
+    - announce_url
+  kind: UrlInvalid
+  additional:
+    - - url
+      - "https://example.com/announce/"
+    - - reason
+      - must not end with a trailing slash

@@ -48,9 +48,7 @@ impl TargetOptions {
 impl OptionsContract for TargetOptions {
     type Partial = TargetOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if self.target.is_empty() {
-            errors.push(OptionRule::IsEmpty("Target format".to_owned()));
-        }
+    fn validate(&self, validator: &mut OptionsValidator) {
+        validator.check_non_empty("target", &self.target);
     }
 }

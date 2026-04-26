@@ -49,9 +49,9 @@ impl UploadOptionsPartial {
         validate: bool,
     ) -> ::std::result::Result<
         UploadOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
-        let mut errors = ::std::vec::Vec::new();
+        let mut validator = ::caesura_options::OptionsValidator::new();
         let copy_transcode_to_content_dir = self.copy_transcode_to_content_dir;
         let copy_transcode_to = self.copy_transcode_to;
         let copy_torrent_to = self.copy_torrent_to;
@@ -64,12 +64,13 @@ impl UploadOptionsPartial {
             dry_run: dry_run.unwrap_or_default(),
         };
         if validate {
-            resolved.validate(&mut errors);
+            resolved.validate(&mut validator);
         }
-        if errors.is_empty() {
+        let issues = validator.into_issues();
+        if issues.is_empty() {
             ::std::result::Result::Ok(resolved)
         } else {
-            ::std::result::Result::Err(errors)
+            ::std::result::Result::Err(issues)
         }
     }
 }
@@ -96,7 +97,7 @@ impl ::caesura_options::OptionsPartialContract for UploadOptionsPartial {
         self,
     ) -> ::std::result::Result<
         UploadOptions,
-        ::std::vec::Vec<::caesura_options::OptionRule>,
+        ::std::vec::Vec<::caesura_options::OptionIssue>,
     > {
         self.resolve_internal(true)
     }

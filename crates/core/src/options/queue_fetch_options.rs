@@ -17,11 +17,7 @@ pub struct QueueFetchOptions {
 impl OptionsContract for QueueFetchOptions {
     type Partial = QueueFetchOptionsPartial;
 
-    fn validate(&self, errors: &mut Vec<OptionRule>) {
-        if self.qbit_fetch_categories.is_empty() {
-            errors.push(OptionRule::IsEmpty(
-                "qBittorrent fetch categories".to_owned(),
-            ));
-        }
+    fn validate(&self, validator: &mut OptionsValidator) {
+        validator.check_non_empty("qbit_fetch_categories", &self.qbit_fetch_categories);
     }
 }
