@@ -1,0 +1,8 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+https://ex   next
+ample.com/
+very/long/
+path

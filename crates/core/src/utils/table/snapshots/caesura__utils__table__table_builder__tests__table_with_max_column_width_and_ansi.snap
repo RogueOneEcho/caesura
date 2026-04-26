@@ -1,0 +1,6 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+[31mhello[0m world   x
+[31mhello[0m

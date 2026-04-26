@@ -2,6 +2,11 @@ use super::picture_info::PictureInfo;
 use super::track_info::{TagEntry, TrackInfo};
 use crate::prelude::*;
 
+/// Max width of the tag value column.
+const MAX_VALUE_WIDTH: usize = 46;
+/// Max number of lines for a tag value.
+const MAX_VALUE_LINES: usize = 3;
+
 /// Format inspect output with optional terminal styling.
 pub struct InspectFactory {
     /// Apply ANSI color codes to output.
@@ -222,7 +227,9 @@ impl TrackInfo {
 
     /// Format tags as a table with NATIVE, ITEM, VALUE columns.
     fn format_tags_table(&self, factory: &InspectFactory) -> String {
-        let mut builder = TableBuilder::new();
+        let mut builder = TableBuilder::new()
+            .max_column_width(1, MAX_VALUE_WIDTH)
+            .max_cell_lines(MAX_VALUE_LINES);
         for entry in &self.tags {
             builder = builder.row([
                 factory.style_key(entry.format_item()),

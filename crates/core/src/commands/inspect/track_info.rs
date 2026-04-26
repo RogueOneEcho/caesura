@@ -18,7 +18,7 @@ const MP3: &str = "mp3";
 pub(super) const EXTENSIONS: &[&str] = &[FLAC, MP3];
 
 /// A single tag entry.
-pub(super) struct TagEntry {
+pub(crate) struct TagEntry {
     /// The item key.
     pub(super) key: ItemKey,
     /// Native key (e.g. "COMMENT", "ARTIST").

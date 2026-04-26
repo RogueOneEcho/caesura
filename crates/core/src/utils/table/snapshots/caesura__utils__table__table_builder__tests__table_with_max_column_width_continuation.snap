@@ -1,0 +1,7 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+A   one two three   Z
+    four five six
+B   short           Y

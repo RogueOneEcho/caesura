@@ -1,0 +1,8 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+| Item      | Value                                       |
+| --------- | ------------------------------------------- |
+| copyright | the quick brown fox jumps over the lazy dog |
+| lyrics    | line1<br>line2<br>line3<br>line4            |

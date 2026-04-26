@@ -1,0 +1,10 @@
+---
+source: crates/core/src/commands/inspect/tests/inspect_tests.rs
+expression: output
+---
+
+
+
+Lyrics   Lyric line 1                          LYRICS
+         Lyric line 2
+         [+18 more lines, 244 chars clipped]

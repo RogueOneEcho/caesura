@@ -1,4 +1,5 @@
 use crate::testing_prelude::*;
+use lofty::tag::ItemKey;
 
 /// Test that [`InspectFactory::create`] returns FLAC metadata for a multi-disc source directory.
 #[tokio::test]
@@ -154,5 +155,53 @@ fn inspect_factory_properties_table_mixed_formats() {
     let output = factory.format_properties_table(&tracks);
 
     // Assert
+    assert_snapshot!(output);
+}
+
+/// Test that the tags table wraps a long single-line value onto multiple visual rows.
+#[test]
+fn format_tags_table_with_long_value() {
+    // Arrange
+    let factory = InspectFactory::new(false);
+    let track = TrackInfo {
+        tags: vec![TagEntry {
+            key: ItemKey::CopyrightMessage,
+            native: Some("COPYRIGHT".to_owned()),
+            value: "(c) 2011 Long artist name via Long record label name (c) 1981 Long artist name via Long record label name".to_owned(),
+        }],
+        ..TrackInfo::mock_flac()
+    };
+
+    // Act
+    let output = factory.format_all_tags(&[track]);
+
+    // Assert
+    let output = strip_ansi(&output);
+    assert_snapshot!(output);
+}
+
+/// Test that the tags table truncates a multi-line value at 3 visual rows.
+#[test]
+fn format_tags_table_with_multiline_value() {
+    // Arrange
+    let factory = InspectFactory::new(false);
+    let lyrics = (1..=20)
+        .map(|i| format!("Lyric line {i}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let track = TrackInfo {
+        tags: vec![TagEntry {
+            key: ItemKey::Lyrics,
+            native: Some("LYRICS".to_owned()),
+            value: lyrics,
+        }],
+        ..TrackInfo::mock_flac()
+    };
+
+    // Act
+    let output = factory.format_all_tags(&[track]);
+
+    // Assert
+    let output = strip_ansi(&output);
     assert_snapshot!(output);
 }

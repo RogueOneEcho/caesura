@@ -1,0 +1,6 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+this column is not limited   the quick   tag
+                             brown fox

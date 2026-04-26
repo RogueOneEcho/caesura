@@ -72,6 +72,7 @@ pedantic = { level = "warn", priority = -1 }
 absolute_paths = "warn"
 arithmetic_side_effects = "allow"
 as_conversions = "warn"
+bool_to_int_with_if = "allow"
 cast_possible_truncation = "warn"
 clone_on_ref_ptr = "allow"
 enum_glob_use = "allow"

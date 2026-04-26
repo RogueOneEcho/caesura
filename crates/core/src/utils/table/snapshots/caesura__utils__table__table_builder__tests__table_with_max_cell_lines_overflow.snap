@@ -1,0 +1,7 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+Lyrics   line1                               X
+         line2
+         [+3 more lines, 17 chars clipped]

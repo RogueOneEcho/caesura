@@ -3,7 +3,6 @@
 use crate::prelude::*;
 use TableStyle::*;
 use std::borrow::Cow;
-use unicode_width::UnicodeWidthStr;
 
 /// Number of spaces between columns in plain-text output.
 const COLUMN_GAP: usize = 3;
@@ -33,6 +32,8 @@ pub(crate) struct TableBuilder<'a> {
     right_aligned: Vec<bool>,
     newline_after_headers: bool,
     style: TableStyle,
+    max_column_widths: Vec<Option<usize>>,
+    max_cell_lines: Option<usize>,
 }
 
 impl<'a> TableBuilder<'a> {
@@ -44,6 +45,8 @@ impl<'a> TableBuilder<'a> {
             right_aligned: Vec::new(),
             newline_after_headers: false,
             style: TableStyle::default(),
+            max_column_widths: Vec::new(),
+            max_cell_lines: None,
         }
     }
 
@@ -100,6 +103,32 @@ impl<'a> TableBuilder<'a> {
         self
     }
 
+    /// Wrap cells in column `col` whose content exceeds `n` visible columns at
+    /// word boundaries.
+    ///
+    /// - Continuation lines occupy additional visual rows aligned with the
+    ///   column start
+    /// - No effect in markdown style
+    pub(crate) fn max_column_width(mut self, col: usize, n: usize) -> Self {
+        if self.max_column_widths.len() <= col {
+            self.max_column_widths.resize(col + 1, None);
+        }
+        if let Some(slot) = self.max_column_widths.get_mut(col) {
+            *slot = Some(n);
+        }
+        self
+    }
+
+    /// Cap each cell at `n` visual rows.
+    ///
+    /// - Excess content is replaced with `[+X more lines, Y chars clipped]`
+    ///   on the final retained row, which counts toward `n`
+    /// - No effect in markdown style
+    pub(crate) fn max_cell_lines(mut self, n: usize) -> Self {
+        self.max_cell_lines = Some(n);
+        self
+    }
+
     /// Add a data row.
     ///
     /// Uses associated type bound instead of nested `impl Trait` for IDE compatibility.
@@ -117,12 +146,13 @@ impl<'a> TableBuilder<'a> {
     /// Build the formatted table string.
     pub(crate) fn build(self) -> String {
         let header_rows = self.prepare_headers();
-        let rows = self.prepare_rows();
-        let widths = self.column_widths(header_rows.as_deref(), &rows);
+        let expanded_rows = self.expand_rows();
+        let widths = self.column_widths(header_rows.as_deref(), &expanded_rows);
         let mut output = String::new();
         if let Some(header_rows) = &header_rows {
             for row in header_rows {
-                output.push_str(&self.format_row(row, &widths, true));
+                let cells: Vec<&str> = row.iter().map(Cow::as_ref).collect();
+                output.push_str(&self.format_row(&cells, &widths, true));
             }
             if self.newline_after_headers {
                 output.push('\n');
@@ -131,8 +161,8 @@ impl<'a> TableBuilder<'a> {
                 output.push_str(&self.markdown_separator_row(&widths));
             }
         }
-        for row in &rows {
-            output.push_str(&self.format_row(row, &widths, false));
+        for row in &expanded_rows {
+            output.push_str(&self.format_expanded_row(row, &widths));
         }
         output
     }
@@ -161,22 +191,42 @@ impl<'a> TableBuilder<'a> {
         vec![row]
     }
 
-    /// Escape row cells for the target style.
-    fn prepare_rows(&self) -> Vec<Vec<Cow<'_, str>>> {
+    /// Expand all data rows into per-cell visual lines, applying overflow
+    /// options.
+    ///
+    /// - In markdown style, each cell is escaped and returned as a single
+    ///   visual line; overflow options are ignored
+    /// - In plain style, cells are escaped (no-op for plain) and passed through
+    ///   [`expand_cell`] using the column's `max_column_width` and the global
+    ///   `max_cell_lines`
+    fn expand_rows(&self) -> Vec<Vec<Vec<String>>> {
         self.rows
             .iter()
-            .map(|row| row.iter().map(|cell| self.escape_cell(cell)).collect())
+            .map(|row| {
+                row.iter()
+                    .enumerate()
+                    .map(|(col, cell)| {
+                        let escaped = self.escape_cell(cell).into_owned();
+                        if self.style != Plain {
+                            return vec![escaped];
+                        }
+                        let max_width = self.max_column_widths.get(col).copied().flatten();
+                        expand_cell(&escaped, max_width, self.max_cell_lines)
+                    })
+                    .collect()
+            })
             .collect()
     }
 
-    /// Calculate column widths from pre-processed header rows and data rows.
+    /// Calculate column widths from pre-processed header rows and expanded
+    /// data rows.
     fn column_widths(
         &self,
         header_rows: Option<&[Vec<Cow<'_, str>>]>,
-        rows: &[Vec<Cow<'_, str>>],
+        expanded_rows: &[Vec<Vec<String>>],
     ) -> Vec<usize> {
         let header_cols = header_rows.map_or(0, |hrs| hrs.first().map_or(0, Vec::len));
-        let max_row_cols = rows.iter().map(Vec::len).max().unwrap_or(0);
+        let max_row_cols = expanded_rows.iter().map(Vec::len).max().unwrap_or(0);
         let min_width = if self.style == Markdown { 3 } else { 0 };
         let col_count = header_cols.max(max_row_cols);
         let mut widths = vec![min_width; col_count];
@@ -187,9 +237,17 @@ impl<'a> TableBuilder<'a> {
                 }
             }
         }
-        for row in rows {
-            for (width, cell) in widths.iter_mut().zip(row) {
-                *width = (*width).max(visible_width(cell));
+        for row in expanded_rows {
+            for (col_idx, (width, cell_lines)) in widths.iter_mut().zip(row).enumerate() {
+                for line in cell_lines {
+                    let mut line_width = visible_width(line);
+                    if self.style == Plain
+                        && let Some(max) = self.max_column_widths.get(col_idx).copied().flatten()
+                    {
+                        line_width = line_width.min(max);
+                    }
+                    *width = (*width).max(line_width);
+                }
             }
         }
         widths
@@ -205,13 +263,13 @@ impl<'a> TableBuilder<'a> {
     }
 
     /// Format a single row of pre-processed cells.
-    fn format_row(&self, cells: &[Cow<'_, str>], widths: &[usize], is_header: bool) -> String {
+    fn format_row(&self, cells: &[&str], widths: &[usize], is_header: bool) -> String {
         let mut output = String::new();
         if self.style == Markdown {
             output.push('|');
         }
         for i in 0..widths.len() {
-            let cell = cells.get(i).map_or("", Cow::as_ref);
+            let cell = cells.get(i).copied().unwrap_or("");
             let width = widths.get(i).copied().unwrap_or(0);
             let is_right = if is_header {
                 false
@@ -241,6 +299,23 @@ impl<'a> TableBuilder<'a> {
         output
     }
 
+    /// Format an expanded data row into one or more visual lines.
+    ///
+    /// Cells with fewer visual lines than the row height render their lines on
+    /// the leading visual rows and blank padding on trailing rows.
+    fn format_expanded_row(&self, cells: &[Vec<String>], widths: &[usize]) -> String {
+        let height = cells.iter().map(Vec::len).max().unwrap_or(1);
+        let mut output = String::new();
+        for line_idx in 0..height {
+            let row: Vec<&str> = cells
+                .iter()
+                .map(|c| c.get(line_idx).map_or("", String::as_str))
+                .collect();
+            output.push_str(&self.format_row(&row, widths, false));
+        }
+        output
+    }
+
     /// Render the markdown separator row.
     fn markdown_separator_row(&self, widths: &[usize]) -> String {
         let mut output = String::new();
@@ -261,15 +336,43 @@ impl<'a> TableBuilder<'a> {
     }
 }
 
-/// Visible width of a string in terminal columns.
+/// Expand a cell into a list of visual lines.
 ///
-/// - Strips ANSI SGR escape sequences before measuring
-/// - Uses [`UnicodeWidthStr`] for accurate column widths (e.g., CJK characters
-///   occupy 2 columns, emoji occupy 2 columns, zero-width characters occupy 0)
-fn visible_width(s: &str) -> usize {
-    static ANSI_RE: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"\x1b\[[0-9;]*m").expect("ANSI regex should be valid"));
-    ANSI_RE.replace_all(s, "").width()
+/// - Splits on `\n` first
+/// - Word-wraps each source line if `max_width` is set
+/// - Caps the resulting visual line count at `max_lines`, replacing the excess
+///   with `[+X more lines, Y chars clipped]` on the final retained row
+fn expand_cell(cell: &str, max_width: Option<usize>, max_lines: Option<usize>) -> Vec<String> {
+    let source_lines: Vec<&str> = cell.split('\n').collect();
+    let mut visual: Vec<String> = Vec::new();
+    for src_line in &source_lines {
+        let wrapped = match max_width {
+            Some(w) => wrap_line(src_line, w),
+            None => vec![(*src_line).to_owned()],
+        };
+        visual.extend(wrapped);
+    }
+    let Some(cap) = max_lines else {
+        return visual;
+    };
+    if visual.len() <= cap {
+        return visual;
+    }
+    if cap == 0 {
+        return Vec::new();
+    }
+    let kept_visual = cap - 1;
+    let dropped_visual_count = visual.len() - kept_visual;
+    let dropped_chars = visual
+        .get(kept_visual..)
+        .map_or(0, |d| d.join("\n").chars().count());
+    let mut output = visual.into_iter().take(kept_visual).collect::<Vec<_>>();
+    output.push(
+        format!("[+{dropped_visual_count} more lines, {dropped_chars} chars clipped]")
+            .dimmed()
+            .to_string(),
+    );
+    output
 }
 
 /// Expand multi-line headers into multiple bottom-aligned rows.
@@ -296,6 +399,147 @@ fn expand_header_rows<'a>(headers: &'a [Vec<Cow<'_, str>>]) -> Vec<Vec<Cow<'a, s
 mod tests {
     use super::*;
     use insta::assert_snapshot;
+
+    #[test]
+    fn expand_cell_no_constraints_splits_on_newline() {
+        let lines = expand_cell("line one\nline two", None, None);
+        assert_eq!(lines, vec!["line one", "line two"]);
+    }
+
+    #[test]
+    fn expand_cell_wraps_long_line() {
+        let lines = expand_cell("the quick brown fox jumps", Some(10), None);
+        assert_eq!(lines, vec!["the quick", "brown fox", "jumps"]);
+    }
+
+    #[test]
+    fn expand_cell_caps_lines_with_clip_note() {
+        let input = "a\nb\nc\nd\ne";
+        let lines = expand_cell(input, None, Some(3));
+        assert_eq!(
+            lines,
+            vec![
+                "a".to_owned(),
+                "b".to_owned(),
+                "[+3 more lines, 5 chars clipped]".dimmed().to_string(),
+            ],
+        );
+    }
+
+    #[test]
+    fn expand_cell_clip_note_counts_after_last_retained_break() {
+        let input = "alpha bravo charlie delta echo foxtrot";
+        let lines = expand_cell(input, Some(11), Some(2));
+        let mut iter = lines.iter();
+        assert_eq!(iter.next().map(String::as_str), Some("alpha bravo"));
+        let second = iter.next().expect("expected at least 2 lines");
+        let plain = strip_ansi(second);
+        assert!(
+            plain.starts_with("[+") && plain.ends_with("chars clipped]"),
+            "unexpected clip note: {second}",
+        );
+        assert!(iter.next().is_none(), "expected exactly 2 lines");
+    }
+
+    #[test]
+    fn expand_cell_within_limit_no_clip_note() {
+        let lines = expand_cell("a\nb", None, Some(3));
+        assert_eq!(lines, vec!["a", "b"]);
+    }
+
+    #[test]
+    fn table_with_max_column_width() {
+        let table = TableBuilder::new()
+            .max_column_width(1, 20)
+            .row([
+                "Item",
+                "the quick brown fox jumps over the lazy dog",
+                "Native",
+            ])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_column_width_continuation() {
+        let table = TableBuilder::new()
+            .max_column_width(1, 15)
+            .row(["A", "one two three four five six", "Z"])
+            .row(["B", "short", "Y"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_column_width_other_columns_unaffected() {
+        let table = TableBuilder::new()
+            .max_column_width(1, 10)
+            .row(["this column is not limited", "the quick brown fox", "tag"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_column_width_word_longer_than_limit() {
+        let table = TableBuilder::new()
+            .max_column_width(0, 10)
+            .row(["https://example.com/very/long/path", "next"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_column_width_and_ansi() {
+        let table = TableBuilder::new()
+            .max_column_width(0, 11)
+            .row(["\x1b[31mhello\x1b[0m world \x1b[31mhello\x1b[0m", "x"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_cell_lines_overflow() {
+        let table = TableBuilder::new()
+            .max_cell_lines(3)
+            .row(["Lyrics", "line1\nline2\nline3\nline4\nline5", "X"])
+            .build();
+        let table = strip_ansi(&table);
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_cell_lines_within_limit() {
+        let table = TableBuilder::new()
+            .max_cell_lines(3)
+            .row(["Tag", "line1\nline2", "X"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_with_max_column_width_and_max_cell_lines() {
+        let table = TableBuilder::new()
+            .max_column_width(1, 12)
+            .max_cell_lines(3)
+            .row([
+                "Lyrics",
+                "alpha bravo charlie delta echo foxtrot golf hotel",
+                "X",
+            ])
+            .build();
+        let table = strip_ansi(&table);
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn table_builder_accepts_overflow_options() {
+        let table = TableBuilder::new()
+            .max_column_width(0, 10)
+            .max_cell_lines(3)
+            .row(["short", "x"])
+            .build();
+        assert_snapshot!(table);
+    }
 
     #[test]
     fn table_with_headers_and_rows() {
@@ -362,62 +606,6 @@ mod tests {
             .row(["baz.txt", "12.5 MB", "128"])
             .build();
         assert_snapshot!(table);
-    }
-
-    #[test]
-    fn visible_width_plain_text() {
-        assert_eq!(visible_width("hello"), 5);
-    }
-
-    #[test]
-    fn visible_width_empty_string() {
-        assert_eq!(visible_width(""), 0);
-    }
-
-    #[test]
-    fn visible_width_single_ansi_code() {
-        // \x1b[31m = red, \x1b[0m = reset
-        assert_eq!(visible_width("\x1b[31mhello\x1b[0m"), 5);
-    }
-
-    #[test]
-    fn visible_width_multiple_ansi_codes() {
-        // bold + red + text + reset
-        assert_eq!(visible_width("\x1b[1m\x1b[31merror\x1b[0m"), 5);
-    }
-
-    #[test]
-    fn visible_width_ansi_with_semicolons() {
-        // \x1b[1;31m = bold red (compound SGR)
-        assert_eq!(visible_width("\x1b[1;31mwarning\x1b[0m"), 7);
-    }
-
-    #[test]
-    fn visible_width_mixed_plain_and_ansi() {
-        assert_eq!(visible_width("plain \x1b[2mdimmed\x1b[0m end"), 16);
-    }
-
-    #[test]
-    fn visible_width_multibyte_utf8() {
-        // ⚠ is 3 bytes but 1 character
-        assert_eq!(visible_width("⚠"), 1);
-    }
-
-    #[test]
-    fn visible_width_multibyte_utf8_with_ansi() {
-        assert_eq!(visible_width("\x1b[31m⚠\x1b[0m"), 1);
-    }
-
-    #[test]
-    fn visible_width_emoji() {
-        // Most emoji occupy 2 terminal columns
-        assert_eq!(visible_width("✅"), 2);
-        assert_eq!(visible_width("🎵"), 2);
-    }
-
-    #[test]
-    fn visible_width_emoji_with_ansi() {
-        assert_eq!(visible_width("\x1b[33m🎵\x1b[0m"), 2);
     }
 
     #[test]
@@ -497,6 +685,19 @@ mod tests {
             .markdown()
             .multi_line_headers([vec!["Name"], vec!["Bit", "Rate"], vec!["Sample", "Rate"]])
             .row(["Track 1", "320", "44.1"])
+            .build();
+        assert_snapshot!(table);
+    }
+
+    #[test]
+    fn markdown_table_with_max_column_width_ignored() {
+        let table = TableBuilder::new()
+            .markdown()
+            .max_column_width(1, 10)
+            .max_cell_lines(2)
+            .headers(["Item", "Value"])
+            .row(["copyright", "the quick brown fox jumps over the lazy dog"])
+            .row(["lyrics", "line1\nline2\nline3\nline4"])
             .build();
         assert_snapshot!(table);
     }

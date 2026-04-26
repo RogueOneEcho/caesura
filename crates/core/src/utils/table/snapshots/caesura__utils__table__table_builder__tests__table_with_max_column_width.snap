@@ -1,0 +1,7 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+Item   the quick brown fox   Native
+       jumps over the lazy
+       dog

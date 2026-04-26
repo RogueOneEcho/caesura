@@ -1,0 +1,10 @@
+---
+source: crates/core/src/commands/inspect/tests/inspect_tests.rs
+expression: output
+---
+
+
+
+Copyright Message   (c) 2011 Long artist name via Long record       COPYRIGHT
+                    label name (c) 1981 Long artist name via Long
+                    record label name

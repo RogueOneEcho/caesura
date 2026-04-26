@@ -1,0 +1,7 @@
+---
+source: crates/core/src/utils/table/table_builder.rs
+expression: table
+---
+Lyrics   alpha bravo    X
+         charlie
+         [+3 more lines, 29 chars clipped]
