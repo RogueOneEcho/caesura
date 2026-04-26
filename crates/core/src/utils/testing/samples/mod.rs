@@ -14,6 +14,7 @@ mod transcode_generator;
 mod transcode_provider;
 
 pub use album_config::*;
+pub use album_generator::*;
 pub use album_provider::*;
 pub use flac_generator::*;
 pub use image_generator::*;

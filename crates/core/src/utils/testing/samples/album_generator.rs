@@ -12,7 +12,7 @@
 use crate::testing_prelude::*;
 
 /// Generates a complete test album (FLAC files, cover image, torrent).
-pub(super) struct AlbumGenerator;
+pub struct AlbumGenerator;
 
 impl AlbumGenerator {
     /// Generate album in a specific directory without caching.
