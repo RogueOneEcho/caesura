@@ -71,6 +71,7 @@ impl VerifyCommand {
         if let Some(issue) = check_directory_exists(source) {
             return Ok(vec![issue]);
         }
+        trace!("Collecting FLACs from {}", source.directory.display());
         let flacs = Collector::get_flacs_with_context(&source.directory);
         if flacs.is_empty() {
             return Ok(vec![SourceIssue::NoFlacs {
@@ -83,6 +84,7 @@ impl VerifyCommand {
         let max_target = get_max_path_length_target(source);
         let output_dir = self.paths.get_output_dir();
         for flac in flacs {
+            trace!("Verifying FLAC {}", flac.path.display());
             if let Some(max_target) = max_target {
                 let path = self
                     .paths
@@ -112,6 +114,10 @@ impl VerifyCommand {
             return Ok(None);
         }
         let torrent_path = self.get_source_torrent(source).await?;
+        trace!(
+            "Verifying torrent hash against {}",
+            source.directory.display()
+        );
         TorrentVerifier::execute(&torrent_path, &source.directory)
             .await
             .map_err(Failure::wrap(VerifyAction::VerifyHash))
@@ -122,6 +128,7 @@ impl VerifyCommand {
         &self,
         source: &Source,
     ) -> Result<PathBuf, Failure<VerifyAction>> {
+        trace!("Fetching torrent file for {}", source.torrent.id);
         self.torrents
             .get(source.torrent.id)
             .await

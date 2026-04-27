@@ -36,12 +36,18 @@ fn verify(
         torrent_file,
     ))?;
     let file_paths = get_file_paths(&torrent, directory);
+    trace!("Opening {} content files", file_paths.len());
     let mut stream = match open_content_stream(&file_paths) {
         Ok(stream) => stream,
         Err(issue) => return Ok(Some(issue)),
     };
     let piece_length = u64::try_from(torrent.piece_length).expect("piece length should fit in u64");
     let mut hasher = Sha1::new();
+    trace!(
+        "Hashing {} pieces from {}",
+        torrent.pieces.len(),
+        directory.display()
+    );
     for (index, expected) in torrent.pieces.iter().enumerate() {
         let mut piece = stream.by_ref().take(piece_length);
         let bytes_copied = io_copy(&mut piece, &mut hasher)
