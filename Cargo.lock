@@ -800,9 +800,9 @@ dependencies = [
 
 [[package]]
 name = "gazelle_api"
-version = "0.22.0"
+version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e6f4d8dd6b19df45c13caab23f3220b5a02f3289f60bd42a9ee031b180f6a25"
+checksum = "796e88bd5d99c2409d774ce4ed2a36ddace155ecaf319a9655846e094079a26b"
 dependencies = [
  "async-trait",
  "html-escape",

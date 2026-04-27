@@ -65,6 +65,19 @@ impl Indexer {
         }
     }
 
+    /// Delays between retry attempts when the API returns `TooManyRequests`.
+    ///
+    /// - OPS enforces a longer cooldown so uses `10s, 20s`
+    /// - Other Gazelle-based indexers use `5s, 10s`
+    /// - Up to 3 attempts total before the error propagates
+    #[must_use]
+    pub fn gazelle_retry_delays(&self) -> Vec<Duration> {
+        match self {
+            Indexer::Ops => vec![Duration::from_secs(10), Duration::from_secs(20)],
+            _ => vec![Duration::from_secs(5), Duration::from_secs(10)],
+        }
+    }
+
     /// Check if `other` is the same indexer as this one, allowing known alternatives.
     ///
     /// - Asymmetric: if this is `Red`, `Pth` is accepted as an alternative
