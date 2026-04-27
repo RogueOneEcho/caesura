@@ -77,13 +77,14 @@ impl CrossServices {
 }
 
 fn create_api(shared: Ref<SharedOptions>) -> Ref<GazelleClient> {
+    let (num, per) = shared.get_indexer().gazelle_rate_limit();
     let factory = GazelleClientFactory {
         options: GazelleClientOptions {
             url: shared.indexer_url.clone(),
             key: shared.api_key.clone(),
             user_agent: app_user_agent(true),
-            requests_allowed_per_duration: None,
-            request_limit_duration: None,
+            requests_allowed_per_duration: Some(num),
+            request_limit_duration: Some(per),
         },
     };
     Ref::new(Box::new(factory.create()))

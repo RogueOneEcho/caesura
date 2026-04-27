@@ -274,13 +274,14 @@ fn qbit_factory(provider: &ServiceProvider) -> Arc<QbitClient> {
 #[expect(clippy::as_conversions, reason = "required for traits")]
 fn gazelle_factory(services: &ServiceProvider) -> Ref<GazelleClient> {
     let options = services.get_required::<SharedOptions>();
+    let (num, per) = options.get_indexer().gazelle_rate_limit();
     let factory = GazelleClientFactory {
         options: GazelleClientOptions {
             url: options.indexer_url.clone(),
             key: options.api_key.clone(),
             user_agent: app_user_agent(true),
-            requests_allowed_per_duration: None,
-            request_limit_duration: None,
+            requests_allowed_per_duration: Some(num),
+            request_limit_duration: Some(per),
         },
     };
     Ref::new(Box::new(factory.create()) as GazelleClient)

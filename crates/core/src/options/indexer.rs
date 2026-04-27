@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use std::cmp::Ordering;
 use std::convert::Infallible;
+use std::time::Duration;
 
 /// URL of the RED indexer.
 pub const RED_URL: &str = "https://redacted.sh";
@@ -48,6 +49,20 @@ impl Indexer {
     #[must_use]
     pub fn to_uppercase(&self) -> String {
         self.as_lowercase().to_uppercase()
+    }
+
+    /// Gazelle API rate limit for this indexer as `(requests, window)`.
+    ///
+    /// - RED allows 10 per 10s with API key auth; we use 8 to leave headroom
+    /// - OPS applies per-action limits with `browse` capped at 5 per 10s; we use 4 to leave headroom
+    /// - Other Gazelle-based trackers fall back to a conservative default
+    #[must_use]
+    pub fn gazelle_rate_limit(&self) -> (usize, Duration) {
+        match self {
+            Indexer::Red => (8, Duration::from_secs(10)),
+            Indexer::Ops => (4, Duration::from_secs(10)),
+            _ => (5, Duration::from_secs(10)),
+        }
     }
 
     /// Check if `other` is the same indexer as this one, allowing known alternatives.
