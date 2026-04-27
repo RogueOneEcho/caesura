@@ -386,6 +386,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
                 format: Format::FLAC,
                 encoding: Quality::Lossless,
                 media: Media::WEB,
+                file_path: transcode.album.dir_name(),
                 ..Torrent::default()
             },
         }))
@@ -402,6 +403,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
                 format: Format::FLAC,
                 encoding: Quality::Lossless,
                 media: Media::WEB,
+                file_path: transcode.album.dir_name(),
                 ..Torrent::default()
             }],
         }))

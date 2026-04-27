@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::path::Component;
 
 /// Retrieve [`Source`] from the API.
 #[injectable]
@@ -111,28 +112,28 @@ impl SourceProvider {
     }
 
     fn get_source_directory(&self, torrent: &Torrent) -> Result<PathBuf, SourceIssue> {
-        let path = torrent.file_path.clone();
-        let result = Sanitizer::libtorrent().execute(path.clone());
-        if !result.found.is_empty() {
-            warn!("Invisible characters in source path: {}", result.humanize());
-        }
-        let safe_path = result.output;
-        let mut paths = vec![&path];
-        if safe_path != path {
-            paths.push(&safe_path);
-        }
+        let path = torrent.file_path.as_str();
+        let candidates = safe_candidates(path)?;
+        self.find_directory(&candidates)
+            .ok_or_else(|| SourceIssue::MissingDirectory {
+                path: PathBuf::from(path),
+            })
+    }
+
+    /// Find an existing directory in the configured content paths matching any candidate.
+    ///
+    /// - Joins each content path with each candidate and filters to existing directories.
+    /// - Warns and returns the first when multiple match.
+    /// - Returns `None` if no candidate matches on disk.
+    fn find_directory(&self, candidates: &[String]) -> Option<PathBuf> {
         let directories: Vec<PathBuf> = self
             .options
             .content_paths()
             .iter()
-            .flat_map(|x| paths.iter().map(|p| x.join(p)))
+            .flat_map(|x| candidates.iter().map(|p| x.join(p)))
             .filter(|x| x.is_dir())
             .collect();
-        if directories.is_empty() {
-            return Err(SourceIssue::MissingDirectory {
-                path: PathBuf::from(path),
-            });
-        } else if directories.len() > 1 {
+        if directories.len() > 1 {
             warn!(
                 "{} multiple content directories matching the torrent. The first will be used.",
                 "Found".bold()
@@ -141,7 +142,7 @@ impl SourceProvider {
                 trace!("{}", directory.display());
             }
         }
-        Ok(directories.first().expect("should be at least one").clone())
+        directories.into_iter().next()
     }
 
     /// Retrieve a [`Source`] using the ID from CLI options.
@@ -185,4 +186,61 @@ impl SourceProvider {
         let source = self.arg.source.as_str();
         HASH_PATTERN.is_match(source).then_some(source)
     }
+}
+
+/// Validate `path` and produce content-path lookup candidates.
+///
+/// - Returns [`SourceIssue::NoDirectory`] for an empty `path`.
+/// - Runs libtorrent and invisible sanitizers, warning on stripped characters.
+/// - Returns [`SourceIssue::InvalidFilePath`] if any candidate is not a single safe segment.
+/// - Deduplicates while preserving raw-first order.
+fn safe_candidates(path: &str) -> Result<Vec<String>, SourceIssue> {
+    if path.is_empty() {
+        return Err(SourceIssue::NoDirectory);
+    }
+    let libtorrent = Sanitizer::libtorrent().execute(path.to_owned());
+    let invisible = Sanitizer::invisible().execute(path.to_owned());
+    let mut found: HashSet<SanitizerChar> = HashSet::new();
+    found.extend(libtorrent.found.iter().copied());
+    found.extend(invisible.found.iter().copied());
+    if !found.is_empty() {
+        let chars: Vec<&SanitizerChar> = found.iter().collect();
+        warn!(
+            "Invisible characters in source path: {}",
+            join_humanized(chars)
+        );
+    }
+    let candidates = [path.to_owned(), libtorrent.output, invisible.output];
+    if !candidates.iter().all(|c| is_single_safe_segment(c)) {
+        return Err(SourceIssue::InvalidFilePath {
+            path: path.to_owned(),
+        });
+    }
+    let mut unique: Vec<String> = Vec::with_capacity(candidates.len());
+    for candidate in candidates {
+        if !unique.contains(&candidate) {
+            unique.push(candidate);
+        }
+    }
+    Ok(unique)
+}
+
+/// Whether `path` is a single normal path segment with no backslash.
+///
+/// - Empty or pure-whitespace strings return `false`.
+/// - Backslashes are rejected explicitly so behavior matches across Linux and Windows
+///   (Windows treats `\` as a path separator, Linux does not).
+/// - Anything other than exactly one [`Component::Normal`] returns `false`.
+fn is_single_safe_segment(path: &str) -> bool {
+    if path.contains('\\') {
+        return false;
+    }
+    if path.trim().is_empty() {
+        return false;
+    }
+    let mut components = Path::new(path).components();
+    let Some(Component::Normal(_)) = components.next() else {
+        return false;
+    };
+    components.next().is_none()
 }

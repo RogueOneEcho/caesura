@@ -4,6 +4,10 @@ use gazelle_api::GazelleSerializableError::*;
 
 #[test]
 #[allow(deprecated)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "flat enumeration of variants and expected YAML"
+)]
 fn source_issue_serialization() -> Result<(), YamlError> {
     // Arrange
     let example = vec![
@@ -54,6 +58,10 @@ fn source_issue_serialization() -> Result<(), YamlError> {
                 message: None,
             },
         },
+        SourceIssue::NoDirectory,
+        SourceIssue::InvalidFilePath {
+            path: "./bad".to_owned(),
+        },
     ];
     let expected = "- type: id_error
   details: Hello, world!
@@ -96,6 +104,9 @@ fn source_issue_serialization() -> Result<(), YamlError> {
     type: other
     status: 500
     message: null
+- type: no_directory
+- type: invalid_file_path
+  path: ./bad
 ";
 
     // Act
@@ -233,6 +244,10 @@ fn source_issue_is_reportable() {
         SourceIssue::Trumpable,
         SourceIssue::MissingDirectory {
             path: PathBuf::from("/x"),
+        },
+        SourceIssue::NoDirectory,
+        SourceIssue::InvalidFilePath {
+            path: "./bad".to_owned(),
         },
     ];
     for issue in reportable {

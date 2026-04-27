@@ -61,6 +61,10 @@ pub enum SourceIssue {
     MissingDirectory {
         path: PathBuf,
     },
+    NoDirectory,
+    InvalidFilePath {
+        path: String,
+    },
     UnnecessaryDirectory {
         prefix: PathBuf,
     },
@@ -175,6 +179,8 @@ impl SourceIssue {
             MissingDirectory { path } => {
                 format!("Directory not found: {}", format_path(path, styled))
             }
+            NoDirectory => "Torrent has no enclosing directory".to_owned(),
+            InvalidFilePath { path } => format!("Invalid file path: {path}"),
             UnnecessaryDirectory { prefix } => {
                 format!(
                     "Unnecessary nested directory: {}",

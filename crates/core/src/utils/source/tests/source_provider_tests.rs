@@ -1,7 +1,7 @@
 use crate::testing_prelude::*;
 
 #[tokio::test]
-async fn get_finds_directory_with_exact_path() -> Result<(), TestError> {
+async fn source_provider_get_exact_path() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
@@ -20,7 +20,7 @@ async fn get_finds_directory_with_exact_path() -> Result<(), TestError> {
 }
 
 #[tokio::test]
-async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), TestError> {
+async fn source_provider_get_path_with_bidi_characters() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
@@ -40,7 +40,7 @@ async fn get_finds_directory_when_api_path_has_bidi_characters() -> Result<(), T
 }
 
 #[tokio::test]
-async fn get_returns_missing_directory_when_path_not_found() -> Result<(), TestError> {
+async fn source_provider_get_path_not_found() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let _album = AlbumProvider::get(SampleFormat::default()).await;
@@ -54,6 +54,49 @@ async fn get_returns_missing_directory_when_path_not_found() -> Result<(), TestE
     // Assert
     let inner = result?;
     assert!(matches!(inner, Err(SourceIssue::MissingDirectory { .. })));
+    Ok(())
+}
+
+#[tokio::test]
+async fn source_provider_get_empty_file_path() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let host = build_host(&test_dir, mock_api("")).await;
+    let provider = host.services.get_required::<SourceProvider>();
+
+    // Act
+    let result = provider.get(AlbumConfig::TORRENT_ID).await;
+
+    // Assert
+    let inner = result?;
+    assert!(matches!(inner, Err(SourceIssue::NoDirectory)));
+    Ok(())
+}
+
+#[tokio::test]
+async fn source_provider_get_unsafe_file_path() -> Result<(), TestError> {
+    // Arrange
+    init_logger();
+    let inputs = [
+        "   ", "\u{200B}", "//", ".", "..", "./Foo", "../Foo", "/etc", "Foo/Bar", "a\\b",
+    ];
+
+    for input in inputs {
+        let test_dir = TestDirectory::new();
+        let host = build_host(&test_dir, mock_api(input)).await;
+        let provider = host.services.get_required::<SourceProvider>();
+
+        // Act
+        let result = provider.get(AlbumConfig::TORRENT_ID).await;
+
+        // Assert
+        let inner = result?;
+        assert!(
+            matches!(&inner, Err(SourceIssue::InvalidFilePath { path }) if path == input),
+            "input {input:?} expected InvalidFilePath with matching path, got {inner:?}"
+        );
+    }
     Ok(())
 }
 
