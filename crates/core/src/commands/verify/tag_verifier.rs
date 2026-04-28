@@ -62,10 +62,15 @@ pub(crate) fn check_title_tag(tags: &Tag) -> Option<String> {
     None
 }
 
-/// Check the composer tag is present when the source is classical.
+/// Check the composer tag is present when the source is classical with credited composers.
 pub(crate) fn check_composer_tag(tags: &Tag, source: &Source) -> Option<String> {
     let is_classical = source.group.tags.contains(&"classical".to_owned());
-    if is_classical && tags.get(Composer).is_none() {
+    let has_composers = source
+        .group
+        .music_info
+        .as_ref()
+        .is_some_and(|info| !info.composers.is_empty());
+    if is_classical && has_composers && tags.get(Composer).is_none() {
         return Some("composer".to_owned());
     }
     None
