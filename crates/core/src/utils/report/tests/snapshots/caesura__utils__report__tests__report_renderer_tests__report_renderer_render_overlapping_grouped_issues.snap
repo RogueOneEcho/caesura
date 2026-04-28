@@ -9,15 +9,39 @@ expression: output
 
 ## Suggested reports
 
+- **Trumpable**
 - **Bad Tags**
+- **Mislabeled**
 
 ## Report body
 
 Paste the block below into the "Comments" field of the report form.
 
 ```
+FLAC stream error: bad header:
+- "01. Track.flac"
+- "03. Track.flac"
+- "05. Track.flac"
+
+Missing tags: album:
+- "CD1/01. Track.flac"
+- "CD2/01. Disk 2 track.flac"
+- "CD2/03. Disk 2 track.flac"
+
+Missing tags: artist:
+- "03. Track.flac"
+- "10. Track.flac"
+
+Missing tags: track number, artist:
+- "01. Track.flac"
+- "05. Track.flac"
+- "08. Track.flac"
+
 No tags:
-- "/content/Artist - Album [2024]/02 - Track.flac"
+- "CD1/01. Track.flac"
+
+Unnecessary nested directory:
+- ""
 
 [code]caesura inspect "content"[/code]
 

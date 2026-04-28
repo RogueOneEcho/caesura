@@ -39,10 +39,8 @@ impl VerifyCommand {
         if result.verified() {
             info!("{} {id}", "Verified".bold());
         } else {
-            warn!("{} for transcoding {id}", "Unsuitable".bold());
-            for issue in &result.issues {
-                warn!("{issue}");
-            }
+            let issues = SourceIssuesRenderer::render(&result.issues, &source.directory);
+            warn!("{} for transcoding {id}\n{issues}", "Unsuitable".bold());
         }
         Ok(result.verified())
     }

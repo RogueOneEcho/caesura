@@ -266,13 +266,6 @@ fn source_issue_report_type() {
 }
 
 #[test]
-fn source_issue_report_label() {
-    let issues = report_sample_issues();
-    let output: Vec<_> = issues.iter().map(SourceIssue::report_label).collect();
-    assert_yaml_snapshot!(output);
-}
-
-#[test]
 fn source_issue_affected_paths() {
     // Arrange
     let path = PathBuf::from("/a.flac");
@@ -283,6 +276,70 @@ fn source_issue_affected_paths() {
 
     // Assert
     assert_eq!(output, vec![path.as_path()]);
+}
+
+#[test]
+fn source_issue_render_no_path() {
+    // Arrange
+    let same_tags_a = SourceIssue::MissingTags {
+        path: PathBuf::from("/a/01.flac"),
+        tags: vec!["artist".to_owned()],
+    };
+    let same_tags_b = SourceIssue::MissingTags {
+        path: PathBuf::from("/b/02.flac"),
+        tags: vec!["artist".to_owned()],
+    };
+    let different_tags = SourceIssue::MissingTags {
+        path: PathBuf::from("/c/03.flac"),
+        tags: vec!["artist".to_owned(), "track number".to_owned()],
+    };
+    let no_tags = SourceIssue::NoTags {
+        path: PathBuf::from("/a/01.flac"),
+    };
+    let flac_error_a = SourceIssue::FlacError {
+        path: PathBuf::from("/a/01.flac"),
+        error: "bad header".to_owned(),
+    };
+    let flac_error_b = SourceIssue::FlacError {
+        path: PathBuf::from("/b/02.flac"),
+        error: "bad header".to_owned(),
+    };
+    let flac_error_different = SourceIssue::FlacError {
+        path: PathBuf::from("/c/03.flac"),
+        error: "corrupt frame".to_owned(),
+    };
+
+    // Assert
+    assert_eq!(
+        same_tags_a.render(PathStyle::None),
+        same_tags_b.render(PathStyle::None)
+    );
+    assert_ne!(
+        same_tags_a.render(PathStyle::None),
+        different_tags.render(PathStyle::None)
+    );
+    assert_ne!(
+        same_tags_a.render(PathStyle::None),
+        no_tags.render(PathStyle::None)
+    );
+    assert_eq!(
+        flac_error_a.render(PathStyle::None),
+        flac_error_b.render(PathStyle::None)
+    );
+    assert_ne!(
+        flac_error_a.render(PathStyle::None),
+        flac_error_different.render(PathStyle::None)
+    );
+    assert_eq!(same_tags_a.render(PathStyle::None), "Missing tags: artist");
+    assert_eq!(
+        different_tags.render(PathStyle::None),
+        "Missing tags: artist, track number"
+    );
+    assert_eq!(no_tags.render(PathStyle::None), "No tags");
+    assert_eq!(
+        flac_error_a.render(PathStyle::None),
+        "FLAC stream error: bad header"
+    );
 }
 
 fn report_sample_issues() -> Vec<SourceIssue> {
