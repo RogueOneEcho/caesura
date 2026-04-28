@@ -56,3 +56,25 @@ async fn report_renderer_render_multiple_issue_types() {
     // Assert
     assert_snapshot!(output);
 }
+
+#[tokio::test]
+async fn report_renderer_render_overlapping_grouped_issues() {
+    // Arrange
+    let mut builder = HostBuilder::new();
+    let _ = builder.with_options(SharedOptions {
+        indexer_url: "https://example.com".to_owned(),
+        ..SharedOptions::mock()
+    });
+    let host = builder.expect_build();
+    let renderer = host.services.get_required::<ReportRenderer>();
+    let source = Source::mock();
+    let issues = SourceIssuesRenderer::mock(&source.directory);
+
+    // Act
+    let output = renderer
+        .render(&source, &issues)
+        .expect("render should succeed");
+
+    // Assert
+    assert_snapshot!(output);
+}

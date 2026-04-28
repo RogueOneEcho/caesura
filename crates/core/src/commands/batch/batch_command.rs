@@ -130,11 +130,13 @@ impl BatchCommand {
             if success.verified() {
                 debug!("{} {}", "Verified".bold(), source);
             } else {
+                let issues = SourceIssuesRenderer::render(&success.issues, &source.directory);
                 debug!("{} {source}", "Skipping".bold());
-                debug!("{} for transcoding {}", "Unsuitable".bold(), source);
-                for issue in &success.issues {
-                    debug!("{issue}");
-                }
+                debug!(
+                    "{} for transcoding {}\n{issues}",
+                    "Unsuitable".bold(),
+                    source
+                );
             }
             let verified = success.verified();
             item.verify = Some(VerifyStatus::from_success(success));

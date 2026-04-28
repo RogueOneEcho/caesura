@@ -39,7 +39,6 @@ impl ReportRenderer {
         inspect: Option<&str>,
     ) -> FmtResult {
         self.write_header(out, source)?;
-        write_detected_issues(out, issues)?;
         write_suggested_reports(out, source, issues)?;
         write_body(out, source, issues, inspect)?;
         Ok(())
@@ -60,16 +59,6 @@ impl ReportRenderer {
         writeln!(out)?;
         Ok(())
     }
-}
-
-fn write_detected_issues(out: &mut String, issues: &[SourceIssue]) -> FmtResult {
-    writeln!(out, "## Detected issues")?;
-    writeln!(out)?;
-    for issue in issues {
-        writeln!(out, "- {}", issue.render(false))?;
-    }
-    writeln!(out)?;
-    Ok(())
 }
 
 fn write_suggested_reports(out: &mut String, source: &Source, issues: &[SourceIssue]) -> FmtResult {
@@ -113,17 +102,11 @@ fn write_body(
     )?;
     writeln!(out)?;
     writeln!(out, "```")?;
-    for issue in issues {
-        writeln!(out, "{}:", issue.report_label())?;
-        for path in issue.affected_paths() {
-            let name = path.file_name().map_or_else(
-                || path.display().to_string(),
-                |file_name| file_name.to_string_lossy().into_owned(),
-            );
-            writeln!(out, "- \"{name}\"")?;
-        }
-        writeln!(out)?;
-    }
+    writeln!(
+        out,
+        "{}",
+        SourceIssuesRenderer::render(issues, &source.directory)
+    )?;
     let dir_name = source.directory.file_name().map_or_else(
         || source.directory.display().to_string(),
         |file_name| file_name.to_string_lossy().into_owned(),
