@@ -1,20 +1,23 @@
 use crate::testing_prelude::*;
 
 #[test]
-fn get_numeric_from_total_format_slash_separated() {
-    assert_eq!(get_numeric_from_total_format("1/1"), Some((1, 1)));
-    assert_eq!(get_numeric_from_total_format("1/12"), Some((1, 12)));
-    assert_eq!(get_numeric_from_total_format("2/6"), Some((2, 6)));
-    assert_eq!(get_numeric_from_total_format("3/8"), Some((3, 8)));
-    assert_eq!(get_numeric_from_total_format("26/9"), Some((26, 9)));
+fn get_numeric_from_slash_total_format_valid() {
+    assert_eq!(get_numeric_from_slash_total_format("1/1"), Some((1, 1)));
+    assert_eq!(get_numeric_from_slash_total_format("1/12"), Some((1, 12)));
+    assert_eq!(get_numeric_from_slash_total_format("2/6"), Some((2, 6)));
+    assert_eq!(get_numeric_from_slash_total_format("3/8"), Some((3, 8)));
+    assert_eq!(get_numeric_from_slash_total_format("26/9"), Some((26, 9)));
+    assert_eq!(get_numeric_from_slash_total_format("3 / 12"), Some((3, 12)));
+    assert_eq!(get_numeric_from_slash_total_format("1 /10"), Some((1, 10)));
+    assert_eq!(get_numeric_from_slash_total_format("01/ 12"), Some((1, 12)));
 }
 
 #[test]
-fn get_numeric_from_total_format_missing_slash() {
-    assert_eq!(get_numeric_from_total_format(""), None);
-    assert_eq!(get_numeric_from_total_format("1"), None);
-    assert_eq!(get_numeric_from_total_format("12"), None);
-    assert_eq!(get_numeric_from_total_format("0"), None);
+fn get_numeric_from_slash_total_format_invalid() {
+    assert_eq!(get_numeric_from_slash_total_format(""), None);
+    assert_eq!(get_numeric_from_slash_total_format("1"), None);
+    assert_eq!(get_numeric_from_slash_total_format("12"), None);
+    assert_eq!(get_numeric_from_slash_total_format("0"), None);
 }
 
 #[test]
@@ -33,6 +36,25 @@ fn get_numeric_from_vinyl_format_no_letter() {
     assert_eq!(get_numeric_from_vinyl_format(""), None);
     assert_eq!(get_numeric_from_vinyl_format("12"), None);
     assert_eq!(get_numeric_from_vinyl_format("1A"), None);
+}
+
+#[test]
+fn get_numeric_from_of_total_format_valid() {
+    assert_eq!(get_numeric_from_of_total_format("1 of 10"), Some((1, 10)));
+    assert_eq!(get_numeric_from_of_total_format("01 of 12"), Some((1, 12)));
+    assert_eq!(get_numeric_from_of_total_format("2 of 6"), Some((2, 6)));
+    assert_eq!(get_numeric_from_of_total_format("1  of  10"), Some((1, 10)));
+    assert_eq!(get_numeric_from_of_total_format("1of10"), Some((1, 10)));
+    assert_eq!(get_numeric_from_of_total_format("1 of10"), Some((1, 10)));
+    assert_eq!(get_numeric_from_of_total_format("1of  10"), Some((1, 10)));
+}
+
+#[test]
+fn get_numeric_from_of_total_format_invalid() {
+    assert_eq!(get_numeric_from_of_total_format(""), None);
+    assert_eq!(get_numeric_from_of_total_format("1"), None);
+    assert_eq!(get_numeric_from_of_total_format("1 of"), None);
+    assert_eq!(get_numeric_from_of_total_format("of 10"), None);
 }
 
 /// Regression test for lofty 0.23.3 bug where `save_to_path` left stale bytes

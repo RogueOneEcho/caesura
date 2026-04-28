@@ -1,0 +1,228 @@
+---
+source: crates/core/src/commands/transcode/tests/rename_tracks_tests.rs
+expression: snapshot
+---
+- directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
+  filename: 1 First Track.mp3
+  size: 2604846
+  sha256: 586bf4fcca70ee84c7fe2379255a76fb8360e70288fa92423b645aca41376534
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: First Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
+  filename: 2 Second Track.mp3
+  size: 2604847
+  sha256: be44bc8e809c48e8b9f2ffa02c7d06991a3c6f907e6cadf86844b901bd2add47
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Second Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
+  filename: 3 Third Track.mp3
+  size: 2604846
+  sha256: c4c3d481267552a51b446185e1bdf46c6bd8f17a076ed87e87b126f3a5248eed
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "3"
+        TrackTitle: Third Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
+  filename: 4 Fourth Track.mp3
+  size: 2604847
+  sha256: bf76ff4c51b901295af5cd6afba77718766e9042e05f28ea8f1b6d71e34659a0
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 320
+    audio_bitrate: 320
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "4"
+        TrackTitle: Fourth Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8
+- directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
+  filename: 1 First Track.mp3
+  size: 786189
+  sha256: b84ea15d1640a952ba31aac633663880a1b139d4a34282e1313ee06cbae5855c
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "1"
+        TrackTitle: First Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
+  filename: 2 Second Track.mp3
+  size: 764870
+  sha256: 4906230c640125c428fd35ec7c945093ff9de5b1fbf99c1d01f1b768f3d06a9f
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 94
+    audio_bitrate: 93
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "2"
+        TrackTitle: Second Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
+  filename: 3 Third Track.mp3
+  size: 784916
+  sha256: 754e7425fd012fad53e7a04f93b8dacc89e7a185790fd042ee212c251ab42fc8
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 96
+    audio_bitrate: 96
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "3"
+        TrackTitle: Third Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
+  filename: 4 Fourth Track.mp3
+  size: 755693
+  sha256: 302980565456bdde46bfc064d4ca3a07eeb373c4fd94a1e4f599f0a02bb699b3
+  audio:
+    duration_ms: 65045
+    overall_bitrate: 92
+    audio_bitrate: 92
+    sample_rate: 44100
+    bit_depth: ~
+    channels: 2
+    channel_mask: 3
+    tags:
+      Id3v2:
+        AlbumTitle: Of Total Album
+        RecordingDate: "2024"
+        TrackArtist: Rename Artist
+        TrackNumber: "4"
+        TrackTitle: Fourth Track
+        TrackTotal: "4"
+    pictures:
+      - picture_type: CoverFront
+        mime_type: Png
+        description: ~
+        size: 849
+        sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+- directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
+  filename: cover.png
+  size: 849
+  sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
+  image:
+    width: 100
+    height: 100
+    color_type: Rgb8

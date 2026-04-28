@@ -262,6 +262,47 @@ impl AlbumConfig {
         }
     }
 
+    /// Create an album with "N of M" track numbers (1 of 4, 2 of 4, etc.).
+    pub fn of_total_tracks() -> Self {
+        Self {
+            artist: "Rename Artist",
+            album: "Of Total Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            use_disc_subdirs: false,
+            tracks: vec![
+                TrackConfig {
+                    title: "First Track",
+                    track_number: "1 of 4",
+                    disc_number: None,
+                    frequency: 440,
+                    duration_secs: None,
+                },
+                TrackConfig {
+                    title: "Second Track",
+                    track_number: "2 of 4",
+                    disc_number: None,
+                    frequency: 550,
+                    duration_secs: None,
+                },
+                TrackConfig {
+                    title: "Third Track",
+                    track_number: "3 of 4",
+                    disc_number: None,
+                    frequency: 660,
+                    duration_secs: None,
+                },
+                TrackConfig {
+                    title: "Fourth Track",
+                    track_number: "4 of 4",
+                    disc_number: None,
+                    frequency: 770,
+                    duration_secs: None,
+                },
+            ],
+        }
+    }
+
     /// Create an album with a 30-second track for testing zoom spectrogram behavior
     /// on tracks shorter than the standard 60-second start position.
     pub fn track_30s() -> Self {

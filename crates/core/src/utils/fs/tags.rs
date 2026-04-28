@@ -20,9 +20,15 @@ static VINYL_REGEX: LazyLock<Regex> =
 
 /// Match `{track}/{total}` numbering format.
 ///
-/// Example: `3/12`, `01/10`
-static TOTAL_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(\d+)/(\d+)$").expect("regex should compile"));
+/// Example: `3/12`, `01/10`, `3 / 12`
+static SLASH_TOTAL_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(\d+)\s*/\s*(\d+)$").expect("regex should compile"));
+
+/// Match `{track} of {total}` numbering format.
+///
+/// Example: `1 of 10`, `01 of 12`, `1of10`
+static OF_TOTAL_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(\d+)\s*of\s*(\d+)$").expect("regex should compile"));
 
 /// Read Vorbis comment tags from a FLAC file.
 pub(crate) fn get_vorbis_tags(flac: &FlacFile) -> Result<Tag, Failure<TagsAction>> {
@@ -48,12 +54,15 @@ pub(crate) fn convert_to_id3v2(tags: &mut Tag) {
 /// Ensure tags contain a numeric track number.
 ///
 /// - Returns `true` if a numeric track number is already present or was successfully parsed
-/// - Attempts `"track/total"` format first, then vinyl format
+/// - Attempts slash format, "of" format, then vinyl format
 pub(crate) fn fix_track_numbering(tags: &mut Tag) -> bool {
     if tags.track().is_some() {
         return true;
     }
-    if replace_total_track_numbering(tags).is_ok() {
+    if replace_slash_total_track_numbering(tags).is_ok() {
+        return true;
+    }
+    if replace_of_total_track_numbering(tags).is_ok() {
         return true;
     }
     if replace_vinyl_track_numbering(tags).is_ok() {
@@ -77,15 +86,31 @@ fn replace_vinyl_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsActio
     Ok(())
 }
 
-fn replace_total_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
+fn replace_slash_total_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
     let track = tags
         .get_string(TrackNumber)
         .ok_or_else(|| Failure::new(TagsAction::ReadTags, TagsError::NoTrackNumber))?;
-    let (track_number, track_total) = get_numeric_from_total_format(track).ok_or_else(|| {
+    let (track_number, track_total) =
+        get_numeric_from_slash_total_format(track).ok_or_else(|| {
+            Failure::new(TagsAction::ReadTags, TagsError::InvalidFormat).with("track", track)
+        })?;
+    trace!(
+        "Replacing total track numbering ({track}) with numeric: track {track_number}, total {track_total}"
+    );
+    tags.set_track(track_number);
+    tags.set_track_total(track_total);
+    Ok(())
+}
+
+fn replace_of_total_track_numbering(tags: &mut Tag) -> Result<(), Failure<TagsAction>> {
+    let track = tags
+        .get_string(TrackNumber)
+        .ok_or_else(|| Failure::new(TagsAction::ReadTags, TagsError::NoTrackNumber))?;
+    let (track_number, track_total) = get_numeric_from_of_total_format(track).ok_or_else(|| {
         Failure::new(TagsAction::ReadTags, TagsError::InvalidFormat).with("track", track)
     })?;
     trace!(
-        "Replacing total track numbering ({track}) with numeric: track {track_number}, total {track_total}"
+        "Replacing of-total track numbering ({track}) with numeric: track {track_number}, total {track_total}"
     );
     tags.set_track(track_number);
     tags.set_track_total(track_total);
@@ -108,8 +133,16 @@ pub(crate) fn get_numeric_from_vinyl_format(input: &str) -> Option<(u32, u32)> {
 }
 
 /// Parse `"track/total"` format into `(track, total)`.
-pub(crate) fn get_numeric_from_total_format(input: &str) -> Option<(u32, u32)> {
-    let captures = TOTAL_REGEX.captures(input)?;
+pub(crate) fn get_numeric_from_slash_total_format(input: &str) -> Option<(u32, u32)> {
+    let captures = SLASH_TOTAL_REGEX.captures(input)?;
+    let track_number: u32 = captures.get(1)?.as_str().parse().ok()?;
+    let track_total: u32 = captures.get(2)?.as_str().parse().ok()?;
+    Some((track_number, track_total))
+}
+
+/// Parse `"track of total"` format into `(track, total)`.
+pub(crate) fn get_numeric_from_of_total_format(input: &str) -> Option<(u32, u32)> {
+    let captures = OF_TOTAL_REGEX.captures(input)?;
     let track_number: u32 = captures.get(1)?.as_str().parse().ok()?;
     let track_total: u32 = captures.get(2)?.as_str().parse().ok()?;
     Some((track_number, track_total))

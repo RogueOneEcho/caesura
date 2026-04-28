@@ -64,6 +64,17 @@ async fn transcode_rename_tracks_vinyl_numbering() {
     assert_yaml_snapshot!(snapshot);
 }
 
+/// Test `rename_tracks` with "N of M" track numbers (1 of 4, 2 of 4, etc.).
+///
+/// The `fix_track_numbering` logic converts "of" notation to proper track numbers
+/// and track totals in the cached ID3 tags.
+#[tokio::test]
+async fn transcode_rename_tracks_of_total_numbering() {
+    let snapshot = rename_tracks_helper(AlbumConfig::of_total_tracks()).await;
+    let snapshot = normalize_snapshots!(snapshot);
+    assert_yaml_snapshot!(snapshot);
+}
+
 async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
     init_logger();
     let config = AlbumProvider::get_advanced(config).await;
