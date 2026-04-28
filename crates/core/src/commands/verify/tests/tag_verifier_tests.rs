@@ -1,4 +1,5 @@
 use crate::testing_prelude::*;
+use gazelle_api::{Credit, Credits};
 use lofty::tag::{Accessor, ItemKey, ItemValue, Tag, TagItem, TagType};
 
 fn full_tags() -> Tag {
@@ -22,6 +23,13 @@ fn minimal_tags() -> Tag {
 fn classical_source() -> Source {
     let mut source = Source::mock();
     source.group.tags = vec!["classical".to_owned()];
+    source.group.music_info = Some(Credits {
+        composers: vec![Credit {
+            id: 12345,
+            name: "Test Composer".to_owned(),
+        }],
+        ..Credits::default()
+    });
     source
 }
 
@@ -95,6 +103,14 @@ fn check_composer_tag_classical_missing() {
 fn check_composer_tag_not_classical() {
     let tags = minimal_tags();
     let source = Source::mock();
+    assert_eq!(check_composer_tag(&tags, &source), None);
+}
+
+#[test]
+fn check_composer_tag_classical_no_credited_composers() {
+    let tags = minimal_tags();
+    let mut source = Source::mock();
+    source.group.tags = vec!["classical".to_owned()];
     assert_eq!(check_composer_tag(&tags, &source), None);
 }
 
