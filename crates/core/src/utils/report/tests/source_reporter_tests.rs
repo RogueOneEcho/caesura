@@ -140,3 +140,99 @@ async fn source_reporter_execute_missing_dir() {
     let files: Vec<_> = reports_dir.read_dir().expect("read reports dir").collect();
     assert_eq!(files.len(), 1, "expected exactly one report file");
 }
+
+#[tokio::test]
+async fn source_reporter_execute_blocked_by_hash_check() {
+    // Arrange
+    let test_dir = TestDirectory::new();
+    let reports_dir = test_dir.reports();
+    let host = HostBuilder::new()
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let reporter = host.services.get_required::<SourceReporter>();
+    let source = Source::mock();
+    let issues = vec![
+        reportable_issue(),
+        SourceIssue::HashCheck { piece_index: 0 },
+    ];
+
+    // Act
+    reporter
+        .execute(&source, &issues)
+        .expect("execute should succeed");
+
+    // Assert
+    assert!(!reports_dir.exists(), "expected no reports directory");
+}
+
+#[tokio::test]
+async fn source_reporter_execute_blocked_by_trumpable() {
+    // Arrange
+    let test_dir = TestDirectory::new();
+    let reports_dir = test_dir.reports();
+    let host = HostBuilder::new()
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let reporter = host.services.get_required::<SourceReporter>();
+    let source = Source::mock();
+    let issues = vec![reportable_issue(), SourceIssue::Trumpable];
+
+    // Act
+    reporter
+        .execute(&source, &issues)
+        .expect("execute should succeed");
+
+    // Assert
+    assert!(!reports_dir.exists(), "expected no reports directory");
+}
+
+#[tokio::test]
+async fn source_reporter_execute_blocked_by_hash_check_skipped() {
+    // Arrange
+    let test_dir = TestDirectory::new();
+    let reports_dir = test_dir.reports();
+    let host = HostBuilder::new()
+        .with_test_options(&test_dir)
+        .await
+        .with_options(VerifyOptions {
+            no_hash_check: true,
+            exclude_tags: None,
+        })
+        .expect_build();
+    let reporter = host.services.get_required::<SourceReporter>();
+    let source = Source::mock();
+    let issues = vec![reportable_issue()];
+
+    // Act
+    reporter
+        .execute(&source, &issues)
+        .expect("execute should succeed");
+
+    // Assert
+    assert!(!reports_dir.exists(), "expected no reports directory");
+}
+
+#[tokio::test]
+async fn source_reporter_execute_not_blocked_by_scene() {
+    // Arrange
+    let test_dir = TestDirectory::new();
+    let reports_dir = test_dir.reports();
+    let host = HostBuilder::new()
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let reporter = host.services.get_required::<SourceReporter>();
+    let source = Source::mock();
+    let issues = vec![reportable_issue(), SourceIssue::Scene];
+    let expected = reports_dir.join(format!("red-{}.md", source.torrent.id));
+
+    // Act
+    reporter
+        .execute(&source, &issues)
+        .expect("execute should succeed");
+
+    // Assert
+    assert!(expected.exists(), "expected report file {expected:?}");
+}

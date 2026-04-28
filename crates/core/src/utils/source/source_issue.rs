@@ -286,7 +286,6 @@ pub(crate) enum PathStyle {
     /// ANSI styled (dimmed gray).
     Styled,
     /// Plain text.
-    #[expect(dead_code, reason = "useful")]
     Plain,
     /// Omit the path entirely.
     None,
