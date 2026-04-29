@@ -2,6 +2,7 @@ use crate::prelude::*;
 use claxon::Error as ClaxonError;
 use claxon::FlacReader;
 use claxon::metadata::StreamInfo;
+use lofty::id3::v2::Id3v2Tag;
 use lofty::tag::Tag;
 use once_cell::sync::OnceCell;
 
@@ -16,9 +17,14 @@ pub struct FlacFile {
     /// Subdirectory of the file.
     pub sub_dir: PathBuf,
 
+    /// Cached raw Vorbis tags.
+    ///
+    /// Lazily loaded. Uses thread-safe `OnceCell`.
+    vorbis_tags: OnceCell<Tag>,
+
     /// Cached ID3 tags.
     ///
-    /// Lazily loaded, converted from Vorbis. Uses thread-safe `OnceCell`.
+    /// Lazily loaded, round-tripped through `Id3v2Tag`. Uses thread-safe `OnceCell`.
     id3_tags: OnceCell<Tag>,
 
     /// Disc context for track renaming.
@@ -49,19 +55,30 @@ impl FlacFile {
             path,
             file_name,
             sub_dir,
+            vorbis_tags: OnceCell::new(),
             id3_tags: OnceCell::new(),
             disc_context: None,
         }
     }
 
-    /// Get cached ID3 tags, converting from Vorbis and fixing track numbering.
+    /// Get cached raw Vorbis tags without any conversion.
+    pub fn vorbis_tags(&self) -> Result<&Tag, Failure<TranscodeAction>> {
+        self.vorbis_tags.get_or_try_init(|| {
+            get_vorbis_tags(self).map_err(Failure::wrap(TranscodeAction::GetTags))
+        })
+    }
+
+    /// Get cached ID3 tags, round-tripped through [`Id3v2Tag`] conversion.
+    ///
+    /// Values that cannot be represented in `ID3v2` format (e.g. non-numeric
+    /// track numbers) are dropped during the round-trip, matching the
+    /// behavior of [`save_id3v2_deterministic`].
     pub fn id3_tags(&self) -> Result<&Tag, Failure<TranscodeAction>> {
         self.id3_tags.get_or_try_init(|| {
-            let mut tags =
-                get_vorbis_tags(self).map_err(Failure::wrap(TranscodeAction::GetTags))?;
-            convert_to_id3v2(&mut tags);
-            let _ = fix_track_numbering(&mut tags);
-            Ok(tags)
+            let mut tags = self.vorbis_tags()?.clone();
+            fix_track_numbering(&mut tags);
+            let id3 = Id3v2Tag::from(tags);
+            Ok(Tag::from(id3))
         })
     }
 

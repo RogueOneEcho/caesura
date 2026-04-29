@@ -1,41 +1,64 @@
 use crate::prelude::*;
 use lofty::prelude::Accessor;
-use lofty::prelude::ItemKey::Composer;
-use lofty::tag::Tag;
+use lofty::tag::{ItemKey, Tag};
 
 /// Verify FLAC files have required metadata tags.
 pub(crate) struct TagVerifier;
 
 impl TagVerifier {
-    /// Verify required tags on a FLAC file and return any missing tag issue.
+    /// Verify required tags on a FLAC file and return any tag issues.
+    ///
+    /// Checks both raw Vorbis tags (presence) and `ID3v2` tags (convertibility).
+    /// Tags missing from Vorbis produce [`SourceIssue::MissingTags`].
+    /// Tags present in Vorbis but lost during `ID3v2` conversion produce
+    /// [`SourceIssue::InvalidTags`].
     pub(crate) fn execute(
         flac: &FlacFile,
         source: &Source,
-    ) -> Result<Option<SourceIssue>, Failure<TranscodeAction>> {
-        let tags = match flac.id3_tags() {
+    ) -> Result<Vec<SourceIssue>, Failure<TranscodeAction>> {
+        let vorbis = match flac.vorbis_tags() {
             Ok(tags) => tags,
             Err(failure) if is_no_vorbis_comments(&failure) => {
-                return Ok(Some(SourceIssue::NoTags {
+                return Ok(vec![SourceIssue::NoTags {
                     path: flac.path.clone(),
-                }));
+                }]);
             }
             Err(failure) => return Err(failure),
         };
-        let mut missing = Vec::new();
-        missing.extend(check_artist_tag(tags));
-        missing.extend(check_album_tag(tags));
-        missing.extend(check_title_tag(tags));
-        missing.extend(check_composer_tag(tags, source));
-        missing.extend(check_track_number_tag(tags));
-        missing.extend(check_disc_number_tag(tags, flac));
-        if missing.is_empty() {
-            return Ok(None);
+        let id3 = flac.id3_tags()?;
+        let vorbis_missing = collect_missing(vorbis, source, flac);
+        let id3_missing = collect_missing(id3, source, flac);
+        let invalid: Vec<String> = id3_missing
+            .into_iter()
+            .filter(|tag| !vorbis_missing.contains(tag))
+            .collect();
+        let mut issues = Vec::new();
+        if !vorbis_missing.is_empty() {
+            issues.push(SourceIssue::MissingTags {
+                path: flac.path.clone(),
+                tags: vorbis_missing,
+            });
         }
-        Ok(Some(SourceIssue::MissingTags {
-            path: flac.path.clone(),
-            tags: missing,
-        }))
+        if !invalid.is_empty() {
+            issues.push(SourceIssue::InvalidTags {
+                path: flac.path.clone(),
+                tags: invalid,
+            });
+        }
+        Ok(issues)
     }
+}
+
+/// Collect tag names that are missing from the given tags.
+fn collect_missing(tags: &Tag, source: &Source, flac: &FlacFile) -> Vec<String> {
+    let mut missing = Vec::new();
+    missing.extend(check_artist_tag(tags));
+    missing.extend(check_album_tag(tags));
+    missing.extend(check_title_tag(tags));
+    missing.extend(check_composer_tag(tags, source));
+    missing.extend(check_track_number_tag(tags));
+    missing.extend(check_disc_number_tag(tags, flac));
+    missing
 }
 
 /// Check the artist tag is present.
@@ -70,15 +93,15 @@ pub(crate) fn check_composer_tag(tags: &Tag, source: &Source) -> Option<String> 
         .music_info
         .as_ref()
         .is_some_and(|info| !info.composers.is_empty());
-    if is_classical && has_composers && tags.get(Composer).is_none() {
+    if is_classical && has_composers && tags.get(ItemKey::Composer).is_none() {
         return Some("composer".to_owned());
     }
     None
 }
 
-/// Check the track number tag is present.
+/// Check the track number tag is present as a string value.
 pub(crate) fn check_track_number_tag(tags: &Tag) -> Option<String> {
-    if tags.track().is_none() {
+    if tags.get_string(ItemKey::TrackNumber).is_none() {
         return Some("track_number".to_owned());
     }
     None
@@ -90,7 +113,7 @@ pub(crate) fn check_disc_number_tag(tags: &Tag, flac: &FlacFile) -> Option<Strin
         .disc_context
         .as_ref()
         .is_some_and(|ctx| ctx.is_multi_disc);
-    if is_multi_disc && tags.disk().is_none() {
+    if is_multi_disc && tags.get_string(ItemKey::DiscNumber).is_none() {
         return Some("disc_number".to_owned());
     }
     None

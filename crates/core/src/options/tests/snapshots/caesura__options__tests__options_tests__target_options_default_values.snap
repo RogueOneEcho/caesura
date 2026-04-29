@@ -12,5 +12,6 @@ sox_random_dither: false
 exclude_vorbis_comments:
   - COMMENT
   - ENCODER
+  - ENCODING
   - RATING
   - WORK

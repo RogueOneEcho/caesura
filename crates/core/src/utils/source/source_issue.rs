@@ -104,6 +104,14 @@ pub enum SourceIssue {
         path: PathBuf,
         tags: Vec<String>,
     },
+    /// Tags present in Vorbis comments but not convertible to `ID3v2`.
+    ///
+    /// The FLAC source tags are valid but contain values that cannot be
+    /// represented in MP3 format (e.g. a non-numeric track number).
+    InvalidTags {
+        path: PathBuf,
+        tags: Vec<String>,
+    },
     FlacError {
         path: PathBuf,
         error: String,
@@ -134,6 +142,7 @@ pub enum SourceIssue {
 impl SourceIssue {
     /// Render this issue as a human-readable string.
     #[expect(deprecated, reason = "match arms for deprecated variants")]
+    #[expect(clippy::too_many_lines, reason = "flat enumeration of variants")]
     pub(crate) fn render(&self, styled: PathStyle) -> String {
         use SourceIssue::*;
         match self {
@@ -217,6 +226,13 @@ impl SourceIssue {
                     format_path(path, styled)
                 )
             }
+            InvalidTags { path, tags } => {
+                format!(
+                    "Invalid tags: {}{}",
+                    join_humanized(tags),
+                    format_path(path, styled)
+                )
+            }
             SampleRate { path, rate } => {
                 format!(
                     "Unsupported sample rate: {rate}{}",
@@ -264,6 +280,7 @@ impl SourceIssue {
         match self {
             SourceIssue::NoTags { path }
             | SourceIssue::MissingTags { path, .. }
+            | SourceIssue::InvalidTags { path, .. }
             | SourceIssue::FlacError { path, .. }
             | SourceIssue::SampleRate { path, .. } => vec![path.as_path()],
             SourceIssue::UnnecessaryDirectory { prefix } => vec![prefix.as_path()],

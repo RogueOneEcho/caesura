@@ -51,10 +51,11 @@ dry_run: false
 # Should sources with specific tags be excluded?
 exclude_tags: null
 # Vorbis comment tag names to exclude from transcoded output.
-# Default: ["COMMENT","ENCODER","RATING","WORK"]
+# Default: ["COMMENT","ENCODER","ENCODING","RATING","WORK"]
 exclude_vorbis_comments:
 - COMMENT
 - ENCODER
+- ENCODING
 - RATING
 - WORK
 # Should files be hard linked instead of copied?

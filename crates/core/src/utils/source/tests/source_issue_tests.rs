@@ -62,6 +62,10 @@ fn source_issue_serialization() -> Result<(), YamlError> {
         SourceIssue::InvalidFilePath {
             path: "./bad".to_owned(),
         },
+        SourceIssue::InvalidTags {
+            path: PathBuf::from("/a.flac"),
+            tags: vec!["track_number".to_owned()],
+        },
     ];
     let expected = "- type: id_error
   details: Hello, world!
@@ -107,6 +111,10 @@ fn source_issue_serialization() -> Result<(), YamlError> {
 - type: no_directory
 - type: invalid_file_path
   path: ./bad
+- type: invalid_tags
+  path: /a.flac
+  tags:
+  - track_number
 ";
 
     // Act
@@ -249,6 +257,10 @@ fn source_issue_is_reportable() {
         SourceIssue::InvalidFilePath {
             path: "./bad".to_owned(),
         },
+        SourceIssue::InvalidTags {
+            path: PathBuf::from("/e.flac"),
+            tags: vec!["track_number".to_owned()],
+        },
     ];
     for issue in reportable {
         assert!(issue.is_reportable(), "expected reportable: {issue:?}");
@@ -354,6 +366,10 @@ fn report_sample_issues() -> Vec<SourceIssue> {
         SourceIssue::MissingTags {
             path: PathBuf::from("/a.flac"),
             tags: vec!["composer".to_owned(), "disc_number".to_owned()],
+        },
+        SourceIssue::InvalidTags {
+            path: PathBuf::from("/a.flac"),
+            tags: vec!["track_number".to_owned()],
         },
         SourceIssue::FlacError {
             path: PathBuf::from("/a.flac"),

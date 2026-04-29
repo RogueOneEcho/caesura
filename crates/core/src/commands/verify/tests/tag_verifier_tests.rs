@@ -169,5 +169,84 @@ async fn tag_verifier_execute_no_vorbis_block() {
     let output = TagVerifier::execute(&flac, &source).expect("should not fail hard");
 
     // Assert
-    assert_eq!(output, Some(SourceIssue::NoTags { path: flac_path }));
+    assert_eq!(output, vec![SourceIssue::NoTags { path: flac_path }]);
+}
+
+/// A non-numeric track number like "bonus" is present as a string
+/// and should not be flagged as missing.
+#[test]
+fn check_track_number_tag_non_numeric_string() {
+    let mut tag = Tag::new(TagType::VorbisComments);
+    tag.push(TagItem::new(
+        ItemKey::TrackNumber,
+        ItemValue::Text("bonus".into()),
+    ));
+    assert_eq!(check_track_number_tag(&tag), None);
+}
+
+/// A non-parseable TRACKNUMBER is valid Vorbis but not convertible to
+/// `ID3v2`, producing `InvalidTags` instead of `MissingTags`.
+#[tokio::test]
+async fn tag_verifier_execute_non_numeric_track() {
+    let dir = TempDirectory::create("tag_verifier_non_numeric_track");
+    let flac_path = FlacGenerator::new()
+        .with_filename("track.flac")
+        .with_artist("Test Artist")
+        .with_title("Test Title")
+        .with_album("Test Album")
+        .with_vorbis_tag("TRACKNUMBER", "bonus")
+        .generate(&dir)
+        .await
+        .expect("generate should succeed");
+    let flac = FlacFile::new(flac_path.clone(), &dir.to_path_buf());
+    let source = Source::mock();
+
+    // Act
+    let output = TagVerifier::execute(&flac, &source).expect("should not fail hard");
+
+    // Assert
+    assert_eq!(
+        output,
+        vec![SourceIssue::InvalidTags {
+            path: flac_path,
+            tags: vec!["track_number".to_owned()],
+        }]
+    );
+}
+
+/// A track with no TRACKNUMBER at all produces `MissingTags`.
+#[tokio::test]
+async fn tag_verifier_execute_missing_track() {
+    let dir = TempDirectory::create("tag_verifier_missing_track");
+    let flac_path = FlacGenerator::new()
+        .with_filename("track.flac")
+        .with_artist("Test Artist")
+        .with_title("Test Title")
+        .with_album("Test Album")
+        .generate(&dir)
+        .await
+        .expect("generate should succeed");
+    let flac = FlacFile::new(flac_path.clone(), &dir.to_path_buf());
+    let source = Source::mock();
+
+    // Act
+    let output = TagVerifier::execute(&flac, &source).expect("should not fail hard");
+
+    // Assert
+    assert_eq!(
+        output,
+        vec![SourceIssue::MissingTags {
+            path: flac_path,
+            tags: vec!["track_number".to_owned()],
+        }]
+    );
+}
+
+#[test]
+fn invalid_tags_not_reportable() {
+    let issue = SourceIssue::InvalidTags {
+        path: PathBuf::from("/a.flac"),
+        tags: vec!["track_number".to_owned()],
+    };
+    assert!(!issue.is_reportable());
 }

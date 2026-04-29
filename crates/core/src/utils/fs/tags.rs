@@ -46,11 +46,6 @@ pub(crate) fn get_vorbis_tags(flac: &FlacFile) -> Result<Tag, Failure<TagsAction
     }
 }
 
-/// Re-map tags to `ID3v2` format for MP3 output.
-pub(crate) fn convert_to_id3v2(tags: &mut Tag) {
-    tags.re_map(TagType::Id3v2);
-}
-
 /// Ensure tags contain a numeric track number.
 ///
 /// - Returns `true` if a numeric track number is already present or was successfully parsed

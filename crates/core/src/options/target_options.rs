@@ -39,6 +39,7 @@ impl TargetOptions {
         vec![
             "COMMENT".to_owned(),
             "ENCODER".to_owned(),
+            "ENCODING".to_owned(),
             "RATING".to_owned(),
             "WORK".to_owned(),
         ]

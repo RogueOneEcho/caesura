@@ -92,9 +92,9 @@ impl VerifyCommand {
                     .to_path_buf();
                 issues.extend(check_path_length(&path));
             }
-            let tag_issue = TagVerifier::execute(&flac, source)
+            let tag_issues = TagVerifier::execute(&flac, source)
                 .map_err(Failure::wrap(VerifyAction::VerifyTags))?;
-            issues.extend(tag_issue);
+            issues.extend(tag_issues);
             for error in StreamVerifier::execute(&flac) {
                 issues.push(error);
             }
