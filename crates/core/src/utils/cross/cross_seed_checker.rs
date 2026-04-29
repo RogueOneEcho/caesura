@@ -19,8 +19,6 @@ pub(crate) struct CrossSeedChecker {
 
 impl CrossSeedChecker {
     /// Find the torrent ID on the cross indexer matching the given source, if any.
-    ///
-    /// - Callers must ensure [`Self::is_configured`] returns `true`.
     pub(crate) async fn execute(
         &self,
         torrent_path: &Path,

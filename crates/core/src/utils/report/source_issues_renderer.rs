@@ -6,7 +6,7 @@ pub(crate) struct SourceIssuesRenderer;
 impl SourceIssuesRenderer {
     /// Render issues grouped by type with sorted relative paths.
     ///
-    /// - Groups share the same [`SourceIssue::group_key`]
+    /// - Groups share the same key from [`group_by_key`]
     /// - Files within a group are sorted by their path relative to `source_dir`
     /// - Groups are ordered alphabetically by key
     /// - Issues without an affected path render as a standalone line
@@ -91,7 +91,7 @@ impl SourceIssuesRenderer {
     }
 }
 
-/// Group issues by [`SourceIssue::group_key`] with deduplicated relative paths.
+/// Group issues by display key with deduplicated relative paths.
 ///
 /// - Strips `source_dir` from each affected path
 /// - Deduplicates and sorts paths within each group

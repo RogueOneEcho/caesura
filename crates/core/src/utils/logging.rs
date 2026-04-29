@@ -14,7 +14,7 @@ pub fn default_logger() -> LoggerBuilder {
         .with_verbosity(Verbosity::Trace)
 }
 
-/// Initialize a logger with standard filters and [`Trace`] verbosity.
+/// Initialize a logger with standard filters and [`Verbosity::Trace`] verbosity.
 pub fn init_logger() {
     default_logger().create().init();
 }

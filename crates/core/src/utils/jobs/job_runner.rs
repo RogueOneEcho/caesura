@@ -31,7 +31,7 @@ impl JobRunner {
         }
     }
 
-    /// Add commands to be run when [execute] is called.
+    /// Add commands to be run when [`Self::execute`] is called.
     pub fn add(&self, jobs: Vec<Job>) {
         for job in jobs {
             let id = job.get_id();

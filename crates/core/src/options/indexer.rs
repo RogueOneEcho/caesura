@@ -14,7 +14,7 @@ pub const RED_TRACKER_URL: &str = "https://flacsfor.me";
 /// Tracker announce host for OPS.
 pub const OPS_TRACKER_URL: &str = "https://home.opsfet.ch";
 
-/// Indexer that a [`QueueItem`](crate::commands::QueueItem) belongs to.
+/// Indexer that a [`QueueItem`] belongs to.
 ///
 /// - Deserializes case-insensitively from a string
 /// - Serializes as a lowercase string

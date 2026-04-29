@@ -11,7 +11,7 @@ const TYPICAL_ZOOM_START: u32 = 60;
 ///
 /// A [command design pattern](https://refactoring.guru/design-patterns/command) is used
 /// so the execution of the command can be deferred and multiple commands can be executed
-/// in parallel via the multithreaded [`SpectrogramCommandRunner`].
+/// in parallel via the multithreaded [`JobRunner`].
 pub(crate) struct SpectrogramJob {
     /// Job identifier for progress tracking.
     pub id: String,
