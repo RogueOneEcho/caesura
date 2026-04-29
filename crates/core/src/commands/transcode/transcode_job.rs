@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use lofty::tag::Tag;
+use lofty::id3::v2::Id3v2Tag;
 use std::process::Stdio;
 use tokio::join;
 
@@ -10,7 +10,7 @@ pub(crate) struct TranscodeJob {
     /// Transcode operation to perform.
     pub variant: Variant,
     /// ID3 tags to write to MP3 output.
-    pub tags: Option<Tag>,
+    pub tags: Option<Id3v2Tag>,
     /// Vorbis comment tag names to exclude from output.
     pub exclude_vorbis_comments: Vec<String>,
 }
@@ -20,7 +20,7 @@ impl TranscodeJob {
     ///
     /// Tags named in [`exclude_vorbis_comments`](TranscodeJob::exclude_vorbis_comments) are
     /// stripped from the output via two paths:
-    /// - **MP3 transcode**: excluded from the in-memory `ID3v2` [`Tag`] before writing
+    /// - **MP3 transcode**: excluded from the in-memory [`Id3v2Tag`] before writing
     /// - **FLAC resample**: excluded from the on-disk Vorbis comments after `SoX` writes the file
     pub(crate) async fn execute(self) -> Result<(), Failure<TranscodeAction>> {
         let output_path = match &self.variant {

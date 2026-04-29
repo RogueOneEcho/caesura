@@ -26,8 +26,9 @@ impl TagVerifier {
             Err(failure) => return Err(failure),
         };
         let id3 = flac.id3_tags()?;
+        let id3 = Tag::from(id3.clone());
         let vorbis_missing = collect_missing(vorbis, source, flac);
-        let id3_missing = collect_missing(id3, source, flac);
+        let id3_missing = collect_missing(&id3, source, flac);
         let invalid: Vec<String> = id3_missing
             .into_iter()
             .filter(|tag| !vorbis_missing.contains(tag))

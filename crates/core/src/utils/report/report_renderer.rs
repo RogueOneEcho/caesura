@@ -145,7 +145,7 @@ fn format_track_numbers(source: &Source, issues: &[&SourceIssue]) -> Option<Stri
     let mut numbers: Vec<u32> = Vec::new();
     for path in &affected {
         let flac = flacs.iter().find(|flac| flac.path == **path)?;
-        let tags = flac.id3_tags().ok()?;
+        let tags = flac.vorbis_tags().ok()?;
         let track = tags.get_string(ItemKey::TrackNumber)?;
         let number: u32 = u32::from_str(track).ok()?;
         numbers.push(number);

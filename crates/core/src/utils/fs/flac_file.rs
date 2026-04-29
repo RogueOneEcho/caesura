@@ -24,8 +24,8 @@ pub struct FlacFile {
 
     /// Cached ID3 tags.
     ///
-    /// Lazily loaded, round-tripped through `Id3v2Tag`. Uses thread-safe `OnceCell`.
-    id3_tags: OnceCell<Tag>,
+    /// Lazily loaded. Uses thread-safe `OnceCell`.
+    id3_tags: OnceCell<Id3v2Tag>,
 
     /// Disc context for track renaming.
     ///
@@ -73,12 +73,11 @@ impl FlacFile {
     /// Values that cannot be represented in `ID3v2` format (e.g. non-numeric
     /// track numbers) are dropped during the round-trip, matching the
     /// behavior of [`save_id3v2_deterministic`].
-    pub fn id3_tags(&self) -> Result<&Tag, Failure<TranscodeAction>> {
+    pub fn id3_tags(&self) -> Result<&Id3v2Tag, Failure<TranscodeAction>> {
         self.id3_tags.get_or_try_init(|| {
             let mut tags = self.vorbis_tags()?.clone();
             fix_track_numbering(&mut tags);
-            let id3 = Id3v2Tag::from(tags);
-            Ok(Tag::from(id3))
+            Ok(Id3v2Tag::from(tags))
         })
     }
 

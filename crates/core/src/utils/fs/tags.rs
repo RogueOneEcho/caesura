@@ -5,7 +5,7 @@ use lofty::config::{ParseOptions, WriteOptions};
 use lofty::error::LoftyError;
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::flac::FlacFile as LoftyFlacFile;
-use lofty::id3::v2::{Frame, Id3v2Tag};
+use lofty::id3::v2::{Frame, FrameId, Id3v2Tag};
 use lofty::prelude::TagExt;
 use lofty::probe::Probe;
 use lofty::tag::ItemKey::TrackNumber;
@@ -143,14 +143,19 @@ pub(crate) fn get_numeric_from_of_total_format(input: &str) -> Option<(u32, u32)
     Some((track_number, track_total))
 }
 
-/// Remove tag items matching the given [`ItemKey`] list.
-pub(crate) fn exclude_tags(tags: &mut Tag, keys: &[ItemKey]) {
-    for key in keys {
-        if let Some(value) = tags.get_string(*key) {
-            trace!("Excluding {key:?}: {value}");
-            tags.remove_key(*key);
-        }
-    }
+/// Remove tag frames matching the given [`ItemKey`] list.
+pub(crate) fn exclude_tags(tags: &mut Id3v2Tag, keys: &[ItemKey]) {
+    let exclusions: Vec<_> = keys
+        .iter()
+        .filter_map(|key| FrameId::try_from(*key).ok().map(|id| (*key, id)))
+        .collect();
+    tags.retain(|frame| {
+        let Some((key, id)) = exclusions.iter().find(|(_, id)| frame.id() == id) else {
+            return true;
+        };
+        trace!("Excluding frame matching {key:?}: {id}");
+        false
+    });
 }
 
 /// Map Vorbis comment names to [`ItemKey`] values.
@@ -208,8 +213,7 @@ pub(crate) fn exclude_vorbis_comments_from_flac(
 /// lofty 0.23's `Tag` to `Id3v2Tag` conversion collects frames into `HashSet`/`HashMap`,
 /// producing correct frames in non-deterministic order. Sorting by frame ID before writing
 /// ensures stable binary output.
-pub(crate) fn save_id3v2_deterministic(tags: Tag, path: &Path) -> Result<(), LoftyError> {
-    let id3 = Id3v2Tag::from(tags);
+pub(crate) fn save_id3v2_deterministic(id3: Id3v2Tag, path: &Path) -> Result<(), LoftyError> {
     let mut frames: Vec<Frame<'static>> = id3.into_iter().collect();
     frames.sort_by_key(frame_sort_key);
     let mut sorted = Id3v2Tag::new();
