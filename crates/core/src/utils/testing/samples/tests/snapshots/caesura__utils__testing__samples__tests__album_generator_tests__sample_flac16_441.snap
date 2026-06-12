@@ -4,8 +4,8 @@ expression: snapshot
 ---
 - directory: ~
   filename: Test Artist - Test Album - 01 Track One.flac
-  size: 850247
-  sha256: 8bf628eaa05a4da6ca338b12307dfb401eded30744f50acfebd50547eb8de9e3
+  size: 850069
+  sha256: 84dbf45120df7f2f3fb757a1175c13547e01e6a21286e055b953d8c36489cbbb
   audio:
     duration_ms: 65000
     overall_bitrate: 104
@@ -31,8 +31,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: ~
   filename: Test Artist - Test Album - 02 Track Two.flac
-  size: 1068423
-  sha256: 15048ef8cfa2ce499fc6f4223a5d277359694c2bd74d3cb024754125a9a4cbaa
+  size: 1068229
+  sha256: 714da5f10b1f20c3bb1c9ba56ef49578533fc34ed7ac92691600f97f28f92757
   audio:
     duration_ms: 65000
     overall_bitrate: 131

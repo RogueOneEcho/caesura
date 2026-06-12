@@ -4,32 +4,32 @@ expression: snapshot
 ---
 - directory: "Test Artist - Test Album [2020] [WEB SPECTROGRAMS]"
   filename: Test Artist - Test Album - 01 Track One.full.png
-  size: 30340
-  sha256: 8e6ce3219738c89f12d52b64ba690a913c26b59d3664fef24c640fe4430ac549
+  size: 44505
+  sha256: 374deabbe815fee5cbe46253ddc78b71ec3769e985d5b9a1c8ec68036d6e23ba
   image:
-    width: 3144
+    width: 3140
     height: 611
     color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB SPECTROGRAMS]"
   filename: Test Artist - Test Album - 01 Track One.zoom.png
-  size: 23918
-  sha256: 38032d3115566e784aa5e2759096be8cfbc71be49a23a694639dd84a77f9f18a
+  size: 23930
+  sha256: a991b8b3f4fd601bc9c4df3f9f5f7d28309df89d9a8ecc63de9ee7198b362a17
   image:
     width: 644
     height: 1123
     color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB SPECTROGRAMS]"
   filename: Test Artist - Test Album - 02 Track Two.full.png
-  size: 31342
-  sha256: 8db82be445d3ba5001b35e65ee061b37355465a9ea1ce60951a9f8a6ab927f68
+  size: 48440
+  sha256: eecf06f49d5caae715d9933bd0278a17afa58fb847b0ce298e3e29eaa6fbd235
   image:
-    width: 3144
+    width: 3140
     height: 611
     color_type: Rgb8
 - directory: "Test Artist - Test Album [2020] [WEB SPECTROGRAMS]"
   filename: Test Artist - Test Album - 02 Track Two.zoom.png
-  size: 20958
-  sha256: 68d5d62860172477513e9cfd6679f95d74b0b1f6e99c91bfa67ca515cc706e32
+  size: 20973
+  sha256: 269c7442c1fad01d24ead048cba2958d16f3a72a2f1b3bea22793516cd909882
   image:
     width: 644
     height: 1123

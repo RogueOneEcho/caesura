@@ -5,7 +5,7 @@ expression: snapshot
 - directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
   filename: 1 First Track.mp3
   size: 2604846
-  sha256: 586bf4fcca70ee84c7fe2379255a76fb8360e70288fa92423b645aca41376534
+  sha256: 36c51aa6cb6155c228611447d658f108fb36c0f7d0ca34d5d77f24872a84c8a6
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -31,7 +31,7 @@ expression: snapshot
 - directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
   filename: 2 Second Track.mp3
   size: 2604847
-  sha256: be44bc8e809c48e8b9f2ffa02c7d06991a3c6f907e6cadf86844b901bd2add47
+  sha256: 76faf94a75e35974b2594c83e8f3cc9311c209f2e020fd295a5ae9d53ed88bcc
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -57,7 +57,7 @@ expression: snapshot
 - directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
   filename: 3 Third Track.mp3
   size: 2604846
-  sha256: c4c3d481267552a51b446185e1bdf46c6bd8f17a076ed87e87b126f3a5248eed
+  sha256: 9822c7d26b4d26d43605a847ba364646a9f010f59fa6d632b15485f787b28ba2
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -83,7 +83,7 @@ expression: snapshot
 - directory: "Rename Artist - Of Total Album [2024] [WEB 320]"
   filename: 4 Fourth Track.mp3
   size: 2604847
-  sha256: bf76ff4c51b901295af5cd6afba77718766e9042e05f28ea8f1b6d71e34659a0
+  sha256: 35695c133db9426b55c0c5f25c602b6c83d45c451daea1e0ff0185d7e2db5772
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -116,8 +116,8 @@ expression: snapshot
     color_type: Rgb8
 - directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
   filename: 1 First Track.mp3
-  size: 786189
-  sha256: b84ea15d1640a952ba31aac633663880a1b139d4a34282e1313ee06cbae5855c
+  size: 786216
+  sha256: 02a959972779120fed1e159a3cc4c95ae5fd2b93a789ff39d7a411baed84471f
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -143,7 +143,7 @@ expression: snapshot
 - directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
   filename: 2 Second Track.mp3
   size: 764870
-  sha256: 4906230c640125c428fd35ec7c945093ff9de5b1fbf99c1d01f1b768f3d06a9f
+  sha256: bbd1546cf930a53d6d47e28e894e8f45a3ebc3216713baa38bfc0900f2ed139d
   audio:
     duration_ms: 65045
     overall_bitrate: 94
@@ -168,8 +168,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
   filename: 3 Third Track.mp3
-  size: 784916
-  sha256: 754e7425fd012fad53e7a04f93b8dacc89e7a185790fd042ee212c251ab42fc8
+  size: 784889
+  sha256: d562613d12ff6005c8fca40ae7bfad966df3020d92cc083556c0e3f1d1e326cc
   audio:
     duration_ms: 65045
     overall_bitrate: 96
@@ -194,8 +194,8 @@ expression: snapshot
         sha256: c73b57d8ad7de5ea9911190a5a1bcebe9b43b6250166b91b12f5c3ee969ba588
 - directory: "Rename Artist - Of Total Album [2024] [WEB V0]"
   filename: 4 Fourth Track.mp3
-  size: 755693
-  sha256: 302980565456bdde46bfc064d4ca3a07eeb373c4fd94a1e4f599f0a02bb699b3
+  size: 755718
+  sha256: 1d87e30dc1fee4cb9f633b3a8ce476407b09af234dc4e9f46b3d9d9825bf71ab
   audio:
     duration_ms: 65045
     overall_bitrate: 92
