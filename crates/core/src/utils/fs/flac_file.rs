@@ -44,13 +44,10 @@ impl FlacFile {
             .expect("Flac file path should have a parent directory")
             .to_path_buf();
         let file_name = path
-            .file_name()
+            .file_stem()
             .expect("Flac file should have a name")
-            .to_os_string()
             .to_string_lossy()
-            .strip_suffix(".flac")
-            .expect("Flac file should .flac extension")
-            .to_owned();
+            .into_owned();
         FlacFile {
             path,
             file_name,
@@ -91,5 +88,34 @@ impl FlacFile {
     pub fn get_stream_info(&self) -> Result<StreamInfo, ClaxonError> {
         let reader = FlacReader::open(&self.path)?;
         Ok(reader.streaminfo())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Lowercase `.flac` extension is stripped from the file name.
+    #[test]
+    fn flac_file_new_lowercase() {
+        // Arrange
+        let source_dir = PathBuf::from("/music");
+        let path = PathBuf::from("/music/01. Track.flac");
+        // Act
+        let flac = FlacFile::new(path, &source_dir);
+        // Assert
+        assert_eq!(flac.file_name, "01. Track");
+    }
+
+    /// Uppercase `.FLAC` extension is stripped from the file name.
+    #[test]
+    fn flac_file_new_uppercase() {
+        // Arrange
+        let source_dir = PathBuf::from("/music");
+        let path = PathBuf::from("/music/01. Track.FLAC");
+        // Act
+        let flac = FlacFile::new(path, &source_dir);
+        // Assert
+        assert_eq!(flac.file_name, "01. Track");
     }
 }
