@@ -34,7 +34,7 @@ impl ExistingFormatProvider {
                 .collect();
             for format in &possible_dupes {
                 if !existing.contains(format) {
-                    debug!("{} {format} as a possible duplicate", "Excluding".bold(),);
+                    debug!("{} {format} as a possible duplicate", "Excluding".bold());
                 }
             }
             existing.extend(possible_dupes);

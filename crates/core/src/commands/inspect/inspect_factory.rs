@@ -144,7 +144,7 @@ impl InspectFactory {
         if !self.style {
             return headers
                 .into_iter()
-                .map(|col| col.into_iter().map(ToString::to_string).collect())
+                .map(|col| col.into_iter().map(str::to_owned).collect())
                 .collect();
         }
         headers

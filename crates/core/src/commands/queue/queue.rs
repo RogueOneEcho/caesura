@@ -187,7 +187,7 @@ impl Queue {
         &self,
         paths: Vec<PathBuf>,
     ) -> Result<usize, Failure<QueueAction>> {
-        let stream = iter(paths.into_iter());
+        let stream = iter(paths);
         let items: BTreeMap<_, _> = stream
             .filter_map(|path| async {
                 let torrent = match TorrentReader::execute(&path).await {
