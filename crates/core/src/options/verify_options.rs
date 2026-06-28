@@ -12,6 +12,12 @@ pub struct VerifyOptions {
     /// Should sources with specific tags be excluded?
     #[arg(long)]
     pub exclude_tags: Option<Vec<String>>,
+
+    /// Should the decode test of each FLAC be skipped?
+    ///
+    /// By default every audio frame is decoded to detect truncation or corruption.
+    #[arg(long)]
+    pub no_decode_test: bool,
 }
 
 impl OptionsContract for VerifyOptions {

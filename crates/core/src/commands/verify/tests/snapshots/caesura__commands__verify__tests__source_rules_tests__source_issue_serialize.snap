@@ -66,6 +66,11 @@ expression: yaml
 - type: flac_error
   path: /path/to/file.flac
   error: I/O Error
+- type: decode_error
+  path: /path/to/file.flac
+  error: frame CRC mismatch
+- type: missing_md5
+  path: /path/to/file.flac
 - type: sample_rate
   path: /path/to/file.flac
   rate: 44100

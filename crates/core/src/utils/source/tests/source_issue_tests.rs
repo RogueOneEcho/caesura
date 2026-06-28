@@ -238,6 +238,13 @@ fn source_issue_is_reportable() {
             path: PathBuf::from("/c.flac"),
             error: "decode".to_owned(),
         },
+        SourceIssue::DecodeError {
+            path: PathBuf::from("/c.flac"),
+            error: "frame CRC mismatch".to_owned(),
+        },
+        SourceIssue::MissingMd5 {
+            path: PathBuf::from("/c.flac"),
+        },
         SourceIssue::UnnecessaryDirectory {
             prefix: PathBuf::from("CD1"),
         },
@@ -374,6 +381,13 @@ fn report_sample_issues() -> Vec<SourceIssue> {
         SourceIssue::FlacError {
             path: PathBuf::from("/a.flac"),
             error: "e".to_owned(),
+        },
+        SourceIssue::DecodeError {
+            path: PathBuf::from("/a.flac"),
+            error: "frame CRC mismatch".to_owned(),
+        },
+        SourceIssue::MissingMd5 {
+            path: PathBuf::from("/a.flac"),
         },
         SourceIssue::SampleRate {
             path: PathBuf::from("/a.flac"),

@@ -305,6 +305,7 @@ async fn verify_command_execute_no_reports_set() -> Result<(), TestError> {
         .with_options(VerifyOptions {
             no_hash_check: true,
             exclude_tags: None,
+            no_decode_test: false,
         })
         .with_options(ReportOptions {
             reports_dir: reports_dir.clone(),

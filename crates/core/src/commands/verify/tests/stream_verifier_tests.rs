@@ -11,7 +11,7 @@ fn valid_stream_info() -> StreamInfo {
         min_frame_size: None,
         max_frame_size: None,
         samples: Some(44100 * 300),
-        md5sum: [0; 16],
+        md5sum: [1; 16],
     }
 }
 
@@ -120,6 +120,24 @@ fn check_channels_surround() {
         Some(SourceIssue::Channels {
             path: path().to_path_buf(),
             count: 6,
+        })
+    );
+}
+
+#[test]
+fn check_md5_set() {
+    let info = valid_stream_info();
+    assert_eq!(check_md5(path(), &info), None);
+}
+
+#[test]
+fn check_md5_unset() {
+    let mut info = valid_stream_info();
+    info.md5sum = [0; 16];
+    assert_eq!(
+        check_md5(path(), &info),
+        Some(SourceIssue::MissingMd5 {
+            path: path().to_path_buf(),
         })
     );
 }

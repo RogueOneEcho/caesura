@@ -116,6 +116,13 @@ pub enum SourceIssue {
         path: PathBuf,
         error: String,
     },
+    DecodeError {
+        path: PathBuf,
+        error: String,
+    },
+    MissingMd5 {
+        path: PathBuf,
+    },
     SampleRate {
         path: PathBuf,
         rate: u32,
@@ -248,6 +255,12 @@ impl SourceIssue {
             FlacError { path, error } => {
                 format!("FLAC stream error: {error}{}", format_path(path, styled))
             }
+            DecodeError { path, error } => {
+                format!("FLAC decode error: {error}{}", format_path(path, styled))
+            }
+            MissingMd5 { path } => {
+                format!("Missing MD5 signature{}", format_path(path, styled))
+            }
             Error { domain, details } => format!("A {domain} error occurred:\n{details}"),
             Other(details) => details.clone(),
         }
@@ -260,6 +273,8 @@ impl SourceIssue {
             SourceIssue::NoTags { .. }
                 | SourceIssue::MissingTags { .. }
                 | SourceIssue::FlacError { .. }
+                | SourceIssue::DecodeError { .. }
+                | SourceIssue::MissingMd5 { .. }
                 | SourceIssue::UnnecessaryDirectory { .. }
                 | SourceIssue::SampleRate { .. }
         )
@@ -270,6 +285,7 @@ impl SourceIssue {
         match self {
             SourceIssue::NoTags { .. } | SourceIssue::MissingTags { .. } => Some("Bad Tags"),
             SourceIssue::FlacError { .. } | SourceIssue::SampleRate { .. } => Some("Mislabeled"),
+            SourceIssue::DecodeError { .. } | SourceIssue::MissingMd5 { .. } => Some("Other"),
             SourceIssue::UnnecessaryDirectory { .. } => Some("Trumpable"),
             _ => None,
         }
@@ -282,6 +298,8 @@ impl SourceIssue {
             | SourceIssue::MissingTags { path, .. }
             | SourceIssue::InvalidTags { path, .. }
             | SourceIssue::FlacError { path, .. }
+            | SourceIssue::DecodeError { path, .. }
+            | SourceIssue::MissingMd5 { path }
             | SourceIssue::SampleRate { path, .. } => vec![path.as_path()],
             SourceIssue::UnnecessaryDirectory { prefix } => vec![prefix.as_path()],
             _ => Vec::new(),

@@ -4,3 +4,4 @@ expression: result
 ---
 no_hash_check: false
 exclude_tags: ~
+no_decode_test: false

@@ -34,7 +34,7 @@ pub(crate) use std::io::{Error as IoError, ErrorKind};
 pub(crate) use std::path::{Path, PathBuf};
 pub(crate) use std::str::FromStr;
 pub(crate) use std::sync::{Arc, LazyLock};
-pub(crate) use std::time::Duration;
+pub(crate) use std::time::{Duration, Instant};
 pub(crate) use thiserror::Error as ThisError;
 pub(crate) use tokio::fs::File as TokioFile;
 pub(crate) use tokio::fs::copy as tokio_copy;

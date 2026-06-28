@@ -16,6 +16,7 @@ fn source_issue_serialize() {
     deprecated,
     reason = "constructs deprecated variants for serialization test"
 )]
+#[expect(clippy::too_many_lines, reason = "flat enumeration of variants")]
 fn all_source_issues() -> Vec<SourceIssue> {
     let mut existing_formats = BTreeSet::new();
     existing_formats.insert(ExistingFormat::_320);
@@ -95,6 +96,11 @@ fn all_source_issues() -> Vec<SourceIssue> {
             path: file.clone(),
             error: "I/O Error".to_owned(),
         },
+        SourceIssue::DecodeError {
+            path: file.clone(),
+            error: "frame CRC mismatch".to_owned(),
+        },
+        SourceIssue::MissingMd5 { path: file.clone() },
         SourceIssue::SampleRate {
             path: file.clone(),
             rate: 44100,

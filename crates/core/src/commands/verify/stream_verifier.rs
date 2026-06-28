@@ -16,6 +16,7 @@ impl StreamVerifier {
         issues.extend(check_bit_rate(&flac.path, &info));
         issues.extend(check_duration(&flac.path, &info));
         issues.extend(check_channels(&flac.path, &info));
+        issues.extend(check_md5(&flac.path, &info));
         issues
     }
 }
@@ -71,6 +72,19 @@ pub(crate) fn check_channels(path: &Path, info: &StreamInfo) -> Option<SourceIss
         return Some(SourceIssue::Channels {
             path: path.to_path_buf(),
             count: info.channels,
+        });
+    }
+    None
+}
+
+/// Check the decoded-audio MD5 signature is set.
+///
+/// An all-zero signature means the encoder never computed it, so the stored
+/// stream cannot be checked for integrity.
+pub(crate) fn check_md5(path: &Path, info: &StreamInfo) -> Option<SourceIssue> {
+    if info.md5sum == [0_u8; 16] {
+        return Some(SourceIssue::MissingMd5 {
+            path: path.to_path_buf(),
         });
     }
     None

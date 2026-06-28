@@ -81,6 +81,8 @@ impl VerifyCommand {
         issues.append(&mut VerifyCommand::subdirectory_checks(&flacs));
         let max_target = get_max_path_length_target(source);
         let output_dir = self.paths.get_output_dir();
+        let flac_count = flacs.len();
+        let mut decode_test_duration = Duration::ZERO;
         for flac in flacs {
             trace!("Verifying FLAC {}", flac.path.display());
             if let Some(max_target) = max_target {
@@ -98,6 +100,17 @@ impl VerifyCommand {
             for error in StreamVerifier::execute(&flac) {
                 issues.push(error);
             }
+            if !self.verify_options.no_decode_test {
+                let start = Instant::now();
+                issues.extend(DecodeVerifier::execute(&flac));
+                decode_test_duration += start.elapsed();
+            }
+        }
+        if !self.verify_options.no_decode_test {
+            trace!(
+                "Decode tested {flac_count} FLACs in {:.3}s",
+                decode_test_duration.as_secs_f64()
+            );
         }
         Ok(issues)
     }
