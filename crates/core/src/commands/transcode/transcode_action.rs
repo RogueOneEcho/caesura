@@ -13,6 +13,8 @@ pub enum TranscodeAction {
     CopyFlac,
     #[error("transcode")]
     Transcode,
+    #[error("decode FLAC")]
+    Decode,
     #[error("start decode process")]
     SpawnDecode,
     #[error("start encode process")]

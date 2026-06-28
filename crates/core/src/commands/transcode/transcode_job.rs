@@ -57,6 +57,7 @@ impl TranscodeJob {
 
 /// Pipe decode output directly to encode input.
 async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure<TranscodeAction>> {
+    let decode_input = decode.input.clone();
     let decode_info = decode.to_info();
     let encode_info = encode.to_info();
     trace!("Executing transcode: {decode_info} | {encode_info}");
@@ -90,7 +91,10 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure
     let decode_exit = decode_result.map_err(Failure::wrap(TranscodeAction::WaitDecode))?;
     let encode_output = encode_output.map_err(Failure::wrap(TranscodeAction::WaitEncode))?;
     if !decode_exit.success() {
-        warn!("Decode ({decode_program}) was not successful: {decode_exit}");
+        return Err(Failure::from_action(TranscodeAction::Decode)
+            .with("program", &decode_program)
+            .with("exit", decode_exit.to_string())
+            .with_path(&decode_input));
     }
     require_success(encode_output, &encode_program).map_err(Failure::wrap_with_path(
         TranscodeAction::Transcode,
