@@ -45,6 +45,46 @@ async fn decode_flac_truncated() {
     );
 }
 
+/// Several valid FLACs plus one truncated FLAC in a single decode pass.
+#[tokio::test]
+async fn decode_verifier_execute_with_one_truncated() {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get(SampleFormat::default()).await;
+    let host = HostBuilder::new()
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .expect_build();
+    let decode_verifier = host.services.get_required::<DecodeVerifier>();
+    let source_track = sample_track().await;
+    let content_dir = TempDirectory::create("decode_verifier_execute_with_one_truncated");
+    let valid_one = content_dir.join("01 - valid.flac");
+    let valid_two = content_dir.join("02 - valid.flac");
+    let truncated = content_dir.join("03 - truncated.flac");
+    copy(&source_track, &valid_one).expect("should copy valid one");
+    copy(&source_track, &valid_two).expect("should copy valid two");
+    copy(&source_track, &truncated).expect("should copy truncated");
+    truncate_to_half(&truncated);
+    let source_dir = content_dir.to_path_buf();
+    let flacs = vec![
+        FlacFile::new(valid_one, &source_dir),
+        FlacFile::new(valid_two, &source_dir),
+        FlacFile::new(truncated.clone(), &source_dir),
+    ];
+
+    // Act
+    let issues = decode_verifier.execute(&flacs).await;
+
+    // Assert
+    assert_eq!(issues.len(), 1, "exactly one decode error expected");
+    match issues.first().expect("should have one issue") {
+        SourceIssue::DecodeError { path, .. } => assert_eq!(path, &truncated),
+        other => unreachable!("expected DecodeError, got: {other}"),
+    }
+}
+
 /// Path to the single track of the default sample album.
 async fn sample_track() -> PathBuf {
     let album = AlbumProvider::get(SampleFormat::default()).await;

@@ -68,7 +68,7 @@ impl VerifyCommand {
         match Collector::collect_flacs(source) {
             Ok(flacs) => {
                 issues.append(&mut self.flac_verifier.execute(source, &flacs)?);
-                issues.append(&mut self.decode_verifier.execute(&flacs));
+                issues.append(&mut self.decode_verifier.execute(&flacs).await);
             }
             Err(issue) => issues.push(issue),
         }
