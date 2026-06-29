@@ -19,11 +19,17 @@ impl TorrentVerifier {
         torrent_file: &Path,
         directory: &Path,
     ) -> Result<Option<SourceIssue>, Failure<TorrentVerifyAction>> {
+        let start = Instant::now();
         let torrent_file = torrent_file.to_path_buf();
         let directory = directory.to_path_buf();
-        spawn_blocking(move || verify(&torrent_file, &directory))
+        let result = spawn_blocking(move || verify(&torrent_file, &directory))
             .await
-            .expect("torrent verify task should not panic")
+            .expect("torrent verify task should not panic");
+        trace!(
+            "Torrent verification took {:.3}s",
+            start.elapsed().as_secs_f64()
+        );
+        result
     }
 }
 
