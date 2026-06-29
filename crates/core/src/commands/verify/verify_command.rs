@@ -68,7 +68,11 @@ impl VerifyCommand {
         match Collector::collect_flacs(source) {
             Ok(flacs) => {
                 issues.append(&mut self.flac_verifier.execute(source, &flacs)?);
-                issues.append(&mut self.decode_verifier.execute(&flacs).await);
+                if issues.is_empty() {
+                    issues.append(&mut self.decode_verifier.execute(&flacs).await);
+                } else {
+                    trace!("Skipping decode check as FLAC checks failed");
+                }
             }
             Err(issue) => issues.push(issue),
         }
