@@ -6,14 +6,14 @@ pub struct DebugSubscriber {
     /// Semaphore to check available permits.
     pub semaphore: Arc<Semaphore>,
     /// Total CPU count for display.
-    pub cpus: u16,
+    pub cpus: usize,
 }
 
 #[injectable]
 impl DebugSubscriber {
     /// Create a new [`DebugSubscriber`].
     pub fn new(options: Arc<RunnerOptions>, semaphore: Arc<Semaphore>) -> Self {
-        let cpus = options.cpus.expect("cpus should be set");
+        let cpus = options.get_cpus();
         Self { semaphore, cpus }
     }
 }
@@ -29,7 +29,7 @@ impl Subscriber for DebugSubscriber {
     #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
     fn update(&self, job_id: &str, status: Status) {
         let available = self.semaphore.available_permits();
-        let in_use = self.cpus - available as u16;
+        let in_use = self.cpus - available;
         let total = self.cpus;
         trace!(
             "{:>9} {} {}",

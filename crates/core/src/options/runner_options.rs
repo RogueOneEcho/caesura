@@ -10,6 +10,16 @@ pub struct RunnerOptions {
     pub cpus: Option<u16>,
 }
 
+impl RunnerOptions {
+    /// Effective CPU count, clamped to at least 1.
+    ///
+    /// - Guards against a `0` value stalling a bounded semaphore or `buffered` stream
+    #[expect(clippy::as_conversions, reason = "u16 to usize is safe")]
+    pub fn get_cpus(&self) -> usize {
+        self.cpus.expect("cpus should be set").max(1) as usize
+    }
+}
+
 #[expect(
     clippy::unnecessary_wraps,
     reason = "default_fn signature requires Option for or_else chaining"

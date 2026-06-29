@@ -322,9 +322,7 @@ fn joinset_factory(
     RefMut::new(Mut::new(set))
 }
 
-#[expect(clippy::as_conversions, reason = "u16 to usize is safe")]
 fn semaphore_factory(services: &ServiceProvider) -> Ref<Semaphore> {
     let options = services.get_required::<RunnerOptions>();
-    let cpus = options.cpus.expect("cpus should be set") as usize;
-    Ref::new(Semaphore::new(cpus))
+    Ref::new(Semaphore::new(options.get_cpus()))
 }
