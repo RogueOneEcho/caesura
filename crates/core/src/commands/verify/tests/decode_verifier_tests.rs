@@ -3,7 +3,7 @@ use std::fs::OpenOptions;
 
 /// A valid FLAC decodes without any issue.
 #[tokio::test]
-async fn decode_verifier_execute_valid() {
+async fn decode_flac_valid() {
     // Arrange
     let path = sample_track().await;
     let source_dir = path
@@ -13,7 +13,7 @@ async fn decode_verifier_execute_valid() {
     let flac = FlacFile::new(path, &source_dir);
 
     // Act
-    let output = DecodeVerifier::execute(&flac);
+    let output = decode_flac(&flac.path);
 
     // Assert
     assert_eq!(output, None);
@@ -21,7 +21,7 @@ async fn decode_verifier_execute_valid() {
 
 /// A truncated FLAC passes the STREAMINFO header check but fails the full decode.
 #[tokio::test]
-async fn decode_verifier_execute_truncated() {
+async fn decode_flac_truncated() {
     // Arrange
     let source = sample_track().await;
     let source_dir = TempDirectory::create("decode_verifier_execute_truncated");
@@ -35,7 +35,7 @@ async fn decode_verifier_execute_truncated() {
     );
 
     // Act
-    let output = DecodeVerifier::execute(&flac);
+    let output = decode_flac(&flac.path);
 
     // Assert
     let issue = output.expect("truncated decode should report an issue");

@@ -39,6 +39,27 @@ impl Collector {
         flacs
     }
 
+    /// Collect the FLAC files of a [`Source`], or the issue that blocks collection.
+    ///
+    /// - Returns [`SourceIssue::MissingDirectory`] when the directory is absent
+    /// - Returns [`SourceIssue::NoFlacs`] when no FLAC files are present
+    /// - Guards the directory check before collecting so [`Collector::get_flacs`] never panics
+    pub(crate) fn collect_flacs(source: &Source) -> Result<Vec<FlacFile>, SourceIssue> {
+        if !source.directory.is_dir() {
+            return Err(SourceIssue::MissingDirectory {
+                path: source.directory.clone(),
+            });
+        }
+        trace!("Collecting FLACs from {}", source.directory.display());
+        let flacs = Self::get_flacs_with_context(&source.directory);
+        if flacs.is_empty() {
+            return Err(SourceIssue::NoFlacs {
+                path: source.directory.clone(),
+            });
+        }
+        Ok(flacs)
+    }
+
     /// Create [`AdditionalFile`] for each additional file in a directory.
     #[must_use]
     pub fn get_additional(source_dir: &PathBuf) -> Vec<AdditionalFile> {
