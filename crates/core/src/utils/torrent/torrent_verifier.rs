@@ -26,7 +26,8 @@ impl TorrentVerifier {
             .await
             .expect("torrent verify task should not panic");
         trace!(
-            "Torrent verification took {:.3}s",
+            "{} torrent hash in {:.3}s",
+            "Checked".bold(),
             start.elapsed().as_secs_f64()
         );
         result

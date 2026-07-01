@@ -93,7 +93,8 @@ impl VerifyCommand {
         }
         let torrent_path = self.get_source_torrent(source).await?;
         trace!(
-            "Verifying torrent hash against {}",
+            "{} torrent hash against {}",
+            "Checking".bold(),
             source.directory.display()
         );
         TorrentVerifier::execute(&torrent_path, &source.directory)

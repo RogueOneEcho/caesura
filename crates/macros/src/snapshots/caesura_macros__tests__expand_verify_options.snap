@@ -24,14 +24,14 @@ pub struct VerifyOptionsPartial {
     #[arg(long)]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub exclude_tags: Option<Vec<String>>,
-    /// Should the decode test of each FLAC be skipped?
+    /// Should the decode check of each FLAC be skipped?
     ///
     /// By default every audio frame is decoded to detect truncation or corruption.
     ///
     /// Default: `false`
-    #[arg(long = "no-decode-test", num_args = 0..= 1, default_missing_value = "true")]
+    #[arg(long = "no-decode-check", num_args = 0..= 1, default_missing_value = "true")]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-    pub no_decode_test: Option<bool>,
+    pub no_decode_check: Option<bool>,
 }
 impl VerifyOptionsPartial {
     fn resolve_internal(
@@ -44,11 +44,11 @@ impl VerifyOptionsPartial {
         let mut validator = ::caesura_options::OptionsValidator::new();
         let no_hash_check = self.no_hash_check;
         let exclude_tags = self.exclude_tags;
-        let no_decode_test = self.no_decode_test;
+        let no_decode_check = self.no_decode_check;
         let resolved = VerifyOptions {
             no_hash_check: no_hash_check.unwrap_or_default(),
             exclude_tags,
-            no_decode_test: no_decode_test.unwrap_or_default(),
+            no_decode_check: no_decode_check.unwrap_or_default(),
         };
         if validate {
             resolved.validate(&mut validator);
@@ -70,8 +70,8 @@ impl ::caesura_options::OptionsPartialContract for VerifyOptionsPartial {
         if self.exclude_tags.is_none() {
             self.exclude_tags = other.exclude_tags;
         }
-        if self.no_decode_test.is_none() {
-            self.no_decode_test = other.no_decode_test;
+        if self.no_decode_check.is_none() {
+            self.no_decode_check = other.no_decode_check;
         }
     }
     fn resolve_without_validation(self) -> VerifyOptions {
@@ -91,7 +91,7 @@ impl ::std::default::Default for VerifyOptions {
         Self {
             no_hash_check: ::std::default::Default::default(),
             exclude_tags: ::std::option::Option::None,
-            no_decode_test: ::std::default::Default::default(),
+            no_decode_check: ::std::default::Default::default(),
         }
     }
 }
@@ -111,11 +111,11 @@ impl ::caesura_options::Documented for VerifyOptions {
                 "--exclude-tags", field_type : "Option<Vec<String>>", default_value :
                 ::std::option::Option::None, default_doc : ::std::option::Option::None,
                 description : "Should sources with specific tags be excluded?", },
-                ::caesura_options::FieldDoc { config_key : "no_decode_test", cli_flag :
-                "--no-decode-test", field_type : "bool", default_value :
+                ::caesura_options::FieldDoc { config_key : "no_decode_check", cli_flag :
+                "--no-decode-check", field_type : "bool", default_value :
                 ::std::option::Option::Some("false".to_owned()), default_doc :
                 ::std::option::Option::None, description :
-                "Should the decode test of each FLAC be skipped?<br>By default every audio frame is decoded to detect truncation or corruption.",
+                "Should the decode check of each FLAC be skipped?<br>By default every audio frame is decoded to detect truncation or corruption.",
                 }
             ],
         });

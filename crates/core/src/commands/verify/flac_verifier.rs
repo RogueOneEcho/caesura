@@ -16,13 +16,13 @@ impl FlacVerifier {
         source: &Source,
         flacs: &[FlacFile],
     ) -> Result<Vec<SourceIssue>, Failure<VerifyAction>> {
+        trace!("{} {} FLACs", "Checking".bold(), flacs.len());
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.extend(check_flac_count(source, flacs.len()));
         issues.extend(check_subdirectory(flacs));
         let max_target = get_max_path_length_target(source);
         let output_dir = self.paths.get_output_dir();
         for flac in flacs {
-            trace!("Verifying FLAC {}", flac.path.display());
             if let Some(max_target) = max_target {
                 let path = self
                     .paths

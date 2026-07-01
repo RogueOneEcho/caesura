@@ -16,6 +16,11 @@ impl ApiVerifier {
     /// source passed every API-only rule.
     #[must_use]
     pub(crate) fn execute(&self, source: &Source) -> Vec<SourceIssue> {
+        trace!(
+            "{} torrent hash against {}",
+            "Checking".bold(),
+            source.directory.display()
+        );
         let exclude_tags = self.verify_options.exclude_tags.as_deref().unwrap_or(&[]);
         let mut issues: Vec<SourceIssue> = Vec::new();
         issues.extend(check_category(source));

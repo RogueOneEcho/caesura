@@ -199,7 +199,7 @@ async fn source_reporter_execute_blocked_by_hash_check_skipped() {
         .with_options(VerifyOptions {
             no_hash_check: true,
             exclude_tags: None,
-            no_decode_test: false,
+            no_decode_check: false,
         })
         .expect_build();
     let reporter = host.services.get_required::<SourceReporter>();

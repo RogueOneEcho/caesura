@@ -20,9 +20,11 @@ impl DecodeVerifier {
     /// - Cost scales with audio length as every frame is decoded, comparable to `flac --test`
     /// - Runs roughly 20x slower in debug builds than release due to unoptimized `claxon` decoding
     pub(crate) async fn execute(&self, flacs: &[FlacFile]) -> Vec<SourceIssue> {
-        if self.verify_options.no_decode_test {
+        if self.verify_options.no_decode_check {
+            debug!("{} decode check due to settings", "Skipped".bold());
             return Vec::new();
         }
+        trace!("{} decode of {} FLACs", "Checking".bold(), flacs.len());
         let cpus = self.runner_options.get_cpus();
         let start = Instant::now();
         let issues: Vec<SourceIssue> = stream::iter(flacs.iter().map(|flac| flac.path.clone()))
@@ -36,7 +38,8 @@ impl DecodeVerifier {
             .collect()
             .await;
         trace!(
-            "Decode tested {} FLACs in {:.3}s",
+            "{} decode of {} FLACs in {:.3}s",
+            "Checked".bold(),
             flacs.len(),
             start.elapsed().as_secs_f64()
         );
@@ -58,6 +61,7 @@ pub(crate) fn decode_flac(path: &Path) -> Option<SourceIssue> {
 /// - Surfaces truncation as a mid-frame decode error
 /// - Reuses a single sample buffer across frames
 fn decode(path: &Path) -> Result<(), ClaxonError> {
+    trace!("Decoding FLAC {}", path.display());
     let mut reader = FlacReader::open(path)?;
     let mut buffer = Vec::new();
     let mut blocks = reader.blocks();

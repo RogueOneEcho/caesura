@@ -89,10 +89,10 @@ max_file_size: 750000
 # Only applied if the image is greater than `max_file_size`.
 # Default: 1280
 max_pixel_size: 1280
-# Should the decode test of each FLAC be skipped?
+# Should the decode check of each FLAC be skipped?
 # By default every audio frame is decoded to detect truncation or corruption.
 # Default: false
-no_decode_test: false
+no_decode_check: false
 # Should the hash check of source files be skipped?
 # Note: This is only useful for development and should probably not be used.
 # Default: false
