@@ -3,12 +3,11 @@ use crate::prelude::*;
 /// Verify a FLAC source is suitable for transcoding.
 #[injectable]
 pub(crate) struct VerifyCommand {
-    verify_options: Ref<VerifyOptions>,
     source_provider: Ref<SourceProvider>,
     api_verifier: Ref<ApiVerifier>,
+    content_verifier: Ref<ContentVerifier>,
     flac_verifier: Ref<FlacVerifier>,
     decode_verifier: Ref<DecodeVerifier>,
-    torrents: Ref<TorrentFileProvider>,
     reporter: Ref<SourceReporter>,
 }
 
@@ -60,7 +59,7 @@ impl VerifyCommand {
             trace!("Skipping hash and FLAC checks as API checks failed");
             return Ok(VerifySuccess { issues });
         }
-        if let Some(issue) = self.hash_check(source).await? {
+        if let Some(issue) = self.content_verifier.execute(source).await? {
             issues.push(issue);
             trace!("Skipping FLAC checks as hash check failed");
             return Ok(VerifySuccess { issues });
@@ -80,37 +79,5 @@ impl VerifyCommand {
             warn!("{}", failure.render());
         }
         Ok(VerifySuccess { issues })
-    }
-
-    /// Verify the source files match the torrent hash, unless disabled in options.
-    pub(crate) async fn hash_check(
-        &self,
-        source: &Source,
-    ) -> Result<Option<SourceIssue>, Failure<VerifyAction>> {
-        if self.verify_options.no_hash_check {
-            debug!("{} hash check due to settings", "Skipped".bold());
-            return Ok(None);
-        }
-        let torrent_path = self.get_source_torrent(source).await?;
-        trace!(
-            "{} torrent hash against {}",
-            "Checking".bold(),
-            source.directory.display()
-        );
-        TorrentVerifier::execute(&torrent_path, &source.directory)
-            .await
-            .map_err(Failure::wrap(VerifyAction::VerifyHash))
-    }
-
-    /// Retrieve the source `.torrent` file, downloading from the API if not cached.
-    pub(crate) async fn get_source_torrent(
-        &self,
-        source: &Source,
-    ) -> Result<PathBuf, Failure<VerifyAction>> {
-        trace!("Fetching torrent file for {}", source.torrent.id);
-        self.torrents
-            .get(source.torrent.id)
-            .await
-            .map_err(Failure::wrap(VerifyAction::GetSourceTorrent))
     }
 }

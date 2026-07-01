@@ -96,6 +96,7 @@ impl HostBuilder {
             .add(UploadCommand::transient())
             // Add verify services
             .add(ApiVerifier::transient())
+            .add(ContentVerifier::transient())
             .add(DecodeVerifier::transient())
             .add(FlacVerifier::transient())
             .add(TorrentFileProvider::transient())
