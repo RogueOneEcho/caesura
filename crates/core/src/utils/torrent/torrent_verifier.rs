@@ -1,6 +1,7 @@
 //! Verify file contents match torrent piece hashes.
 
 use crate::prelude::*;
+use lava_torrent::LavaTorrentError;
 use lava_torrent::torrent::v1::Torrent as LavaTorrent;
 
 /// Verify that files on disk match the piece hashes in a `.torrent` file.
@@ -36,10 +37,20 @@ fn verify(
     torrent_file: &Path,
     directory: &Path,
 ) -> Result<Option<SourceIssue>, Failure<TorrentVerifyAction>> {
-    let torrent = LavaTorrent::read_from_file(torrent_file).map_err(Failure::wrap_with_path(
-        TorrentVerifyAction::ReadTorrent,
-        torrent_file,
-    ))?;
+    let torrent = match LavaTorrent::read_from_file(torrent_file) {
+        Ok(torrent) => torrent,
+        Err(LavaTorrentError::MalformedTorrent(details)) => {
+            return Ok(Some(SourceIssue::InvalidTorrent {
+                details: details.into_owned(),
+            }));
+        }
+        Err(error) => {
+            return Err(Failure::wrap_with_path(
+                TorrentVerifyAction::ReadTorrent,
+                torrent_file,
+            )(error));
+        }
+    };
     let mut hasher = match TorrentPieceHasher::open(&torrent, directory) {
         Ok(hasher) => hasher,
         Err(issue) => return Ok(Some(issue)),

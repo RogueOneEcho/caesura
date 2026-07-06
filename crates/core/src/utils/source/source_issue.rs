@@ -65,6 +65,13 @@ pub enum SourceIssue {
     InvalidFilePath {
         path: String,
     },
+    /// The `.torrent` file could not be parsed.
+    ///
+    /// The bencode is malformed or violates the torrent spec, so the source
+    /// cannot be matched against files on disk.
+    InvalidTorrent {
+        details: String,
+    },
     UnnecessaryDirectory {
         prefix: PathBuf,
     },
@@ -191,6 +198,7 @@ impl SourceIssue {
             }
             NoDirectory => "Torrent has no enclosing directory".to_owned(),
             InvalidFilePath { path } => format!("Invalid file path: {path}"),
+            InvalidTorrent { details } => format!("Invalid torrent: {details}"),
             UnnecessaryDirectory { prefix } => {
                 format!(
                     "Unnecessary nested directory{}",

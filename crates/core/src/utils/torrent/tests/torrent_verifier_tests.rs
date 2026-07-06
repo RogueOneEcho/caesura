@@ -190,6 +190,28 @@ async fn verify_excess_content_returns_excess_content() {
 }
 
 #[tokio::test]
+async fn verify_non_utf8_path_returns_invalid_torrent() {
+    // Arrange
+    init_logger();
+    let test_dir = TempDirectory::create("verify_non_utf8_path");
+    let torrent_path = test_dir.join("test.torrent");
+    write(&torrent_path, build_non_utf8_torrent()).expect("should write torrent");
+    let content_dir = test_dir.join("album");
+
+    // Act
+    let result = TorrentVerifier::execute(&torrent_path, &content_dir)
+        .await
+        .expect("non-UTF-8 path should return an issue, not an error");
+
+    // Assert
+    let issue = result.expect("non-UTF-8 path should fail verification");
+    assert!(
+        matches!(issue, SourceIssue::InvalidTorrent { .. }),
+        "expected InvalidTorrent issue, got: {issue}"
+    );
+}
+
+#[tokio::test]
 async fn verify_nonexistent_torrent_returns_error() {
     // Arrange
     let torrent_path = PathBuf::from("/nonexistent/path.torrent");
@@ -205,6 +227,28 @@ async fn verify_nonexistent_torrent_returns_error() {
 #[expect(clippy::integer_division, reason = "intentional truncation for test")]
 const fn truncate_midpoint(len: usize) -> usize {
     len / 2
+}
+
+/// Build a minimal single-file torrent whose `path` component is not valid UTF-8.
+///
+/// - The bencode is well-formed but the file path holds a raw `0xE9` byte
+/// - `lava_torrent` decodes it as a byte string, so parsing fails
+fn build_non_utf8_torrent() -> Vec<u8> {
+    let mut path_element = b"song".to_vec();
+    path_element.push(0xE9);
+    path_element.extend_from_slice(b".flac");
+    let mut bytes = b"d4:infod5:filesld6:lengthi10e4:pathl".to_vec();
+    bytes.extend_from_slice(&bencode_bytes(&path_element));
+    bytes.extend_from_slice(b"eeeee");
+    bytes
+}
+
+/// Encode raw bytes as a bencode byte string (`<len>:<bytes>`).
+fn bencode_bytes(value: &[u8]) -> Vec<u8> {
+    let mut out = value.len().to_string().into_bytes();
+    out.push(b':');
+    out.extend_from_slice(value);
+    out
 }
 
 fn copy_dir(from: &Path, to: &Path) {

@@ -62,6 +62,9 @@ fn source_issue_serialization() -> Result<(), YamlError> {
         SourceIssue::InvalidFilePath {
             path: "./bad".to_owned(),
         },
+        SourceIssue::InvalidTorrent {
+            details: "malformed torrent".to_owned(),
+        },
         SourceIssue::InvalidTags {
             path: PathBuf::from("/a.flac"),
             tags: vec!["track_number".to_owned()],
@@ -111,6 +114,8 @@ fn source_issue_serialization() -> Result<(), YamlError> {
 - type: no_directory
 - type: invalid_file_path
   path: ./bad
+- type: invalid_torrent
+  details: malformed torrent
 - type: invalid_tags
   path: /a.flac
   tags:
@@ -358,6 +363,17 @@ fn source_issue_render_no_path() {
     assert_eq!(
         flac_error_a.render(PathStyle::None),
         "FLAC stream error: bad header"
+    );
+}
+
+#[test]
+fn source_issue_render_invalid_torrent() {
+    let issue = SourceIssue::InvalidTorrent {
+        details: "malformed torrent".to_owned(),
+    };
+    assert_eq!(
+        issue.render(PathStyle::None),
+        "Invalid torrent: malformed torrent"
     );
 }
 
