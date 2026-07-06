@@ -8,6 +8,7 @@ use crate::prelude::*;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(crate) struct EditionKey {
     remaster_title: String,
+    remaster_year: Option<u16>,
     remaster_record_label: String,
     remaster_catalogue_number: String,
     media: Media,
@@ -19,6 +20,7 @@ impl EditionKey {
     pub(crate) fn from_torrent(torrent: &Torrent) -> Self {
         Self {
             remaster_title: torrent.remaster_title.clone(),
+            remaster_year: normalize_year(torrent.remaster_year),
             remaster_record_label: torrent.remaster_record_label.clone(),
             remaster_catalogue_number: remove_zero_pad(&torrent.remaster_catalogue_number),
             media: torrent.media.clone(),
@@ -27,14 +29,17 @@ impl EditionKey {
 
     /// Check whether this edition key is a less specific match.
     ///
-    /// Returns `true` when `remaster_title` and `media` match exactly, at
-    /// least one field is less specific (empty on self but populated on other),
-    /// and no populated fields conflict.
+    /// Returns `true` when `remaster_title`, `remaster_year`, and `media` match
+    /// exactly, at least one field is less specific (empty on self but populated
+    /// on other), and no populated fields conflict.
     ///
     /// Exact matches return `false` (those are handled by `PartialEq`).
     #[must_use]
     pub(crate) fn is_less_specific_than(&self, other: &EditionKey) -> bool {
-        if self.remaster_title != other.remaster_title || self.media != other.media {
+        if self.remaster_title != other.remaster_title
+            || self.remaster_year != other.remaster_year
+            || self.media != other.media
+        {
             return false;
         }
         let label = self.remaster_record_label == other.remaster_record_label;
@@ -53,11 +58,20 @@ impl EditionKey {
     pub(crate) fn mock() -> Self {
         Self {
             remaster_title: "Test Edition".to_owned(),
+            remaster_year: Some(2020),
             remaster_record_label: "Test Label".to_owned(),
             remaster_catalogue_number: "TEST-001".to_owned(),
             media: Media::CD,
         }
     }
+}
+
+/// Normalize a remaster year so blank values share one representation.
+///
+/// Collapses `Some(0)` to `None` so torrents that leave the remaster year
+/// blank compare equal whether the tracker returned `None` or `0`.
+fn normalize_year(year: Option<u16>) -> Option<u16> {
+    year.filter(|&y| y != 0)
 }
 
 /// Remove leading zeros from a string.
@@ -129,6 +143,44 @@ mod tests {
 
         // Act & Assert
         assert_ne!(
+            EditionKey::from_torrent(&left),
+            EditionKey::from_torrent(&right)
+        );
+    }
+
+    #[test]
+    fn edition_key_different_year_differ() {
+        // Arrange
+        let left = Torrent {
+            remaster_year: Some(2016),
+            ..Torrent::default()
+        };
+        let right = Torrent {
+            remaster_year: Some(2020),
+            ..Torrent::default()
+        };
+
+        // Act & Assert
+        assert_ne!(
+            EditionKey::from_torrent(&left),
+            EditionKey::from_torrent(&right)
+        );
+    }
+
+    #[test]
+    fn edition_key_unset_year_variants_match() {
+        // Arrange
+        let left = Torrent {
+            remaster_year: None,
+            ..Torrent::default()
+        };
+        let right = Torrent {
+            remaster_year: Some(0),
+            ..Torrent::default()
+        };
+
+        // Act & Assert
+        assert_eq!(
             EditionKey::from_torrent(&left),
             EditionKey::from_torrent(&right)
         );
@@ -253,6 +305,20 @@ mod tests {
     }
 
     #[test]
+    fn edition_key_is_less_specific_than_different_year() {
+        // Arrange
+        let source = EditionKey {
+            remaster_year: None,
+            remaster_catalogue_number: String::new(),
+            ..EditionKey::mock()
+        };
+        let existing = EditionKey::mock();
+
+        // Act & Assert
+        assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
     fn edition_key_is_less_specific_than_different_media() {
         // Arrange
         let source = EditionKey {
@@ -280,6 +346,13 @@ mod tests {
 
         // Act & Assert
         assert!(!source.is_less_specific_than(&existing));
+    }
+
+    #[test]
+    fn normalize_year_edge_cases() {
+        assert_eq!(normalize_year(Some(0)), None);
+        assert_eq!(normalize_year(None), None);
+        assert_eq!(normalize_year(Some(2016)), Some(2016));
     }
 
     #[test]

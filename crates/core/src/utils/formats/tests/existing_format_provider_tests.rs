@@ -96,6 +96,33 @@ fn existing_format_provider_get_source_more_specific() {
     assert!(!output.contains(&ExistingFormat::V0));
 }
 
+#[test]
+fn existing_format_provider_get_excludes_different_year() {
+    // Arrange
+    let source = Torrent {
+        id: 1,
+        remaster_year: Some(2020),
+        remaster_catalogue_number: String::new(),
+        ..Torrent::mock()
+    };
+    let other_year = Torrent {
+        id: 2,
+        format: Format::MP3,
+        encoding: Quality::_320,
+        remaster_year: Some(2016),
+        remaster_catalogue_number: String::new(),
+        ..Torrent::mock()
+    };
+    let group_torrents = vec![source.clone(), other_year];
+    let provider = create_provider(false);
+
+    // Act
+    let output = provider.get(&source, &group_torrents);
+
+    // Assert
+    assert!(!output.contains(&ExistingFormat::_320));
+}
+
 fn create_provider(allow_less_specific: bool) -> ExistingFormatProvider {
     ExistingFormatProvider {
         options: Ref::new(TargetOptions {
