@@ -293,6 +293,37 @@ If you point it at the directory your torrent client stores `.torrent` files the
 caesura audit /srv/torrents --print-bb-code
 ```
 
+## `cross`
+
+Cross-seed a source onto a second indexer.
+
+> [!NOTE]
+> `cross` exists to support an unreleased feature and isn't much use on its own.
+>
+> It uses similar mechanics to [qui's cross-seeding](https://getqui.com/docs/features/cross-seed/gazelle-ops-red/), which is the recommended approach.
+
+Given a source, `cross` looks up whether the same release exists on another indexer (the "cross" indexer). If a match is found it downloads the cross-seed `.torrent` and adds it to your torrent client so you seed the same files on both.
+
+The cross indexer is configured with a separate config file passed via `--cross-config`. Only `api_key`, `indexer`, and `indexer_url` are read from it.
+
+> [!TIP]
+> Append `--dry-run` to look up the cross-seed without downloading or injecting.
+
+You must set at least one of:
+
+- `--qbit-cross` to inject the cross-seed into qBittorrent
+- `--copy-cross-torrent-to <DIR>` to copy the `.torrent` into a watch directory
+- `--dry-run` to only report the match
+
+```bash
+caesura cross 142659 --cross-config ops.yml --qbit-cross
+```
+
+> [!TIP]
+> `--qbit-cross` uses your existing qBittorrent connection: see [Torrent client integration](SETUP.md#torrent-client-integration).
+>
+> Injected cross-seeds default to the `caesura` category and tag. Override placement with `--qbit-cross-category`, `--qbit-cross-tags`, `--qbit-cross-savepath`, `--qbit-cross-paused`, or `--qbit-cross-skip-checking`.
+
 ## Troubleshooting
 
 Refer to the [troubleshooting guide](TROUBLESHOOTING.md) if you have any issues.
