@@ -17,7 +17,7 @@ The following tools must be installed to run tests. Version numbers are those us
 | SoX_ng      | 14.8.0.1 | Generate sample audio files         | `brew install sox_ng`     |
 | FLAC        | 1.5.0    | FLAC encoding/decoding              | `brew install flac`       |
 | metaflac    | 1.5.0    | Test sample tag injection           | Included with FLAC        |
-| LAME        | 3.100    | MP3 encoding for transcode tests    | `brew install lame`       |
+| LAME        | 4.0      | MP3 encoding for transcode tests    | `brew install lame`       |
 
 ### Testing with classic SoX
 

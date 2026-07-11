@@ -29,7 +29,6 @@ fn encode_mp3_v0(output_path: PathBuf) -> CommandInfo {
             "-S".to_owned(),
             "-V".to_owned(),
             "0".to_owned(),
-            "--vbr-new".to_owned(),
             "--ignore-tag-errors".to_owned(),
             "-".to_owned(),
             output_path.to_string_lossy().to_string(),

@@ -5,7 +5,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 01 Track One.mp3
   size: 2604846
-  sha256: 9488773f275e4b89f35be2f0de7ca4fa3c10e3841c22d589d413c55abb481947
+  sha256: e85f0d00696558117c320e709d983ddd4edbcfa6513b7e4a4a9a53e819ab001d
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -30,7 +30,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 02 Track Two.mp3
   size: 2604846
-  sha256: eed97674da758ecffdea534e46fd757a54190f91500ba0cd75b025673f108cc8
+  sha256: 04921710be0519d6f3a00345ebf13b9e6adc74be1344145c78d246fbba7db337
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -55,7 +55,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 03 Track Three.mp3
   size: 2604848
-  sha256: 6e8f1e33b653c7b895fe2d2a05a39d7eab787d6638d3a88de4b808f5a0e40798
+  sha256: 901f6a2a9a78673a428036af50c8b38a7c5da964a6517cb4238d30963fc61ea7
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -80,7 +80,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 04 Track Four.mp3
   size: 2604847
-  sha256: 2a23abaa35a0f54e17a23171e2571fc6f2feae6cc2edf9638c60e8b605c838d9
+  sha256: 35bb76711edd3b7940ad9f1560583beafa8fa4fa4ca8161f5a4e5550e7e18e31
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -105,7 +105,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 05 Track Five.mp3
   size: 2604847
-  sha256: 919af801182a0a6c356cdeb4f2f66e7b3b2d93a302441688758d7db83b186399
+  sha256: f79af7138a418f7bc4c90b33640b34564a3b398223724fc708f79bc69e9c7341
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -130,7 +130,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 06 Track Six.mp3
   size: 2604846
-  sha256: 96ec166517dd9661232b7ee80aea7f1beb9692a3b200cbdacfdfbd7703c56e87
+  sha256: e95dd28b17438bdcdaca50f95b558e96977c635960a8a561ef3a05bbf11a5c49
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -155,7 +155,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 07 Track Seven.mp3
   size: 2604848
-  sha256: 718feba289872d347f0ee7f3186e9b0b94cc1931d331e992c336d51e6448dd70
+  sha256: d1d876d2f983d5c243b92517ee6d0a47f8f28130df772c152088fb1bd3a2f836
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -180,7 +180,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 08 Track Eight.mp3
   size: 2604848
-  sha256: 72ac88c61050774f48fdc9f12a0d40b3081cbb230e5ec90b0ec469c326a2a1ad
+  sha256: 7062ab70e34ab74b7b149b2c0bc384f79c2072fa26368887b47a9b857ba41e43
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -205,7 +205,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 09 Track Nine.mp3
   size: 2604847
-  sha256: 4d1c0190abc23f7edf6ee4119e2cd22a7800cc5c035848e16f54a10bf66eb78c
+  sha256: 8b58a091f7d9c2c5dae756221765f8425af8673785cf31284a13caa988586396
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -230,7 +230,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB 320]"
   filename: 10 Track Ten.mp3
   size: 2604847
-  sha256: 76788f7787d0e82d06d53f111d22ab551f0c08492a30ccdf2987d8ed38c87628
+  sha256: 305fbffd474011000e13cd7af6691ead8dc0f98c8e03f01a825208feeb9b6510
   audio:
     duration_ms: 65045
     overall_bitrate: 320
@@ -263,7 +263,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 01 Track One.mp3
   size: 613370
-  sha256: 2e32251b0d950f1342972ed8b8dfff60e57c48e5ffc74c03fca252d47b42caf7
+  sha256: e4483d67925ffae5fdf99801d2fa424e5ebb536d1f0351af9315a4c80e325e31
   audio:
     duration_ms: 65045
     overall_bitrate: 75
@@ -288,7 +288,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 02 Track Two.mp3
   size: 693392
-  sha256: 7928bac63d1b8afdc8bad9f539bd245d8789e211c1202777aa54c91b527690e7
+  sha256: b6b2490ea30623f29a678089d379ba058cbf1d47dc19eb1cde140d48ae8ce395
   audio:
     duration_ms: 65045
     overall_bitrate: 85
@@ -313,7 +313,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 03 Track Three.mp3
   size: 827687
-  sha256: 5f671b3e554f3118f6202af05d603fc7f915cf78022ecf9513d3399ca7a96e7b
+  sha256: aaf9867e2f4a12b38e26faa043cc19b7d68585b618f9bea9728c9400e197a414
   audio:
     duration_ms: 65045
     overall_bitrate: 101
@@ -338,7 +338,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 04 Track Four.mp3
   size: 813959
-  sha256: a21f0b6a4e2b94dc2400e061241b2baa24cd5d650208187cc5c68e8b009ca41e
+  sha256: 419e3db62693cc81f89288755d767ffd6af786fbeb0cbbea021dc295dbcfbf85
   audio:
     duration_ms: 65045
     overall_bitrate: 100
@@ -363,7 +363,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 05 Track Five.mp3
   size: 729875
-  sha256: c5797df2f3dd8ca474bb5f9521448de56ab03c7b7d631ecc5fb42199195e178a
+  sha256: 50646267c62f01afc27df670e4005daa83e0cd195088e91b16f8cd47846824c2
   audio:
     duration_ms: 65045
     overall_bitrate: 89
@@ -388,7 +388,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 06 Track Six.mp3
   size: 827218
-  sha256: 0a67351fd6d5d14229793819cb9d2d353fd6c7c8aa67908f6730b51d5b8aeb35
+  sha256: 735af2620b2cafd6e1ff16492159a90e13eec96877b939a752af5a79682e6fe3
   audio:
     duration_ms: 65045
     overall_bitrate: 101
@@ -413,7 +413,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 07 Track Seven.mp3
   size: 847578
-  sha256: 0915527c021354af65e81d332b544eaef159f01184c64d3b5b675e29440cc72e
+  sha256: 723113cba566b5c8a5737389a0345b74af9e82dda4843379178bfb063d5c148f
   audio:
     duration_ms: 65045
     overall_bitrate: 104
@@ -438,7 +438,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 08 Track Eight.mp3
   size: 683223
-  sha256: d92f941fb42eb88f37c9c9da94dd759913e262d81ea83c2848536befe4bec528
+  sha256: 19f085b523cdd0c2d14f8e1360ee14ec27ab4418aac60cb74528416ddb19c689
   audio:
     duration_ms: 65045
     overall_bitrate: 84
@@ -463,7 +463,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 09 Track Nine.mp3
   size: 830859
-  sha256: 38211ce120bdcb826e9870076e78a013bdb4fe1d2104207344c5d5c424cc2121
+  sha256: 9bd160decd4bdc3803cff34fdc64862037a0dfc76773080661f69f423a552dce
   audio:
     duration_ms: 65045
     overall_bitrate: 102
@@ -488,7 +488,7 @@ expression: snapshot
 - directory: "Rename Artist - Double Digit Album [2024] [WEB V0]"
   filename: 10 Track Ten.mp3
   size: 824124
-  sha256: 136ab8863c4439297a813167a2e7fd35fefb7158571e3b1694e89b7a4b12a103
+  sha256: d6cba81640e88d82b2c98f306343cd1862aaf93dae636e3becb13d4456c82334
   audio:
     duration_ms: 65045
     overall_bitrate: 101
