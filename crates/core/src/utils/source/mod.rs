@@ -5,7 +5,7 @@ pub(crate) use metadata::*;
 pub(crate) use source::*;
 pub(crate) use source_action::*;
 pub(crate) use source_issue::*;
-pub(crate) use source_provider::SourceProvider;
+pub(crate) use source_provider::{SourceProvider, is_single_safe_segment};
 pub(crate) use torrent_file_provider::*;
 pub(crate) use url_helpers::*;
 

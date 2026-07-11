@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 /// Characters that are illegal or problematic in file paths.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, ThisError)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, ThisError)]
 pub(crate) enum SanitizerChar {
     // Filesystem illegal
     #[error("colon")]

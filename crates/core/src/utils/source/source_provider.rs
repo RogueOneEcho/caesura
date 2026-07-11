@@ -231,7 +231,7 @@ fn safe_candidates(path: &str) -> Result<Vec<String>, SourceIssue> {
 /// - Backslashes are rejected explicitly so behavior matches across Linux and Windows
 ///   (Windows treats `\` as a path separator, Linux does not).
 /// - Anything other than exactly one [`Component::Normal`] returns `false`.
-fn is_single_safe_segment(path: &str) -> bool {
+pub(crate) fn is_single_safe_segment(path: &str) -> bool {
     if path.contains('\\') {
         return false;
     }

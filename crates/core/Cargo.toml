@@ -27,11 +27,14 @@ path = "src/lib.rs"
 [dependencies]
 caesura_macros = { workspace = true }
 caesura_options = { workspace = true }
+cesu8 = { workspace = true }
+chardetng = { workspace = true }
 chrono = { workspace = true }
 clap = { workspace = true }
 claxon = { workspace = true }
 colored = { workspace = true }
 dirs = { workspace = true }
+encoding_rs = { workspace = true }
 fast_image_resize = { workspace = true }
 flat_db = { workspace = true }
 futures = { workspace = true }
@@ -55,8 +58,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
 sha1 = { workspace = true }
+similar = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+unicode-normalization = { workspace = true }
 unicode-width = { workspace = true }
 
 [dev-dependencies]

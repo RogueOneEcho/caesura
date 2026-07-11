@@ -253,6 +253,46 @@ If you're working with a lot of files then `less` can be helpful:
 cat ./cache/queue/*.yml | yq --colors 'map(select(.verify.verified == false))' | less -R
 ```
 
+## `audit`
+
+Scan a directory of `.torrent` files for problematic file paths.
+
+```bash
+caesura audit path/to/torrents
+```
+
+![](https://media.githubusercontent.com/media/RogueOneEcho/assets-caesura/main/dist/audit.gif)
+
+If you point it at the directory your torrent client stores `.torrent` files then caesura will scan everything from your client.
+
+- For qBittorrent use the `BT_backup` directory
+- For deluge use the `state` directory
+
+> [!WARNING]
+> While these identified issues can be problematic they aren't necessarily rule breaking. Check before reporting.
+
+> [!TIP]
+> By default it runs every check. Disable individual checks with the `--ignore-*` flags:
+>
+> - `--ignore-non-utf8` - paths that are not valid UTF-8
+> - `--ignore-single-file` - single-file torrents
+> - `--ignore-libtorrent` - characters libtorrent strips on disk
+> - `--ignore-invisible` - invisible or zero-width characters
+> - `--ignore-unsafe` - unsafe path segments
+> - `--ignore-nfd` - decomposed (non-NFC) characters
+> - `--ignore-lost-extension` - file extensions lost on disk
+>
+> ```bash
+> caesura audit path/to/torrents --ignore-invisible --ignore-libtorrent --ignore-unsafe --ignore-nfd --ignore-single-file --ignore-non-utf8
+> ```
+
+> [!TIP]
+> Add `--print-bb-code` to render the diffs with BB code, ready to paste into a tracker report.
+
+```bash
+caesura audit /srv/torrents --print-bb-code
+```
+
 ## Troubleshooting
 
 Refer to the [troubleshooting guide](TROUBLESHOOTING.md) if you have any issues.

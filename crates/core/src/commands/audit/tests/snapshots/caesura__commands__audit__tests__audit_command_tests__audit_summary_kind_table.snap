@@ -1,0 +1,8 @@
+---
+source: crates/core/src/commands/audit/tests/audit_command_tests.rs
+expression: output
+---
+Issue                 Torrents   %
+non-UTF-8                    2   40.00%
+libtorrent stripped          1   20.00%
+parse torrent                1   20.00%

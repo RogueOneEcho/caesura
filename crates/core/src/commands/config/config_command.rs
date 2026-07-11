@@ -3,6 +3,7 @@ use crate::prelude::*;
 /// Display the current configuration options.
 #[injectable]
 pub struct ConfigCommand {
+    audit_options: Ref<AuditOptions>,
     batch_options: Ref<BatchOptions>,
     cache_options: Ref<CacheOptions>,
     config_options: Ref<ConfigOptions>,
@@ -61,6 +62,7 @@ impl ConfigCommand {
 
     fn get_options_map(&self) -> Result<BTreeMap<String, Value>, YamlError> {
         let option_values = [
+            yaml_to_value(&*self.audit_options)?,
             yaml_to_value(&*self.batch_options)?,
             yaml_to_value(&*self.cache_options)?,
             yaml_to_value(&*self.config_options)?,

@@ -27,7 +27,14 @@ impl Sanitizer {
     #[must_use]
     pub fn invisible() -> Self {
         Self {
-            rules: vec![SanitizerRule::invisible()],
+            rules: vec![SanitizerRule::invisible(), SanitizerRule::control()],
+        }
+    }
+    /// Exclude restricted file path characters.
+    #[must_use]
+    pub fn restricted() -> Self {
+        Self {
+            rules: vec![SanitizerRule::restricted()],
         }
     }
 
@@ -39,7 +46,9 @@ impl Sanitizer {
         Self {
             rules: vec![
                 SanitizerRule::replace_dividers(),
-                SanitizerRule::restricted(),
+                SanitizerRule::restricted_without_dividers(),
+                SanitizerRule::invisible(),
+                SanitizerRule::control(),
             ],
         }
     }
@@ -114,32 +123,49 @@ impl SanitizerRule {
 
     /// Characters that should not be in file paths.
     ///
-    /// Includes invisible and control characters.
+    /// - Excludes dividers
+    fn restricted_without_dividers() -> Self {
+        SanitizerRule {
+            chars: vec![
+                SanitizerChar::Colon,
+                SanitizerChar::LessThan,
+                SanitizerChar::GreaterThan,
+                SanitizerChar::DoubleQuote,
+                SanitizerChar::QuestionMark,
+                SanitizerChar::Asterisk,
+            ],
+            replacement: None,
+        }
+    }
+
+    /// Characters that should not be in file paths.
+    ///
+    /// - Includes [`Self::restricted_without_dividers()`]
     fn restricted() -> Self {
-        Self::invisible().extend(vec![
-            SanitizerChar::Colon,
-            SanitizerChar::LessThan,
-            SanitizerChar::GreaterThan,
-            SanitizerChar::DoubleQuote,
-            SanitizerChar::QuestionMark,
-            SanitizerChar::Asterisk,
+        Self::restricted_without_dividers().extend(vec![
+            SanitizerChar::ForwardSlash,
+            SanitizerChar::Backslash,
+            SanitizerChar::Pipe,
         ])
     }
 
-    /// Invisible + control characters.
+    /// Invisible characters.
     fn invisible() -> Self {
-        Self::control().extend(vec![
-            SanitizerChar::NonBreakingSpace,
-            SanitizerChar::ZeroWidthSpace,
-            SanitizerChar::LeftToRightMark,
-            SanitizerChar::RightToLeftMark,
-            SanitizerChar::LeftToRightEmbedding,
-            SanitizerChar::RightToLeftEmbedding,
-            SanitizerChar::PopDirectionalFormatting,
-            SanitizerChar::LeftToRightOverride,
-            SanitizerChar::RightToLeftOverride,
-            SanitizerChar::ZeroWidthNoBreakSpace,
-        ])
+        SanitizerRule {
+            chars: vec![
+                SanitizerChar::NonBreakingSpace,
+                SanitizerChar::ZeroWidthSpace,
+                SanitizerChar::LeftToRightMark,
+                SanitizerChar::RightToLeftMark,
+                SanitizerChar::LeftToRightEmbedding,
+                SanitizerChar::RightToLeftEmbedding,
+                SanitizerChar::PopDirectionalFormatting,
+                SanitizerChar::LeftToRightOverride,
+                SanitizerChar::RightToLeftOverride,
+                SanitizerChar::ZeroWidthNoBreakSpace,
+            ],
+            replacement: None,
+        }
     }
 
     /// C0 and C1 control characters.

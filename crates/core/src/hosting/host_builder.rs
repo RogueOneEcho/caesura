@@ -63,6 +63,9 @@ impl HostBuilder {
             .add(ProgressBarSubscriber::transient())
             .add(ExistingFormatProvider::transient())
             .add(TargetFormatProvider::transient())
+            // Add audit services
+            .add(AuditCommand::transient())
+            .add(TorrentAuditor::transient())
             // Add batch services
             .add(BatchCommand::transient())
             // Add config services

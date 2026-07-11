@@ -3,6 +3,7 @@
 pub(crate) use app_info::*;
 pub(crate) use cross::*;
 pub(crate) use diagnostic_ext::*;
+pub(crate) use diff::*;
 pub(crate) use formats::*;
 pub(crate) use fs::*;
 pub(crate) use github_release::*;
@@ -23,6 +24,7 @@ pub(crate) use torrent::*;
 mod app_info;
 mod cross;
 mod diagnostic_ext;
+mod diff;
 mod formats;
 mod fs;
 mod github_release;

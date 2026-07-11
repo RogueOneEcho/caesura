@@ -10,6 +10,10 @@ pub type ArgumentsProvider = ArgsProvider<Cli, Command>;
 /// and upload to gazelle based indexers/trackers
 #[derive(CommandEnum, Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Command {
+    /// Scan a directory of `.torrent` files for problematic file paths.
+    #[options(AuditArgs, AuditOptions)]
+    Audit,
+
     /// Verify, transcode, and upload from multiple FLAC sources in one command.
     #[options(
         ConfigOptions,

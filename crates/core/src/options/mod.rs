@@ -1,5 +1,7 @@
 //! Configuration structs loaded from CLI args and YAML config.
 
+pub use audit_args::*;
+pub use audit_options::*;
 pub use batch_options::*;
 pub use cache_options::*;
 pub use config_options::*;
@@ -25,6 +27,8 @@ pub use target_options::*;
 pub use upload_options::*;
 pub use verify_options::*;
 
+mod audit_args;
+mod audit_options;
 mod batch_options;
 mod cache_options;
 mod config_options;

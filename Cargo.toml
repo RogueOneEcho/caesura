@@ -20,11 +20,14 @@ caesura = { path = "crates/core" }
 caesura_macros = { version = "0.0.0", path = "crates/macros" }
 caesura_options = { version = "0.0.0", path = "crates/options" }
 
+cesu8 = { version = "1.1.0" }
+chardetng = { version = "1.0.0" }
 chrono = { version = "0.4.45", features = ["serde"] }
 clap = { version = "4.6.1", features = ["derive"] }
 claxon = "0.4.3"
 colored = "3.1.1"
 dirs = "6.0.0"
+encoding_rs = { version = "0.8.35" }
 fast_image_resize = { version = "6.0.0", features = ["image"] }
 flat_db = "0.6.0"
 futures = "0.3.32"
@@ -52,8 +55,10 @@ serde_yaml = "0.9.34"
 sha1 = "=0.10.6"
 # Pinned to 0.10: 0.11 output type drops LowerHex and the replacement crate (base16ct) adds friction
 sha2 = "=0.10.9"
+similar = { version = "3.1.1", features = ["unicode"] }
 thiserror = "2.0.18"
 tokio = { version = "1.52.3", features = ["full"] }
+unicode-normalization = { version = "0.1.25" }
 unicode-width = "0.2.2"
 
 [workspace.lints.rust]

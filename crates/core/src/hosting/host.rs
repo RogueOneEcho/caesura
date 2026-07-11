@@ -30,6 +30,11 @@ impl Host {
         trace!("{} {}", APP_NAME, app_version_or_describe());
         let args = self.services.get_required::<ArgumentsProvider>();
         match args.get_command() {
+            Command::Audit => self
+                .services
+                .get_required::<AuditCommand>()
+                .execute_cli()
+                .map_err(Report::new),
             Command::Batch => self
                 .services
                 .get_required::<BatchCommand>()
