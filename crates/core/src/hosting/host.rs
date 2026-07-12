@@ -34,6 +34,7 @@ impl Host {
                 .services
                 .get_required::<AuditCommand>()
                 .execute_cli()
+                .await
                 .map_err(Report::new),
             Command::Batch => self
                 .services

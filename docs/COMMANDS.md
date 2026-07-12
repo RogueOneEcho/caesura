@@ -268,8 +268,16 @@ If you point it at the directory your torrent client stores `.torrent` files the
 - For qBittorrent use the `BT_backup` directory
 - For deluge use the `state` directory
 
+The command also accepts a torrent id. The respective torrent is then downloaded from the indexer API.
+
+This requires `api_key` and `indexer_url` to be set in the config file.
+
+```bash
+caesura audit 12345
+```
+
 > [!WARNING]
-> While these identified issues can be problematic they aren't necessarily rule breaking. Check before reporting.
+> While audit issues can be problematic they aren't necessarily rule breaking. Check before reporting.
 
 > [!TIP]
 > By default it runs every check. Disable individual checks with the `--ignore-*` flags:
