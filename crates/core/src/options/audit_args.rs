@@ -11,6 +11,7 @@ pub struct AuditArgs {
     /// - `/srv/qBittorrent/BT_backup`
     /// - `path/to/file.torrent`
     #[arg(value_name = "PATH | ID")]
+    #[options(required)]
     pub audit_arg: String,
 }
 
