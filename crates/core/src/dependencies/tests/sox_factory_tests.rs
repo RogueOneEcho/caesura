@@ -21,8 +21,13 @@ fn sox_factory_sox_ng_true() {
 }
 
 /// When only `sox_ng: false` is set, the factory selects the `sox` binary.
+///
+/// - Skipped under Docker, which forces `sox_ng`.
 #[test]
 fn sox_factory_sox_ng_false() {
+    if is_docker() {
+        return;
+    }
     // Arrange
     let options = SoxOptionsPartial {
         sox_ng: Some(false),
