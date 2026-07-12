@@ -33,6 +33,32 @@ RUN wget -q "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-${SOX_N
     && make -j"$(nproc)" \
     && make install DESTDIR=/artifacts
 
+# Build LAME from source
+# https://lame.sourceforge.io
+FROM alpine:latest AS lame
+RUN apk add --no-cache build-base curl pkgconf
+ARG LAME_VERSION=4.0
+ARG LAME_SHA256=3df5124d5ad3a98312ffd7ba6a9b36230e4f8a3e66d3ce0f425e336c32d216eb
+RUN curl -L "https://downloads.sourceforge.net/project/lame/lame/${LAME_VERSION}/lame-${LAME_VERSION}.tar.gz" \
+      --show-error --silent -o lame.tar.gz \
+    && echo "${LAME_SHA256}  lame.tar.gz" | sha256sum -c - \
+    && tar xf lame.tar.gz \
+    && cd "lame-${LAME_VERSION}" \
+    # LAME 4.0 ships an inconsistent frontend: lame.h defines
+    # DEPRECATED_OR_OBSOLETE_CODE_REMOVED=1, dropping the id3tag_set_*_ucs2
+    # declarations, but frontend/parse.c still calls them in its unused --utf8
+    # tagging path. GCC 14+ (Alpine) makes implicit-declaration and
+    # incompatible-pointer-type fatal; downgrade them to warnings. The functions
+    # remain in libmp3lame so linking succeeds, and caesura only encodes so this
+    # path is never reached.
+    && export CFLAGS="-Wno-error=implicit-function-declaration -Wno-error=incompatible-pointer-types" \
+    && ./configure \
+      --prefix=/usr \
+      --disable-static \
+      --disable-decoder \
+    && make -j"$(nproc)" \
+    && make install DESTDIR=/artifacts
+
 # Cargo chef base
 FROM rust:alpine AS chef
 RUN apk add --no-cache libc-dev && cargo install cargo-chef cargo-edit cargo-auditable
@@ -54,10 +80,12 @@ RUN cargo auditable build --release --locked
 
 # Dev target for running tests
 FROM builder AS dev
-RUN apk add --no-cache lame libogg libpng fftw
+RUN apk add --no-cache libogg libpng fftw
 COPY --from=flac /artifacts/usr/bin/flac /usr/bin/flac
 COPY --from=flac /artifacts/usr/bin/metaflac /usr/bin/metaflac
 COPY --from=flac /artifacts/usr/lib/libFLAC.so* /usr/lib/
+COPY --from=lame /artifacts/usr/bin/lame /usr/bin/lame
+COPY --from=lame /artifacts/usr/lib/libmp3lame.so* /usr/lib/
 COPY --from=sox /artifacts/usr/bin/sox_ng /usr/bin/sox_ng
 COPY --from=sox /artifacts/usr/lib/libsox_ng.so* /usr/lib/
 ENV CAESURA_DOCKER=1
@@ -72,7 +100,7 @@ CMD ["test", "--release", "--all-features"]
 # - Remove docs and man pages to reduce image size
 # - Run as non-root user (65532 matches the DHI nonroot convention)
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates-bundle libogg lame libpng fftw \
+RUN apk add --no-cache ca-certificates-bundle libogg libpng fftw \
     && apk del apk-tools \
     && rm -rf /var/cache/apk /etc/apk /lib/apk /usr/share/apk \
     && rm -rf /usr/share/man /usr/share/doc
@@ -80,6 +108,8 @@ RUN addgroup -g 65532 -S nonroot \
     && adduser -u 65532 -S -G nonroot -H -s /sbin/nologin nonroot
 COPY --from=flac /artifacts/usr/bin/flac /usr/bin/flac
 COPY --from=flac /artifacts/usr/lib/libFLAC.so* /usr/lib/
+COPY --from=lame /artifacts/usr/bin/lame /usr/bin/lame
+COPY --from=lame /artifacts/usr/lib/libmp3lame.so* /usr/lib/
 COPY --from=sox /artifacts/usr/bin/sox_ng /usr/bin/sox_ng
 COPY --from=sox /artifacts/usr/lib/libsox_ng.so* /usr/lib/
 COPY --from=builder /app/target/release/caesura /bin/caesura
