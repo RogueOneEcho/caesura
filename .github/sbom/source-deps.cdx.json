@@ -48,6 +48,29 @@
           "url": "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-14.8.0.1/sox_ng-14.8.0.1.tar.gz"
         }
       ]
+    },
+    {
+      "type": "library",
+      "name": "lame",
+      "version": "4.0",
+      "purl": "pkg:generic/lame/lame@4.0?download_url=https://downloads.sourceforge.net/project/lame/lame/4.0/lame-4.0.tar.gz",
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-2.0-or-later"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://lame.sourceforge.io"
+        },
+        {
+          "type": "distribution",
+          "url": "https://downloads.sourceforge.net/project/lame/lame/4.0/lame-4.0.tar.gz"
+        }
+      ]
     }
   ]
 }
