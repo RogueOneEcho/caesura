@@ -32,7 +32,7 @@ fn generate_audit_samples() {
     }
 
     // Assert
-    assert_eq!(samples.len(), 14);
+    assert_eq!(samples.len(), 16);
 }
 
 /// The `samples/audit` directory relative to the workspace root.
@@ -57,6 +57,8 @@ fn samples() -> Vec<(String, Vec<u8>)> {
         ("lost-extension-2.torrent".to_owned(), lost_extension_a()),
         ("single-file-1.torrent".to_owned(), single_file_album()),
         ("single-file-2.torrent".to_owned(), single_file_single()),
+        ("unsafe-3.torrent".to_owned(), unsafe_track_slash()),
+        ("unsafe-4.torrent".to_owned(), unsafe_folder_slash()),
     ]
 }
 
@@ -153,6 +155,29 @@ fn unsafe_folder() -> Vec<u8> {
         100_008,
         "Test Artist 8 - Sample Album \\ [FLAC]",
         vec![file("Test Artist 8 - Sample Track.flac")],
+    )
+}
+
+/// A forward slash in a track name.
+fn unsafe_track_slash() -> Vec<u8> {
+    multi(
+        "OPS",
+        100_015,
+        "Test Artist 15 - Sample Album 15 [FLAC]",
+        vec![
+            file("01 - Sample Track/One.flac"),
+            file("02 - Sample Track.flac"),
+        ],
+    )
+}
+
+/// A trailing forward slash on the folder name.
+fn unsafe_folder_slash() -> Vec<u8> {
+    multi(
+        "RED",
+        100_016,
+        "Test Artist 16 - Sample Album 16 [FLAC]/",
+        vec![file("Test Artist 16 - Sample Track.flac")],
     )
 }
 

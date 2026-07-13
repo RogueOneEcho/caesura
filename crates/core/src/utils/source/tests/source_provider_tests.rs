@@ -79,7 +79,7 @@ async fn source_provider_get_unsafe_file_path() -> Result<(), TestError> {
     // Arrange
     init_logger();
     let inputs = [
-        "   ", "\u{200B}", "//", ".", "..", "./Foo", "../Foo", "/etc", "Foo/Bar", "a\\b",
+        "   ", "\u{200B}", "//", ".", "..", "./Foo", "../Foo", "/etc", "Foo/Bar", "Foo/", "a\\b",
     ];
 
     for input in inputs {

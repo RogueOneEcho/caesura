@@ -88,7 +88,7 @@ fn torrent_auditor_execute_bytes_libtorrent() {
 
 /// A traversal component is reported as an `UnsafeSegment` issue.
 #[test]
-fn torrent_auditor_execute_bytes_unsafe_segment() {
+fn torrent_auditor_execute_bytes_unsafe_segment_traversal() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["..", "song.flac"])
@@ -104,6 +104,71 @@ fn torrent_auditor_execute_bytes_unsafe_segment() {
             .iter()
             .flatten()
             .any(|issue| issue.kind == AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment)),
+        "expected UnsafeSegment, got: {:?}",
+        output.issues
+    );
+}
+
+/// A forward slash in a path segment is reported as both `RestrictedChars` and `UnsafeSegment` issue.
+#[test]
+fn torrent_auditor_execute_bytes_unsafe_segment_forward_slash() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song/evil.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::RestrictedChars),
+        "expected RestrictedChars, got: {:?}",
+        output.issues
+    );
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::UnsafeSegment),
+        "expected UnsafeSegment, got: {:?}",
+        output.issues
+    );
+}
+
+/// A trailing forward slash on a path segment is reported as an `UnsafeSegment` issue.
+#[test]
+fn torrent_auditor_execute_bytes_unsafe_segment_trailing_slash() {
+    // Arrange
+    let bytes = TorrentBuilder::new().with_multi_file(["song/"]).build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::UnsafeSegment),
+        "expected UnsafeSegment, got: {:?}",
+        output.issues
+    );
+}
+
+/// A backslash in a path segment is reported as both `RestrictedChars` and `UnsafeSegment` issue.
+#[test]
+fn torrent_auditor_execute_bytes_unsafe_segment_backslash() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song\\evil.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::RestrictedChars),
+        "expected RestrictedChars, got: {:?}",
+        output.issues
+    );
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::UnsafeSegment),
         "expected UnsafeSegment, got: {:?}",
         output.issues
     );

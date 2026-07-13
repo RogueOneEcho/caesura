@@ -225,14 +225,15 @@ fn safe_candidates(path: &str) -> Result<Vec<String>, SourceIssue> {
     Ok(unique)
 }
 
-/// Whether `path` is a single normal path segment with no backslash.
+/// Whether `path` is a single normal path segment with no separator.
 ///
 /// - Empty or pure-whitespace strings return `false`.
-/// - Backslashes are rejected explicitly so behavior matches across Linux and Windows
-///   (Windows treats `\` as a path separator, Linux does not).
+/// - Forward slashes and backslashes are rejected explicitly so a trailing separator
+///   (which [`Path::components`] silently drops) is caught and behavior matches across
+///   Linux and Windows (Windows treats `\` as a path separator, Linux does not).
 /// - Anything other than exactly one [`Component::Normal`] returns `false`.
 pub(crate) fn is_single_safe_segment(path: &str) -> bool {
-    if path.contains('\\') {
+    if path.contains('/') || path.contains('\\') {
         return false;
     }
     if path.trim().is_empty() {
