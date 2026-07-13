@@ -1,8 +1,7 @@
 use crate::testing_prelude::*;
 
-/// A clean multi-file torrent yields no issues and the group name.
 #[test]
-fn torrent_auditor_execute_bytes_clean() {
+fn torrent_auditor_execute_clean() {
     // Arrange
     let bytes = TorrentBuilder::new().with_multi_file(["song.flac"]).build();
 
@@ -14,9 +13,9 @@ fn torrent_auditor_execute_bytes_clean() {
     assert!(output.issues.is_none());
 }
 
-/// A non-UTF-8 path element is reported as a `NonUtf8` issue.
+/// A non-UTF-8 path element yields a Windows-1252 suggestion recovering the accented character.
 #[test]
-fn torrent_auditor_execute_bytes_non_utf8() {
+fn torrent_auditor_execute_non_utf8() {
     // Arrange
     let component = splice(b"song", E_ACUTE, b".flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
@@ -40,9 +39,8 @@ fn torrent_auditor_execute_bytes_non_utf8() {
     );
 }
 
-/// A zero-width space is reported as an `InvisibleChars` issue.
 #[test]
-fn torrent_auditor_execute_bytes_invisible() {
+fn torrent_auditor_execute_zero_width_space() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["song\u{200B}.flac"])
@@ -63,9 +61,8 @@ fn torrent_auditor_execute_bytes_invisible() {
     );
 }
 
-/// A right-to-left override is reported as a `LibtorrentStripped` issue.
 #[test]
-fn torrent_auditor_execute_bytes_libtorrent() {
+fn torrent_auditor_execute_rtl_override() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["song\u{202E}.flac"])
@@ -86,9 +83,8 @@ fn torrent_auditor_execute_bytes_libtorrent() {
     );
 }
 
-/// A traversal component is reported as an `UnsafeSegment` issue.
 #[test]
-fn torrent_auditor_execute_bytes_unsafe_segment_traversal() {
+fn torrent_auditor_execute_traversal() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["..", "song.flac"])
@@ -109,9 +105,8 @@ fn torrent_auditor_execute_bytes_unsafe_segment_traversal() {
     );
 }
 
-/// A forward slash in a path segment is reported as both `RestrictedChars` and `UnsafeSegment` issue.
 #[test]
-fn torrent_auditor_execute_bytes_unsafe_segment_forward_slash() {
+fn torrent_auditor_execute_forward_slash() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["song/evil.flac"])
@@ -121,21 +116,18 @@ fn torrent_auditor_execute_bytes_unsafe_segment_forward_slash() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::RestrictedChars),
-        "expected RestrictedChars, got: {:?}",
-        output.issues
-    );
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::UnsafeSegment),
-        "expected UnsafeSegment, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([
+            AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+            AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment),
+            AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
+        ]),
     );
 }
 
-/// A trailing forward slash on a path segment is reported as an `UnsafeSegment` issue.
 #[test]
-fn torrent_auditor_execute_bytes_unsafe_segment_trailing_slash() {
+fn torrent_auditor_execute_trailing_slash() {
     // Arrange
     let bytes = TorrentBuilder::new().with_multi_file(["song/"]).build();
 
@@ -143,16 +135,18 @@ fn torrent_auditor_execute_bytes_unsafe_segment_trailing_slash() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::UnsafeSegment),
-        "expected UnsafeSegment, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([
+            AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment),
+            AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+            AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
+        ]),
     );
 }
 
-/// A backslash in a path segment is reported as both `RestrictedChars` and `UnsafeSegment` issue.
 #[test]
-fn torrent_auditor_execute_bytes_unsafe_segment_backslash() {
+fn torrent_auditor_execute_backslash() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["song\\evil.flac"])
@@ -162,21 +156,18 @@ fn torrent_auditor_execute_bytes_unsafe_segment_backslash() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::RestrictedChars),
-        "expected RestrictedChars, got: {:?}",
-        output.issues
-    );
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::UnsafeSegment),
-        "expected UnsafeSegment, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([
+            AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+            AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment),
+            AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
+        ]),
     );
 }
 
-/// A decomposed (non-NFC) path element is reported as a `Decomposed` issue.
 #[test]
-fn torrent_auditor_execute_bytes_decomposed() {
+fn torrent_auditor_execute_decomposed() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["cafe\u{0301}.flac"])
@@ -186,16 +177,14 @@ fn torrent_auditor_execute_bytes_decomposed() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::Decomposed),
-        "expected Decomposed, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::Path(AuditPathIssueKind::Decomposed)]),
     );
 }
 
-/// A composed (NFC) path element is not reported as a `Decomposed` issue.
 #[test]
-fn torrent_auditor_execute_bytes_composed() {
+fn torrent_auditor_execute_composed() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["caf\u{00e9}.flac"])
@@ -208,9 +197,8 @@ fn torrent_auditor_execute_bytes_composed() {
     assert!(output.issues.is_none(), "got: {:?}", output.issues);
 }
 
-/// An invisible-character issue is suppressed when `ignore_invisible` is set.
 #[test]
-fn torrent_auditor_execute_bytes_ignore_invisible() {
+fn torrent_auditor_execute_ignore_invisible() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["song\u{200B}.flac"])
@@ -231,9 +219,8 @@ fn torrent_auditor_execute_bytes_ignore_invisible() {
     );
 }
 
-/// A libtorrent-stripped issue is suppressed when `ignore_libtorrent` is set.
 #[test]
-fn torrent_auditor_execute_bytes_ignore_libtorrent() {
+fn torrent_auditor_execute_ignore_libtorrent() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["song\u{202E}.flac"])
@@ -254,9 +241,8 @@ fn torrent_auditor_execute_bytes_ignore_libtorrent() {
     );
 }
 
-/// An unsafe-segment issue is suppressed when `ignore_unsafe` is set.
 #[test]
-fn torrent_auditor_execute_bytes_ignore_unsafe() {
+fn torrent_auditor_execute_ignore_unsafe() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["..", "song.flac"])
@@ -277,9 +263,8 @@ fn torrent_auditor_execute_bytes_ignore_unsafe() {
     );
 }
 
-/// A decomposed issue is suppressed when `ignore_nfd` is set.
 #[test]
-fn torrent_auditor_execute_bytes_ignore_nfd() {
+fn torrent_auditor_execute_ignore_nfd() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_multi_file(["cafe\u{0301}.flac"])
@@ -300,9 +285,8 @@ fn torrent_auditor_execute_bytes_ignore_nfd() {
     );
 }
 
-/// A non-UTF-8 torrent name with clean paths is reported as a `NonUtf8` issue.
 #[test]
-fn torrent_auditor_execute_bytes_name_non_utf8() {
+fn torrent_auditor_execute_name_non_utf8() {
     // Arrange
     let name = splice(b"album", E_ACUTE, b"");
     let bytes = TorrentBuilder::new()
@@ -329,9 +313,8 @@ fn torrent_auditor_execute_bytes_name_non_utf8() {
     );
 }
 
-/// A single-file torrent has no `files` list and is reported as a `NoFiles` issue.
 #[test]
-fn torrent_auditor_execute_bytes_single_file() {
+fn torrent_auditor_execute_single_file() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -355,9 +338,8 @@ fn torrent_auditor_execute_bytes_single_file() {
     );
 }
 
-/// Bytes that are not valid bencode are reported as a `Parse` issue.
 #[test]
-fn torrent_auditor_execute_bytes_not_bencode() {
+fn torrent_auditor_execute_not_bencode() {
     // Arrange
     let bytes = b"this is not bencode".to_vec();
 
@@ -375,7 +357,7 @@ fn torrent_auditor_execute_bytes_not_bencode() {
 
 /// A CESU-8 path element yields a first `Cesu8` suggestion recovering the emoji.
 #[test]
-fn torrent_auditor_execute_bytes_cesu8() {
+fn torrent_auditor_execute_cesu8() {
     // Arrange
     let mut component = b"track ".to_vec();
     component.extend_from_slice(&[0xED, 0xA0, 0xBD, 0xED, 0xB8, 0x89]);
@@ -388,6 +370,10 @@ fn torrent_auditor_execute_bytes_cesu8() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::Path(AuditPathIssueKind::NonUtf8)]),
+    );
     let issue = output
         .issues
         .iter()
@@ -400,9 +386,8 @@ fn torrent_auditor_execute_bytes_cesu8() {
     assert_eq!(first.value, "track \u{1F609} \u{1F974}.flac");
 }
 
-/// A torrent with a tracker `comment` URL yields the torrent id and URL.
 #[test]
-fn torrent_auditor_execute_bytes_comment() {
+fn torrent_auditor_execute_comment() {
     // Arrange
     let url = "https://example.invalid/torrents.php?id=1&torrentid=2#torrent2";
     let bytes = TorrentBuilder::new()
@@ -418,9 +403,8 @@ fn torrent_auditor_execute_bytes_comment() {
     assert_eq!(output.url.as_deref(), Some(url));
 }
 
-/// A non-UTF-8 byte before the extension is reported as a `LostExtension` issue.
 #[test]
-fn torrent_auditor_execute_bytes_lost_extension() {
+fn torrent_auditor_execute_lost_extension() {
     // Arrange
     let component = splice(b"song", I_ACUTE, b".flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
@@ -429,16 +413,17 @@ fn torrent_auditor_execute_bytes_lost_extension() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::BrokenExtension),
-        "expected LostExtension, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([
+            AuditIssueKind::Path(AuditPathIssueKind::BrokenExtension),
+            AuditIssueKind::Path(AuditPathIssueKind::NonUtf8),
+        ]),
     );
 }
 
-/// A non-UTF-8 byte in the middle of the name keeps the extension and is not reported.
 #[test]
-fn torrent_auditor_execute_bytes_lost_extension_midname() {
+fn torrent_auditor_execute_lost_extension_midname() {
     // Arrange
     let component = splice(b"so", I_ACUTE, b"ng.flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
@@ -454,9 +439,8 @@ fn torrent_auditor_execute_bytes_lost_extension_midname() {
     );
 }
 
-/// A non-UTF-8 directory element with a clean filename is not reported as `LostExtension`.
 #[test]
-fn torrent_auditor_execute_bytes_lost_extension_directory() {
+fn torrent_auditor_execute_lost_extension_directory() {
     // Arrange
     let directory = splice(b"dir", I_ACUTE, b"");
     let bytes = TorrentBuilder::new()
@@ -474,9 +458,8 @@ fn torrent_auditor_execute_bytes_lost_extension_directory() {
     );
 }
 
-/// A lost-extension issue is suppressed when `ignore_lost_extension` is set.
 #[test]
-fn torrent_auditor_execute_bytes_ignore_lost_extension() {
+fn torrent_auditor_execute_ignore_lost_extension() {
     // Arrange
     let component = splice(b"song", I_ACUTE, b".flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
@@ -496,9 +479,8 @@ fn torrent_auditor_execute_bytes_ignore_lost_extension() {
     );
 }
 
-/// A valid `name.utf-8` is preferred over the legacy `name`.
 #[test]
-fn torrent_auditor_execute_bytes_name_utf8() {
+fn torrent_auditor_execute_name_utf8() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -517,9 +499,8 @@ fn torrent_auditor_execute_bytes_name_utf8() {
     assert_eq!(output.name, Some("chosen".to_owned()));
 }
 
-/// A valid `path.utf-8` is preferred over the legacy `path`.
 #[test]
-fn torrent_auditor_execute_bytes_path_utf8() {
+fn torrent_auditor_execute_path_utf8() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -540,16 +521,14 @@ fn torrent_auditor_execute_bytes_path_utf8() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_path_kind(AuditPathIssueKind::InvisibleChars),
-        "expected InvisibleChars from path.utf-8, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::Path(AuditPathIssueKind::InvisibleChars)]),
     );
 }
 
-/// A wrong-type `name.utf-8` diverges from libtorrent and is reported.
 #[test]
-fn torrent_auditor_execute_bytes_name_divergence() {
+fn torrent_auditor_execute_name_utf8_wrong_type() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -565,16 +544,14 @@ fn torrent_auditor_execute_bytes_name_divergence() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_kind(AuditIssueKind::NameDivergence),
-        "expected NameDivergence, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::NameDivergence]),
     );
 }
 
-/// A wrong-type `path.utf-8` diverges from libtorrent and is reported.
 #[test]
-fn torrent_auditor_execute_bytes_path_divergence() {
+fn torrent_auditor_execute_path_utf8_wrong_type() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -594,16 +571,14 @@ fn torrent_auditor_execute_bytes_path_divergence() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_kind(AuditIssueKind::PathDivergence),
-        "expected PathDivergence, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::PathDivergence]),
     );
 }
 
-/// An empty `name.utf-8` diverges from libtorrent and is reported.
 #[test]
-fn torrent_auditor_execute_bytes_name_empty() {
+fn torrent_auditor_execute_name_utf8_empty() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -619,16 +594,14 @@ fn torrent_auditor_execute_bytes_name_empty() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_kind(AuditIssueKind::NameEmpty),
-        "expected NameEmpty, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::NameEmpty]),
     );
 }
 
-/// An empty `path.utf-8` list diverges from libtorrent and is reported.
 #[test]
-fn torrent_auditor_execute_bytes_path_empty() {
+fn torrent_auditor_execute_path_utf8_empty() {
     // Arrange
     let bytes = TorrentBuilder::new()
         .with_dictionary(
@@ -649,9 +622,8 @@ fn torrent_auditor_execute_bytes_path_empty() {
     let output = TorrentAuditor::mock().execute_bytes(&bytes);
 
     // Assert
-    assert!(
-        output.has_kind(AuditIssueKind::PathEmpty),
-        "expected PathEmpty, got: {:?}",
-        output.issues
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::PathEmpty]),
     );
 }

@@ -78,6 +78,16 @@ impl AuditItem {
         }
     }
 
+    /// Get all issue kinds.
+    #[cfg(test)]
+    pub fn get_issue_kinds(&self) -> HashSet<AuditIssueKind> {
+        self.issues
+            .iter()
+            .flatten()
+            .map(|issue| issue.kind)
+            .collect()
+    }
+
     /// Are any issues of specified `kind`.
     #[cfg(test)]
     pub fn has_kind(&self, kind: AuditIssueKind) -> bool {
