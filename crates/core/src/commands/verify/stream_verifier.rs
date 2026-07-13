@@ -6,7 +6,7 @@ pub(crate) struct StreamVerifier;
 
 impl StreamVerifier {
     /// Verify stream properties of a FLAC file and return any issues found.
-    pub(crate) fn execute(flac: &FlacFile) -> Vec<SourceIssue> {
+    pub(crate) fn execute(flac: &FlacFile, source: &Source) -> Vec<SourceIssue> {
         let info = match check_flac_readable(flac) {
             Ok(info) => info,
             Err(issue) => return vec![issue],
@@ -16,7 +16,9 @@ impl StreamVerifier {
         issues.extend(check_bit_rate(&flac.path, &info));
         issues.extend(check_duration(&flac.path, &info));
         issues.extend(check_channels(&flac.path, &info));
-        issues.extend(check_md5(&flac.path, &info));
+        if source.torrent.media == Media::CD {
+            issues.extend(check_md5(&flac.path, &info));
+        }
         issues
     }
 }

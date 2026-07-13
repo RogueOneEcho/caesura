@@ -35,7 +35,7 @@ impl FlacVerifier {
             let tag_issues = TagVerifier::execute(flac, source)
                 .map_err(Failure::wrap(VerifyAction::VerifyTags))?;
             issues.extend(tag_issues);
-            issues.extend(StreamVerifier::execute(flac));
+            issues.extend(StreamVerifier::execute(flac, source));
         }
         Ok(issues)
     }
