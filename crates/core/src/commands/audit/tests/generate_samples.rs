@@ -32,7 +32,7 @@ fn generate_audit_samples() {
     }
 
     // Assert
-    assert_eq!(samples.len(), 16);
+    assert_eq!(samples.len(), 20);
 }
 
 /// The `samples/audit` directory relative to the workspace root.
@@ -43,27 +43,88 @@ fn samples_directory() -> PathBuf {
 /// The demo samples as `(file_name, bencode_bytes)` pairs.
 fn samples() -> Vec<(String, Vec<u8>)> {
     vec![
-        ("non-utf8-1.torrent".to_owned(), non_utf8_accents()),
-        ("non-utf8-2.torrent".to_owned(), non_utf8_folder()),
-        ("invisible-1.torrent".to_owned(), invisible_nbsp()),
-        ("invisible-2.torrent".to_owned(), invisible_zwsp()),
-        ("libtorrent-1.torrent".to_owned(), libtorrent_folder()),
-        ("libtorrent-2.torrent".to_owned(), libtorrent_track()),
-        ("unsafe-1.torrent".to_owned(), unsafe_track()),
-        ("unsafe-2.torrent".to_owned(), unsafe_folder()),
-        ("decomposed-1.torrent".to_owned(), decomposed_tracks()),
-        ("decomposed-2.torrent".to_owned(), decomposed_folder()),
-        ("lost-extension-1.torrent".to_owned(), lost_extension_e()),
-        ("lost-extension-2.torrent".to_owned(), lost_extension_a()),
-        ("single-file-1.torrent".to_owned(), single_file_album()),
-        ("single-file-2.torrent".to_owned(), single_file_single()),
-        ("unsafe-3.torrent".to_owned(), unsafe_track_slash()),
-        ("unsafe-4.torrent".to_owned(), unsafe_folder_slash()),
+        (
+            "non-utf8-accents-in-tracks.torrent".to_owned(),
+            non_utf8_accents_in_tracks(),
+        ),
+        (
+            "non-utf8-accent-in-folder.torrent".to_owned(),
+            non_utf8_accent_in_folder(),
+        ),
+        (
+            "non-breaking-space-in-tracks.torrent".to_owned(),
+            non_breaking_space_in_tracks(),
+        ),
+        (
+            "zero-width-space-in-track.torrent".to_owned(),
+            zero_width_space_in_track(),
+        ),
+        (
+            "ltr-mark-in-folder.torrent".to_owned(),
+            ltr_mark_in_folder(),
+        ),
+        ("ltr-mark-in-track.torrent".to_owned(), ltr_mark_in_track()),
+        (
+            "backslash-in-track.torrent".to_owned(),
+            backslash_in_track(),
+        ),
+        (
+            "backslash-in-folder.torrent".to_owned(),
+            backslash_in_folder(),
+        ),
+        (
+            "decomposed-accents-in-tracks.torrent".to_owned(),
+            decomposed_accents_in_tracks(),
+        ),
+        (
+            "decomposed-accent-in-folder.torrent".to_owned(),
+            decomposed_accent_in_folder(),
+        ),
+        (
+            "non-utf8-lost-extension-e.torrent".to_owned(),
+            non_utf8_lost_extension_e(),
+        ),
+        (
+            "non-utf8-lost-extension-a.torrent".to_owned(),
+            non_utf8_lost_extension_a(),
+        ),
+        (
+            "single-file-no-files-list-red.torrent".to_owned(),
+            single_file_no_files_list_red(),
+        ),
+        (
+            "single-file-no-files-list-ops.torrent".to_owned(),
+            single_file_no_files_list_ops(),
+        ),
+        (
+            "forward-slash-in-track.torrent".to_owned(),
+            forward_slash_in_track(),
+        ),
+        (
+            "trailing-slash-in-folder.torrent".to_owned(),
+            trailing_slash_in_folder(),
+        ),
+        (
+            "trailing-backslash-in-folder.torrent".to_owned(),
+            trailing_backslash_in_folder(),
+        ),
+        (
+            "trailing-division-slash-in-folder.torrent".to_owned(),
+            trailing_division_slash_in_folder(),
+        ),
+        (
+            "trailing-fullwidth-slash-in-folder.torrent".to_owned(),
+            trailing_fullwidth_slash_in_folder(),
+        ),
+        (
+            "trailing-overlong-slash-in-folder.torrent".to_owned(),
+            trailing_overlong_slash_in_folder(),
+        ),
     ]
 }
 
 /// A windows-1252 `è` and `î` in track names.
-fn non_utf8_accents() -> Vec<u8> {
+fn non_utf8_accents_in_tracks() -> Vec<u8> {
     multi(
         "RED",
         100_001,
@@ -76,7 +137,7 @@ fn non_utf8_accents() -> Vec<u8> {
 }
 
 /// A windows-1252 `ä` in the folder name.
-fn non_utf8_folder() -> Vec<u8> {
+fn non_utf8_accent_in_folder() -> Vec<u8> {
     multi(
         "OPS",
         100_002,
@@ -86,7 +147,7 @@ fn non_utf8_folder() -> Vec<u8> {
 }
 
 /// A non-breaking space in track names.
-fn invisible_nbsp() -> Vec<u8> {
+fn non_breaking_space_in_tracks() -> Vec<u8> {
     multi(
         "RED",
         100_003,
@@ -100,7 +161,7 @@ fn invisible_nbsp() -> Vec<u8> {
 }
 
 /// A zero-width space in a track name.
-fn invisible_zwsp() -> Vec<u8> {
+fn zero_width_space_in_track() -> Vec<u8> {
     multi(
         "OPS",
         100_004,
@@ -113,7 +174,7 @@ fn invisible_zwsp() -> Vec<u8> {
 }
 
 /// A left-to-right mark in the folder name.
-fn libtorrent_folder() -> Vec<u8> {
+fn ltr_mark_in_folder() -> Vec<u8> {
     multi(
         "RED",
         100_005,
@@ -123,7 +184,7 @@ fn libtorrent_folder() -> Vec<u8> {
 }
 
 /// A left-to-right mark in a track name.
-fn libtorrent_track() -> Vec<u8> {
+fn ltr_mark_in_track() -> Vec<u8> {
     multi(
         "OPS",
         100_006,
@@ -136,7 +197,7 @@ fn libtorrent_track() -> Vec<u8> {
 }
 
 /// A backslash in a track name.
-fn unsafe_track() -> Vec<u8> {
+fn backslash_in_track() -> Vec<u8> {
     multi(
         "RED",
         100_007,
@@ -149,7 +210,7 @@ fn unsafe_track() -> Vec<u8> {
 }
 
 /// A backslash in the folder name.
-fn unsafe_folder() -> Vec<u8> {
+fn backslash_in_folder() -> Vec<u8> {
     multi(
         "RED",
         100_008,
@@ -159,7 +220,7 @@ fn unsafe_folder() -> Vec<u8> {
 }
 
 /// A forward slash in a track name.
-fn unsafe_track_slash() -> Vec<u8> {
+fn forward_slash_in_track() -> Vec<u8> {
     multi(
         "OPS",
         100_015,
@@ -172,7 +233,7 @@ fn unsafe_track_slash() -> Vec<u8> {
 }
 
 /// A trailing forward slash on the folder name.
-fn unsafe_folder_slash() -> Vec<u8> {
+fn trailing_slash_in_folder() -> Vec<u8> {
     multi(
         "RED",
         100_016,
@@ -181,8 +242,57 @@ fn unsafe_folder_slash() -> Vec<u8> {
     )
 }
 
+/// A trailing backslash on the folder name.
+fn trailing_backslash_in_folder() -> Vec<u8> {
+    multi(
+        "OPS",
+        100_017,
+        "Test Artist 17 - Sample Album 17 [FLAC]\\",
+        vec![file("Test Artist 17 - Sample Track.flac")],
+    )
+}
+
+/// A trailing division slash on the folder name.
+///
+/// `U+2215` is the Windows lookalike substituted for a forward slash.
+fn trailing_division_slash_in_folder() -> Vec<u8> {
+    multi(
+        "RED",
+        100_018,
+        "Test Artist 18 - Sample Album 18 [FLAC]\u{2215}",
+        vec![file("Test Artist 18 - Sample Track.flac")],
+    )
+}
+
+/// A trailing fullwidth solidus on the folder name.
+///
+/// `U+FF0F` decomposes to a plain forward slash under NFKC normalization.
+fn trailing_fullwidth_slash_in_folder() -> Vec<u8> {
+    multi(
+        "OPS",
+        100_019,
+        "Test Artist 19 - Sample Album 19 [FLAC]\u{FF0F}",
+        vec![file("Test Artist 19 - Sample Track.flac")],
+    )
+}
+
+/// A trailing overlong-encoded forward slash on the folder name.
+///
+/// The bytes `0xC0 0xAF` are an overlong UTF-8 encoding a lenient decoder
+/// collapses to a plain forward slash.
+fn trailing_overlong_slash_in_folder() -> Vec<u8> {
+    let mut name = b"Test Artist 20 - Sample Album 20 [FLAC]".to_vec();
+    name.extend_from_slice(&[0xC0, 0xAF]);
+    multi(
+        "RED",
+        100_020,
+        name,
+        vec![file("Test Artist 20 - Sample Track.flac")],
+    )
+}
+
 /// A decomposed (non-NFC) `é` in track names.
-fn decomposed_tracks() -> Vec<u8> {
+fn decomposed_accents_in_tracks() -> Vec<u8> {
     multi(
         "RED",
         100_009,
@@ -195,7 +305,7 @@ fn decomposed_tracks() -> Vec<u8> {
 }
 
 /// A decomposed (non-NFC) `ö` in the folder and track names.
-fn decomposed_folder() -> Vec<u8> {
+fn decomposed_accent_in_folder() -> Vec<u8> {
     multi(
         "OPS",
         100_010,
@@ -205,7 +315,7 @@ fn decomposed_folder() -> Vec<u8> {
 }
 
 /// A windows-1252 `é` immediately before the extension.
-fn lost_extension_e() -> Vec<u8> {
+fn non_utf8_lost_extension_e() -> Vec<u8> {
     multi(
         "RED",
         100_011,
@@ -218,7 +328,7 @@ fn lost_extension_e() -> Vec<u8> {
 }
 
 /// A windows-1252 `ä` immediately before the extension.
-fn lost_extension_a() -> Vec<u8> {
+fn non_utf8_lost_extension_a() -> Vec<u8> {
     multi(
         "OPS",
         100_012,
@@ -230,13 +340,13 @@ fn lost_extension_a() -> Vec<u8> {
     )
 }
 
-/// A single-file torrent with no `files` list.
-fn single_file_album() -> Vec<u8> {
+/// A single-file RED torrent with no `files` list.
+fn single_file_no_files_list_red() -> Vec<u8> {
     single("RED", 100_013, "Test Artist 13 - Sample Single Track.flac")
 }
 
-/// A single-file torrent with no `files` list.
-fn single_file_single() -> Vec<u8> {
+/// A single-file OPS torrent with no `files` list.
+fn single_file_no_files_list_ops() -> Vec<u8> {
     single("OPS", 100_014, "Test Artist 14 - Sample Single Track.flac")
 }
 
