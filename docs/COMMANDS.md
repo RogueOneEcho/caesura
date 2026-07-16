@@ -286,9 +286,10 @@ caesura audit 12345
 > - `--ignore-single-file` - single-file torrents
 > - `--ignore-libtorrent` - characters libtorrent strips on disk
 > - `--ignore-invisible` - invisible or zero-width characters
+> - `--ignore-directional` - unnecessary directional marks
 > - `--ignore-unsafe` - unsafe path segments
 > - `--ignore-nfd` - decomposed (non-NFC) characters
-> - `--ignore-lost-extension` - file extensions lost on disk
+> - `--ignore-broken-extension` - file extensions broken by libtorrent
 >
 > ```bash
 > caesura audit path/to/torrents --ignore-invisible --ignore-libtorrent --ignore-unsafe --ignore-nfd --ignore-single-file --ignore-non-utf8

@@ -62,6 +62,9 @@ exclude_vorbis_comments:
 # Enabling this option requires the source and destination to be on the same filesystem or mounted volume.
 # Default: false
 hard_link: false
+# Should the check for file extensions broken by libtorrent be disabled?
+# Default: false
+ignore_broken_extension: false
 # Should the check for unnecessary directional marks be disabled?
 # Default: false
 ignore_directional: false
@@ -71,9 +74,6 @@ ignore_invisible: false
 # Should the check for libtorrent-stripped path characters be disabled?
 # Default: false
 ignore_libtorrent: false
-# Should the check for file extensions lost on disk be disabled?
-# Default: false
-ignore_lost_extension: false
 # Should the check for decomposed (non-NFC) path characters be disabled?
 # Default: false
 ignore_nfd: false

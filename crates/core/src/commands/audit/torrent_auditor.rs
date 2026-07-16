@@ -66,8 +66,8 @@ impl TorrentAuditor {
                 }
             }
         }
-        if !self.options.ignore_lost_extension {
-            audit_lost_extension(&torrent.paths, &mut issues);
+        if !self.options.ignore_broken_extension {
+            audit_broken_extension(&torrent.paths, &mut issues);
         }
         if !issues.is_empty() {
             return AuditItem {
@@ -102,7 +102,7 @@ impl TorrentAuditor {
         let restricted = Sanitizer::restricted().execute(value.to_owned());
         if !restricted.found.is_empty() {
             issues.push(AuditIssue {
-                kind: AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+                kind: AuditIssueKind::Path(AuditPathIssueKind::Restricted),
                 raw: Some(RawString::from(value)),
                 sanitized: Some(restricted.found),
                 ..AuditIssue::default()
@@ -112,7 +112,7 @@ impl TorrentAuditor {
             let invisible = Sanitizer::invisible().execute(value.to_owned());
             if !invisible.found.is_empty() {
                 issues.push(AuditIssue {
-                    kind: AuditIssueKind::Path(AuditPathIssueKind::InvisibleChars),
+                    kind: AuditIssueKind::Path(AuditPathIssueKind::Invisible),
                     raw: Some(RawString::from(value)),
                     sanitized: Some(invisible.found),
                     ..AuditIssue::default()
@@ -158,16 +158,16 @@ impl TorrentAuditor {
     }
 }
 
-/// Append a [`AuditIssue`] for any file whose extension is lost on disk.
+/// Append a [`AuditIssue`] for any file whose extension is broken by libtorrent.
 ///
 /// - Checks only the final element of each path, the one carrying the extension
 /// - A directory or valid-UTF-8 element can never lose its extension, so it is skipped
-fn audit_lost_extension(paths: &[Vec<DecodedString>], issues: &mut Vec<AuditIssue>) {
+fn audit_broken_extension(paths: &[Vec<DecodedString>], issues: &mut Vec<AuditIssue>) {
     for parts in paths {
         let Some(DecodedString::Suggestions(raw, _)) = parts.last() else {
             continue;
         };
-        if lost_extension(raw) {
+        if broken_extension(raw) {
             issues.push(AuditIssue {
                 kind: AuditIssueKind::Path(AuditPathIssueKind::BrokenExtension),
                 raw: Some(RawString::from(raw.clone())),
@@ -177,11 +177,11 @@ fn audit_lost_extension(paths: &[Vec<DecodedString>], issues: &mut Vec<AuditIssu
     }
 }
 
-/// Detect a file extension lost when the raw name is written to disk.
+/// Detect a file extension broken when the raw name is written to disk.
 ///
 /// - Returns `true` when the predicted on-disk name drops the raw extension
 /// - Returns `false` when there is no extension or it survives decoding
-fn lost_extension(raw: &[u8]) -> bool {
+fn broken_extension(raw: &[u8]) -> bool {
     let Some(extension) = get_extension(raw) else {
         return false;
     };

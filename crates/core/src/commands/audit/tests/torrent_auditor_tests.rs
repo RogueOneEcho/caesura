@@ -55,8 +55,8 @@ fn torrent_auditor_execute_zero_width_space() {
             .issues
             .iter()
             .flatten()
-            .any(|issue| issue.kind == AuditIssueKind::Path(AuditPathIssueKind::InvisibleChars)),
-        "expected InvisibleChars, got: {:?}",
+            .any(|issue| issue.kind == AuditIssueKind::Path(AuditPathIssueKind::Invisible)),
+        "expected Invisible, got: {:?}",
         output.issues
     );
 }
@@ -200,7 +200,7 @@ fn torrent_auditor_execute_forward_slash() {
     assert_eq!(
         output.get_issue_kinds(),
         HashSet::from([
-            AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+            AuditIssueKind::Path(AuditPathIssueKind::Restricted),
             AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment),
             AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
         ]),
@@ -220,7 +220,7 @@ fn torrent_auditor_execute_trailing_slash() {
         output.get_issue_kinds(),
         HashSet::from([
             AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment),
-            AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+            AuditIssueKind::Path(AuditPathIssueKind::Restricted),
             AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
         ]),
     );
@@ -240,7 +240,7 @@ fn torrent_auditor_execute_backslash() {
     assert_eq!(
         output.get_issue_kinds(),
         HashSet::from([
-            AuditIssueKind::Path(AuditPathIssueKind::RestrictedChars),
+            AuditIssueKind::Path(AuditPathIssueKind::Restricted),
             AuditIssueKind::Path(AuditPathIssueKind::UnsafeSegment),
             AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
         ]),
@@ -294,7 +294,7 @@ fn torrent_auditor_execute_ignore_invisible() {
 
     // Assert
     assert!(
-        !output.has_path_kind(AuditPathIssueKind::InvisibleChars),
+        !output.has_path_kind(AuditPathIssueKind::Invisible),
         "got: {:?}",
         output.issues
     );
@@ -485,7 +485,7 @@ fn torrent_auditor_execute_comment() {
 }
 
 #[test]
-fn torrent_auditor_execute_lost_extension() {
+fn torrent_auditor_execute_broken_extension() {
     // Arrange
     let component = splice(b"song", I_ACUTE, b".flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
@@ -504,7 +504,7 @@ fn torrent_auditor_execute_lost_extension() {
 }
 
 #[test]
-fn torrent_auditor_execute_lost_extension_midname() {
+fn torrent_auditor_execute_broken_extension_midname() {
     // Arrange
     let component = splice(b"so", I_ACUTE, b"ng.flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
@@ -521,7 +521,7 @@ fn torrent_auditor_execute_lost_extension_midname() {
 }
 
 #[test]
-fn torrent_auditor_execute_lost_extension_directory() {
+fn torrent_auditor_execute_broken_extension_directory() {
     // Arrange
     let directory = splice(b"dir", I_ACUTE, b"");
     let bytes = TorrentBuilder::new()
@@ -540,12 +540,12 @@ fn torrent_auditor_execute_lost_extension_directory() {
 }
 
 #[test]
-fn torrent_auditor_execute_ignore_lost_extension() {
+fn torrent_auditor_execute_ignore_broken_extension() {
     // Arrange
     let component = splice(b"song", I_ACUTE, b".flac");
     let bytes = TorrentBuilder::new().with_multi_file([component]).build();
     let auditor = TorrentAuditor::new(AuditOptions {
-        ignore_lost_extension: true,
+        ignore_broken_extension: true,
         ..AuditOptions::default()
     });
 
@@ -604,7 +604,7 @@ fn torrent_auditor_execute_path_utf8() {
     // Assert
     assert_eq!(
         output.get_issue_kinds(),
-        HashSet::from([AuditIssueKind::Path(AuditPathIssueKind::InvisibleChars)]),
+        HashSet::from([AuditIssueKind::Path(AuditPathIssueKind::Invisible)]),
     );
 }
 

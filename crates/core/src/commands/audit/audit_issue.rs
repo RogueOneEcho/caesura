@@ -90,57 +90,48 @@ impl From<AuditIssueKind> for AuditIssue {
 }
 
 /// Category of a path-character problem found in a torrent file path.
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize, ThisError)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub(crate) enum AuditPathIssueKind {
     #[default]
+    #[error("unknown")]
     Unknown,
     /// A path element that is not valid UTF-8.
+    #[error("non-UTF-8")]
     NonUtf8,
     /// A path element containing restricted characters.
-    RestrictedChars,
+    #[error("restricted")]
+    Restricted,
     /// A path element containing invisible or zero-width characters.
-    InvisibleChars,
+    #[error("invisible")]
+    Invisible,
     /// A path element containing characters libtorrent strips on disk.
     ///
     /// The on-disk name produced by a client will not match the torrent path.
+    #[error("libtorrent stripped")]
     LibtorrentStripped,
     /// A path element that is not a single safe path segment.
+    #[error("unsafe")]
     UnsafeSegment,
     /// A path element that is not in Unicode NFC (canonical composed) form.
     ///
     /// Decomposed elements render identically to their composed form but differ
     /// byte-for-byte, causing on-disk path mismatches.
+    #[error("decomposed (non-NFC)")]
     Decomposed,
     /// A path element whose file extension is lost when written to disk.
     ///
     /// A non-UTF-8 byte immediately before the extension is replaced with a
     /// single `_` that consumes the `.` separator, so the on-disk name loses
     /// its extension.
+    #[error("extension breaking")]
     BrokenExtension,
     /// A path element containing directional formatting marks with no effect.
     ///
     /// Directional marks only reorder text when a right-to-left character is
     /// present, so a mark in a component with none is invisible and inert.
+    #[error("unnecessary directional")]
     UnnecessaryDirectional,
-}
-
-impl Display for AuditPathIssueKind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        match self {
-            AuditPathIssueKind::NonUtf8 => write!(f, "non-UTF-8"),
-            AuditPathIssueKind::InvisibleChars => write!(f, "invisible"),
-            AuditPathIssueKind::RestrictedChars => write!(f, "restricted"),
-            AuditPathIssueKind::LibtorrentStripped => write!(f, "libtorrent stripped"),
-            AuditPathIssueKind::UnsafeSegment => write!(f, "unsafe"),
-            AuditPathIssueKind::Decomposed => write!(f, "decomposed (non-NFC)"),
-            AuditPathIssueKind::BrokenExtension => write!(f, "lost extension"),
-            AuditPathIssueKind::UnnecessaryDirectional => {
-                write!(f, "unnecessary directional")
-            }
-            AuditPathIssueKind::Unknown => write!(f, "unknown"),
-        }
-    }
 }
 
 impl AuditIssue {
@@ -149,11 +140,7 @@ impl AuditIssue {
         let AuditIssueKind::Path(kind) = self.kind else {
             return format!("  {}", self.kind);
         };
-        let mut output = if matches!(kind, AuditPathIssueKind::BrokenExtension) {
-            "  File extension broken by libtorrent".to_owned()
-        } else {
-            format!("  Contains {kind} characters")
-        };
+        let mut output = format!("  Contains {kind} characters");
         let Some(raw) = &self.raw else {
             return output;
         };
@@ -165,11 +152,11 @@ impl AuditIssue {
         if let Some(suggestions) = &self.suggestions {
             render_suggestions(&mut output, raw, suggestions, renderer);
         } else if matches!(kind, AuditPathIssueKind::BrokenExtension) {
-            render_lost_extension(&mut output, raw, renderer);
+            render_broken_extension(&mut output, raw, renderer);
         } else if matches!(
             kind,
-            AuditPathIssueKind::RestrictedChars
-                | AuditPathIssueKind::InvisibleChars
+            AuditPathIssueKind::Restricted
+                | AuditPathIssueKind::Invisible
                 | AuditPathIssueKind::LibtorrentStripped
                 | AuditPathIssueKind::UnnecessaryDirectional
         ) && let Some(characters) = &self.sanitized
@@ -197,7 +184,7 @@ fn render_suggestions(
     }
 }
 
-fn render_lost_extension(output: &mut String, raw: &RawString, renderer: DiffRenderer) {
+fn render_broken_extension(output: &mut String, raw: &RawString, renderer: DiffRenderer) {
     let on_disk = LibtorrentDecoder::decode(raw.as_bytes());
     let differ = Differ::new(renderer);
     let diff = differ.execute(raw, &on_disk);

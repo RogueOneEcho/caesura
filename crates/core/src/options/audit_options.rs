@@ -25,9 +25,9 @@ pub struct AuditOptions {
     /// Should the check for decomposed (non-NFC) path characters be disabled?
     #[arg(long)]
     pub ignore_nfd: bool,
-    /// Should the check for file extensions lost on disk be disabled?
+    /// Should the check for file extensions broken by libtorrent be disabled?
     #[arg(long)]
-    pub ignore_lost_extension: bool,
+    pub ignore_broken_extension: bool,
     /// Should diffs be rendered with BB code?
     #[arg(long)]
     pub print_bb_code: bool,

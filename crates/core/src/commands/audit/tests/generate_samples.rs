@@ -81,12 +81,12 @@ fn samples() -> Vec<(String, Vec<u8>)> {
             decomposed_accent_in_folder(),
         ),
         (
-            "non-utf8-lost-extension-e.torrent".to_owned(),
-            non_utf8_lost_extension_e(),
+            "non-utf8-broken-extension-e.torrent".to_owned(),
+            non_utf8_broken_extension_e(),
         ),
         (
-            "non-utf8-lost-extension-a.torrent".to_owned(),
-            non_utf8_lost_extension_a(),
+            "non-utf8-broken-extension-a.torrent".to_owned(),
+            non_utf8_broken_extension_a(),
         ),
         (
             "single-file-no-files-list-red.torrent".to_owned(),
@@ -386,7 +386,7 @@ fn decomposed_accent_in_folder() -> Vec<u8> {
 }
 
 /// A windows-1252 `é` immediately before the extension.
-fn non_utf8_lost_extension_e() -> Vec<u8> {
+fn non_utf8_broken_extension_e() -> Vec<u8> {
     multi(
         "RED",
         100_011,
@@ -399,7 +399,7 @@ fn non_utf8_lost_extension_e() -> Vec<u8> {
 }
 
 /// A windows-1252 `ä` immediately before the extension.
-fn non_utf8_lost_extension_a() -> Vec<u8> {
+fn non_utf8_broken_extension_a() -> Vec<u8> {
     multi(
         "OPS",
         100_012,
