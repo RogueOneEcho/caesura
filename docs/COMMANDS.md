@@ -290,6 +290,9 @@ caesura audit 12345
 > - `--ignore-unsafe` - unsafe path segments
 > - `--ignore-nfd` - decomposed (non-NFC) characters
 > - `--ignore-broken-extension` - file extensions broken by libtorrent
+> - `--ignore-leading-period` - path components with a leading period
+> - `--ignore-leading-space` - path components with a leading space
+> - `--ignore-trailing-space` - path components with a trailing space
 >
 > ```bash
 > caesura audit path/to/torrents --ignore-invisible --ignore-libtorrent --ignore-unsafe --ignore-nfd --ignore-single-file --ignore-non-utf8

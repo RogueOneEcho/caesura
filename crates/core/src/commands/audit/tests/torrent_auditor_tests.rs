@@ -367,6 +367,126 @@ fn torrent_auditor_execute_ignore_nfd() {
 }
 
 #[test]
+fn torrent_auditor_execute_leading_period() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file([".song.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::LeadingPeriod),
+        "expected LeadingPeriod, got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
+fn torrent_auditor_execute_leading_space() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file([" song.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::LeadingSpace),
+        "expected LeadingSpace, got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
+fn torrent_auditor_execute_trailing_space() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song.flac "])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        output.has_path_kind(AuditPathIssueKind::TrailingSpace),
+        "expected TrailingSpace, got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
+fn torrent_auditor_execute_ignore_leading_period() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file([".song.flac"])
+        .build();
+    let auditor = TorrentAuditor::new(AuditOptions {
+        ignore_leading_period: true,
+        ..AuditOptions::default()
+    });
+
+    // Act
+    let output = auditor.execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        !output.has_path_kind(AuditPathIssueKind::LeadingPeriod),
+        "got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
+fn torrent_auditor_execute_ignore_leading_space() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file([" song.flac"])
+        .build();
+    let auditor = TorrentAuditor::new(AuditOptions {
+        ignore_leading_space: true,
+        ..AuditOptions::default()
+    });
+
+    // Act
+    let output = auditor.execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        !output.has_path_kind(AuditPathIssueKind::LeadingSpace),
+        "got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
+fn torrent_auditor_execute_ignore_trailing_space() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song.flac "])
+        .build();
+    let auditor = TorrentAuditor::new(AuditOptions {
+        ignore_trailing_space: true,
+        ..AuditOptions::default()
+    });
+
+    // Act
+    let output = auditor.execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        !output.has_path_kind(AuditPathIssueKind::TrailingSpace),
+        "got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
 fn torrent_auditor_execute_name_non_utf8() {
     // Arrange
     let name = splice(b"album", E_ACUTE, b"");

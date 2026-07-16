@@ -71,6 +71,12 @@ ignore_directional: false
 # Should the check for invisible or zero-width path characters be disabled?
 # Default: false
 ignore_invisible: false
+# Should the check for a leading period in path components be disabled?
+# Default: false
+ignore_leading_period: false
+# Should the check for a leading space in path components be disabled?
+# Default: false
+ignore_leading_space: false
 # Should the check for libtorrent-stripped path characters be disabled?
 # Default: false
 ignore_libtorrent: false
@@ -83,6 +89,9 @@ ignore_non_utf8: false
 # Should the check for file torrents be disabled?
 # Default: false
 ignore_single_file: false
+# Should the check for a trailing space in path components be disabled?
+# Default: false
+ignore_trailing_space: false
 # Should the check for unsafe path segments be disabled?
 # Default: false
 ignore_unsafe: false

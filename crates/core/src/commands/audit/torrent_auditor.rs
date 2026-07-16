@@ -155,6 +155,27 @@ impl TorrentAuditor {
                 ..AuditIssue::default()
             });
         }
+        if !self.options.ignore_leading_period && value.starts_with('.') {
+            issues.push(AuditIssue {
+                kind: AuditIssueKind::Path(AuditPathIssueKind::LeadingPeriod),
+                raw: Some(RawString::from(value)),
+                ..AuditIssue::default()
+            });
+        }
+        if !self.options.ignore_leading_space && value.starts_with(' ') {
+            issues.push(AuditIssue {
+                kind: AuditIssueKind::Path(AuditPathIssueKind::LeadingSpace),
+                raw: Some(RawString::from(value)),
+                ..AuditIssue::default()
+            });
+        }
+        if !self.options.ignore_trailing_space && value.ends_with(' ') {
+            issues.push(AuditIssue {
+                kind: AuditIssueKind::Path(AuditPathIssueKind::TrailingSpace),
+                raw: Some(RawString::from(value)),
+                ..AuditIssue::default()
+            });
+        }
     }
 }
 

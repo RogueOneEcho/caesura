@@ -32,7 +32,7 @@ fn generate_audit_samples() {
     }
 
     // Assert
-    assert_eq!(samples.len(), 24);
+    assert_eq!(samples.len(), 27);
 }
 
 /// The `samples/audit` directory relative to the workspace root.
@@ -133,7 +133,43 @@ fn samples() -> Vec<(String, Vec<u8>)> {
             "rtl-mark-in-folder.torrent".to_owned(),
             rtl_mark_in_folder(),
         ),
+        ("leading-period.torrent".to_owned(), leading_period()),
+        ("leading-space.torrent".to_owned(), leading_space()),
+        ("trailing-space.torrent".to_owned(), trailing_space()),
     ]
+}
+
+/// A leading period on the folder name, producing a hidden directory on Unix.
+fn leading_period() -> Vec<u8> {
+    multi(
+        "RED",
+        100_025,
+        ".Test Artist 25 - Sample Album 25 [FLAC]",
+        vec![file("Test Artist 25 - Sample Track.flac")],
+    )
+}
+
+/// A leading space on a track name, trimmed by some filesystems.
+fn leading_space() -> Vec<u8> {
+    multi(
+        "OPS",
+        100_026,
+        "Test Artist 26 - Sample Album 26 [FLAC]",
+        vec![
+            file(" 01 - Sample Track.flac"),
+            file("02 - Sample Track.flac"),
+        ],
+    )
+}
+
+/// A trailing space on the folder name, trimmed by some filesystems.
+fn trailing_space() -> Vec<u8> {
+    multi(
+        "RED",
+        100_027,
+        "Test Artist 27 - Sample Album 27 [FLAC] ",
+        vec![file("Test Artist 27 - Sample Track.flac")],
+    )
 }
 
 /// A windows-1252 `è` and `î` in track names.

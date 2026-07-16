@@ -28,6 +28,15 @@ pub struct AuditOptions {
     /// Should the check for file extensions broken by libtorrent be disabled?
     #[arg(long)]
     pub ignore_broken_extension: bool,
+    /// Should the check for a leading period in path components be disabled?
+    #[arg(long)]
+    pub ignore_leading_period: bool,
+    /// Should the check for a leading space in path components be disabled?
+    #[arg(long)]
+    pub ignore_leading_space: bool,
+    /// Should the check for a trailing space in path components be disabled?
+    #[arg(long)]
+    pub ignore_trailing_space: bool,
     /// Should diffs be rendered with BB code?
     #[arg(long)]
     pub print_bb_code: bool,

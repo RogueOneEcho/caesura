@@ -132,6 +132,15 @@ pub(crate) enum AuditPathIssueKind {
     /// present, so a mark in a component with none is invisible and inert.
     #[error("unnecessary directional")]
     UnnecessaryDirectional,
+    /// A path element that begins with a period, producing a hidden file on Unix.
+    #[error("leading period")]
+    LeadingPeriod,
+    /// A path element that begins with a space, trimmed by some filesystems.
+    #[error("leading space")]
+    LeadingSpace,
+    /// A path element that ends with a space, trimmed by some filesystems.
+    #[error("trailing space")]
+    TrailingSpace,
 }
 
 impl AuditIssue {
