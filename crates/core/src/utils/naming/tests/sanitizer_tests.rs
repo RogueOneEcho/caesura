@@ -43,6 +43,18 @@ fn sanitizer_name_en_dash() {
 }
 
 #[test]
+fn sanitizer_name_directional() {
+    // Arrange
+    let input = "Artist\u{200E} - Album\u{2066} zero () [2009]".to_owned();
+
+    // Act
+    let result = Sanitizer::name().execute(input);
+
+    // Assert
+    assert_eq!(result, "Artist - Album zero () [2009]");
+}
+
+#[test]
 fn sanitizer_name_valid_unicode() {
     // Arrange
     let input = "안녕하세요 세상 - 你好世界 - こんにちは世界".to_owned();

@@ -23,7 +23,7 @@ impl Metadata {
     /// Create [`Metadata`] from API response.
     #[must_use]
     pub fn new(group: &Group, torrent: &Torrent) -> Self {
-        let sanitizer = Sanitizer::invisible();
+        let sanitizer = Sanitizer::non_printing();
         let artist = sanitizer.execute(get_artist(group));
         let album = sanitizer.execute(get_album(group));
         let remaster_title = sanitizer.execute(get_remaster_title(torrent));

@@ -48,6 +48,14 @@ pub(crate) enum SanitizerChar {
     LeftToRightOverride,
     #[error("right-to-left override")]
     RightToLeftOverride,
+    #[error("left-to-right isolate")]
+    LeftToRightIsolate,
+    #[error("right-to-left isolate")]
+    RightToLeftIsolate,
+    #[error("first strong isolate")]
+    FirstStrongIsolate,
+    #[error("pop directional isolate")]
+    PopDirectionalIsolate,
     #[error("zero-width no-break space")]
     ZeroWidthNoBreakSpace,
     // C0 control characters
@@ -209,6 +217,10 @@ impl SanitizerChar {
             Self::PopDirectionalFormatting => '\u{202C}',
             Self::LeftToRightOverride => '\u{202D}',
             Self::RightToLeftOverride => '\u{202E}',
+            Self::LeftToRightIsolate => '\u{2066}',
+            Self::RightToLeftIsolate => '\u{2067}',
+            Self::FirstStrongIsolate => '\u{2068}',
+            Self::PopDirectionalIsolate => '\u{2069}',
             Self::ZeroWidthNoBreakSpace => '\u{FEFF}',
             Self::Null => '\x00',
             Self::StartOfHeading => '\x01',

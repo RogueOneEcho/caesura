@@ -199,10 +199,10 @@ fn safe_candidates(path: &str) -> Result<Vec<String>, SourceIssue> {
         return Err(SourceIssue::NoDirectory);
     }
     let libtorrent = Sanitizer::libtorrent().execute(path.to_owned());
-    let invisible = Sanitizer::invisible().execute(path.to_owned());
+    let non_printing = Sanitizer::non_printing().execute(path.to_owned());
     let mut found: HashSet<SanitizerChar> = HashSet::new();
     found.extend(libtorrent.found.iter().copied());
-    found.extend(invisible.found.iter().copied());
+    found.extend(non_printing.found.iter().copied());
     if !found.is_empty() {
         let chars: Vec<&SanitizerChar> = found.iter().collect();
         warn!(
@@ -210,7 +210,7 @@ fn safe_candidates(path: &str) -> Result<Vec<String>, SourceIssue> {
             join_humanized(chars)
         );
     }
-    let candidates = [path.to_owned(), libtorrent.output, invisible.output];
+    let candidates = [path.to_owned(), libtorrent.output, non_printing.output];
     if !candidates.iter().all(|c| is_single_safe_segment(c)) {
         return Err(SourceIssue::InvalidFilePath {
             path: path.to_owned(),

@@ -16,6 +16,9 @@ pub struct AuditOptions {
     /// Should the check for invisible or zero-width path characters be disabled?
     #[arg(long)]
     pub ignore_invisible: bool,
+    /// Should the check for unnecessary directional marks be disabled?
+    #[arg(long)]
+    pub ignore_directional: bool,
     /// Should the check for unsafe path segments be disabled?
     #[arg(long)]
     pub ignore_unsafe: bool,

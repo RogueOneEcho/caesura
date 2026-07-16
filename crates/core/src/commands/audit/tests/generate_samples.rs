@@ -32,7 +32,7 @@ fn generate_audit_samples() {
     }
 
     // Assert
-    assert_eq!(samples.len(), 20);
+    assert_eq!(samples.len(), 24);
 }
 
 /// The `samples/audit` directory relative to the workspace root.
@@ -120,6 +120,19 @@ fn samples() -> Vec<(String, Vec<u8>)> {
             "trailing-overlong-slash-in-folder.torrent".to_owned(),
             trailing_overlong_slash_in_folder(),
         ),
+        (
+            "necessary-mark-beside-rtl-in-folder.torrent".to_owned(),
+            necessary_mark_beside_rtl_in_folder(),
+        ),
+        ("isolate-in-track.torrent".to_owned(), isolate_in_track()),
+        (
+            "rtl-override-in-track.torrent".to_owned(),
+            rtl_override_in_track(),
+        ),
+        (
+            "rtl-mark-in-folder.torrent".to_owned(),
+            rtl_mark_in_folder(),
+        ),
     ]
 }
 
@@ -193,6 +206,64 @@ fn ltr_mark_in_track() -> Vec<u8> {
             file("00 - Sample Playlist \u{200E}.m3u"),
             file("01 - Sample Track.flac"),
         ],
+    )
+}
+
+/// A left-to-right mark beside right-to-left script in the folder name.
+///
+/// `U+0623 U+0644 U+0628 U+0648 U+0645` is Arabic, so the trailing `U+200E`
+/// legitimately orders the Latin tag and is not flagged as unnecessary. It is
+/// still stripped by libtorrent, so the on-disk name diverges.
+fn necessary_mark_beside_rtl_in_folder() -> Vec<u8> {
+    multi(
+        "OPS",
+        100_021,
+        "Test Artist 21 - \u{0623}\u{0644}\u{0628}\u{0648}\u{0645}\u{200E} [FLAC]",
+        vec![file("Test Artist 21 - Sample Track.flac")],
+    )
+}
+
+/// A directional isolate wrapping a segment of a track name.
+///
+/// `U+2066` and `U+2069` are isolate controls with no effect beside Latin text.
+fn isolate_in_track() -> Vec<u8> {
+    multi(
+        "RED",
+        100_022,
+        "Test Artist 22 - Sample Album 22 [FLAC]",
+        vec![
+            file("01 - Sample Track \u{2066}One\u{2069}.flac"),
+            file("02 - Sample Track.flac"),
+        ],
+    )
+}
+
+/// A right-to-left override in a track name.
+///
+/// `U+202E` visually reverses the following text, the classic trojan-source
+/// spoof. It has no right-to-left script to order and is stripped by libtorrent.
+fn rtl_override_in_track() -> Vec<u8> {
+    multi(
+        "OPS",
+        100_023,
+        "Test Artist 23 - Sample Album 23 [FLAC]",
+        vec![
+            file("01 - Sample Track \u{202E}One.flac"),
+            file("02 - Sample Track.flac"),
+        ],
+    )
+}
+
+/// A right-to-left mark in the folder name.
+///
+/// `U+200F` has no right-to-left script to order beside the Latin name, so it is
+/// inert and unnecessary.
+fn rtl_mark_in_folder() -> Vec<u8> {
+    multi(
+        "RED",
+        100_024,
+        "Test Artist 24 - Sample Album 24 \u{200F}[FLAC]",
+        vec![file("Test Artist 24 - Sample Track.flac")],
     )
 }
 

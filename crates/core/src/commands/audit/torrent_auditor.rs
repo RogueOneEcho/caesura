@@ -119,6 +119,17 @@ impl TorrentAuditor {
                 });
             }
         }
+        if !self.options.ignore_directional && !value.contains_rtl() {
+            let directional = Sanitizer::directional().execute(value.to_owned());
+            if !directional.found.is_empty() {
+                issues.push(AuditIssue {
+                    kind: AuditIssueKind::Path(AuditPathIssueKind::UnnecessaryDirectional),
+                    raw: Some(RawString::from(value)),
+                    sanitized: Some(directional.found),
+                    ..AuditIssue::default()
+                });
+            }
+        }
         if !self.options.ignore_libtorrent {
             let libtorrent = Sanitizer::libtorrent().execute(value.to_owned());
             if !libtorrent.found.is_empty() {

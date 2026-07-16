@@ -84,6 +84,87 @@ fn torrent_auditor_execute_rtl_override() {
 }
 
 #[test]
+fn torrent_auditor_execute_unnecessary_directional() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song\u{200E}.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([
+            AuditIssueKind::Path(AuditPathIssueKind::LibtorrentStripped),
+            AuditIssueKind::Path(AuditPathIssueKind::UnnecessaryDirectional),
+        ]),
+    );
+}
+
+/// An isolate control is flagged only as an unnecessary directional mark.
+#[test]
+fn torrent_auditor_execute_unnecessary_directional_isolate() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song\u{2066}.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert_eq!(
+        output.get_issue_kinds(),
+        HashSet::from([AuditIssueKind::Path(
+            AuditPathIssueKind::UnnecessaryDirectional
+        )]),
+    );
+}
+
+/// A directional mark beside right-to-left text is doing work, so it is not flagged.
+#[test]
+fn torrent_auditor_execute_directional_with_rtl() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["\u{200E}\u{05D0}song.flac"])
+        .build();
+
+    // Act
+    let output = TorrentAuditor::mock().execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        !output.has_path_kind(AuditPathIssueKind::UnnecessaryDirectional),
+        "got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
+fn torrent_auditor_execute_ignore_unnecessary_directional() {
+    // Arrange
+    let bytes = TorrentBuilder::new()
+        .with_multi_file(["song\u{200E}.flac"])
+        .build();
+    let auditor = TorrentAuditor::new(AuditOptions {
+        ignore_directional: true,
+        ..AuditOptions::default()
+    });
+
+    // Act
+    let output = auditor.execute_bytes(&bytes);
+
+    // Assert
+    assert!(
+        !output.has_path_kind(AuditPathIssueKind::UnnecessaryDirectional),
+        "got: {:?}",
+        output.issues
+    );
+}
+
+#[test]
 fn torrent_auditor_execute_traversal() {
     // Arrange
     let bytes = TorrentBuilder::new()

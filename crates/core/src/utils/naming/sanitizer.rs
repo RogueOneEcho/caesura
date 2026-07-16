@@ -37,10 +37,30 @@ impl Sanitizer {
             rules: vec![SanitizerRule::restricted()],
         }
     }
+    /// Exclude directional formatting marks.
+    #[must_use]
+    pub fn directional() -> Self {
+        Self {
+            rules: vec![SanitizerRule::directional()],
+        }
+    }
+    /// Exclude invisible, directional, and control characters.
+    ///
+    /// - Scrubs non-content characters from values without rewriting path characters
+    #[must_use]
+    pub fn non_printing() -> Self {
+        Self {
+            rules: vec![
+                SanitizerRule::invisible(),
+                SanitizerRule::directional(),
+                SanitizerRule::control(),
+            ],
+        }
+    }
 
     /// Sanitize source names.
     /// - Replace divider characters with hyphens
-    /// - Remove restricted, invisible, and control characters
+    /// - Remove restricted, invisible, directional, and control characters
     #[must_use]
     pub fn name() -> Self {
         Self {
@@ -48,6 +68,7 @@ impl Sanitizer {
                 SanitizerRule::replace_dividers(),
                 SanitizerRule::restricted_without_dividers(),
                 SanitizerRule::invisible(),
+                SanitizerRule::directional(),
                 SanitizerRule::control(),
             ],
         }
@@ -107,6 +128,26 @@ impl SanitizerRule {
         }
     }
 
+    /// Directional formatting marks, including the isolate controls.
+    fn directional() -> Self {
+        SanitizerRule {
+            chars: vec![
+                SanitizerChar::LeftToRightMark,
+                SanitizerChar::RightToLeftMark,
+                SanitizerChar::LeftToRightEmbedding,
+                SanitizerChar::RightToLeftEmbedding,
+                SanitizerChar::PopDirectionalFormatting,
+                SanitizerChar::LeftToRightOverride,
+                SanitizerChar::RightToLeftOverride,
+                SanitizerChar::LeftToRightIsolate,
+                SanitizerChar::RightToLeftIsolate,
+                SanitizerChar::FirstStrongIsolate,
+                SanitizerChar::PopDirectionalIsolate,
+            ],
+            replacement: None,
+        }
+    }
+
     /// Replace divider characters with a hyphen.
     fn replace_dividers() -> Self {
         SanitizerRule {
@@ -150,18 +191,13 @@ impl SanitizerRule {
     }
 
     /// Invisible characters.
+    ///
+    /// - Excludes directional formatting marks, handled by [`Self::directional()`]
     fn invisible() -> Self {
         SanitizerRule {
             chars: vec![
                 SanitizerChar::NonBreakingSpace,
                 SanitizerChar::ZeroWidthSpace,
-                SanitizerChar::LeftToRightMark,
-                SanitizerChar::RightToLeftMark,
-                SanitizerChar::LeftToRightEmbedding,
-                SanitizerChar::RightToLeftEmbedding,
-                SanitizerChar::PopDirectionalFormatting,
-                SanitizerChar::LeftToRightOverride,
-                SanitizerChar::RightToLeftOverride,
                 SanitizerChar::ZeroWidthNoBreakSpace,
             ],
             replacement: None,

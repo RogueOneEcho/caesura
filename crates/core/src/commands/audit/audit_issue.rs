@@ -118,6 +118,11 @@ pub(crate) enum AuditPathIssueKind {
     /// single `_` that consumes the `.` separator, so the on-disk name loses
     /// its extension.
     BrokenExtension,
+    /// A path element containing directional formatting marks with no effect.
+    ///
+    /// Directional marks only reorder text when a right-to-left character is
+    /// present, so a mark in a component with none is invisible and inert.
+    UnnecessaryDirectional,
 }
 
 impl Display for AuditPathIssueKind {
@@ -130,6 +135,9 @@ impl Display for AuditPathIssueKind {
             AuditPathIssueKind::UnsafeSegment => write!(f, "unsafe"),
             AuditPathIssueKind::Decomposed => write!(f, "decomposed (non-NFC)"),
             AuditPathIssueKind::BrokenExtension => write!(f, "lost extension"),
+            AuditPathIssueKind::UnnecessaryDirectional => {
+                write!(f, "unnecessary directional")
+            }
             AuditPathIssueKind::Unknown => write!(f, "unknown"),
         }
     }
@@ -163,6 +171,7 @@ impl AuditIssue {
             AuditPathIssueKind::RestrictedChars
                 | AuditPathIssueKind::InvisibleChars
                 | AuditPathIssueKind::LibtorrentStripped
+                | AuditPathIssueKind::UnnecessaryDirectional
         ) && let Some(characters) = &self.sanitized
         {
             render_sanitized(&mut output, raw, characters);
