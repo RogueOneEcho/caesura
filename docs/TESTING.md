@@ -164,7 +164,7 @@ CAESURA_DETERMINISTIC_TESTS=1 cargo test
 | `transcode_command_*`        | `normalize_snapshots!`     | SHA-256, file-size, and bitrate ignored                                                                 |
 | `transcode_rename_tracks_*` | `normalize_snapshots!`     | SHA-256, file-size, and bitrate ignored                                                                 |
 | `inspect_*`                  | `assert_inspect_snapshot!` | Line count only                                                                               |
-| `spectrogram_command_*`      | `normalize_snapshots!`     | SHA-256, file-size, and bitrate ignored                                                                 |
+| `spectrogram_command_*`      | `normalize_snapshots!`     | SHA-256, file-size, bitrate, and full-spectrogram width ignored                                          |
 | `sample_flac*`               | `#[ignore]`                | Ignored, CI only runs on x86_64 Linux via<br>`cargo test --release -- --ignored sample_flac` |
 
 ### Updating Snapshots

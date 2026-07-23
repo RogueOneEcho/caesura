@@ -80,9 +80,9 @@ fn read_snap_body(snap_path: &Path) -> Option<String> {
 /// Patch platform-dependent fields from a stored insta snapshot.
 ///
 /// On platforms where audio encoding produces bitwise-different output (ARM,
-/// Nix), replaces SHA-256, file-size, and bitrate fields in `files` with values
-/// from the stored snapshot so that structural comparison via
-/// `assert_yaml_snapshot!` still works.
+/// Nix), replaces SHA-256, file-size, bitrate, and full-spectrogram width fields
+/// in `files` with values from the stored snapshot so that structural comparison
+/// via `assert_yaml_snapshot!` still works.
 pub fn patch_platform_dependent_fields(files: &mut [FileSnapshot], snap_path: &Path) {
     let Some(yaml_body) = read_snap_body(snap_path) else {
         return;
@@ -93,6 +93,11 @@ pub fn patch_platform_dependent_fields(files: &mut [FileSnapshot], snap_path: &P
     for (actual, stored) in files.iter_mut().zip(stored.iter()) {
         actual.sha256.clone_from(&stored.sha256);
         actual.size = stored.size;
+        if actual.filename.ends_with(".full.png")
+            && let (Some(actual_image), Some(stored_image)) = (&mut actual.image, &stored.image)
+        {
+            actual_image.width = stored_image.width;
+        }
         if let (Some(actual_audio), Some(stored_audio)) = (&mut actual.audio, &stored.audio) {
             actual_audio.overall_bitrate = stored_audio.overall_bitrate;
             actual_audio.audio_bitrate = stored_audio.audio_bitrate;
