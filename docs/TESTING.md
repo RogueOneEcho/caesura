@@ -150,6 +150,7 @@ Some snapshot tests verify the deterministic output via SHA-256 hashes and file 
 
 - libFLAC does not guarantee identical output [across machines or builds](https://xiph.org/flac/faq.html#tools__different_sizes)
 - SoX is built against libFLAC, so differences in either the SoX or FLAC build can produce different spectrogram images even at the same version.
+- SoX_ng `14.8.0` includes a [fix to rounding](https://codeberg.org/sox_ng/sox_ng/commit/5f3cca0) that produces slightly different full spectrogram widths.
 
 Where cross platform behavior is non-deterministic we use x86_64 Linux as the source of truth and ignore the deterministic aspects on other platforms.
 

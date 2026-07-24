@@ -77,12 +77,13 @@ fn read_snap_body(snap_path: &Path) -> Option<String> {
     content.splitn(3, "---\n").nth(2).map(String::from)
 }
 
-/// Patch platform-dependent fields from a stored insta snapshot.
+/// Patch non-deterministic fields from a stored insta snapshot.
 ///
-/// On platforms where audio encoding produces bitwise-different output (ARM,
-/// Nix), replaces SHA-256, file-size, bitrate, and full-spectrogram width fields
-/// in `files` with values from the stored snapshot so that structural comparison
-/// via `assert_yaml_snapshot!` still works.
+/// Replaces fields that vary across platforms or tool versions so that
+/// structural comparison via `assert_yaml_snapshot!` still works.
+///
+/// - SHA-256, file-size, bitrate: differ across libFLAC builds (ARM, Nix)
+/// - Full spectrogram width differs due to [rounding fix in SoX_ng `14.8.0`](https://codeberg.org/sox_ng/sox_ng/commit/5f3cca0)
 pub fn patch_platform_dependent_fields(files: &mut [FileSnapshot], snap_path: &Path) {
     let Some(yaml_body) = read_snap_body(snap_path) else {
         return;
