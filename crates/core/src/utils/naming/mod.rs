@@ -2,6 +2,7 @@
 
 pub(crate) use disc_context::*;
 pub(crate) use humanize::*;
+pub(crate) use nfc::*;
 pub(crate) use rtl::*;
 pub(crate) use sanitizer::*;
 pub(crate) use sanitizer_char::*;
@@ -12,6 +13,7 @@ pub(crate) use transcode_name::*;
 
 mod disc_context;
 mod humanize;
+mod nfc;
 mod rtl;
 mod sanitizer;
 mod sanitizer_char;

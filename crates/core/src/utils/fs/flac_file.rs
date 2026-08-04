@@ -8,13 +8,21 @@ use once_cell::sync::OnceCell;
 
 /// A representation of a FLAC file.
 pub struct FlacFile {
-    /// Path to the file
+    /// Path to the existing file on disk
+    ///
+    /// - May contain invalid UTF-8 characters or decomposed (NFD) sequences
     pub path: PathBuf,
 
-    /// File name without the extension.
+    /// Output file name without extension
+    ///
+    /// - Invalid UTF-8 is replaced with `�`
+    /// - Decomposed (NFD) sequences are replaced with composed (NFC)
     pub file_name: String,
 
-    /// Subdirectory of the file.
+    /// Output subdirectory, relative to the source directory
+    ///
+    /// - Invalid UTF-8 is replaced with `�`
+    /// - Decomposed (NFD) sequences are replaced with composed (NFC)
     pub sub_dir: PathBuf,
 
     /// Cached raw Vorbis tags.
@@ -42,12 +50,12 @@ impl FlacFile {
             .expect("Flac file path should start with the source directory")
             .parent()
             .expect("Flac file path should have a parent directory")
-            .to_path_buf();
+            .to_nfc();
         let file_name = path
             .file_stem()
             .expect("Flac file should have a name")
             .to_string_lossy()
-            .into_owned();
+            .to_nfc();
         FlacFile {
             path,
             file_name,
@@ -117,5 +125,18 @@ mod tests {
         let flac = FlacFile::new(path, &source_dir);
         // Assert
         assert_eq!(flac.file_name, "01. Track");
+    }
+
+    /// Decomposed sequences in the file name and subdirectory are composed.
+    #[test]
+    fn flac_file_new_decomposed() {
+        // Arrange
+        let source_dir = PathBuf::from("/music");
+        let path = PathBuf::from("/music/No\u{308}rd/01. Cafe\u{301}.flac");
+        // Act
+        let flac = FlacFile::new(path, &source_dir);
+        // Assert
+        assert_eq!(flac.file_name, "01. Caf\u{e9}");
+        assert_eq!(flac.sub_dir, PathBuf::from("N\u{f6}rd"));
     }
 }

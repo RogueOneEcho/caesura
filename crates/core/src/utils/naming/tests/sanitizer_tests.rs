@@ -55,6 +55,34 @@ fn sanitizer_name_directional() {
 }
 
 #[test]
+fn sanitizer_name_decomposed() {
+    // Arrange
+    let input = "Artist - Cafe\u{301} Album [2009]".to_owned();
+
+    // Act
+    let result = Sanitizer::name().execute(input);
+
+    // Assert
+    assert_eq!(result, "Artist - Caf\u{e9} Album [2009]");
+}
+
+/// Only [`Sanitizer::name`] composes.
+///
+/// The other constructors detect problems in names caesura did not create, so composing
+/// would hide the decomposed characters `audit` exists to report.
+#[test]
+fn sanitizer_restricted_decomposed() {
+    // Arrange
+    let input = "Artist - Cafe\u{301} Album [2009]".to_owned();
+
+    // Act
+    let result = Sanitizer::restricted().execute(input.clone());
+
+    // Assert
+    assert_eq!(result, input);
+}
+
+#[test]
 fn sanitizer_name_valid_unicode() {
     // Arrange
     let input = "안녕하세요 세상 - 你好世界 - こんにちは世界".to_owned();

@@ -99,6 +99,43 @@ async fn create_uppercases_source() {
     assert_eq!(torrent.source(), Some("RED"));
 }
 
+/// Test that decomposed (non-NFC) names read from the content directory are composed.
+///
+/// Filesystems that decompose on write hand back decomposed names when the directory is read,
+/// undoing the composition applied when the files were written.
+#[tokio::test]
+async fn create_composes_decomposed_paths() {
+    // Arrange
+    init_logger();
+    let test_dir = TempDirectory::create("create_composes_decomposed_paths");
+    let content_dir = test_dir.join("Decomposed Album No\u{308}rd");
+    create_dir_all(&content_dir).expect("should create content directory");
+    write(content_dir.join("01 Cafe\u{301} Track.mp3"), b"content").expect("should write track");
+    let output_path = test_dir.join("test.torrent");
+
+    // Act
+    TorrentCreator::create(
+        &content_dir,
+        &output_path,
+        "https://example.com/announce".to_owned(),
+        Indexer::from("TST"),
+    )
+    .await
+    .expect("should create torrent");
+
+    // Assert
+    let torrent = TorrentReader::execute(&output_path)
+        .await
+        .expect("should read created torrent");
+    assert_eq!(torrent.name, "Decomposed Album N\u{f6}rd");
+    let files = torrent
+        .files
+        .as_ref()
+        .expect("should be multi-file torrent");
+    let paths: Vec<_> = files.iter().map(|x| x.path.clone()).collect();
+    assert_eq!(paths, vec![PathBuf::from("01 Caf\u{e9} Track.mp3")]);
+}
+
 #[tokio::test]
 async fn duplicate_copies_when_source_matches() {
     // Arrange

@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 use lava_torrent::bencode::BencodeElem;
-use lava_torrent::torrent::v1::TorrentBuilder;
+use lava_torrent::torrent::v1::{Torrent as LavaTorrent, TorrentBuilder};
 use num_cpus::get as get_num_cpus;
 
 /// Maximum number of threads used by `lava_torrent`.
@@ -28,6 +28,7 @@ impl TorrentCreator {
     ///   and CPU-intensive piece hashing
     /// - Sets `creation date` to 0 for deterministic output (the field has no practical use)
     /// - Sets `created by` to identify caesura as the creator
+    /// - Composes paths to NFC after the directory is read
     pub async fn create(
         content_dir: &Path,
         output_path: &Path,
@@ -40,7 +41,7 @@ impl TorrentCreator {
             let content_size = dir_size(&content_dir)?;
             let pl = piece_length(content_size);
             let created_by = format!("{APP_NAME} {}", app_version_or_describe());
-            let torrent = TorrentBuilder::new(&content_dir, pl)
+            let mut torrent = TorrentBuilder::new(&content_dir, pl)
                 .set_num_threads(num_threads())
                 .set_announce(Some(announce_url))
                 .set_privacy(true)
@@ -55,6 +56,7 @@ impl TorrentCreator {
                     TorrentCreateAction::BuildTorrent,
                     &content_dir,
                 ))?;
+            compose_paths(&mut torrent);
             torrent
                 .write_into_file(&output_path)
                 .map_err(Failure::wrap_with_path(
@@ -125,6 +127,23 @@ impl TorrentCreator {
         })
         .await
         .expect("torrent write task should not panic")
+    }
+}
+
+/// Replace decomposed (NFD) sequences with composed (NFC) in the name and file paths
+///
+/// - Invalid UTF-8 is replaced with `�`
+/// - Filesystems that decompose on write return decomposed names when the content directory is
+///   read, undoing the composition applied when the files were written
+/// - Safe because such filesystems resolve a composed name to the file they decomposed, so the
+///   torrent still matches what is on disk
+fn compose_paths(torrent: &mut LavaTorrent) {
+    torrent.name = torrent.name.to_nfc();
+    let Some(files) = torrent.files.as_mut() else {
+        return;
+    };
+    for file in files {
+        file.path = file.path.to_nfc();
     }
 }
 

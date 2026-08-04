@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 /// Remove or replace characters that are invalid in file paths.
 pub(crate) struct Sanitizer {
+    /// Rules applied to each character.
     rules: Vec<SanitizerRule>,
+    /// Should the input be composed to NFC before the rules are applied?
+    compose: bool,
 }
 
 /// A rule that matches a set of characters and either removes or replaces them.
@@ -23,54 +26,57 @@ pub(crate) struct SanitizerResult {
 }
 
 impl Sanitizer {
+    /// Create a [`Sanitizer`] from rules, without composing the input.
+    fn from_rules(rules: Vec<SanitizerRule>) -> Self {
+        Self {
+            rules,
+            compose: false,
+        }
+    }
+
     /// Exclude invisible and control characters.
     #[must_use]
     pub fn invisible() -> Self {
-        Self {
-            rules: vec![SanitizerRule::invisible(), SanitizerRule::control()],
-        }
+        Self::from_rules(vec![SanitizerRule::invisible(), SanitizerRule::control()])
     }
     /// Exclude restricted file path characters.
     #[must_use]
     pub fn restricted() -> Self {
-        Self {
-            rules: vec![SanitizerRule::restricted()],
-        }
+        Self::from_rules(vec![SanitizerRule::restricted()])
     }
     /// Exclude directional formatting marks.
     #[must_use]
     pub fn directional() -> Self {
-        Self {
-            rules: vec![SanitizerRule::directional()],
-        }
+        Self::from_rules(vec![SanitizerRule::directional()])
     }
     /// Exclude invisible, directional, and control characters.
     ///
     /// - Scrubs non-content characters from values without rewriting path characters
     #[must_use]
     pub fn non_printing() -> Self {
-        Self {
-            rules: vec![
-                SanitizerRule::invisible(),
-                SanitizerRule::directional(),
-                SanitizerRule::control(),
-            ],
-        }
+        Self::from_rules(vec![
+            SanitizerRule::invisible(),
+            SanitizerRule::directional(),
+            SanitizerRule::control(),
+        ])
     }
 
     /// Sanitize source names.
+    ///
     /// - Replace divider characters with hyphens
     /// - Remove restricted, invisible, directional, and control characters
+    /// - Compose the input to NFC
     #[must_use]
     pub fn name() -> Self {
         Self {
-            rules: vec![
+            compose: true,
+            ..Self::from_rules(vec![
                 SanitizerRule::replace_dividers(),
                 SanitizerRule::restricted_without_dividers(),
                 SanitizerRule::invisible(),
                 SanitizerRule::directional(),
                 SanitizerRule::control(),
-            ],
+            ])
         }
     }
 
@@ -78,14 +84,13 @@ impl Sanitizer {
     /// - <https://github.com/arvidn/libtorrent/blob/9c1897645265c6a450930e766ab46c02a240891f/src/torrent_info.cpp#L100>
     #[must_use]
     pub fn libtorrent() -> Self {
-        Self {
-            rules: vec![SanitizerRule::libtorrent()],
-        }
+        Self::from_rules(vec![SanitizerRule::libtorrent()])
     }
 
     /// Sanitize a string for use in file paths.
     #[must_use]
     pub fn execute(&self, input: String) -> SanitizerResult {
+        let input = if self.compose { input.to_nfc() } else { input };
         let mut found = HashSet::new();
         let output = input
             .chars()

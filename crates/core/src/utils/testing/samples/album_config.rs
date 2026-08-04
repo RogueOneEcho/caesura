@@ -341,6 +341,27 @@ impl AlbumConfig {
         }
     }
 
+    /// Create an album whose track title is decomposed (non-NFC).
+    ///
+    /// - The title holds `Cafe` followed by `U+0301`, the form macOS filesystems store
+    /// - Reproduces <https://github.com/RogueOneEcho/caesura/issues/248>
+    pub fn decomposed() -> Self {
+        Self {
+            artist: "Decomposed Artist",
+            album: "Decomposed Album",
+            year: 2024,
+            format: SampleFormat::default(),
+            use_disc_subdirs: false,
+            tracks: vec![TrackConfig {
+                title: "Cafe\u{301} Track",
+                track_number: "1",
+                disc_number: None,
+                frequency: 440,
+                duration_secs: None,
+            }],
+        }
+    }
+
     /// Directory name in standard format: `Artist - Album (Year) [WEB] {16-44.1} (FLAC)`
     pub fn dir_name(&self) -> String {
         format!(

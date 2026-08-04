@@ -1,4 +1,5 @@
 use crate::testing_prelude::*;
+use unicode_normalization::is_nfc;
 
 /// Delay between file operations to ensure filesystem modification times differ.
 ///
@@ -388,6 +389,101 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
     );
 }
 
+/// Test that a decomposed (non-NFC) source filename is composed in the created torrent.
+///
+/// macOS filesystems decompose accented characters, so a source track arrives as `Cafe` plus
+/// `U+0301`. The name is carried verbatim through the transcode output into the torrent, which
+/// `audit` then flags. Reproduces <https://github.com/RogueOneEcho/caesura/issues/248>.
+#[tokio::test]
+async fn transcode_creates_composed_torrent_paths() {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get_advanced(AlbumConfig::decomposed()).await;
+    let host = HostBuilder::new()
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(TargetOptions {
+            target: vec![TargetFormat::_320],
+            ..TargetOptions::default()
+        })
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let transcoder = host.services.get_required::<TranscodeCommand>();
+    let paths = host.services.get_required::<PathManager>();
+    let source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+
+    // Act
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
+
+    // Assert
+    assert_transcode_names_composed(&paths, &source, TargetFormat::_320);
+    let torrent_path = paths.get_torrent_path(&source, TargetFormat::_320);
+    let audit = TorrentAuditor::mock().execute_path(&torrent_path);
+    assert!(
+        !audit.has_path_kind(AuditPathIssueKind::Decomposed),
+        "torrent should not contain decomposed paths: {:?}",
+        audit.issues
+    );
+}
+
+/// Test that a decomposed (non-NFC) track title is composed when tracks are renamed.
+///
+/// With `rename_tracks` the output filename comes from the Vorbis title tag rather than the
+/// source filename, so it reaches the torrent by a different path.
+#[tokio::test]
+async fn transcode_creates_composed_torrent_paths_renamed() {
+    // Arrange
+    init_logger();
+    let test_dir = TestDirectory::new();
+    let album = AlbumProvider::get_advanced(AlbumConfig::decomposed()).await;
+    let host = HostBuilder::new()
+        .with_mock_api(album)
+        .with_test_options(&test_dir)
+        .await
+        .with_options(TargetOptions {
+            target: vec![TargetFormat::_320],
+            ..TargetOptions::default()
+        })
+        .with_options(FileOptions {
+            rename_tracks: true,
+            ..FileOptions::default()
+        })
+        .expect_build();
+    let provider = host.services.get_required::<SourceProvider>();
+    let transcoder = host.services.get_required::<TranscodeCommand>();
+    let paths = host.services.get_required::<PathManager>();
+    let source = provider
+        .get(AlbumConfig::TORRENT_ID)
+        .await
+        .expect("should not fail")
+        .expect("should find source");
+
+    // Act
+    transcoder
+        .execute(&source)
+        .await
+        .expect("transcode should succeed");
+
+    // Assert
+    assert_transcode_names_composed(&paths, &source, TargetFormat::_320);
+    let torrent_path = paths.get_torrent_path(&source, TargetFormat::_320);
+    let audit = TorrentAuditor::mock().execute_path(&torrent_path);
+    assert!(
+        !audit.has_path_kind(AuditPathIssueKind::Decomposed),
+        "torrent should not contain decomposed paths: {:?}",
+        audit.issues
+    );
+}
+
 /// Test that re-running transcode skips when torrent exists.
 #[tokio::test]
 async fn transcode_skips_when_torrent_exists() {
@@ -438,5 +534,27 @@ async fn transcode_skips_when_torrent_exists() {
     assert_eq!(
         modified_before, modified_after,
         "Torrent file should not be recreated"
+    );
+}
+
+/// Assert every file written to the transcode directory is composed.
+///
+/// The torrent is composed by [`TorrentCreator::create`] regardless, so asserting the torrent
+/// alone would pass even if the names on disk were left decomposed.
+fn assert_transcode_names_composed(paths: &PathManager, source: &Source, target: TargetFormat) {
+    let dir = paths.get_transcode_target_dir(source, target);
+    let names: Vec<String> = read_dir(&dir)
+        .expect("should read transcode directory")
+        .map(|entry| {
+            entry
+                .expect("should read directory entry")
+                .file_name()
+                .to_string_lossy()
+                .into_owned()
+        })
+        .collect();
+    assert!(
+        names.iter().all(|name| is_nfc(name)),
+        "transcode file names should be composed: {names:?}"
     );
 }
