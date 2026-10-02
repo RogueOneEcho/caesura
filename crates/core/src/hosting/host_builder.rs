@@ -4,6 +4,8 @@ use di::existing_as_self;
 use di::{Injectable, Mut, ServiceCollection, ServiceProvider, singleton_as_self};
 #[cfg(test)]
 use gazelle_api::MockGazelleClient;
+#[cfg(test)]
+use qbittorrent_api::mock::MockQBittorrentClient;
 use qbittorrent_api::{QBittorrentClientFactory, QBittorrentClientOptions};
 use rogue_logging::InitLog;
 
@@ -15,18 +17,20 @@ pub struct HostBuilder {
     options: OptionsProvider,
 }
 
-impl Default for HostBuilder {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl HostBuilder {
-    /// Create a new [`HostBuilder`] without CLI arguments.
+    /// Create a new [`HostBuilder`] for testing.
+    ///
+    /// - Registers mock Gazelle and qBittorrent clients so tests never build real HTTP clients
+    /// - Tests MAY override the mocks with [`HostBuilder::with_mock_client`] or [`HostBuilder::with_mock_torrent_client`]
     #[must_use]
+    #[cfg(test)]
     pub(crate) fn new() -> Self {
         let options = OptionsProvider::default();
-        Self::new_internal(options, None)
+        let mut builder = Self::new_internal(options, None);
+        let _ = builder
+            .with_mock_client(MockGazelleClient::new())
+            .with_mock_torrent_client(MockQBittorrentClient::default());
+        builder
     }
 
     /// Create a new [`HostBuilder`] from CLI arguments and config file.
@@ -177,14 +181,7 @@ impl HostBuilder {
         clippy::as_conversions,
         reason = "required for DI trait object registration"
     )]
-    #[expect(
-        clippy::absolute_paths,
-        reason = "mock type is behind a feature flag and not re-exported at crate root"
-    )]
-    pub fn with_mock_torrent_client(
-        &mut self,
-        client: qbittorrent_api::mock::MockQBittorrentClient,
-    ) -> &mut Self {
+    pub fn with_mock_torrent_client(&mut self, client: MockQBittorrentClient) -> &mut Self {
         let client: Ref<QbitClient> = Ref::new(Box::new(client) as QbitClient);
         self.services
             .add(singleton_as_self().from(move |_| client.clone()));
