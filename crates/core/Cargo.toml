@@ -2,7 +2,7 @@
 name = "caesura"
 edition.workspace = true
 authors.workspace = true
-description = "An all-in-one command line tool to transcode FLAC audio files and upload to gazelle based indexers/trackers"
+description = "A versatile command line tool for fully automated transcoding of FLAC sources"
 repository.workspace = true
 homepage.workspace = true
 license.workspace = true
