@@ -23,8 +23,8 @@ RUN apk add --no-cache build-base autoconf automake \
     libpng-dev fftw-dev libogg-dev
 COPY --from=flac /artifacts/usr/lib/ /usr/lib/
 COPY --from=flac /artifacts/usr/include/ /usr/include/
-ARG SOX_NG_VERSION=14.8.0.1
-ARG SOX_NG_SHA256=7698a1b2699499b0b38fa95a15bb56c68928d97b144bce03b7ecb76fe9c46698
+ARG SOX_NG_VERSION=14.8.1
+ARG SOX_NG_SHA256=1dedd9ad574abc576bbda06743867fb778accf98a1eacde1a42913acbf072448
 RUN wget -q "https://codeberg.org/sox_ng/sox_ng/releases/download/sox_ng-${SOX_NG_VERSION}/sox_ng-${SOX_NG_VERSION}.tar.gz" \
     && echo "${SOX_NG_SHA256}  sox_ng-${SOX_NG_VERSION}.tar.gz" | sha256sum -c - \
     && tar xf "sox_ng-${SOX_NG_VERSION}.tar.gz" \
