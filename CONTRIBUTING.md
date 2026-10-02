@@ -69,6 +69,10 @@ New features and bug fixes should be covered by tests.
 
 Refer to the [testing guide](docs/TESTING.md) for details.
 
+### Updating Dependencies
+
+Refer to the [dependency update guide](docs/UPDATING-DEPENDENCIES.md) when bumping SoX_ng, FLAC or LAME.
+
 ### Screencasts
 
 Documentation includes GIF screencasts generated from VHS tape files in the [assets-caesura](https://github.com/RogueOneEcho/assets-caesura) repository.
