@@ -11,6 +11,7 @@ pub(crate) const SOX_VERSION_PATTERN: &str = r"v(\d+\.\d+\.\d+(?:\.\d+)?)";
 #[injectable]
 pub struct VersionCommand {
     sox: Ref<SoxFactory>,
+    release_provider: Ref<ReleaseProvider>,
 }
 
 impl VersionCommand {
@@ -18,19 +19,27 @@ impl VersionCommand {
     ///
     /// Returns `true` if all dependencies are found, `false` if any are missing.
     pub async fn execute(&self) -> bool {
+        let versions = self.get_versions().await;
+        let found = versions.check_versions();
+        if !found {
+            error!("Failed to find all dependencies\n");
+        }
+        let table = build_table(versions);
+        print!("{table}");
+        match self.release_provider.get_latest().await {
+            Ok(release) => release.log(),
+            Err(failure) => warn!("{}", failure.render()),
+        }
+        found
+    }
+
+    /// Get the version of each dependency.
+    pub(super) async fn get_versions(&self) -> DependencyVersions<'_> {
         let sox_binary = self.sox.binary();
         let flac = get_version(FLAC, FLAC_VERSION_PATTERN).await;
         let lame = get_version(LAME, LAME_VERSION_PATTERN).await;
         let sox = get_version(sox_binary, SOX_VERSION_PATTERN).await;
-        let dependencies = [(FLAC, flac), (LAME, lame), (sox_binary, sox)];
-        let any_error = dependencies.iter().any(|(_, result)| result.is_err());
-        if any_error {
-            error!("Failed to find all dependencies\n");
-        }
-        let table = build_table(dependencies);
-        print!("{table}");
-        GitHubRelease::check_for_update().await;
-        !any_error
+        DependencyVersions([(FLAC, flac), (LAME, lame), (sox_binary, sox)])
     }
 }
 
@@ -59,13 +68,13 @@ pub(super) async fn get_version(binary: &str, pattern: &str) -> Result<VersionIn
 }
 
 /// Build the version table.
-fn build_table(dependencies: [(&str, Result<VersionInfo, VersionError>); 3]) -> String {
+fn build_table(versions: DependencyVersions<'_>) -> String {
     let mut builder = TableBuilder::new().row([
         APP_NAME.to_owned(),
         app_version_or_describe().trim_start_matches('v').to_owned(),
         app_user_agent(false).dimmed().to_string(),
     ]);
-    for (name, result) in dependencies {
+    for (name, result) in versions.0 {
         let (version, detail) = match result {
             Ok(info) => (
                 info.version.unwrap_or_else(|| String::from("?")),
@@ -84,6 +93,29 @@ pub(super) struct VersionInfo {
     pub(super) first_line: String,
     /// Extracted version number, if regex matched.
     pub(super) version: Option<String>,
+}
+
+impl VersionInfo {
+    /// Create a [`VersionInfo`] with mock values for testing.
+    #[cfg(test)]
+    pub(super) fn mock() -> Self {
+        Self {
+            first_line: "example 1.0".to_owned(),
+            version: Some("1.0".to_owned()),
+        }
+    }
+}
+
+/// Version information for each dependency, keyed by binary name.
+pub(super) struct DependencyVersions<'a>(
+    pub(super) [(&'a str, Result<VersionInfo, VersionError>); 3],
+);
+
+impl DependencyVersions<'_> {
+    /// Were all dependencies found?
+    pub(super) fn check_versions(&self) -> bool {
+        self.0.iter().all(|(_, result)| result.is_ok())
+    }
 }
 
 /// Errors returned by [`get_version`].

@@ -1,18 +1,33 @@
-use crate::commands::version::get_version;
+use crate::commands::version::{DependencyVersions, VersionError, VersionInfo, get_version};
 use crate::testing_prelude::*;
 
 #[tokio::test]
-async fn execute_returns_true_when_dependencies_present() {
+async fn version_command_get_versions() {
     // Arrange
-    init_logger();
     let host = HostBuilder::new().expect_build();
     let command = host.services.get_required::<VersionCommand>();
 
     // Act
-    let result = command.execute().await;
+    let versions = command.get_versions().await;
 
     // Assert
-    assert!(result, "should return true when all dependencies are found");
+    assert!(versions.check_versions(), "should find all dependencies");
+}
+
+#[test]
+fn dependency_versions_check_versions_missing() {
+    // Arrange
+    let versions = DependencyVersions([
+        (FLAC, Ok(VersionInfo::mock())),
+        (LAME, Err(VersionError::EmptyStdout)),
+        (SOX, Ok(VersionInfo::mock())),
+    ]);
+
+    // Act
+    let found = versions.check_versions();
+
+    // Assert
+    assert!(!found);
 }
 
 #[tokio::test]

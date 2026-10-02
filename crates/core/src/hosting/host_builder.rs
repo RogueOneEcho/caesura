@@ -108,6 +108,7 @@ impl HostBuilder {
             .add(ReportRenderer::transient())
             .add(SourceReporter::transient())
             // Add version services
+            .add(ReleaseProvider::transient())
             .add(VersionCommand::transient());
         HostBuilder { services, options }
     }

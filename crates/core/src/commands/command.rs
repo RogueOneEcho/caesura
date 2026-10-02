@@ -122,7 +122,7 @@ pub enum Command {
 
     /// Display version information for caesura and dependencies.
     #[command(short_flag = 'V', long_flag = "version")]
-    #[options(SoxOptions)]
+    #[options(SoxOptions, ReleaseOptions)]
     Version,
 }
 
