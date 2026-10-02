@@ -43,7 +43,6 @@ nix profile install github:RogueOneEcho/nix#caesura
 | Linux | Intel/AMD     | `x86_64-unknown-linux-musl`  | Portable (without glibc) |
 | Linux | ARM           | `aarch64-unknown-linux-musl` | Portable (without glibc) |
 | macOS | Apple Silicon | `aarch64-apple-darwin`       |                          |
-| macOS | Intel         | `x86_64-apple-darwin`        |                          |
 
 3. Make the binary executable and move it to a directory on your `PATH`.
 

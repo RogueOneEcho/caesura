@@ -47,7 +47,6 @@ If you're unable to build it yourself then you can try these experimental binari
 | Linux | Intel/AMD     | `x86_64-unknown-linux-musl`  | Portable (without glibc) |
 | Linux | ARM           | `aarch64-unknown-linux-musl` | Portable (without glibc) |
 | macOS | Apple Silicon | `aarch64-apple-darwin`       |                          |
-| macOS | Intel         | `x86_64-apple-darwin`        |                          |
 
 ```bash
 curl -fSL "https://github.com/RogueOneEcho/install/releases/latest/download/sox_ng-x86_64-unknown-linux-musl.tar.xz" -o sox_ng.tar.xz
