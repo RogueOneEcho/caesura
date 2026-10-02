@@ -58,7 +58,7 @@ async fn transcode_command_truncated_source() {
     .expect("should copy source to isolated directory");
     let track = album.tracks.first().expect("album should have a track");
     truncate_to_half(&source_dir.join(album.track_filename(track)));
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -124,7 +124,7 @@ async fn transcode_command_helper(format: SampleFormat) -> Vec<FileSnapshot> {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(format).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await

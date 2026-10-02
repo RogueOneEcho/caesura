@@ -32,7 +32,7 @@ async fn upload_command_dry_run_skips_api_call() -> Result<(), TestError> {
     init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
@@ -74,7 +74,7 @@ async fn upload_command_torrent_client_injection_succeeds() -> Result<(), TestEr
     init_logger();
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
-    let mut builder = HostBuilder::new();
+    let mut builder = HostBuilder::mock();
     let _ = builder
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
@@ -140,7 +140,7 @@ async fn upload_command_missing_transcode_returns_error() -> Result<(), TestErro
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -173,7 +173,7 @@ async fn upload_command_missing_torrent_fails() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -232,7 +232,7 @@ async fn upload_command_copies_to_content_dir() -> Result<(), TestError> {
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let copy_target = TempDirectory::create("content_copy_target");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
@@ -275,7 +275,7 @@ async fn upload_command_copies_to_custom_dir() -> Result<(), TestError> {
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let copy_target = TempDirectory::create("custom_copy_target");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
@@ -316,7 +316,7 @@ async fn upload_command_copies_torrent_file() -> Result<(), TestError> {
     let transcode = TranscodeProvider::get(SampleFormat::default(), TargetFormat::_320).await;
     let test_dir = TestDirectory::new();
     let torrent_target = TempDirectory::create("torrent_copy_target");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(transcode.album.clone())
         .with_test_options(&test_dir)
         .await
@@ -413,7 +413,7 @@ async fn upload_command_api_failure_sets_error() -> Result<(), TestError> {
             source: ErrorSource::Io(IoError::new(ErrorKind::NotFound, "Upload failed")),
         }));
 
-    let mut builder = HostBuilder::new();
+    let mut builder = HostBuilder::mock();
 
     #[allow(clippy::as_conversions)]
     let client: DiRef<GazelleClient> = DiRef::new(Box::new(mock) as GazelleClient);
@@ -499,7 +499,7 @@ async fn upload_command_skip_existing_copy_succeeds() -> Result<(), TestError> {
 
 /// Helper to build a host configured for upload tests with pre-generated transcodes.
 async fn build_upload_test_host(transcode: &TranscodeConfig, test_dir: &TestDirectory) -> Host {
-    HostBuilder::new()
+    HostBuilder::mock()
         .with_mock_api(transcode.album.clone())
         .with_test_options(test_dir)
         .await

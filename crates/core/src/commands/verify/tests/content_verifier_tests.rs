@@ -6,7 +6,7 @@ async fn content_verifier_execute_mismatch() -> Result<(), TestError> {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await

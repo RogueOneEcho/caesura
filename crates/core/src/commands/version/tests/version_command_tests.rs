@@ -4,7 +4,7 @@ use crate::testing_prelude::*;
 #[tokio::test]
 async fn version_command_get_versions() {
     // Arrange
-    let host = HostBuilder::new().expect_build();
+    let host = HostBuilder::mock().expect_build();
     let command = host.services.get_required::<VersionCommand>();
 
     // Act

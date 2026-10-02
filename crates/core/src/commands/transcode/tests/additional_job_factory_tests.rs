@@ -168,7 +168,7 @@ async fn setup_factory(
     let test_dir = TestDirectory::new();
     let source_dir = test_dir.join("source");
     create_dir_all(&source_dir).expect("should create source dir");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await

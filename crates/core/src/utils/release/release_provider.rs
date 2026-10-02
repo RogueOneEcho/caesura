@@ -62,7 +62,7 @@ mod tests {
     #[tokio::test]
     async fn release_provider_get_latest_offline() {
         // Arrange
-        let host = HostBuilder::new()
+        let host = HostBuilder::mock()
             .with_options(ReleaseOptions { offline: true })
             .expect_build();
         let provider = host.services.get_required::<ReleaseProvider>();

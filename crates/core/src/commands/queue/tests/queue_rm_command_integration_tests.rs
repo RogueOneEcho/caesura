@@ -8,7 +8,7 @@ async fn queue_rm_command_removes_item() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
@@ -29,7 +29,7 @@ async fn queue_rm_command_removes_item() -> Result<(), TestError> {
     let hash = *items.keys().next().expect("should have at least one item");
 
     // Build new host with remove args
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -60,7 +60,7 @@ async fn queue_rm_command_nonexistent_hash() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await

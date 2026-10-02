@@ -7,7 +7,7 @@ async fn torrent_file_provider_get_repeat_call() -> Result<(), TestError> {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -58,7 +58,7 @@ async fn torrent_file_provider_get_download_failure() -> Result<(), TestError> {
             "simulated download failure",
         )),
     }));
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(failing_api)
         .with_test_options(&test_dir)
         .await

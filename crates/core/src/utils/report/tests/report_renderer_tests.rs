@@ -3,7 +3,7 @@ use crate::testing_prelude::*;
 #[tokio::test]
 async fn report_renderer_render_single_no_tags_issue() {
     // Arrange
-    let mut builder = HostBuilder::new();
+    let mut builder = HostBuilder::mock();
     let _ = builder.with_options(SharedOptions {
         indexer_url: "https://example.com".to_owned(),
         ..SharedOptions::mock()
@@ -27,7 +27,7 @@ async fn report_renderer_render_single_no_tags_issue() {
 #[tokio::test]
 async fn report_renderer_render_multiple_issue_types() {
     // Arrange
-    let mut builder = HostBuilder::new();
+    let mut builder = HostBuilder::mock();
     let _ = builder.with_options(SharedOptions {
         indexer_url: "https://example.com".to_owned(),
         ..SharedOptions::mock()
@@ -60,7 +60,7 @@ async fn report_renderer_render_multiple_issue_types() {
 #[tokio::test]
 async fn report_renderer_render_overlapping_grouped_issues() {
     // Arrange
-    let mut builder = HostBuilder::new();
+    let mut builder = HostBuilder::mock();
     let _ = builder.with_options(SharedOptions {
         indexer_url: "https://example.com".to_owned(),
         ..SharedOptions::mock()

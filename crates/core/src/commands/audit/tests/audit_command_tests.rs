@@ -12,7 +12,7 @@ async fn audit_command_execute_reports_problematic() {
     let component = splice(b"song", E_ACUTE, b".flac");
     let torrent = TorrentBuilder::new().with_multi_file([component]).build();
     write(torrents.join("bad.torrent"), torrent).expect("write torrent");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();
@@ -82,7 +82,7 @@ async fn audit_command_execute_cli_id_reports_problematic() {
     let component = splice(b"song", E_ACUTE, b".flac");
     let torrent = TorrentBuilder::new().with_multi_file([component]).build();
     let api = MockGazelleClient::new().with_download_torrent(Ok(torrent));
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(api)
         .with_test_options(&test_dir)
         .await
@@ -106,7 +106,7 @@ async fn audit_command_execute_cli_id_missing_credentials() {
     init_logger();
     let test_dir = TestDirectory::new();
     let api = MockGazelleClient::new();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(api)
         .with_test_options(&test_dir)
         .await
@@ -140,7 +140,7 @@ async fn audit_command_execute_cli_id_clean() {
         .with_multi_file([b"song.flac".to_vec()])
         .build();
     let api = MockGazelleClient::new().with_download_torrent(Ok(torrent));
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(api)
         .with_test_options(&test_dir)
         .await
@@ -169,7 +169,7 @@ async fn audit_command_execute_cli_path() {
     let component = splice(b"song", E_ACUTE, b".flac");
     let torrent = TorrentBuilder::new().with_multi_file([component]).build();
     write(torrents.join("bad.torrent"), torrent).expect("write torrent");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .with_options(AuditArgs {

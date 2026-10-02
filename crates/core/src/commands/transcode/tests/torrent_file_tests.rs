@@ -16,7 +16,7 @@ async fn transcode_creates_only_indexed_torrent() {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -62,7 +62,7 @@ async fn get_or_duplicate_returns_path_when_exists() -> Result<(), TestError> {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -113,7 +113,7 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), TestError> 
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     // First create a transcode with RED indexer
-    let host_red = HostBuilder::new()
+    let host_red = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
@@ -136,7 +136,7 @@ async fn get_or_duplicate_creates_from_other_tracker() -> Result<(), TestError> 
         .expect("transcode should succeed");
 
     // Now create a new host with OPS indexer, using same output directory
-    let host_ops = HostBuilder::new()
+    let host_ops = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -181,7 +181,7 @@ async fn get_or_duplicate_returns_none_when_missing() -> Result<(), TestError> {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -215,7 +215,7 @@ async fn torrent_filename_includes_format_and_indexer() {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -266,7 +266,7 @@ async fn transcode_creates_torrents_for_each_format() {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -307,7 +307,7 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     // First create a transcode with RED indexer
-    let host_red = HostBuilder::new()
+    let host_red = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
@@ -347,7 +347,7 @@ async fn transcode_skips_when_other_tracker_torrent_exists() {
     sleep(MODIFICATION_TIME_WAIT).await;
 
     // Now create a new host with OPS indexer
-    let host_ops = HostBuilder::new()
+    let host_ops = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -400,7 +400,7 @@ async fn transcode_creates_composed_torrent_paths() {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get_advanced(AlbumConfig::decomposed()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -445,7 +445,7 @@ async fn transcode_creates_composed_torrent_paths_renamed() {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get_advanced(AlbumConfig::decomposed()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -491,7 +491,7 @@ async fn transcode_skips_when_torrent_exists() {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await

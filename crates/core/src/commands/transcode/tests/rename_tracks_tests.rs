@@ -79,7 +79,7 @@ async fn rename_tracks_helper(config: AlbumConfig) -> Vec<FileSnapshot> {
     init_logger();
     let config = AlbumProvider::get_advanced(config).await;
     let test_dir = TestDirectory::new();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(config)
         .with_test_options(&test_dir)
         .await

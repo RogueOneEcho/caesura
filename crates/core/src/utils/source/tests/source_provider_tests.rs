@@ -110,7 +110,7 @@ async fn source_provider_get_from_options_dispatches_to_hash() -> Result<(), Tes
     let _album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
     let dir_name = AlbumConfig::default().dir_name();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_options(SourceArg {
             source: TEST_HASH.to_owned(),
         })
@@ -142,7 +142,7 @@ async fn source_provider_get_from_options_hash_not_found() -> Result<(), TestErr
             status: 404,
         }),
     }));
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_options(SourceArg {
             source: TEST_HASH.to_owned(),
         })
@@ -197,7 +197,7 @@ fn mock_api(file_path: &str) -> MockGazelleClient {
 }
 
 async fn build_host(test_dir: &TestDirectory, client: MockGazelleClient) -> Host {
-    HostBuilder::new()
+    HostBuilder::mock()
         .with_mock_client(client)
         .with_test_options(test_dir)
         .await

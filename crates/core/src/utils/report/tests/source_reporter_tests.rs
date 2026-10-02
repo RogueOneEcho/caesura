@@ -10,7 +10,7 @@ fn reportable_issue() -> SourceIssue {
 async fn source_reporter_execute_no_reportable_issues() {
     // Arrange
     let test_dir = TestDirectory::new();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();
@@ -33,7 +33,7 @@ async fn source_reporter_execute_reports_disabled() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .with_options(ReportOptions {
@@ -59,7 +59,7 @@ async fn source_reporter_execute_no_tags_issue() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();
@@ -85,7 +85,7 @@ async fn source_reporter_execute_existing_report() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();
@@ -119,7 +119,7 @@ async fn source_reporter_execute_missing_dir() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.join("nested").join("reports");
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .with_options(ReportOptions {
@@ -146,7 +146,7 @@ async fn source_reporter_execute_blocked_by_hash_check() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();
@@ -171,7 +171,7 @@ async fn source_reporter_execute_blocked_by_trumpable() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();
@@ -193,7 +193,7 @@ async fn source_reporter_execute_blocked_by_hash_check_skipped() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .with_options(VerifyOptions {
@@ -220,7 +220,7 @@ async fn source_reporter_execute_not_blocked_by_scene() {
     // Arrange
     let test_dir = TestDirectory::new();
     let reports_dir = test_dir.reports();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_test_options(&test_dir)
         .await
         .expect_build();

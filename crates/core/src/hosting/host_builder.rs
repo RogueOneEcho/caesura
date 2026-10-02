@@ -24,7 +24,7 @@ impl HostBuilder {
     /// - Tests MAY override the mocks with [`HostBuilder::with_mock_client`] or [`HostBuilder::with_mock_torrent_client`]
     #[must_use]
     #[cfg(test)]
-    pub(crate) fn new() -> Self {
+    pub(crate) fn mock() -> Self {
         let options = OptionsProvider::default();
         let mut builder = Self::new_internal(options, None);
         let _ = builder

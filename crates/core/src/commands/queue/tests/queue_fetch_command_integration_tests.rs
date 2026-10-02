@@ -114,7 +114,7 @@ async fn queue_fetch_test_helper(
         status_code: Some(200),
         result: Some(mock_torrents),
     });
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_mock_torrent_client(mock_client)
         .with_test_options(&test_dir)

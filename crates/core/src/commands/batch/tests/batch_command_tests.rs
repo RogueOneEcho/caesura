@@ -8,7 +8,7 @@ async fn batch_command_empty_queue_succeeds() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -33,7 +33,7 @@ async fn batch_command_verifies_item() -> Result<(), TestError> {
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
@@ -80,7 +80,7 @@ async fn batch_command_skips_item_without_id() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -126,7 +126,7 @@ async fn batch_command_respects_limit() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -175,7 +175,7 @@ async fn batch_command_filters_by_indexer() -> Result<(), TestError> {
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -233,7 +233,7 @@ async fn batch_command_skips_verified_when_transcode_disabled() -> Result<(), Te
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -276,7 +276,7 @@ async fn batch_command_processes_verified_when_transcode_enabled() -> Result<(),
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
@@ -328,7 +328,7 @@ async fn batch_command_upload_dry_run_does_not_save_status() -> Result<(), TestE
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await
@@ -385,7 +385,7 @@ async fn batch_command_upload_saves_status() -> Result<(), TestError> {
     let test_dir = TestDirectory::new();
     let torrent_dir = album.single_torrent_dir();
 
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album.clone())
         .with_test_options(&test_dir)
         .await

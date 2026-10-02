@@ -5,7 +5,7 @@ use crate::testing_prelude::*;
 fn config_command_renders_documented_yaml() {
     // Arrange
     init_logger();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_options(SharedOptions {
             output: PathBuf::from("/test/output"),
             ..SharedOptions::mock()

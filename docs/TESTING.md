@@ -108,7 +108,7 @@ Use `AlbumConfig::api()` for a pre-configured mock, or build one manually with `
 
 Most integration tests build a DI container with `HostBuilder`:
 
-- **`HostBuilder::new()`** - Creates an empty DI container
+- **`HostBuilder::mock()`** - Creates a DI container with default mock Gazelle and qBittorrent clients, so tests never build real HTTP clients
 - **`.with_mock_api(album)`** - Registers a mock Gazelle client from an `AlbumConfig`
 - **`.with_test_options(&test_dir)`** - Registers `SharedOptions` and `CacheOptions` pointing at test directories
 - **`.with_options(T)`** - Registers additional option structs (e.g. `UploadOptions`, `QueueAddArgs`)
@@ -124,7 +124,7 @@ async fn example() -> Result<(), TestError> {
     init_logger();
     let album = AlbumProvider::get(SampleFormat::default()).await;
     let test_dir = TestDirectory::new();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await

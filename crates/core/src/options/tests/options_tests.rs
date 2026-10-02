@@ -409,8 +409,8 @@ fn shared_options_partial_merge_preserves_set() {
 fn host_builder_with_options_overrides() {
     use crate::hosting::HostBuilder;
 
-    // Arrange: HostBuilder::new() registers default options via register_options()
-    let mut builder = HostBuilder::new();
+    // Arrange: HostBuilder::mock() registers default options via register_options()
+    let mut builder = HostBuilder::mock();
 
     // Act: Override with custom value
     let custom_output = PathBuf::from("/custom/output/path");

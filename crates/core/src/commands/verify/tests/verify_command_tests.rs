@@ -6,7 +6,7 @@ async fn verify_command_mocked() -> Result<(), TestError> {
     init_logger();
     let test_dir = TestDirectory::new();
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_api(album)
         .with_test_options(&test_dir)
         .await
@@ -47,7 +47,7 @@ async fn verify_command_execute_no_reports_set() -> Result<(), TestError> {
         .await
         .expect("generate tagless flac");
     let album = AlbumProvider::get(SampleFormat::default()).await;
-    let mut builder = HostBuilder::new();
+    let mut builder = HostBuilder::mock();
     let _ = builder
         .with_mock_api(album)
         .with_test_options(&test_dir)

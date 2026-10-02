@@ -25,7 +25,7 @@ impl TranscodeGenerator {
             .await
             .map_err(Failure::wrap(SampleAction::CreateDirectory))?;
         let content_dir = SAMPLE_SOURCES_DIR.clone();
-        let host = HostBuilder::new()
+        let host = HostBuilder::mock()
             .with_mock_api(config.album.clone())
             .with_options(SharedOptions {
                 content: vec![content_dir],

@@ -146,7 +146,7 @@ async fn id_provider_missing_torrent_file_returns_not_found() {
 
 /// Helper function to create a host with a specific source argument.
 fn create_host_with_source(source: &str) -> Host {
-    HostBuilder::new()
+    HostBuilder::mock()
         .with_options(SourceArg {
             source: source.to_owned(),
         })

@@ -5,7 +5,7 @@ use crate::testing_prelude::*;
 async fn cross_command_validation_fails_without_cross_config() {
     // Arrange
     let test_dir = TestDirectory::new();
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(MockGazelleClient::default())
         .with_mock_torrent_client(MockQBittorrentClient::default())
         .with_test_options(&test_dir)
@@ -40,7 +40,7 @@ async fn cross_command_unresolvable_source_returns_false() {
             status: 404,
         }),
     }));
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(main_client)
         .with_mock_cross_client(MockGazelleClient::default())
         .with_mock_torrent_client(MockQBittorrentClient::default())
@@ -74,7 +74,7 @@ async fn cross_command_validation_fails_without_inject_copy_or_dry_run() {
     // Arrange
     let test_dir = TestDirectory::new();
     let cross_config = make_cross_config(&test_dir, "OPS").await;
-    let host = HostBuilder::new()
+    let host = HostBuilder::mock()
         .with_mock_client(MockGazelleClient::default())
         .with_mock_cross_client(MockGazelleClient::default())
         .with_mock_torrent_client(MockQBittorrentClient::default())
