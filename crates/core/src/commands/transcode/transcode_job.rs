@@ -56,8 +56,13 @@ impl TranscodeJob {
 }
 
 /// Pipe decode output directly to encode input.
+///
+/// - Reports the failing program with its stderr
+/// - Reports decode with encode as related when both fail, since a failure of either one breaks
+///   the pipe for the other
 async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure<TranscodeAction>> {
     let decode_input = decode.input.clone();
+    let encode_output_path = encode.output.clone();
     let decode_info = decode.to_info();
     let encode_info = encode.to_info();
     trace!("Executing transcode: {decode_info} | {encode_info}");
@@ -65,7 +70,7 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure
     let mut decode_command = decode_info
         .to_command()
         .stdout(Stdio::piped())
-        .stderr(Stdio::null())
+        .stderr(Stdio::piped())
         .spawn()
         .map_err(Failure::wrap_with(TranscodeAction::SpawnDecode, |f| {
             f.with("program", &decode_program)
@@ -81,26 +86,31 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure
         .to_command()
         .stdin(pipe)
         .stdout(Stdio::null())
-        .stderr(Stdio::null())
+        .stderr(Stdio::piped())
         .spawn()
         .map_err(Failure::wrap_with(TranscodeAction::SpawnEncode, |f| {
             f.with("program", &encode_program)
         }))?;
-    let (decode_result, encode_output) =
-        join!(decode_command.wait(), encode_command.wait_with_output());
-    let decode_exit = decode_result.map_err(Failure::wrap(TranscodeAction::WaitDecode))?;
+    let (decode_output, encode_output) = join!(
+        decode_command.wait_with_output(),
+        encode_command.wait_with_output()
+    );
+    let decode_output = decode_output.map_err(Failure::wrap(TranscodeAction::WaitDecode))?;
     let encode_output = encode_output.map_err(Failure::wrap(TranscodeAction::WaitEncode))?;
-    if !decode_exit.success() {
-        return Err(Failure::from_action(TranscodeAction::Decode)
-            .with("program", &decode_program)
-            .with("exit", decode_exit.to_string())
-            .with_path(&decode_input));
-    }
-    require_success(encode_output, &encode_program).map_err(Failure::wrap_with_path(
+    let decode = require_success(decode_output, &decode_program).map_err(Failure::wrap_with_path(
+        TranscodeAction::Decode,
+        &decode_input,
+    ));
+    let encode = require_success(encode_output, &encode_program).map_err(Failure::wrap_with_path(
         TranscodeAction::Transcode,
-        encode_program,
-    ))?;
-    Ok(())
+        &encode_output_path,
+    ));
+    match (decode, encode) {
+        (Ok(_), Ok(_)) => Ok(()),
+        (Err(decode), Ok(_)) => Err(decode),
+        (Ok(_), Err(encode)) => Err(encode),
+        (Err(decode), Err(encode)) => Err(decode.with_related(encode)),
+    }
 }
 
 async fn execute_resample(resample: Resample) -> Result<(), Failure<TranscodeAction>> {
@@ -139,4 +149,95 @@ async fn execute_include(include: Include) -> Result<(), Failure<TranscodeAction
         include.output.display()
     );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::testing_prelude::*;
+
+    /// `lame` can't open a directory as its output, so `flac` also fails on the closed pipe.
+    #[tokio::test]
+    async fn transcode_job_execute_output_path_is_directory() {
+        // Arrange
+        init_logger();
+        let test_dir = TestDirectory::new();
+        let source = get_sample_flac().await;
+        let output_path = test_dir.output().join("track.mp3");
+        create_dir_all(&output_path).expect("should create directory at output path");
+        let job = create_job(&test_dir, source, output_path).await;
+
+        // Act
+        let failure = job
+            .execute()
+            .await
+            .expect_err("should fail when lame can't write the output");
+
+        // Assert
+        let debug = format!("{failure:?}");
+        assert!(
+            debug.contains("Can't init outfile"),
+            "lame stderr should be reported, got: {debug}"
+        );
+    }
+
+    /// `flac` can't decode a corrupt source, so `lame` also fails on the empty input.
+    #[tokio::test]
+    async fn transcode_job_execute_corrupt_source() {
+        // Arrange
+        init_logger();
+        let test_dir = TestDirectory::new();
+        create_dir_all(test_dir.output()).expect("should create output directory");
+        let source = test_dir.output().join("corrupt.flac");
+        write(&source, "not a flac file").expect("should write corrupt source");
+        let output_path = test_dir.output().join("track.mp3");
+        let job = create_job(&test_dir, source, output_path).await;
+
+        // Act
+        let failure = job
+            .execute()
+            .await
+            .expect_err("should fail when flac can't decode the source");
+
+        // Assert
+        assert_eq!(failure.action(), &TranscodeAction::Decode);
+        let debug = format!("{failure:?}");
+        assert!(
+            debug.contains("not a FLAC file"),
+            "flac stderr should be reported, got: {debug}"
+        );
+    }
+
+    async fn get_sample_flac() -> PathBuf {
+        let album = AlbumProvider::get(SampleFormat::default()).await;
+        Collector::get_flacs(&SAMPLE_SOURCES_DIR.join(album.dir_name()))
+            .into_iter()
+            .next()
+            .expect("should find a flac")
+            .path
+    }
+
+    async fn create_job(test_dir: &TestDirectory, input: PathBuf, output: PathBuf) -> TranscodeJob {
+        let host = HostBuilder::mock()
+            .with_test_options(test_dir)
+            .await
+            .expect_build();
+        TranscodeJob {
+            id: "Transcode".to_owned(),
+            variant: Variant::Transcode(
+                Decode {
+                    input,
+                    resample_rate: None,
+                    repeatable: true,
+                    sox: host.services.get_required::<SoxFactory>(),
+                },
+                Encode {
+                    output,
+                    format: TargetFormat::_320,
+                },
+            ),
+            tags: None,
+            exclude_vorbis_comments: Vec::new(),
+        }
+    }
 }
