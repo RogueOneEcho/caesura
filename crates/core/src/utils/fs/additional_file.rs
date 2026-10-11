@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::os::unix::prelude::MetadataExt;
 
 /// A non-FLAC file to include in transcodes.
 pub struct AdditionalFile {
@@ -52,7 +51,7 @@ impl AdditionalFile {
             .metadata()
             .await
             .map_err(Failure::wrap_with_path(FsAction::ReadMetadata, &self.path))?;
-        Ok(metadata.size())
+        Ok(metadata.len())
     }
 }
 
