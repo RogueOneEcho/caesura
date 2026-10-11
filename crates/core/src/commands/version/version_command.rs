@@ -50,6 +50,9 @@ pub(super) async fn get_version(binary: &str, pattern: &str) -> Result<VersionIn
         .output()
         .await
         .map_err(VersionError::Process)?;
+    if !output.status.success() {
+        return Err(VersionError::Execute(ProcessOutput::from(output)));
+    }
     let stdout = String::from_utf8_lossy(&output.stdout);
     let first_line = stdout
         .lines()
@@ -123,6 +126,8 @@ impl DependencyVersions<'_> {
 pub(super) enum VersionError {
     #[error("Unable to get version information")]
     EmptyStdout,
+    #[error("Dependency failed: {0}")]
+    Execute(ProcessOutput),
     #[error("Unable to run dependency: {0}")]
     Process(IoError),
 }

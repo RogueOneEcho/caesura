@@ -1,5 +1,6 @@
 use crate::commands::version::{DependencyVersions, VersionError, VersionInfo, get_version};
 use crate::testing_prelude::*;
+use std::env::current_exe;
 
 #[tokio::test]
 async fn version_command_get_versions() {
@@ -76,4 +77,27 @@ async fn get_version_missing_binary() {
 
     // Assert
     assert!(result.is_err());
+}
+
+/// Test that a binary exiting non-zero with empty stdout reports its exit code and stderr.
+///
+/// - The test harness rejects `--version` with exit code `101` and a stderr message
+/// - Mirrors a crashed `lame` on Windows that can't load `libmpg123-0.dll`
+#[tokio::test]
+async fn get_version_failing_binary() {
+    // Arrange
+    let binary = current_exe().expect("should get test binary path");
+    let binary = binary.to_str().expect("test binary path should be UTF-8");
+
+    // Act
+    let result = get_version(binary, r"v(\d+)").await;
+
+    // Assert
+    let output = match result {
+        Err(VersionError::Execute(output)) => Some(output),
+        _ => None,
+    };
+    let output = output.expect("error should be Execute");
+    assert_eq!(output.code, Some(101));
+    assert!(output.stderr.is_some(), "stderr should be captured");
 }
