@@ -113,9 +113,10 @@ mod tests {
     fn options_validator_check_url_scheme() {
         let issues = run_with_validator(|v| v.check_url("indexer_url", "ftp://example.com"));
         assert_eq!(issues.len(), 1);
-        assert_eq!(issues[0].kind, OptionIssueKind::UrlInvalid);
-        assert_eq!(issues[0].keys, vec!["indexer_url".to_owned()]);
-        let reasons: Vec<&str> = issues[0]
+        let issue = issues.first().expect("should have one issue");
+        assert_eq!(issue.kind, OptionIssueKind::UrlInvalid);
+        assert_eq!(issue.keys, vec!["indexer_url".to_owned()]);
+        let reasons: Vec<&str> = issue
             .additional
             .iter()
             .filter_map(|(k, v)| (k == "reason").then_some(v.as_str()))
@@ -127,8 +128,9 @@ mod tests {
     fn options_validator_check_url_trailing_slash() {
         let issues = run_with_validator(|v| v.check_url("indexer_url", "https://example.com/"));
         assert_eq!(issues.len(), 1);
-        assert_eq!(issues[0].kind, OptionIssueKind::UrlInvalid);
-        let reasons: Vec<&str> = issues[0]
+        let issue = issues.first().expect("should have one issue");
+        assert_eq!(issue.kind, OptionIssueKind::UrlInvalid);
+        let reasons: Vec<&str> = issue
             .additional
             .iter()
             .filter_map(|(k, v)| (k == "reason").then_some(v.as_str()))
@@ -140,8 +142,9 @@ mod tests {
     fn options_validator_check_url_both_problems() {
         let issues = run_with_validator(|v| v.check_url("indexer_url", "ftp://example.com/"));
         assert_eq!(issues.len(), 1);
-        assert_eq!(issues[0].kind, OptionIssueKind::UrlInvalid);
-        let reasons: Vec<&str> = issues[0]
+        let issue = issues.first().expect("should have one issue");
+        assert_eq!(issue.kind, OptionIssueKind::UrlInvalid);
+        let reasons: Vec<&str> = issue
             .additional
             .iter()
             .filter_map(|(k, v)| (k == "reason").then_some(v.as_str()))
@@ -167,7 +170,8 @@ mod tests {
             v.check_dir_exists("output", Path::new("/no/such/path/at/all"));
         });
         assert_eq!(issues.len(), 1);
-        assert_eq!(issues[0].kind, OptionIssueKind::DirectoryNotFound);
+        let issue = issues.first().expect("should have one issue");
+        assert_eq!(issue.kind, OptionIssueKind::DirectoryNotFound);
     }
 
     #[test]
@@ -181,12 +185,13 @@ mod tests {
         let empty: Vec<u8> = Vec::new();
         let issues = run_with_validator(|v| v.check_non_empty("content", &empty));
         assert_eq!(issues.len(), 1);
-        assert_eq!(issues[0].kind, OptionIssueKind::RequiredNonEmpty);
+        let issue = issues.first().expect("should have one issue");
+        assert_eq!(issue.kind, OptionIssueKind::RequiredNonEmpty);
     }
 
     #[test]
     fn options_validator_check_non_empty_populated() {
-        let populated = vec![1u8];
+        let populated = vec![1_u8];
         let issues = run_with_validator(|v| v.check_non_empty("content", &populated));
         assert!(issues.is_empty());
     }
@@ -197,9 +202,10 @@ mod tests {
             v.check_dependent("upload", true, "transcode", false);
         });
         assert_eq!(issues.len(), 1);
-        assert_eq!(issues[0].kind, OptionIssueKind::DependencyMissing);
+        let issue = issues.first().expect("should have one issue");
+        assert_eq!(issue.kind, OptionIssueKind::DependencyMissing);
         assert_eq!(
-            issues[0].keys,
+            issue.keys,
             vec!["upload".to_owned(), "transcode".to_owned()]
         );
     }
