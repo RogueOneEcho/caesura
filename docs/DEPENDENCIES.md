@@ -12,14 +12,15 @@ The official repository for [SoX](https://sourceforge.net/projects/sox/) is no l
 
 ## Install
 
-| Platform        | Install                          | Includes `SoX_ng` | Note                                                                  |
-|-----------------|----------------------------------|-------------------|-----------------------------------------------------------------------|
-| Homebrew        | `brew install sox_ng flac lame`  | ✅                |                                                                       |
-| Arch Linux      | `pacman -S sox flac lame`        | ✅                | [sox is sox_ng](https://archlinux.org/packages/extra/x86_64/sox/)     |
-| Gentoo          | `emerge sox flac lame`           | ✅                | [sox is sox_ng](https://packages.gentoo.org/packages/media-sound/sox) |
-| Debian / Ubuntu | `apt install sox flac lame`      | ❌                |                                                                       |
-| Fedora          | `dnf install sox flac lame`      | ❌                |                                                                       |
-| Nix             | `nix-shell -p sox flac lame`     | ❌                |                                                                       |
+| Platform        | Install                                            | Includes `SoX_ng` | Note                                                                  |
+|-----------------|----------------------------------------------------|-------------------|-----------------------------------------------------------------------|
+| Homebrew        | `brew install sox_ng flac lame`                    | ✅                |                                                                       |
+| Windows         | `winget install Xiph.FLAC LAME.LAME sox_ng.sox_ng` | ✅                |                                                                       |
+| Arch Linux      | `pacman -S sox flac lame`                          | ✅                | [sox is sox_ng](https://archlinux.org/packages/extra/x86_64/sox/)     |
+| Gentoo          | `emerge sox flac lame`                             | ✅                | [sox is sox_ng](https://packages.gentoo.org/packages/media-sound/sox) |
+| Debian / Ubuntu | `apt install sox flac lame`                        | ❌                |                                                                       |
+| Fedora          | `dnf install sox flac lame`                        | ❌                |                                                                       |
+| Nix             | `nix-shell -p sox flac lame`                       | ❌                |                                                                       |
 
 ## SoX_ng
 
