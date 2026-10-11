@@ -6,7 +6,9 @@ They should be updated together so everything stays in sync.
 
 ## Version
 
-CI installs SoX_ng, FLAC and LAME from Homebrew, so the pinned versions should match Homebrew.
+CI installs SoX_ng, FLAC and LAME from Homebrew on Linux and macOS, and winget on Windows.
+
+The pinned versions should match Homebrew.
 
 Check the current Homebrew versions:
 
@@ -14,7 +16,16 @@ Check the current Homebrew versions:
 brew info sox_ng flac lame
 ```
 
-The [Homebrew tap](https://github.com/RogueOneEcho/homebrew-tap) installs from Homebrew, so it needs no changes.
+Check the current winget versions:
+
+```powershell
+winget show --id sox_ng.sox_ng
+winget show --id Xiph.FLAC
+winget show --id LAME.LAME
+```
+
+> [!TIP]
+> Use [Komac](https://github.com/russellbanks/Komac) to quickly submit package update PRs to [winget-pkgs](https://github.com/microsoft/winget-pkgs).
 
 ## caesura
 
@@ -55,3 +66,7 @@ The [nix](https://github.com/RogueOneEcho/nix) repo packages SoX_ng. FLAC and LA
 ```bash
 scripts/update-sox-ng.sh <version>
 ```
+
+## Homebrew tap
+
+The [Homebrew tap](https://github.com/RogueOneEcho/homebrew-tap) always installs the latest version of dependencies, so it doesn't need updating.

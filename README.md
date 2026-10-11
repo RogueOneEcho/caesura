@@ -7,9 +7,9 @@ A versatile command line tool for fully automated transcoding of FLAC sources.
 ## Features
 
 - RED and OPS fully supported.
-- Runs on Linux and macOS. Windows via WSL or Docker.
+- Runs on Linux, macOS, and Windows.
 - Fully configurable, if there's something hard coded that you think should be configurable then [open a discussion on GitHub](https://github.com/RogueOneEcho/caesura/discussions).
-- Install via [Docker](docs/DOCKER.md), [Homebrew](docs/INSTALL.md#homebrew-linux-and-macos), [Nix](docs/INSTALL.md#nix-linux-and-macos) and [standalone binaries](docs/INSTALL.md#github-releases-linux-and-macos).
+- Install via [Docker](docs/DOCKER.md), [Homebrew](docs/INSTALL.md#homebrew-linux-and-macos), [Nix](docs/INSTALL.md#nix-linux-and-macos) and [standalone binaries](docs/INSTALL.md#github-releases-linux-macos-and-windows).
 - Minimal CLI tools required. Only FLAC, LAME and SoX. Image resizing, torrent creation and audio metadata inspection are handled natively.
 
 ### Source Verification

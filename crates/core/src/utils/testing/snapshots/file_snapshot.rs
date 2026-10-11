@@ -27,6 +27,8 @@ impl FileSnapshot {
 
         let directory = relative.parent().and_then(|p| {
             let s = p.to_string_lossy().to_string();
+            #[cfg(windows)]
+            let s = s.replace('\\', "/");
             if s.is_empty() { None } else { Some(s) }
         });
 

@@ -30,7 +30,7 @@ Comparison with related tools.
 
 | Repo                                                                                              | RED | OPS | [API](#api) | Verify | Spec | Upload | Batch | [CI](#cicd-and-tests) | [Tests](#cicd-and-tests) | [Platforms](#platforms) | [Lang](#language) | Stars | Active | Notes |
 |---------------------------------------------------------------------------------------------------| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | --- | ---: | --- | --- |
-| [<small>RogueOneEcho/</small>​**caesura**](https://github.com/RogueOneEcho/caesura)               | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🍎 🐧 🐳 | 🟢 Rust | 156 | 🟢 2026 | |
+| [<small>RogueOneEcho/</small>​**caesura**](https://github.com/RogueOneEcho/caesura)               | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🪟 🍎 🐧 🐳 | 🟢 Rust | 156 | 🟢 2026 | |
 | [<small>smokin-salmon/</small>​**smoked-salmon**](https://github.com/smokin-salmon/smoked-salmon) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | 🪟 🍎 🐧 🐳 | 🔴 Python | 148 | 🟢 2026 | Maintained fork with OPS, DIC, and API key support |
 | [<small>DevYukine/</small>​**red_oxide**](https://github.com/DevYukine/red_oxide)                 | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | 🪟 🍎 🐧 | 🟢 Rust | 147 | 🟠 2024 | Predecessor project caesura was forked from |
 | [<small>lfence/</small>​**red-trul**](https://github.com/lfence/red-trul)                         | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | 🪟 🍎 🐧 | 🟠 JavaScript | 48 | 🟠 2025 | Non-interactive transcoder and uploader for RED |

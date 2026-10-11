@@ -30,28 +30,35 @@ brew install rogueoneecho/tap/caesura
 nix profile install github:RogueOneEcho/nix#caesura
 ```
 
-## GitHub Releases (Linux and macOS)
+## GitHub Releases (Linux, macOS, and Windows)
 
 1. [Install the dependencies](DEPENDENCIES.md)
 
-2. Download the binary for your platform from the [latest release](https://github.com/RogueOneEcho/caesura/releases/latest).
+2. Download the archive for your platform from the [latest release](https://github.com/RogueOneEcho/caesura/releases/latest).
 
-| OS    | CPU           | Binary Suffix                | Note                     |
-|-------|---------------|------------------------------|--------------------------|
-| Linux | Intel/AMD     | `x86_64-unknown-linux-gnu`   | Standard (with glibc)    |
-| Linux | ARM           | `aarch64-unknown-linux-gnu`  | Standard (with glibc)    |
-| Linux | Intel/AMD     | `x86_64-unknown-linux-musl`  | Portable (without glibc) |
-| Linux | ARM           | `aarch64-unknown-linux-musl` | Portable (without glibc) |
-| macOS | Apple Silicon | `aarch64-apple-darwin`       |                          |
+| OS      | CPU           | Binary Suffix                | Note                     |
+|---------|---------------|------------------------------|--------------------------|
+| Linux   | Intel/AMD     | `x86_64-unknown-linux-gnu`   | Standard (with glibc)    |
+| Linux   | ARM           | `aarch64-unknown-linux-gnu`  | Standard (with glibc)    |
+| Linux   | Intel/AMD     | `x86_64-unknown-linux-musl`  | Portable (without glibc) |
+| Linux   | ARM           | `aarch64-unknown-linux-musl` | Portable (without glibc) |
+| macOS   | Apple Silicon | `aarch64-apple-darwin`       |                          |
+| Windows | Intel/AMD     | `x86_64-pc-windows-msvc`     | Experimental             |
 
-3. Make the binary executable and move it to a directory on your `PATH`.
+3. Extract the binary and move it to a directory on your `PATH`.
+
+On Linux and macOS:
 
 ```bash
-chmod +x caesura-*
-mv caesura-* /usr/local/bin/caesura
+tar -xJf caesura-*.tar.xz
+mv caesura /usr/local/bin/caesura
 ```
 
-Alternatively, use the install script to automate the above steps:
+On Windows, extract `caesura.exe` from the `.zip` and move it to a folder on your `PATH`.
+
+### Install script (Linux and macOS)
+
+Alternatively, on Linux and macOS, use the install script to automate the above steps:
 
 > [!CAUTION]
 > This script is experimental and piping straight to bash can be dangerous.
@@ -62,7 +69,7 @@ Alternatively, use the install script to automate the above steps:
 curl -fsSL https://raw.githubusercontent.com/RogueOneEcho/install/main/scripts/install-caesura.sh | bash
 ```
 
-## Cargo (Linux and macOS)
+## Cargo (Linux, macOS, and Windows)
 
 *Cargo isn't recommended because you have to manually install the dependencies and these are unlikely to be as up to date or compatible as the brew or nix packages.*
 
@@ -73,12 +80,6 @@ curl -fsSL https://raw.githubusercontent.com/RogueOneEcho/install/main/scripts/i
 ```bash
 cargo install caesura
 ```
-
-## Windows
-
-Windows currently isn't supported. Either use WSL or Docker.
-
-Add a comment to [this discussion](https://github.com/RogueOneEcho/caesura/discussions/175) if you'd like to see Windows support.
 
 ## Build from source
 

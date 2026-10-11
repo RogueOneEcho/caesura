@@ -18,10 +18,24 @@ jobs:
           {"os":"ubuntu-24.04","target":"x86_64-unknown-linux-gnu","test":true},
           {"os":"ubuntu-24.04","target":"x86_64-unknown-linux-musl"},
           {"os":"macos-15","target":"aarch64-apple-darwin","test":true},
-          {"os":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu","test":true}
+          {"os":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu","test":true},
+          {"os":"windows-2025","target":"x86_64-pc-windows-msvc","test":true}
         ]
       pre-test: |
-        brew install flac lame sox_ng
+        if [[ "$TARGET" == *-windows-* ]]; then
+          for id in Xiph.FLAC LAME.LAME sox_ng.sox_ng; do
+            winget install --exact --id "$id" --accept-source-agreements --accept-package-agreements --disable-interactivity
+          done
+          # winget adds its tool folders to the saved user PATH, which later steps don't see.
+          # Pass on only the winget folders, so other folders like WindowsApps (WSL bash) stay out.
+          powershell -NoProfile -Command '
+            [Environment]::GetEnvironmentVariable("Path", "User") -split ";" |
+              Where-Object { $_ -like "*\WinGet\*" } |
+              Add-Content $env:GITHUB_PATH
+          '
+        else
+          brew install flac lame sox_ng
+        fi
         if [[ "$TARGET" == "x86_64-unknown-linux-gnu" ]]; then
           echo "CAESURA_DETERMINISTIC_TESTS=1" >> $GITHUB_ENV
         fi
