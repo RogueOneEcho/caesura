@@ -15,6 +15,9 @@ pub enum TranscodeAction {
     Transcode,
     #[error("decode FLAC")]
     Decode,
+    #[cfg(windows)]
+    #[error("decode FLAC with a path too long for Windows")]
+    SourcePathTooLong,
     #[error("start decode process")]
     SpawnDecode,
     #[error("start encode process")]

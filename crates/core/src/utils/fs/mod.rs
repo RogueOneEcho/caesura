@@ -10,6 +10,9 @@ pub(crate) use fs_action::*;
 pub(crate) use path_manager::*;
 pub(crate) use tags::*;
 pub(crate) use tags_action::*;
+pub(crate) use tool_path::*;
+#[cfg(windows)]
+pub(crate) use tool_path_windows::*;
 
 mod additional_file;
 mod collector;
@@ -23,3 +26,6 @@ mod tags;
 mod tags_action;
 #[cfg(test)]
 mod tests;
+mod tool_path;
+#[cfg(windows)]
+mod tool_path_windows;

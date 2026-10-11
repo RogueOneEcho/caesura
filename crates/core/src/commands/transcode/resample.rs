@@ -23,12 +23,11 @@ impl Resample {
         if self.repeatable {
             info.args.push("-R".to_owned());
         }
+        info.args.extend(self.input.to_sox_file_args());
+        info.args
+            .extend(["-G".to_owned(), "-b".to_owned(), "16".to_owned()]);
+        info.args.extend(self.output.to_sox_file_args());
         info.args.extend([
-            self.input.to_string_lossy().to_string(),
-            "-G".to_owned(),
-            "-b".to_owned(),
-            "16".to_owned(),
-            self.output.to_string_lossy().to_string(),
             "rate".to_owned(),
             "-v".to_owned(),
             "-L".to_owned(),

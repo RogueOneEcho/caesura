@@ -63,6 +63,8 @@ impl TranscodeJob {
 /// - Attaches encode as context NOT a related diagnostic, since miette only renders related
 ///   diagnostics of the outermost failure
 async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure<TranscodeAction>> {
+    #[cfg(windows)]
+    decode.check_flac_input()?;
     let decode_input = decode.input.clone();
     let encode_output_path = encode.output.clone();
     let decode_info = decode.to_info();

@@ -60,7 +60,7 @@ impl SpectrogramJob {
         self.sox
             .create()
             .to_command()
-            .arg(&self.source_path)
+            .args(Path::new(&self.source_path).to_sox_file_args())
             .arg("-n")
             .arg("remix")
             .arg("1")
@@ -82,7 +82,7 @@ impl SpectrogramJob {
             .arg("-c")
             .arg(APP_NAME)
             .arg("-o")
-            .arg(&self.output_path)
+            .arg(self.output_path.to_tool_path())
             .run()
             .await
             .map_err(Failure::wrap_with_path(
@@ -95,7 +95,7 @@ impl SpectrogramJob {
         self.sox
             .create()
             .to_command()
-            .arg(&self.source_path)
+            .args(Path::new(&self.source_path).to_sox_file_args())
             .arg("-n")
             .arg("remix")
             .arg("1")
@@ -113,7 +113,7 @@ impl SpectrogramJob {
             .arg("-c")
             .arg(APP_NAME)
             .arg("-o")
-            .arg(&self.output_path)
+            .arg(self.output_path.to_tool_path())
             .run()
             .await
             .map_err(Failure::wrap_with_path(

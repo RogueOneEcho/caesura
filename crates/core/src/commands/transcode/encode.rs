@@ -31,7 +31,7 @@ fn encode_mp3_v0(output_path: PathBuf) -> CommandInfo {
             "0".to_owned(),
             "--ignore-tag-errors".to_owned(),
             "-".to_owned(),
-            output_path.to_string_lossy().to_string(),
+            output_path.to_tool_path().to_string_lossy().to_string(),
         ],
     }
 }
@@ -46,7 +46,7 @@ fn encode_mp3_320(output_path: PathBuf) -> CommandInfo {
             "320".to_owned(),
             "--ignore-tag-errors".to_owned(),
             "-".to_owned(),
-            output_path.to_string_lossy().to_string(),
+            output_path.to_tool_path().to_string_lossy().to_string(),
         ],
     }
 }
@@ -57,7 +57,7 @@ fn encode_flac(output_path: PathBuf) -> CommandInfo {
         args: vec![
             "--best".to_owned(),
             "-o".to_owned(),
-            output_path.to_string_lossy().to_string(),
+            output_path.to_tool_path().to_string_lossy().to_string(),
             "-".to_owned(),
         ],
     }

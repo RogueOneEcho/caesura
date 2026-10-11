@@ -23,13 +23,29 @@ impl Decode {
         }
     }
 
+    /// Check `flac` can open the input on Windows.
+    ///
+    /// - `flac` can't read paths over `MAX_PATH`, even with a `\\?\` prefix
+    /// - Inputs decoded by `sox_ng` are skipped since it reads `\\?\` paths
+    #[cfg(windows)]
+    pub(crate) fn check_flac_input(&self) -> Result<(), Failure<TranscodeAction>> {
+        if self.resample_rate.is_some() || !self.input.exceeds_max_path() {
+            return Ok(());
+        }
+        Err(Failure::from_action(TranscodeAction::SourcePathTooLong)
+            .with_path(&self.input)
+            .with_help(
+                "flac can't read paths over 260 characters on Windows; move the source to a shorter folder",
+            ))
+    }
+
     fn decode_with_resample(self, resample_rate: u32) -> CommandInfo {
         let mut info = self.sox.create();
         if self.repeatable {
             info.args.push("-R".to_owned());
         }
+        info.args.extend(self.input.to_sox_file_args());
         info.args.extend([
-            self.input.to_string_lossy().to_string(),
             "-G".to_owned(),
             "-b".to_owned(),
             "16".to_owned(),
