@@ -135,8 +135,8 @@ async fn execute_include(include: Include) -> Result<(), Failure<TranscodeAction
     trace!(
         "{} {} to {}",
         verb.bold(),
-        &include.input.display(),
-        &include.output.display()
+        include.input.display(),
+        include.output.display()
     );
     Ok(())
 }

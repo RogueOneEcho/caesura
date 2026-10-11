@@ -89,8 +89,8 @@ impl AdditionalJobFactory {
             trace!(
                 "{} {} to {}",
                 verb.bold(),
-                &source_path.display(),
-                &output_path.display()
+                source_path.display(),
+                output_path.display()
             );
             return Ok(None);
         }
