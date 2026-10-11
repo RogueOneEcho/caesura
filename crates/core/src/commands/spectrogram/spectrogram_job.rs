@@ -40,10 +40,17 @@ impl SpectrogramJob {
             SpectrogramAction::CreateOutputDirectory,
             output_dir,
         ))?;
-        match self.size {
+        let output = match self.size {
             Size::Full => self.execute_full().await,
             Size::Zoom => self.execute_zoom().await,
         }?;
+        if !self.output_path.is_file() {
+            return Err(Failure::new(
+                SpectrogramAction::GenerateSpectrogram,
+                ProcessOutput::from(output),
+            )
+            .with_path(&self.output_path));
+        }
         Ok(())
     }
 
@@ -136,6 +143,43 @@ fn calculate_zoom_start(duration_secs: Option<u32>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// `sox_ng` exits 0 without writing the PNG when it can't create the output file.
+    #[tokio::test]
+    async fn spectrogram_job_execute_output_path_is_directory() {
+        // Arrange
+        init_logger();
+        let test_dir = TestDirectory::new();
+        let album = AlbumProvider::get(SampleFormat::default()).await;
+        let host = HostBuilder::mock()
+            .with_test_options(&test_dir)
+            .await
+            .expect_build();
+        let flac = Collector::get_flacs(&SAMPLE_SOURCES_DIR.join(album.dir_name()))
+            .into_iter()
+            .next()
+            .expect("should find a flac");
+        let output_path = test_dir.output().join("spectrogram.png");
+        create_dir_all(&output_path).expect("should create directory at output path");
+        let job = SpectrogramJob {
+            id: "Spectrogram".to_owned(),
+            source_path: flac.get_path_string(),
+            output_path,
+            image_title: flac.file_name.clone(),
+            size: Size::Full,
+            duration_secs: None,
+            sox: host.services.get_required::<SoxFactory>(),
+        };
+
+        // Act
+        let failure = job
+            .execute()
+            .await
+            .expect_err("should fail when the output is not written");
+
+        // Assert
+        assert_eq!(failure.action(), &SpectrogramAction::GenerateSpectrogram);
+    }
 
     #[test]
     fn zoom_start_unknown_duration_uses_typical() {
