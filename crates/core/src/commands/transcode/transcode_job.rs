@@ -58,8 +58,10 @@ impl TranscodeJob {
 /// Pipe decode output directly to encode input.
 ///
 /// - Reports the failing program with its stderr
-/// - Reports decode with encode as related when both fail, since a failure of either one breaks
-///   the pipe for the other
+/// - Reports decode with the encode program and stderr attached when both fail, since a failure
+///   of either one breaks the pipe for the other
+/// - Attaches encode as context NOT a related diagnostic, since miette only renders related
+///   diagnostics of the outermost failure
 async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure<TranscodeAction>> {
     let decode_input = decode.input.clone();
     let encode_output_path = encode.output.clone();
@@ -109,7 +111,16 @@ async fn execute_transcode(decode: Decode, encode: Encode) -> Result<(), Failure
         (Ok(_), Ok(_)) => Ok(()),
         (Err(decode), Ok(_)) => Err(decode),
         (Ok(_), Err(encode)) => Err(encode),
-        (Err(decode), Err(encode)) => Err(decode.with_related(encode)),
+        (Err(decode), Err(encode)) => {
+            let encode_error = encode
+                .source()
+                .and_then(Error::source)
+                .map(ToString::to_string)
+                .unwrap_or_default();
+            Err(decode
+                .with("encode", &encode_program)
+                .with("encode error", encode_error))
+        }
     }
 }
 
@@ -155,6 +166,7 @@ async fn execute_include(include: Include) -> Result<(), Failure<TranscodeAction
 mod tests {
     use super::*;
     use crate::testing_prelude::*;
+    use miette::{GraphicalReportHandler, GraphicalTheme};
 
     /// `lame` can't open a directory as its output, so `flac` also fails on the closed pipe.
     #[tokio::test]
@@ -174,10 +186,10 @@ mod tests {
             .expect_err("should fail when lame can't write the output");
 
         // Assert
-        let debug = format!("{failure:?}");
+        let report = render_unwrapped(failure);
         assert!(
-            debug.contains("Can't init outfile"),
-            "lame stderr should be reported, got: {debug}"
+            report.contains("Can't init outfile"),
+            "lame stderr should be reported, got: {report}"
         );
     }
 
@@ -201,11 +213,25 @@ mod tests {
 
         // Assert
         assert_eq!(failure.action(), &TranscodeAction::Decode);
-        let debug = format!("{failure:?}");
+        let report = render_unwrapped(failure);
         assert!(
-            debug.contains("not a FLAC file"),
-            "flac stderr should be reported, got: {debug}"
+            report.contains("not a FLAC file"),
+            "flac stderr should be reported, got: {report}"
         );
+    }
+
+    /// Render the report as users see it, without line wrapping.
+    ///
+    /// - Nests the failure under [`TranscodeAction::ExecuteRunner`] as [`TranscodeCommand`] does,
+    ///   since miette only renders related diagnostics of the outermost failure
+    fn render_unwrapped(failure: Failure<TranscodeAction>) -> String {
+        let outer = Failure::new(TranscodeAction::ExecuteRunner, failure);
+        let mut report = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(usize::MAX)
+            .render_report(&mut report, &outer)
+            .expect("report should render");
+        report
     }
 
     async fn get_sample_flac() -> PathBuf {
