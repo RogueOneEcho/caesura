@@ -161,7 +161,7 @@ mod tests {
     #[test]
     fn options_validator_check_url_clean() {
         let issues = run_with_validator(|v| v.check_url("indexer_url", "https://example.com"));
-        assert!(issues.is_empty());
+        assert_eq!(issues, Vec::new());
     }
 
     #[test]
@@ -177,7 +177,7 @@ mod tests {
     #[test]
     fn options_validator_check_dir_exists_present() {
         let issues = run_with_validator(|v| v.check_dir_exists("output", Path::new(".")));
-        assert!(issues.is_empty());
+        assert_eq!(issues, Vec::new());
     }
 
     #[test]
@@ -193,7 +193,7 @@ mod tests {
     fn options_validator_check_non_empty_populated() {
         let populated = vec![1_u8];
         let issues = run_with_validator(|v| v.check_non_empty("content", &populated));
-        assert!(issues.is_empty());
+        assert_eq!(issues, Vec::new());
     }
 
     #[test]
@@ -215,6 +215,6 @@ mod tests {
         let issues = run_with_validator(|v| {
             v.check_dependent("upload", true, "transcode", true);
         });
-        assert!(issues.is_empty());
+        assert_eq!(issues, Vec::new());
     }
 }

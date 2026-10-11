@@ -37,7 +37,7 @@ fn sox_factory_sox_ng_false() {
 
     // Act / Assert
     assert_eq!(factory.binary(), SOX);
-    assert!(factory.create().args.is_empty());
+    assert_eq!(factory.create().args, Vec::<String>::new());
 }
 
 /// When `sox_path` contains `sox_ng`, `sox_ng` defaults to `true`.

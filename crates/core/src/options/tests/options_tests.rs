@@ -744,7 +744,7 @@ fn qbit_options_validate_connection_qui_proxy_url() {
     };
     let mut validator = OptionsValidator::new();
     options.validate_connection(&mut validator);
-    assert!(validator.into_issues().is_empty());
+    assert_eq!(validator.into_issues(), Vec::new());
 }
 
 /// Verify `QbitOptions` rejects a trailing slash in the URL.

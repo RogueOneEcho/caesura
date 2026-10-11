@@ -106,7 +106,7 @@ mod tests {
         };
         let mut validator = OptionsValidator::new();
         args.validate(&mut validator);
-        assert!(validator.into_issues().is_empty());
+        assert_eq!(validator.into_issues(), Vec::new());
     }
 
     /// A non-numeric input pointing at a missing path reports one issue.

@@ -212,16 +212,16 @@ mod tests {
 
     #[test]
     fn app_name_is_populated() {
-        assert!(!APP_NAME.is_empty());
+        assert_ne!(APP_NAME, "");
     }
 
     #[test]
     fn app_version_is_populated() {
-        assert!(!APP_VERSION.is_empty());
+        assert_ne!(APP_VERSION, "");
     }
 
     #[test]
     fn app_homepage_is_populated() {
-        assert!(!APP_HOMEPAGE.is_empty());
+        assert_ne!(APP_HOMEPAGE, "");
     }
 }

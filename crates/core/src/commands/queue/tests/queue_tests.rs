@@ -644,6 +644,6 @@ async fn queue_get_unprocessed_empty_queue() -> Result<(), TestError> {
         .await?;
 
     // Assert
-    assert!(items.is_empty());
+    assert_eq!(items, Vec::new());
     Ok(())
 }

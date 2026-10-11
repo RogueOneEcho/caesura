@@ -39,7 +39,7 @@ async fn get_version_flac() {
 
     // Assert
     assert!(info.version.is_some(), "should extract flac version");
-    assert!(!info.first_line.is_empty());
+    assert_ne!(info.first_line, "");
 }
 
 #[tokio::test]
@@ -51,7 +51,7 @@ async fn get_version_lame() {
 
     // Assert
     assert!(info.version.is_some(), "should extract lame version");
-    assert!(!info.first_line.is_empty());
+    assert_ne!(info.first_line, "");
 }
 
 #[tokio::test]
@@ -66,7 +66,7 @@ async fn get_version_sox() {
 
     // Assert
     assert!(info.version.is_some(), "should extract sox version");
-    assert!(!info.first_line.is_empty());
+    assert_ne!(info.first_line, "");
 }
 
 #[tokio::test]
