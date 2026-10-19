@@ -14,11 +14,11 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
-syn = { version = "2", features = ["full", "extra-traits"] }
+syn = { version = "3", features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 insta.workspace = true
-prettyplease = "0.2"
+prettyplease = "0.3"
 
 [lints]
 workspace = true
