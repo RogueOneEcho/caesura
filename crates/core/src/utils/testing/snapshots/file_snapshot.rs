@@ -1,4 +1,5 @@
 use crate::testing_prelude::*;
+use base16ct::lower::encode_string;
 use sha2::{Digest, Sha256};
 
 /// Snapshot of a single file for deterministic testing.
@@ -46,7 +47,7 @@ impl FileSnapshot {
             directory,
             filename,
             size,
-            sha256: format!("{:x}", Sha256::digest(&content)),
+            sha256: encode_string(&Sha256::digest(&content)),
             audio: parse_audio_metadata(path, ext.as_deref()),
             image: parse_image_metadata(path, ext.as_deref()),
         })

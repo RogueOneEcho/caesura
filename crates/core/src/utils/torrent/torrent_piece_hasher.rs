@@ -1,6 +1,7 @@
 //! Iterate SHA-1 digests of a torrent's content pieces.
 
 use crate::prelude::*;
+use digest_io::IoWrapper;
 use lava_torrent::torrent::v1::Torrent as LavaTorrent;
 use sha1::{Digest, Sha1};
 use std::io::{Read, copy as io_copy, empty as io_empty};
@@ -9,7 +10,7 @@ use std::io::{Read, copy as io_copy, empty as io_empty};
 pub(crate) struct TorrentPieceHasher {
     stream: Box<dyn Read>,
     piece_length: u64,
-    hasher: Sha1,
+    hasher: IoWrapper<Sha1>,
 }
 
 impl TorrentPieceHasher {
@@ -20,7 +21,7 @@ impl TorrentPieceHasher {
         Self {
             stream,
             piece_length,
-            hasher: Sha1::new(),
+            hasher: IoWrapper(Sha1::new()),
         }
     }
 
@@ -54,7 +55,7 @@ impl Iterator for TorrentPieceHasher {
             Ok(0) => None,
             Ok(_) => {
                 let mut digest = [0_u8; 20];
-                digest.copy_from_slice(self.hasher.finalize_reset().as_slice());
+                digest.copy_from_slice(self.hasher.0.finalize_reset().as_slice());
                 Some(Ok(digest))
             }
             Err(error) => Some(Err(Failure::new(TorrentVerifyAction::HashContent, error))),

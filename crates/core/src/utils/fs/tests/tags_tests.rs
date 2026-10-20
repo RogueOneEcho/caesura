@@ -201,9 +201,10 @@ fn read_vorbis_tags(path: &Path) -> String {
 }
 
 fn file_sha256(path: &Path) -> String {
+    use base16ct::lower::encode_string;
     use sha2::{Digest, Sha256};
     let content = read(path).expect("file should be readable");
-    format!("{:x}", Sha256::digest(&content))
+    encode_string(&Sha256::digest(&content))
 }
 
 fn file_size(path: &Path) -> u64 {

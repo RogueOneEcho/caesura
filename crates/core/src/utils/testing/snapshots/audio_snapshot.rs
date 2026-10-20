@@ -1,4 +1,5 @@
 use crate::testing_prelude::*;
+use base16ct::lower::encode_string;
 use lofty::file::{AudioFile, TaggedFile, TaggedFileExt};
 use lofty::picture::Picture;
 use lofty::probe::Probe;
@@ -51,7 +52,7 @@ impl From<&Picture> for PictureSnapshot {
             mime_type: picture.mime_type().map(|m| format!("{m:?}")),
             description: picture.description().map(String::from),
             size: picture.data().len(),
-            sha256: format!("{:x}", Sha256::digest(picture.data())),
+            sha256: encode_string(&Sha256::digest(picture.data())),
         }
     }
 }
@@ -110,7 +111,7 @@ impl From<&ItemValue> for TagValue {
             ItemValue::Text(text) | ItemValue::Locator(text) => Self::Text(text.clone()),
             ItemValue::Binary(data) => Self::Binary {
                 size: data.len(),
-                sha256: format!("{:x}", Sha256::digest(data)),
+                sha256: encode_string(&Sha256::digest(data)),
             },
         }
     }

@@ -33,6 +33,7 @@ chrono = { workspace = true }
 clap = { workspace = true }
 claxon = { workspace = true }
 colored = { workspace = true }
+digest-io = { workspace = true }
 dirs = { workspace = true }
 encoding_rs = { workspace = true }
 fast_image_resize = { workspace = true }
@@ -65,6 +66,7 @@ unicode-normalization = { workspace = true }
 unicode-width = { workspace = true }
 
 [dev-dependencies]
+base16ct = { workspace = true }
 caesura_options = { workspace = true, features = ["testing"] }
 gazelle_api = { workspace = true, features = ["mock"] }
 image = { workspace = true }
