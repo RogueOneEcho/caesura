@@ -64,6 +64,8 @@ fn get_numeric_from_of_total_format_invalid() {
 ///   metadata block is smaller than the original, even after lofty adds
 ///   a 1024-byte PADDING block to files that lack one
 /// - A value over ~1040 bytes is the minimum to exceed the padding
+/// - Since lofty 0.25 the PADDING block fills the freed space, so the file
+///   keeps its size rather than shrinking
 /// - <https://github.com/Serial-ATA/lofty-rs/issues/640>
 /// - <https://github.com/Serial-ATA/lofty-rs/pull/641>
 #[tokio::test]
@@ -84,9 +86,10 @@ async fn exclude_vorbis_comments_from_flac_with_exclusion() -> Result<(), TestEr
     // Assert
     let size_after = file_size(&path);
     assert!(
-        size_after < size_before,
-        "file should shrink after excluding tags"
+        size_after <= size_before,
+        "file should not grow after excluding tags"
     );
+    assert!(!read_vorbis_tags(&path).contains("COMMENT="));
     assert_flac_integrity(&path).await;
     Ok(())
 }

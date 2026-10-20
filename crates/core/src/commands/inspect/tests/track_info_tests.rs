@@ -32,18 +32,17 @@ async fn track_info_read_mp3_with_non_iso8601_tdrl() -> Result<(), TestError> {
     assert_eq!(info.parsing_mode, Some(ParsingMode::Relaxed));
     assert_eq!(
         info.parsing_error.as_deref(),
-        Some("Encountered an invalid timestamp: Timestamp segment contains non-digit characters"),
+        Some("failed to parse Id3v2 tag: failed to parse frame 'TDRL': unexpected character 's'")
     );
     Ok(())
 }
 
-/// Tolerate dot-separated dates in `ID3v2` TDRC timestamp frames.
+/// Parse dot-separated dates in `ID3v2` TDRC timestamp frames.
 ///
-/// - Asian distributors (Genie, etc.) use `DATE=2025.11.20` in Vorbis comments
+/// - Some distributors (Genie, etc.) use `DATE=2025.11.20` in Vorbis comments
 /// - LAME copies this verbatim into the TDRC frame during transcode
-/// - Lofty only recognizes `-`, `T`, `:` as timestamp separators
-/// - Without relaxed parsing, `.` causes `TrackInfo::read` to fail
-/// - See Serial-ATA/lofty-rs#647
+/// - Before lofty 0.25, `.` was not a timestamp separator, so relaxed parsing dropped TDRC
+/// - See Serial-ATA/lofty-rs#647 and Serial-ATA/lofty-rs#648
 #[tokio::test]
 async fn track_info_read_mp3_with_dot_separated_tdrc() -> Result<(), TestError> {
     // Arrange
@@ -65,12 +64,9 @@ async fn track_info_read_mp3_with_dot_separated_tdrc() -> Result<(), TestError> 
     assert!(has_native_tag(&info, "TPE1"));
     assert!(has_native_tag(&info, "TIT2"));
     assert!(has_native_tag(&info, "TRCK"));
-    assert!(!has_native_tag(&info, "TDRC"));
-    assert_eq!(info.parsing_mode, Some(ParsingMode::Relaxed));
-    assert_eq!(
-        info.parsing_error.as_deref(),
-        Some("Encountered an invalid timestamp: Timestamp segment contains non-digit characters"),
-    );
+    assert!(has_native_tag(&info, "TDRC"));
+    assert_eq!(info.parsing_mode, Some(ParsingMode::Strict));
+    assert_eq!(info.parsing_error, None);
     Ok(())
 }
 

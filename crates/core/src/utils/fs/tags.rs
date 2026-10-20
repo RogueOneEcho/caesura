@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 use lofty::config::{ParseOptions, WriteOptions};
-use lofty::error::LoftyError;
+use lofty::error::FileEncodingError;
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::flac::FlacFile as LoftyFlacFile;
 use lofty::id3::v2::{Frame, FrameId, Id3v2Tag};
@@ -147,7 +147,7 @@ pub(crate) fn get_numeric_from_of_total_format(input: &str) -> Option<(u32, u32)
 pub(crate) fn exclude_tags(tags: &mut Id3v2Tag, keys: &[ItemKey]) {
     let exclusions: Vec<_> = keys
         .iter()
-        .filter_map(|key| FrameId::try_from(*key).ok().map(|id| (*key, id)))
+        .filter_map(|key| get_frame_id(*key).map(|id| (*key, id)))
         .collect();
     tags.retain(|frame| {
         let Some((key, id)) = exclusions.iter().find(|(_, id)| frame.id() == id) else {
@@ -156,6 +156,14 @@ pub(crate) fn exclude_tags(tags: &mut Id3v2Tag, keys: &[ItemKey]) {
         trace!("Excluding frame matching {key:?}: {id}");
         false
     });
+}
+
+/// Map an [`ItemKey`] to its `ID3v2.3/4` [`FrameId`].
+///
+/// - Returns `None` for keys without a dedicated frame, e.g. those stored as `TXXX`
+fn get_frame_id(key: ItemKey) -> Option<FrameId<'static>> {
+    let id = key.map_key(TagType::Id3v2)?;
+    FrameId::new(id).ok().filter(FrameId::is_valid)
 }
 
 /// Map Vorbis comment names to [`ItemKey`] values.
@@ -210,10 +218,13 @@ pub(crate) fn exclude_vorbis_comments_from_flac(
 
 /// Convert a generic [`Tag`] to [`Id3v2Tag`] and save with deterministic frame ordering.
 ///
-/// lofty 0.23's `Tag` to `Id3v2Tag` conversion collects frames into `HashSet`/`HashMap`,
+/// Since lofty 0.23, the `Tag` to `Id3v2Tag` conversion collects frames into `HashSet`/`HashMap`,
 /// producing correct frames in non-deterministic order. Sorting by frame ID before writing
 /// ensures stable binary output.
-pub(crate) fn save_id3v2_deterministic(id3: Id3v2Tag, path: &Path) -> Result<(), LoftyError> {
+pub(crate) fn save_id3v2_deterministic(
+    id3: Id3v2Tag,
+    path: &Path,
+) -> Result<(), FileEncodingError> {
     let mut frames: Vec<Frame<'static>> = id3.into_iter().collect();
     frames.sort_by_key(frame_sort_key);
     let mut sorted = Id3v2Tag::new();

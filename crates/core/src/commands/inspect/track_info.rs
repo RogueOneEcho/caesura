@@ -1,10 +1,11 @@
 use super::picture_info::{PictureInfo, collect_pictures};
 use crate::prelude::*;
 use lofty::config::{ParseOptions, ParsingMode};
-use lofty::error::{ErrorKind as LoftyErrorKind, LoftyError};
+use lofty::error::FileParseError;
 use lofty::file::{AudioFile, TaggedFile, TaggedFileExt};
 use lofty::flac::FlacFile as LoftyFlacFile;
 use lofty::mpeg::{ChannelMode, MpegFile};
+use lofty::tag::items::timestamp::TimestampParseError;
 use lofty::tag::{ItemKey, ItemValue};
 use std::io::{Seek, SeekFrom};
 
@@ -258,7 +259,7 @@ fn log_parsing_fallbacks(tracks: &[TrackInfo]) {
 ///
 /// - Tries `Strict`, `BestAttempt`, then `Relaxed`
 /// - Returns the result from the strictest mode that succeeds
-/// - Only retries on `BadTimestamp` errors; other errors propagate immediately
+/// - Only retries on invalid timestamp errors; other errors propagate immediately
 /// - Populates `parsing_mode` and `parsing_error` on the returned [`TrackInfo`]
 fn read_mpeg_with_fallback(
     file: &mut File,
@@ -269,7 +270,7 @@ fn read_mpeg_with_fallback(
         ParsingMode::BestAttempt,
         ParsingMode::Relaxed,
     ];
-    let mut last_error: Option<LoftyError> = None;
+    let mut last_error: Option<FileParseError> = None;
     for mode in modes {
         let options = ParseOptions::default().parsing_mode(mode);
         trace!(
@@ -281,11 +282,11 @@ fn read_mpeg_with_fallback(
             Ok(mpeg) => {
                 let mut info = TrackInfo::from_mpeg(mpeg);
                 info.parsing_mode = Some(mode);
-                info.parsing_error = last_error.map(|e| format!("{e}"));
+                info.parsing_error = last_error.as_ref().map(format_parsing_error);
                 return Ok(info);
             }
             Err(e) => {
-                if !matches!(e.kind(), LoftyErrorKind::BadTimestamp(_)) {
+                if e.get_source::<TimestampParseError>().is_none() {
                     return Err(Failure::new(InspectAction::ReadMpegFile, e).with_path(path));
                 }
                 trace!(
@@ -304,6 +305,18 @@ fn read_mpeg_with_fallback(
         last_error.expect("should have at least one error"),
     )
     .with_path(path))
+}
+
+/// Join the messages of each nested source with `: `.
+///
+/// - Skips the outer error since it only repeats `failed to parse Mpeg file`
+fn format_parsing_error(error: &FileParseError) -> String {
+    error
+        .chain()
+        .skip(1)
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(": ")
 }
 
 fn format_parsing_mode(mode: ParsingMode) -> String {
