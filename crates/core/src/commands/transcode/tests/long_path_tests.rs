@@ -122,15 +122,8 @@ fn count_files(dir: &Path, extension: &str) -> usize {
 
 /// Whether a failure with `action` appears in the error source chain.
 fn chain_contains(error: &Failure<TranscodeAction>, action: TranscodeAction) -> bool {
-    let mut source: Option<&(dyn Error + 'static)> = Some(error);
-    while let Some(current) = source {
-        if current
-            .downcast_ref::<Failure<TranscodeAction>>()
-            .is_some_and(|failure| failure.action() == &action)
-        {
-            return true;
-        }
-        source = current.source();
-    }
-    false
+    error
+        .chain()
+        .filter_map(|source| source.downcast_ref::<Failure<TranscodeAction>>())
+        .any(|failure| failure.action() == &action)
 }

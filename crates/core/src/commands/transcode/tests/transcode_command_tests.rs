@@ -94,17 +94,10 @@ async fn transcode_command_truncated_source() {
 /// The command wraps the job's decode failure as [`TranscodeAction::ExecuteRunner`], so the
 /// original action is nested rather than top-level.
 fn chain_contains_decode(error: &Failure<TranscodeAction>) -> bool {
-    let mut source: Option<&(dyn Error + 'static)> = Some(error);
-    while let Some(current) = source {
-        if current
-            .downcast_ref::<Failure<TranscodeAction>>()
-            .is_some_and(|failure| failure.action() == &TranscodeAction::Decode)
-        {
-            return true;
-        }
-        source = current.source();
-    }
-    false
+    error
+        .chain()
+        .filter_map(|source| source.downcast_ref::<Failure<TranscodeAction>>())
+        .any(|failure| failure.action() == &TranscodeAction::Decode)
 }
 
 /// Truncate a file to half its length, dropping trailing bytes.

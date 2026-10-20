@@ -18,7 +18,7 @@ impl TagVerifier {
     ) -> Result<Vec<SourceIssue>, Failure<TranscodeAction>> {
         let vorbis = match flac.vorbis_tags() {
             Ok(tags) => tags,
-            Err(failure) if is_no_vorbis_comments(&failure) => {
+            Err(failure) if failure.get_source() == Some(&TagsError::NoVorbisComments) => {
                 return Ok(vec![SourceIssue::NoTags {
                     path: flac.path.clone(),
                 }]);
@@ -118,16 +118,4 @@ pub(crate) fn check_disc_number_tag(tags: &Tag, flac: &FlacFile) -> Option<Strin
         return Some("disc_number".to_owned());
     }
     None
-}
-
-/// Walk the source chain looking for [`TagsError::NoVorbisComments`].
-fn is_no_vorbis_comments(failure: &Failure<TranscodeAction>) -> bool {
-    let mut source: Option<&(dyn Error + 'static)> = failure.source();
-    while let Some(err) = source {
-        if let Some(tags_err) = err.downcast_ref::<TagsError>() {
-            return matches!(tags_err, TagsError::NoVorbisComments);
-        }
-        source = err.source();
-    }
-    false
 }
