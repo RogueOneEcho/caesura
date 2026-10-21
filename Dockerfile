@@ -96,11 +96,13 @@ CMD ["test", "--release", "--all-features"]
 # Hardened runtime image
 # Follows the Docker Hardened Images (DHI) approach:
 # https://github.com/docker-hardened-images/catalog/blob/e2579891e42131f738018407d8bbe0c66379cb8b/image/alpine-base/alpine-3.23/3.23.yaml
+# - Upgrade base packages to get security fixes before Alpine point releases
 # - Remove apk so the package manager cannot be used to install attack tools
 # - Remove docs and man pages to reduce image size
 # - Run as non-root user (65532 matches the DHI nonroot convention)
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates-bundle libogg libpng fftw \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache ca-certificates-bundle libogg libpng fftw \
     && apk del apk-tools \
     && rm -rf /var/cache/apk /etc/apk /lib/apk /usr/share/apk \
     && rm -rf /usr/share/man /usr/share/doc
